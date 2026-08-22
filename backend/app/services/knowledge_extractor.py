@@ -2,6 +2,7 @@
 LLM知识提取服务：实体识别 + 关系提取
 """
 import json
+import re
 import asyncio
 from typing import List, Tuple
 from openai import OpenAI
@@ -73,7 +74,7 @@ class KnowledgeExtractor:
                 model=settings.LLM_MODEL,
                 messages=[
                     {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
-                    {"role": "user", "content": EXTRACTION_PROMPT.format(text=text)}
+                    {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
                 ],
                 temperature=0.1,  # 低温度保证稳定
                 max_tokens=4096,
@@ -81,20 +82,43 @@ class KnowledgeExtractor:
             )
 
             content = response.choices[0].message.content.strip()
-
-            # 清理可能的 markdown 代码块标记
-            if content.startswith("```"):
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:]
-            content = content.strip()
-
-            return json.loads(content)
+            return self._parse_json(content)
 
         except json.JSONDecodeError as e:
             return {"entities": [], "relations": [], "error": f"JSON解析失败: {str(e)}"}
         except Exception as e:
             return {"entities": [], "relations": [], "error": f"提取失败: {str(e)}"}
+
+    @staticmethod
+    def _parse_json(content: str) -> dict:
+        """稳健地解析 LLM 返回的 JSON：清理 markdown 代码块、剥离多余文本"""
+        if not content:
+            return {"entities": [], "relations": []}
+
+        content = content.strip()
+
+        # 清理 markdown 代码块标记 ```json ... ```
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.strip()
+
+        # 直接解析
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            pass
+
+        # 兜底：提取第一个 { 到最后一个 } 之间的内容再解析
+        match = re.search(r"\{.*\}", content, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(0))
+            except json.JSONDecodeError:
+                pass
+
+        raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
     def _merge_results(self, results: List[dict]) -> dict:
         """合并多个提取结果，按名称去重"""
