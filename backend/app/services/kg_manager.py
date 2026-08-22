@@ -11,36 +11,44 @@ class KnowledgeGraphManager:
     @staticmethod
     def build_graph(course_id: str, entities: List[dict], relations: List[dict]) -> dict:
         """
-        根据提取的实体和关系构建知识图谱
+        根据提取的实体和关系构建知识图谱（对齐规划文档：KnowledgePoint 节点 + 英文关系类型）
         """
         node_count = 0
         relation_count = 0
 
         # 创建节点
         for entity in entities:
-            props = {
-                "course_id": course_id,
-                "description": entity.get("description", ""),
-            }
+            name = entity.get("name", "").strip()
+            if not name:
+                continue
             db.create_knowledge_node(
-                name=entity["name"],
-                category=entity.get("category", "其他"),
-                properties=props
+                course_id=course_id,
+                name=name,
+                category=entity.get("category", "概念"),
+                description=entity.get("description", ""),
+                properties={"confidence": 0.9, "is_manual": False}
             )
             node_count += 1
 
         # 创建关系
         for rel in relations:
+            source = rel.get("source", "").strip()
+            target = rel.get("target", "").strip()
+            rel_type = rel.get("type", "RELATED_TO")
+            # 应用层校验：过滤空值与自环（对齐规划文档「表格4」）
+            if not source or not target or source == target:
+                continue
             try:
                 db.create_relationship(
-                    source=rel["source"],
-                    target=rel["target"],
-                    rel_type=rel.get("type", "related_to"),
-                    properties={"course_id": course_id}
+                    course_id=course_id,
+                    source=source,
+                    target=target,
+                    rel_type=rel_type,
+                    properties={"confidence": 0.9, "is_manual": False}
                 )
                 relation_count += 1
             except Exception:
-                pass  # 忽略无效关系
+                pass  # 忽略无效关系（如目标节点不存在）
 
         return {
             "course_id": course_id,
@@ -90,7 +98,7 @@ class KnowledgeGraphManager:
                 links.append({
                     "source": record.get("n").get("name"),
                     "target": node_m.get("name"),
-                    "type": list(rel.types())[0] if rel else "related_to"
+                    "type": rel.type if rel else "RELATED_TO"
                 })
 
         return {

@@ -11,25 +11,37 @@ from ..utils.text_processor import chunk_text_for_llm
 
 
 # 知识提取的 Prompt 模板
-EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请从以下课程文本中提取知识点和它们之间的关系。
+EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请从以下课程文本中提取知识点实体和它们之间的关系。
 
-## 要求
-1. 提取所有重要的知识点实体（概念、定理、公式、方法等）
-2. 识别实体之间的关系类型，包括但不限于：
-   - "前置知识" (prerequisite)：学习B之前需要先掌握A
-   - "相关概念" (related_to)：两个概念密切相关
-   - "包含" (contains)：知识点包含子知识点
-   - "应用" (applies_to)：某个知识点的实际应用
-3. 每个实体需要包含 name（名称）、category（类别：概念/定理/公式/方法/其他）、description（一句话描述）
-4. 每个关系需要包含 source（源节点名）、target（目标节点名）、type（关系类型）
+## 实体要求
+每个实体包含：
+- name：知识点名称（简洁规范，去除冗余修饰）
+- category：类别，只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
+- description：一句话描述
 
-## 输出格式（严格JSON）
+## 关系要求
+关系只能使用以下 4 种类型，必须使用英文大写标识符，且方向严格遵循约定：
+1. PRECEDES（前置知识）：source 是 target 的前置知识，即学习 target 之前需先掌握 source。
+   例：线性代数 PRECEDES 机器学习
+2. CONTAINS（包含）：source 包含 target，即 source 是上层概念，target 是其子概念或组成部分。
+   例：神经网络 CONTAINS 卷积神经网络
+3. RELATED_TO（相关概念）：source 与 target 密切相关。
+   例：过拟合 RELATED_TO 正则化
+4. APPLIES_TO（应用）：source 应用到 target。
+   例：梯度下降 APPLIES_TO 损失函数优化
+
+## 约束
+- 不要输出 source 与 target 相同的自环关系
+- 不要输出重复关系（相同 source、type、target 只保留一条）
+- 关系的 source 和 target 必须出现在实体列表中
+
+## 输出格式（严格JSON，只输出JSON）
 {
   "entities": [
     {"name": "实体名", "category": "概念", "description": "简要描述"}
   ],
   "relations": [
-    {"source": "源实体名", "target": "目标实体名", "type": "前置知识"}
+    {"source": "源实体名", "target": "目标实体名", "type": "PRECEDES"}
   ]
 }
 
@@ -121,19 +133,35 @@ class KnowledgeExtractor:
         raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
     def _merge_results(self, results: List[dict]) -> dict:
-        """合并多个提取结果，按名称去重"""
+        """合并多个提取结果：实体按名称去重、关系按三元组去重并过滤自环"""
         seen_entities = set()
         merged_entities = []
+        seen_relations = set()
         merged_relations = []
 
         for result in results:
             for entity in result.get("entities", []):
-                name = entity.get("name", "")
+                name = entity.get("name", "").strip()
                 if name and name not in seen_entities:
                     seen_entities.add(name)
                     merged_entities.append(entity)
 
             for relation in result.get("relations", []):
+                source = relation.get("source", "").strip()
+                target = relation.get("target", "").strip()
+                rel_type = relation.get("type", "").strip()
+
+                # 过滤空值
+                if not source or not target or not rel_type:
+                    continue
+                # 过滤自环（source == target）
+                if source == target:
+                    continue
+                # 按 (source, type, target) 去重
+                key = (source, rel_type, target)
+                if key in seen_relations:
+                    continue
+                seen_relations.add(key)
                 merged_relations.append(relation)
 
         return {"entities": merged_entities, "relations": merged_relations}
