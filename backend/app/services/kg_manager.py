@@ -4,6 +4,14 @@
 from typing import List, Dict
 from ..core.database import db
 
+# 类别中文 -> 英文类型映射（对齐规划文档 6.3 节点 type 字段）
+CATEGORY_TYPE_MAP = {
+    "概念": "concept",
+    "定理": "theorem",
+    "公式": "formula",
+    "方法": "method",
+}
+
 
 class KnowledgeGraphManager:
     """知识图谱管理器"""
@@ -105,6 +113,76 @@ class KnowledgeGraphManager:
             "nodes": list(nodes.values()),
             "links": links
         }
+
+    @staticmethod
+    def get_graph_v1(course_id: str, limit: int = 500, node_type: str = None) -> dict:
+        """
+        获取课程图谱数据（对齐规划文档 6.3.2）
+        返回 {"nodes": [...], "edges": [...]}，节点以 kp_id 为 id
+        """
+        params = {"course_id": course_id, "limit": limit}
+
+        if node_type:
+            cypher = """
+            MATCH (n:KnowledgePoint {course_id: $course_id, category: $node_type})
+            WITH n ORDER BY n.name LIMIT $limit
+            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id})
+            RETURN n, r, m, elementId(r) AS edge_id
+            """
+            params["node_type"] = node_type
+        else:
+            cypher = """
+            MATCH (n:KnowledgePoint {course_id: $course_id})
+            WITH n ORDER BY n.name LIMIT $limit
+            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id})
+            RETURN n, r, m, elementId(r) AS edge_id
+            """
+
+        records = db.query(cypher, params)
+
+        nodes = {}
+        edges = []
+
+        def node_dict(node) -> dict:
+            kp_id = node.get("kp_id") or node.get("name")
+            return {
+                "id": kp_id,
+                "label": node.get("name", ""),
+                "type": CATEGORY_TYPE_MAP.get(node.get("category"), "concept"),
+                "description": node.get("description", ""),
+                "properties": {
+                    "category": node.get("category", ""),
+                    "confidence": node.get("confidence"),
+                    "is_manual": node.get("is_manual", False),
+                    "created_at": node.get("created_at"),
+                    "updated_at": node.get("updated_at"),
+                },
+            }
+
+        for record in records:
+            n = record.get("n")
+            m = record.get("m")
+            r = record.get("r")
+            if n:
+                nodes.setdefault(n.get("kp_id") or n.get("name"), node_dict(n))
+            if m:
+                nodes.setdefault(m.get("kp_id") or m.get("name"), node_dict(m))
+            if r and n and m:
+                edges.append({
+                    "id": record.get("edge_id") or "",
+                    "source": n.get("kp_id") or n.get("name"),
+                    "target": m.get("kp_id") or m.get("name"),
+                    "type": r.type,
+                    "label": r.get("relation_type") or r.type,
+                    "properties": {
+                        "confidence": r.get("confidence"),
+                        "is_manual": r.get("is_manual", False),
+                        "created_at": r.get("created_at"),
+                        "updated_at": r.get("updated_at"),
+                    },
+                })
+
+        return {"nodes": list(nodes.values()), "edges": edges}
 
     @staticmethod
     def update_node(name: str, properties: dict):

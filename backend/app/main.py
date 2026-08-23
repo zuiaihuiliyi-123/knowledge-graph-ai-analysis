@@ -4,7 +4,7 @@ FastAPI 应用入口
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
-from .api import auth, courses, knowledge_graph, qa, learning_path
+from .api import auth, courses, knowledge_graph, qa, learning_path, graph
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -27,6 +27,7 @@ app.include_router(courses.router)
 app.include_router(knowledge_graph.router)
 app.include_router(qa.router)
 app.include_router(learning_path.router)
+app.include_router(graph.router)
 
 
 @app.get("/")
