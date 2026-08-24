@@ -24,9 +24,16 @@
             <el-input v-model="form.description" type="textarea" :rows="4" />
           </el-form-item>
         </el-form>
+        <el-alert
+          type="info"
+          :closable="false"
+          title="节点编辑功能开发中"
+          description="后端节点编辑接口（6.3.3/6.3.4）尚未实现。"
+          style="margin-bottom: 12px"
+        />
         <div class="btn-row">
-          <el-button type="primary" :loading="saving" @click="save">保存修改</el-button>
-          <el-button type="danger" plain :loading="deleting" @click="remove">删除节点</el-button>
+          <el-button type="primary" :loading="saving" disabled @click="save">保存修改</el-button>
+          <el-button type="danger" plain :loading="deleting" disabled @click="remove">删除节点</el-button>
         </div>
       </template>
 

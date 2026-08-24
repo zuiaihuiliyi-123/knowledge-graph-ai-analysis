@@ -10,37 +10,24 @@ export const api = {
   // ---- 健康检查 ----
   health: () => request.get('/health'),
 
-  // ---- 课程 ----
-  /** 上传课程文档（LLM 抽取耗时较长，超时放宽到 10 分钟） */
-  uploadCourse: (formData, courseName) =>
-    request.post('/api/courses/upload', formData, {
-      params: { course_name: courseName || undefined },
-      timeout: 600000,
-    }),
-  /** 旧版图谱接口（ECharts 格式，节点以 name 为 id） */
-  getCourseGraphLegacy: (courseId) => request.get(`/api/courses/${courseId}/graph`),
+  // ---- 文档 / 课程 ----
+  /** 上传课程文档（对齐后端 POST /api/v1/documents/upload；LLM 抽取耗时较长，超时放宽到 10 分钟） */
+  uploadCourse: (formData, courseName) => {
+    if (courseName) formData.append('course_name', courseName)
+    return request.post('/api/v1/documents/upload', formData, { timeout: 600000 })
+  },
 
-  // ---- 知识图谱（新版，G6 格式） ----
-  /** 新版图谱接口：{ nodes: [{id,label,type,description,properties}], edges: [...] } */
+  // ---- 知识图谱（G6 格式） ----
+  /** 图谱接口：{ nodes: [{id,label,type,description,properties}], edges: [...] } */
   getGraphV1: (courseId, params = {}) =>
     request.get(`/api/v1/graph/${courseId}`, { params }),
-  /** 教师编辑：更新节点属性（现有接口，后端标签为 KnowledgeNode 需修复） */
-  updateNode: (courseId, name, properties) =>
-    request.put(`/api/courses/${courseId}/graph/node`, null, {
-      params: { name, properties: JSON.stringify(properties) },
-    }),
-  /** 教师编辑：删除节点（现有接口，后端标签为 KnowledgeNode 需修复） */
-  deleteNode: (courseId, name) =>
-    request.delete(`/api/courses/${courseId}/graph/node`, { params: { name } }),
-  /** 教师编辑：新增节点（后端待补） */
-  createNode: (courseId, body) =>
-    request.post(`/api/v1/graph/${courseId}/node`, body),
-  /** 教师编辑：新增关系（后端待补） */
-  createEdge: (courseId, body) =>
-    request.post(`/api/v1/graph/${courseId}/edge`, body),
-  /** 教师编辑：删除关系（后端待补） */
-  deleteEdge: (courseId, body) =>
-    request.delete(`/api/v1/graph/${courseId}/edge`, { data: body }),
+
+  // ---- 教师编辑（后端图谱节点/关系编辑接口 6.3.3/6.3.4 尚未实现，前端暂屏蔽） ----
+  updateNode: () => Promise.reject(new Error('节点编辑功能开发中')),
+  deleteNode: () => Promise.reject(new Error('节点删除功能开发中')),
+  createNode: () => Promise.reject(new Error('新增知识点功能开发中')),
+  createEdge: () => Promise.reject(new Error('新增关系功能开发中')),
+  deleteEdge: () => Promise.reject(new Error('删除关系功能开发中')),
 
   // ---- 图谱统计 ----
   getStats: () => request.get('/api/kg/stats'),

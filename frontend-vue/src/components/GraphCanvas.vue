@@ -64,35 +64,11 @@ async function loadGraph() {
   loading.value = true
   empty.value = false
   try {
-    let nodes = []
-    let edges = []
-    try {
-      const data = await api.getGraphV1(props.courseId, { limit: 800 })
-      nodes = data.nodes || []
-      edges = data.edges || []
-    } catch {
-      // 回退旧版 ECharts 格式接口（节点以 name 为 id）
-      const legacy = await api.getCourseGraphLegacy(props.courseId)
-      const lg = legacy?.graph || {}
-      nodes = (lg.nodes || []).map((n) => ({
-        id: n.name,
-        label: n.name,
-        type: 'concept',
-        description: n.description || '',
-        properties: { category: n.category || '概念' },
-      }))
-      edges = (lg.links || []).map((l, i) => ({
-        id: `e${i}`,
-        source: l.source,
-        target: l.target,
-        type: l.type,
-        label: l.type,
-      }))
-    }
-    rawNodes = nodes
-    rawEdges = edges
+    const data = await api.getGraphV1(props.courseId, { limit: 800 })
+    rawNodes = data.nodes || []
+    rawEdges = data.edges || []
     await renderGraph()
-    emit('loaded', { nodeCount: nodes.length, edgeCount: edges.length })
+    emit('loaded', { nodeCount: rawNodes.length, edgeCount: rawEdges.length })
   } catch (e) {
     empty.value = true
     emptyText.value = `图谱加载失败：${e.message}`

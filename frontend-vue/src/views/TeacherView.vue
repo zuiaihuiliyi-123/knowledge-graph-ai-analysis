@@ -71,27 +71,22 @@
             <el-descriptions-item label="课程 ID">
               <code>{{ uploadResult.course_id }}</code>
             </el-descriptions-item>
-            <el-descriptions-item label="课程名称">
-              {{ uploadResult.course_name }}
+            <el-descriptions-item label="文档名称">
+              {{ uploadResult.filename }}
             </el-descriptions-item>
             <el-descriptions-item label="知识点数量">
-              {{ uploadResult.extraction?.entity_count ?? 0 }}
+              {{ uploadResult.entity_count ?? 0 }}
             </el-descriptions-item>
             <el-descriptions-item label="关系数量">
-              {{ uploadResult.extraction?.relation_count ?? 0 }}
+              {{ uploadResult.relation_count ?? 0 }}
             </el-descriptions-item>
-            <el-descriptions-item label="入库节点">
-              {{ uploadResult.graph?.node_count ?? 0 }}
+            <el-descriptions-item label="解析状态">
+              {{ uploadResult.parse_status }}
             </el-descriptions-item>
-            <el-descriptions-item label="入库关系">
-              {{ uploadResult.graph?.relation_count ?? 0 }}
+            <el-descriptions-item label="抽取状态">
+              {{ uploadResult.extract_status }}
             </el-descriptions-item>
           </el-descriptions>
-          <el-collapse style="margin-top: 12px">
-            <el-collapse-item title="查看 LLM 提取原始结果（JSON）" name="raw">
-              <pre class="raw-json">{{ JSON.stringify(uploadResult.extraction?.raw_result, null, 2) }}</pre>
-            </el-collapse-item>
-          </el-collapse>
         </el-card>
       </el-tab-pane>
 
@@ -125,14 +120,21 @@
       </el-tab-pane>
 
       <!-- ===================== Tab 3：编辑图谱 ===================== -->
-      <el-tab-pane label="✏️ 编辑图谱" name="edit">
+      <el-tab-pane label="✏️ 编辑图谱（开发中）" name="edit">
         <el-card class="page-card">
+          <el-alert
+            type="info"
+            :closable="false"
+            title="节点 / 关系编辑功能开发中"
+            description="后端图谱节点编辑接口（6.3.3/6.3.4）尚未实现，当前仅支持预览浏览。"
+            style="margin-bottom: 12px"
+          />
           <div class="toolbar">
             <CourseSelector v-model="editCourseId" @change="onEditCourseChange" />
-            <el-button type="primary" :icon="Plus" @click="openAddNode">新增知识点</el-button>
-            <el-button type="success" plain :icon="Connection" @click="openAddEdge">新增关系</el-button>
+            <el-button type="primary" :icon="Plus" disabled>新增知识点</el-button>
+            <el-button type="success" plain :icon="Connection" disabled>新增关系</el-button>
             <el-button :icon="Refresh" circle title="刷新" @click="refreshEdit" />
-            <span class="stats-text edit-hint">点击节点编辑详情，点击边可删除关系</span>
+            <span class="stats-text edit-hint">节点 / 关系编辑开发中，暂仅支持预览</span>
           </div>
         </el-card>
         <el-card class="page-card graph-card">
@@ -229,8 +231,9 @@
         <el-button
           type="danger"
           :loading="deleteEdgeLoading"
+          disabled
           @click="removeEdge"
-        >删除关系</el-button>
+        >删除关系（开发中）</el-button>
       </template>
     </el-dialog>
   </div>
@@ -286,12 +289,11 @@ async function doUpload() {
   try {
     const formData = new FormData()
     formData.append('file', selectedFile.value)
-    const result = await api.uploadCourse(formData, courseName.value)
+    // course_name 后端必填：为空时用文件名（去扩展名）兜底
+    const name = courseName.value.trim() || selectedFile.value.name.replace(/\.[^.]+$/, '')
+    const result = await api.uploadCourse(formData, name)
     uploadResult.value = result
-    store.registerCourse({
-      courseId: result.course_id,
-      name: result.course_name || courseName.value,
-    })
+    store.registerCourse({ courseId: result.course_id, name })
     ElMessage.success('知识图谱构建完成')
   } catch (e) {
     ElMessage.error(`上传失败：${e.message}`)
