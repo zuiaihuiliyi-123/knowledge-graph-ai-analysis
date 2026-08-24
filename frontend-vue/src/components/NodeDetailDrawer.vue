@@ -1,0 +1,191 @@
+<template>
+  <el-drawer
+    :model-value="modelValue"
+    :title="editable ? '知识点编辑' : '知识点详情'"
+    direction="rtl"
+    size="420px"
+    @update:model-value="$emit('update:modelValue', $event)"
+  >
+    <template v-if="node">
+      <template v-if="editable">
+        <el-form label-position="top">
+          <el-form-item label="名称">
+            <el-input v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="类别">
+            <el-select v-model="form.category" style="width: 100%">
+              <el-option label="概念" value="概念" />
+              <el-option label="定理" value="定理" />
+              <el-option label="公式" value="公式" />
+              <el-option label="方法" value="方法" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="描述">
+            <el-input v-model="form.description" type="textarea" :rows="4" />
+          </el-form-item>
+        </el-form>
+        <div class="btn-row">
+          <el-button type="primary" :loading="saving" @click="save">保存修改</el-button>
+          <el-button type="danger" plain :loading="deleting" @click="remove">删除节点</el-button>
+        </div>
+      </template>
+
+      <template v-else>
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="名称">{{ node.label }}</el-descriptions-item>
+          <el-descriptions-item label="类别">
+            <el-tag size="small">{{ nodeTypeLabel(node.type) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="描述">
+            {{ node.description || '暂无描述' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否人工添加">
+            {{ node.properties?.is_manual ? '是' : '否' }}
+          </el-descriptions-item>
+          <el-descriptions-item v-if="node.properties?.confidence != null" label="置信度">
+            {{ node.properties.confidence }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider content-position="left">前置知识</el-divider>
+        <el-button size="small" :loading="prereqLoading" @click="loadPrereqs">
+          查询前置知识
+        </el-button>
+        <el-empty
+          v-if="!prereqLoading && prereqLoaded && !prereqs.length"
+          description="未查询到前置知识"
+          :image-size="60"
+        />
+        <ul class="prereq-list">
+          <li v-for="p in prereqs" :key="p.name">
+            <el-tag size="small" type="info">{{ p.depth }} 级前置</el-tag>
+            <span class="prereq-name">{{ p.name }}</span>
+            <div class="prereq-desc">{{ p.description }}</div>
+          </li>
+        </ul>
+      </template>
+    </template>
+  </el-drawer>
+</template>
+
+<script setup>
+import { ref, watch, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { api } from '../api'
+import { nodeTypeLabel } from '../utils/graphStyle'
+
+const props = defineProps({
+  modelValue: { type: Boolean, default: false },
+  node: { type: Object, default: null },
+  editable: { type: Boolean, default: false },
+  courseId: { type: String, default: '' },
+})
+const emit = defineEmits(['update:modelValue', 'saved', 'deleted'])
+
+const form = ref({ name: '', category: '概念', description: '' })
+const saving = ref(false)
+const deleting = ref(false)
+const prereqs = ref([])
+const prereqLoading = ref(false)
+const prereqLoaded = ref(false)
+
+const originalName = computed(() => props.node?.label || '')
+
+watch(
+  () => props.node,
+  (n) => {
+    if (n) {
+      form.value = {
+        name: n.label || '',
+        category: n.properties?.category || '概念',
+        description: n.description || '',
+      }
+    }
+    prereqs.value = []
+    prereqLoaded.value = false
+  }
+)
+
+async function save() {
+  if (!form.value.name.trim()) {
+    ElMessage.warning('名称不能为空')
+    return
+  }
+  saving.value = true
+  try {
+    await api.updateNode(props.courseId, originalName.value, {
+      name: form.value.name.trim(),
+      category: form.value.category,
+      description: form.value.description,
+      is_manual: true,
+    })
+    ElMessage.success('保存成功')
+    emit('saved')
+  } catch (e) {
+    ElMessage.error(`保存失败：${e.message}（注：后端该接口目前查询的节点标签为 KnowledgeNode，新数据为 KnowledgePoint，需修复后端）`)
+  } finally {
+    saving.value = false
+  }
+}
+
+async function remove() {
+  try {
+    await ElMessageBox.confirm(
+      `确定删除知识点「${originalName.value}」及其全部关系吗？`,
+      '删除确认',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  deleting.value = true
+  try {
+    await api.deleteNode(props.courseId, originalName.value)
+    ElMessage.success('已删除')
+    emit('deleted')
+  } catch (e) {
+    ElMessage.error(`删除失败：${e.message}（注：后端该接口目前查询的节点标签为 KnowledgeNode，新数据为 KnowledgePoint，需修复后端）`)
+  } finally {
+    deleting.value = false
+  }
+}
+
+async function loadPrereqs() {
+  prereqLoading.value = true
+  try {
+    const res = await api.getPrerequisites(originalName.value, props.courseId)
+    prereqs.value = res.prerequisites || []
+  } catch (e) {
+    ElMessage.warning(`查询失败：${e.message}（注：后端该接口仍使用旧图模型 KnowledgeNode/前置知识，与当前 KnowledgePoint 数据不匹配）`)
+  } finally {
+    prereqLoading.value = false
+    prereqLoaded.value = true
+  }
+}
+</script>
+
+<style scoped>
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.prereq-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.prereq-list li {
+  padding: 8px 0;
+  border-bottom: 1px dashed #e4e7ed;
+}
+.prereq-name {
+  font-weight: 600;
+  margin-left: 8px;
+}
+.prereq-desc {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 4px;
+}
+</style>
