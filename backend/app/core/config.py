@@ -22,6 +22,9 @@ class Settings:
     NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
     NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
 
+    # SQLite 关系型数据库配置（第一阶段，第二阶段迁移 MySQL）
+    SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./data/app.db")
+
     # 文件上传配置
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./data/uploads")
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB

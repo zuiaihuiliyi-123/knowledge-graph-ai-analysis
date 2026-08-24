@@ -1,96 +1,68 @@
 """
-课程管理 API
+课程管理 API（对齐规划文档 6.6.6~6.6.10）
 """
-import os
-import uuid
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from ..core.config import settings
-from ..services.document_parser import DocumentParser
-from ..services.knowledge_extractor import KnowledgeExtractor
-from ..services.kg_manager import KnowledgeGraphManager
+from fastapi import APIRouter, Query
+from pydantic import BaseModel
 
-router = APIRouter(prefix="/api/courses", tags=["课程管理"])
+from ..core.response import success, error
+from ..services.course_service import CourseService
+
+router = APIRouter(prefix="/api/v1/courses", tags=["课程管理"])
 
 
-@router.post("/upload")
-async def upload_course_document(
-    file: UploadFile = File(...),
+class CourseCreate(BaseModel):
+    course_name: str
+    course_code: str = None
+    description: str = None
+    teacher_id: int = None
+
+
+class CourseUpdate(BaseModel):
     course_name: str = None
-):
-    """
-    教师上传课程文档，自动提取知识并构建图谱
-    """
-    # 1. 校验文件格式
-    ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in settings.ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"不支持的文件格式: {ext}。支持: {settings.ALLOWED_EXTENSIONS}"
-        )
+    course_code: str = None
+    description: str = None
 
-    # 2. 保存文件
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    course_id = str(uuid.uuid4())[:8]
-    save_path = os.path.join(settings.UPLOAD_DIR, f"{course_id}_{file.filename}")
 
-    content = await file.read()
-    with open(save_path, "wb") as f:
-        f.write(content)
-
-    # 3. 解析文档
-    parser = DocumentParser()
-    try:
-        text = await parser.parse(save_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"文档解析失败: {str(e)}")
-
-    # 4. LLM提取知识
-    extractor = KnowledgeExtractor()
-    try:
-        result = await extractor.extract(text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"知识提取失败: {str(e)}")
-
-    # 5. 构建知识图谱
-    kg_manager = KnowledgeGraphManager()
-    build_result = kg_manager.build_graph(
-        course_id=course_id,
-        entities=result.get("entities", []),
-        relations=result.get("relations", [])
+@router.post("")
+async def create_course(body: CourseCreate):
+    """创建课程（仅教师角色，认证未实现前缺省用默认教师）"""
+    result = CourseService.create_course(
+        course_name=body.course_name, teacher_id=body.teacher_id,
+        course_code=body.course_code, description=body.description,
     )
-
-    return {
-        "course_id": course_id,
-        "course_name": course_name or file.filename,
-        "file_name": file.filename,
-        "extraction": {
-            "entity_count": len(result.get("entities", [])),
-            "relation_count": len(result.get("relations", [])),
-            "raw_result": result
-        },
-        "graph": build_result
-    }
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
 
 
-@router.get("/{course_id}/graph")
-async def get_course_graph(course_id: str):
-    """获取课程知识图谱数据"""
-    kg_manager = KnowledgeGraphManager()
-    graph_data = kg_manager.get_graph_data(course_id)
-    return {"course_id": course_id, "graph": graph_data}
+@router.get("")
+async def list_courses(
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(10, ge=1, le=100, description="每页数量"),
+    teacher_id: int = Query(None, description="按教师筛选"),
+    keyword: str = Query(None, description="课程名关键词搜索"),
+):
+    """课程列表（分页 + 教师筛选 + 关键词搜索）"""
+    result = CourseService.list_courses(page, page_size, teacher_id, keyword)
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
 
 
-@router.put("/{course_id}/graph/node")
-async def update_node(course_id: str, name: str, properties: dict):
-    """更新知识图谱节点"""
-    kg_manager = KnowledgeGraphManager()
-    kg_manager.update_node(name, properties)
-    return {"status": "ok", "name": name}
+@router.get("/{course_id}")
+async def get_course(course_id: int):
+    """课程详情（含文档/节点/关系统计）"""
+    result = CourseService.get_course_detail(course_id)
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
 
 
-@router.delete("/{course_id}/graph/node")
-async def delete_node(course_id: str, name: str):
-    """删除知识图谱节点"""
-    kg_manager = KnowledgeGraphManager()
-    kg_manager.delete_node(name)
-    return {"status": "ok", "name": name}
+@router.put("/{course_id}")
+async def update_course(course_id: int, body: CourseUpdate):
+    """更新课程信息（仅传入的字段生效）"""
+    result = CourseService.update_course(
+        course_id, body.course_name, body.course_code, body.description,
+    )
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
+
+
+@router.delete("/{course_id}")
+async def delete_course(course_id: int, confirm: bool = Query(False, description="删除二次确认，须为 true")):
+    """删除课程及其全部关联数据（文档/图谱/学习记录）"""
+    result = CourseService.delete_course(course_id, confirm)
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])

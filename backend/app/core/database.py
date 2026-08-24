@@ -138,6 +138,22 @@ class Neo4jDB:
             """
             return self.query(cypher)
 
+    def delete_course_graph(self, course_id: int):
+        """删除指定课程的所有知识点节点与关系，返回 (node_count, edge_count)"""
+        node_cnt = self.query(
+            "MATCH (n:KnowledgePoint {course_id: $cid}) RETURN count(n) AS cnt",
+            {"cid": course_id},
+        )[0]["cnt"]
+        edge_cnt = self.query(
+            "MATCH (:KnowledgePoint {course_id: $cid})-[r]->(:KnowledgePoint {course_id: $cid}) "
+            "RETURN count(r) AS cnt",
+            {"cid": course_id},
+        )[0]["cnt"]
+        self.query(
+            "MATCH (n:KnowledgePoint {course_id: $cid}) DETACH DELETE n", {"cid": course_id},
+        )
+        return node_cnt, edge_cnt
+
 
 # 全局数据库实例
 db = Neo4jDB()
