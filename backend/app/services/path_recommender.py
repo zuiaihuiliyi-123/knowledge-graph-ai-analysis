@@ -1,6 +1,13 @@
 """
 学习路径推荐服务：基于知识图谱的个性化推荐
 （对齐规划文档：KnowledgePoint 节点 + PRECEDES 英文关系类型，按 course_id 隔离）
+
+关系方向约定（务必遵守）：
+    A -[:PRECEDES]-> B 表示「A 是 B 的前置知识」，即先学 A 再学 B。
+    因此：
+    - B 的前置知识 = 入边来源 = (A)-[:PRECEDES]->(B)
+    - B 解锁的后继 = 出边目标 = (B)-[:PRECEDES]->(C)
+    - 根节点（无前置） = 无入边 = NOT ()-[:PRECEDES]->(B)
 """
 from typing import List, Set
 from ..core.database import db
@@ -22,24 +29,24 @@ class PathRecommender:
     @staticmethod
     def get_prerequisites(knowledge_name: str, course_id=None) -> List[dict]:
         """
-        获取某个知识点的所有前置知识（递归），沿 PRECEDES 关系向上遍历
+        获取某个知识点的所有前置知识（递归），沿 PRECEDES 入边向上遍历
         """
         cid = _coerce_course_id(course_id)
         if cid is not None:
             cypher = """
-            MATCH path = (n:KnowledgePoint {name: $name, course_id: $course_id})
-                         -[:PRECEDES*1..5]->(prereq:KnowledgePoint {course_id: $course_id})
+            MATCH path = (prereq:KnowledgePoint {course_id: $course_id})
+                         -[:PRECEDES*1..5]->(n:KnowledgePoint {name: $name, course_id: $course_id})
             RETURN prereq.name AS name, prereq.category AS category,
                    prereq.description AS description, length(path) AS depth
-            ORDER BY depth DESC
+            ORDER BY depth
             """
             params = {"name": knowledge_name, "course_id": cid}
         else:
             cypher = """
-            MATCH path = (n:KnowledgePoint {name: $name})-[:PRECEDES*1..5]->(prereq:KnowledgePoint)
+            MATCH path = (prereq:KnowledgePoint)-[:PRECEDES*1..5]->(n:KnowledgePoint {name: $name})
             RETURN prereq.name AS name, prereq.category AS category,
                    prereq.description AS description, length(path) AS depth
-            ORDER BY depth DESC
+            ORDER BY depth
             """
             params = {"name": knowledge_name}
 
@@ -65,11 +72,11 @@ class PathRecommender:
         cid = _coerce_course_id(course_id)
 
         if not mastered:
-            # 没有已掌握的知识，推荐入门的根节点（没有前置知识的节点）
+            # 没有已掌握的知识，推荐入门根节点（没有前置知识的节点，即无 PRECEDES 入边）
             if cid is not None:
                 cypher = """
                 MATCH (n:KnowledgePoint {course_id: $course_id})
-                WHERE NOT (n)-[:PRECEDES]->(:KnowledgePoint)
+                WHERE NOT ()-[:PRECEDES]->(n)
                 RETURN n.name AS name, n.category AS category, n.description AS description
                 LIMIT 10
                 """
@@ -77,7 +84,7 @@ class PathRecommender:
             else:
                 cypher = """
                 MATCH (n:KnowledgePoint)
-                WHERE NOT (n)-[:PRECEDES]->(:KnowledgePoint)
+                WHERE NOT ()-[:PRECEDES]->(n)
                 RETURN n.name AS name, n.category AS category, n.description AS description
                 LIMIT 10
                 """
@@ -93,7 +100,7 @@ class PathRecommender:
                 for r in records
             ]
 
-        # 找到所有已掌握节点的直接后继（被 PRECEDES 指向的节点）
+        # 找到所有「某前置已掌握」的候选后继节点（known 是 next 的前置）
         if cid is not None:
             cypher = """
             MATCH (known:KnowledgePoint {course_id: $course_id})-[:PRECEDES]->(next:KnowledgePoint {course_id: $course_id})
@@ -118,15 +125,16 @@ class PathRecommender:
             name = r.get("name")
             prereqs = r.get("prereqs_satisfied") or []
 
-            # 检查该节点的所有前置知识是否都已掌握
+            # 检查该节点的所有前置知识（PRECEDES 入边）是否都已掌握
             if cid is not None:
                 all_prereqs = db.query("""
-                MATCH (n:KnowledgePoint {name: $name, course_id: $course_id})-[:PRECEDES]->(prereq:KnowledgePoint {course_id: $course_id})
+                MATCH (prereq:KnowledgePoint {course_id: $course_id})
+                      -[:PRECEDES]->(n:KnowledgePoint {name: $name, course_id: $course_id})
                 RETURN prereq.name AS name
                 """, {"name": name, "course_id": cid})
             else:
                 all_prereqs = db.query("""
-                MATCH (n:KnowledgePoint {name: $name})-[:PRECEDES]->(prereq:KnowledgePoint)
+                MATCH (prereq:KnowledgePoint)-[:PRECEDES]->(n:KnowledgePoint {name: $name})
                 RETURN prereq.name AS name
                 """, {"name": name})
 
@@ -150,14 +158,14 @@ class PathRecommender:
     def get_learning_path(target_knowledge: str, course_id=None) -> List[List[dict]]:
         """
         生成到达目标知识点的学习路径（可能有多个）
-        使用 BFS 找到从任意起始节点（无前置）到目标节点的路径
+        沿 PRECEDES 从根节点（无前置）走到目标节点
         """
         cid = _coerce_course_id(course_id)
         if cid is not None:
             cypher = """
             MATCH path = (start:KnowledgePoint {course_id: $course_id})
                          -[:PRECEDES*1..10]->(target:KnowledgePoint {name: $target, course_id: $course_id})
-            WHERE NOT (start)-[:PRECEDES]->(:KnowledgePoint)
+            WHERE NOT ()-[:PRECEDES]->(start)
             RETURN [node in nodes(path) | {name: node.name, category: node.category}] AS steps,
                    length(path) AS path_length
             ORDER BY path_length
@@ -167,7 +175,7 @@ class PathRecommender:
         else:
             cypher = """
             MATCH path = (start:KnowledgePoint)-[:PRECEDES*1..10]->(target:KnowledgePoint {name: $target})
-            WHERE NOT (start)-[:PRECEDES]->(:KnowledgePoint)
+            WHERE NOT ()-[:PRECEDES]->(start)
             RETURN [node in nodes(path) | {name: node.name, category: node.category}] AS steps,
                    length(path) AS path_length
             ORDER BY path_length

@@ -43,21 +43,21 @@ export const api = {
 
   // ---- 智能问答 ----
   ask: (question, courseId) =>
-    request.post('/api/qa/ask', { question, course_id: courseId || null }),
+    request.post('/api/v1/qa/ask', { question, course_id: courseId || null }),
 
   // ---- 学习路径推荐 ----
   recommendNext: (mastered, courseId) =>
-    request.post('/api/learning-path/recommend', {
+    request.post('/api/v1/learning-path/recommend', {
       mastered,
       course_id: courseId || null,
     }),
   pathToTarget: (target, courseId) =>
-    request.post('/api/learning-path/path-to-target', {
+    request.post('/api/v1/learning-path/path-to-target', {
       target,
       course_id: courseId || null,
     }),
   getPrerequisites: (name, courseId) =>
-    request.get(`/api/learning-path/prerequisites/${encodeURIComponent(name)}`, {
+    request.get(`/api/v1/learning-path/prerequisites/${encodeURIComponent(name)}`, {
       params: { course_id: courseId || undefined },
     }),
 }
