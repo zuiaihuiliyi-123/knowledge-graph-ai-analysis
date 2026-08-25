@@ -10,7 +10,7 @@ from ..core.config import settings
 from ..utils.text_processor import chunk_text_for_llm
 
 
-# 知识提取的 Prompt 模板
+# 知识提取的 Prompt 模板（修改版）
 EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请从以下课程文本中提取知识点实体和它们之间的关系。
 
 ## 实体要求
@@ -19,21 +19,59 @@ EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请
 - category：类别，只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
 - description：一句话描述
 
-## 关系要求
+## 关系要求（严格遵循以下优先级规则）
 关系只能使用以下 4 种类型，必须使用英文大写标识符，且方向严格遵循约定：
-1. PRECEDES（前置知识）：source 是 target 的前置知识，即学习 target 之前需先掌握 source。
-   例：线性代数 PRECEDES 机器学习
-2. CONTAINS（包含）：source 包含 target，即 source 是上层概念，target 是其子概念或组成部分。
-   例：神经网络 CONTAINS 卷积神经网络
-3. RELATED_TO（相关概念）：source 与 target 密切相关。
-   例：过拟合 RELATED_TO 正则化
-4. APPLIES_TO（应用）：source 应用到 target。
-   例：梯度下降 APPLIES_TO 损失函数优化
+
+### 规则1：PRECEDES（前置知识）—— 优先级最高！
+- 定义：source 是 target 的前置知识，即学习 target 之前需先掌握 source。
+- 方向：source → target
+- **重要：识别到任何"先学后学"的先后顺序关系时，必须使用 PRECEDES，不得降级为 RELATED_TO！**
+- 典型触发词："基础"、"先修"、"前提"、"掌握…之后"、"进一步学习"、"入门"、"进阶"
+
+### 规则2：CONTAINS（包含关系）
+- 定义：source 包含 target，即 source 是上层概念，target 是其子概念或组成部分。
+- 方向：source → target
+- 示例：神经网络 CONTAINS 卷积神经网络
+
+### 规则3：RELATED_TO（相关概念）
+- 定义：source 与 target 密切相关，但**不存在先后学习顺序**。
+- 方向：无方向
+- **只有确认不存在先后顺序时，才使用 RELATED_TO**
+
+### 规则4：APPLIES_TO（应用关系）
+- 定义：source 应用到 target。
+- 方向：source → target
+- 示例：梯度下降 APPLIES_TO 损失函数优化
+
+## PRECEDES 示例（特别注意，优先产出此类关系）
+以下示例帮助你识别什么情况下必须输出 PRECEDES：
+
+示例1：
+  文本："要学习面向对象编程，必须先理解类和对象的概念。"
+  输出：{"source": "类和对象", "target": "面向对象编程", "type": "PRECEDES"}
+
+示例2：
+  文本："数组是线性表的基础实现方式。"
+  输出：{"source": "线性表", "target": "数组", "type": "PRECEDES"}
+
+示例3：
+  文本："学习机器学习之前，建议先掌握线性代数和概率论。"
+  输出：
+    {"source": "线性代数", "target": "机器学习", "type": "PRECEDES"},
+    {"source": "概率论", "target": "机器学习", "type": "PRECEDES"}
+
+示例4（关键区分）：
+  文本："卷积神经网络是神经网络的一种，常用于图像识别任务。"
+  输出：
+    {"source": "神经网络", "target": "卷积神经网络", "type": "CONTAINS"},
+    {"source": "卷积神经网络", "target": "图像识别", "type": "APPLIES_TO"}
+  （注意：这里"神经网络→卷积神经网络"是包含关系，没有先后顺序，所以用 CONTAINS 而非 PRECEDES）
 
 ## 约束
 - 不要输出 source 与 target 相同的自环关系
 - 不要输出重复关系（相同 source、type、target 只保留一条）
 - 关系的 source 和 target 必须出现在实体列表中
+- 同一段文本中，PRECEDES 占比不应为 0。如果存在任何先后顺序表述，必须产出 PRECEDES。
 
 ## 输出格式（严格JSON，只输出JSON）
 {
@@ -88,7 +126,7 @@ class KnowledgeExtractor:
                     {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
                     {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
                 ],
-                temperature=0.1,  # 低温度保证稳定
+                temperature=0.3,  # 从0.1调高至0.3，给模型更多"判断空间"识别前置关系，同时保持稳定
                 max_tokens=4096,
                 timeout=settings.EXTRACTION_TIMEOUT
             )
