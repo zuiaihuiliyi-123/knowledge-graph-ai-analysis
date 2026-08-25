@@ -15,10 +15,22 @@
         :key="c.course_id"
         :label="optionLabel(c)"
         :value="String(c.course_id)"
-      />
+      >
+        <span class="option-row">
+          <span class="option-label">{{ optionLabel(c) }}</span>
+          <el-icon
+            v-if="store.role === 'teacher'"
+            class="option-del"
+            title="删除课程"
+            @click.stop="onDelete(c)"
+          >
+            <Delete />
+          </el-icon>
+        </span>
+      </el-option>
     </el-select>
     <el-button :icon="Plus" circle size="small" title="新建课程" @click="openCreate" />
-    <el-tooltip content="课程列表来自后端；点击 + 新建课程" placement="top">
+    <el-tooltip content="课程列表来自后端；点击 + 新建课程，悬停课程项可删除" placement="top">
       <el-icon class="hint-icon"><QuestionFilled /></el-icon>
     </el-tooltip>
 
@@ -43,11 +55,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Plus, QuestionFilled } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { Plus, QuestionFilled, Delete } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '../stores/app'
 
-defineProps({
+const props = defineProps({
   modelValue: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -92,6 +104,32 @@ async function submitCreate() {
   }
 }
 
+function onDelete(course) {
+  const id = course.course_id
+  const name = course.course_name
+  ElMessageBox.confirm(
+    `确定删除课程「${name}」吗？删除将同时删除该课程下的所有文档、图谱数据及学习记录，此操作不可恢复。`,
+    '删除课程',
+    {
+      type: 'warning',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger',
+    }
+  )
+    .then(async () => {
+      try {
+        await store.deleteCourse(id)
+        ElMessage.success('课程已删除')
+        // 若删除的是当前选中课程，清空父组件选中值，避免图谱加载已删除的课程
+        if (String(props.modelValue) === String(id)) onChange('')
+      } catch (e) {
+        ElMessage.error(`删除失败：${e.message}`)
+      }
+    })
+    .catch(() => {})
+}
+
 onMounted(() => {
   store.fetchCourses().catch(() => {})
 })
@@ -110,5 +148,27 @@ onMounted(() => {
 .hint-icon {
   color: #c0c4cc;
   cursor: help;
+}
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+.option-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.option-del {
+  color: #f56c6c;
+  cursor: pointer;
+  flex-shrink: 0;
+  visibility: hidden;
+}
+.option-row:hover .option-del {
+  visibility: visible;
 }
 </style>

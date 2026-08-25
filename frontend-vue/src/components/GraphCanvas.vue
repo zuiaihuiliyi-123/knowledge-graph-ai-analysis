@@ -52,7 +52,7 @@ let rawEdges = [] // 后端原始边数据
 let resizeObserver = null
 
 // ---------------------------------------------------------------
-// 数据加载：优先新版 /api/v1/graph（G6 格式），失败回退旧接口
+// 数据加载：调用 /api/v1/graph/{courseId}（G6 格式）
 // ---------------------------------------------------------------
 async function loadGraph() {
   if (!props.courseId) {
@@ -162,7 +162,8 @@ async function renderGraph() {
   }))
 
   graph.setData({ nodes: gNodes, edges: gEdges })
-  await graph.draw()
+  // 全量数据变更需 render()（含布局计算 + 适配视图），draw() 只绘制、不布局
+  await graph.render()
   applySearchHighlight()
 }
 
