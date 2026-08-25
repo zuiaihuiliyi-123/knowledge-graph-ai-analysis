@@ -26,7 +26,7 @@ import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { Graph } from '@antv/g6'
 import { ElMessage } from 'element-plus'
 import { api } from '../api'
-import { NODE_TYPES, nodeColor, nodeTypeLabel, edgeTypeLabel } from '../utils/graphStyle'
+import { NODE_TYPES, nodeColor, edgeTypeLabel } from '../utils/graphStyle'
 
 const props = defineProps({
   courseId: { type: String, default: '' },
