@@ -293,7 +293,9 @@ async function doUpload() {
     const name = courseName.value.trim() || selectedFile.value.name.replace(/\.[^.]+$/, '')
     const result = await api.uploadCourse(formData, name)
     uploadResult.value = result
-    store.registerCourse({ courseId: result.course_id, name })
+    // 上传会自动在后端建课程，刷新课程列表并选中新课程
+    store.fetchCourses(true).catch(() => {})
+    store.currentCourseId = String(result.course_id)
     ElMessage.success('知识图谱构建完成')
   } catch (e) {
     ElMessage.error(`上传失败：${e.message}`)

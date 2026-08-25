@@ -17,6 +17,14 @@ export const api = {
     return request.post('/api/v1/documents/upload', formData, { timeout: 600000 })
   },
 
+  // ---- 课程管理（对齐后端 /api/v1/courses CRUD） ----
+  listCourses: (params = {}) => request.get('/api/v1/courses', { params }),
+  getCourse: (courseId) => request.get(`/api/v1/courses/${courseId}`),
+  createCourse: (data) => request.post('/api/v1/courses', data),
+  updateCourse: (courseId, data) => request.put(`/api/v1/courses/${courseId}`, data),
+  deleteCourse: (courseId, confirm = true) =>
+    request.delete(`/api/v1/courses/${courseId}`, { params: { confirm } }),
+
   // ---- 知识图谱（G6 格式） ----
   /** 图谱接口：{ nodes: [{id,label,type,description,properties}], edges: [...] } */
   getGraphV1: (courseId, params = {}) =>
