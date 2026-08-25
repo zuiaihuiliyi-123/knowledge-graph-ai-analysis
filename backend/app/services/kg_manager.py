@@ -186,31 +186,31 @@ class KnowledgeGraphManager:
 
     @staticmethod
     def update_node(name: str, properties: dict):
-        """更新节点属性"""
+        """更新节点属性（注意：name 跨课程不唯一，正式启用 6.3.3 时需按 course_id 定位）"""
         db.query(
-            "MATCH (n:KnowledgeNode {name: $name}) SET n += $props RETURN n",
+            "MATCH (n:KnowledgePoint {name: $name}) SET n += $props RETURN n",
             {"name": name, "props": properties}
         )
 
     @staticmethod
     def delete_node(name: str):
-        """删除节点及其所有关系"""
+        """删除节点及其所有关系（注意：name 跨课程不唯一，正式启用 6.3.4 时需按 course_id 定位）"""
         db.query(
-            "MATCH (n:KnowledgeNode {name: $name}) DETACH DELETE n",
+            "MATCH (n:KnowledgePoint {name: $name}) DETACH DELETE n",
             {"name": name}
         )
 
     @staticmethod
     def delete_relationship(source: str, target: str, rel_type: str = None):
-        """删除关系"""
+        """删除关系（注意：[r:$rel_type] 为非法 Cypher，Neo4j 不支持参数化关系类型，正式启用时需白名单校验后拼接）"""
         if rel_type:
             cypher = """
-            MATCH (a:KnowledgeNode {name: $source})-[r:$rel_type]->(b:KnowledgeNode {name: $target})
+            MATCH (a:KnowledgePoint {name: $source})-[r:$rel_type]->(b:KnowledgePoint {name: $target})
             DELETE r
             """
         else:
             cypher = """
-            MATCH (a:KnowledgeNode {name: $source})-[r]->(b:KnowledgeNode {name: $target})
+            MATCH (a:KnowledgePoint {name: $source})-[r]->(b:KnowledgePoint {name: $target})
             DELETE r
             """
         db.query(cypher, {"source": source, "target": target, "rel_type": rel_type})

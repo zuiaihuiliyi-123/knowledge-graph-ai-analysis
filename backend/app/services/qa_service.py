@@ -21,6 +21,16 @@ QA_SYSTEM_PROMPT = """你是一个课程学习助手。请基于提供的课程�
 请根据以上内容回答学生的问题。"""
 
 
+def _coerce_course_id(course_id):
+    """course_id 统一为整数（对齐 Neo4j 存储类型）；空值返回 None 表示不过滤"""
+    if course_id is None or course_id == "":
+        return None
+    try:
+        return int(course_id)
+    except (TypeError, ValueError):
+        return None
+
+
 class QAService:
     """智能问答服务"""
 
@@ -30,31 +40,31 @@ class QAService:
             base_url=settings.LLM_API_BASE
         )
 
-    def search_related_knowledge(self, question: str, course_id: str = None, top_k: int = 5) -> List[str]:
+    def search_related_knowledge(self, question: str, course_id=None, top_k: int = 5) -> List[str]:
         """
-        从知识图谱中检索与问题相关的知识点（简化版RAG检索）
+        从知识图谱中检索与问题相关的知识点（简化版 RAG 检索，第 2 阶段替换为向量检索）
         """
-        # 检索相关节点（基于名称模糊匹配 + 描述匹配）
-        if course_id:
+        cid = _coerce_course_id(course_id)
+        keyword = (question or "")[:20]
+
+        if cid is not None:
             cypher = """
-            MATCH (n:KnowledgeNode {course_id: $course_id})
+            MATCH (n:KnowledgePoint {course_id: $course_id})
             WHERE n.name CONTAINS $keyword OR n.description CONTAINS $keyword
-            RETURN n.name, n.description, n.category
+            RETURN n
             LIMIT $top_k
             """
-            records = db.query(cypher, {
-                "course_id": course_id,
-                "keyword": question[:20],
-                "top_k": top_k
-            })
+            params = {"course_id": cid, "keyword": keyword, "top_k": top_k}
         else:
             cypher = """
-            MATCH (n:KnowledgeNode)
+            MATCH (n:KnowledgePoint)
             WHERE n.name CONTAINS $keyword OR n.description CONTAINS $keyword
-            RETURN n.name, n.description, n.category
+            RETURN n
             LIMIT $top_k
             """
-            records = db.query(cypher, {"keyword": question[:20], "top_k": top_k})
+            params = {"keyword": keyword, "top_k": top_k}
+
+        records = db.query(cypher, params)
 
         contexts = []
         for record in records:
@@ -65,26 +75,36 @@ class QAService:
                     ctx += f": {node.get('description')}"
                 contexts.append(ctx)
 
-        # 如果精确匹配结果少，扩展搜索关联节点
+        # 如果精确匹配结果少，扩展搜索同课程下的其它节点兜底
         if len(contexts) < top_k:
-            records = db.query("""
-            MATCH (n:KnowledgeNode)
-            RETURN n.name, n.description, n.category
-            LIMIT $top_k
-            """, {"top_k": top_k})
+            existing_names = {c.split('] ', 1)[-1].split(':')[0] for c in contexts}
+            if cid is not None:
+                records = db.query(
+                    "MATCH (n:KnowledgePoint {course_id: $course_id}) RETURN n LIMIT $top_k",
+                    {"course_id": cid, "top_k": top_k},
+                )
+            else:
+                records = db.query(
+                    "MATCH (n:KnowledgePoint) RETURN n LIMIT $top_k",
+                    {"top_k": top_k},
+                )
             for record in records:
                 node = record.get("n")
-                if node and node.get('name') not in [c.split('] ')[-1].split(':')[0] for c in contexts]:
-                    ctx = f"[{node.get('category', '知识点')}] {node.get('name', '')}"
-                    if node.get('description'):
-                        ctx += f": {node.get('description')}"
-                    contexts.append(ctx)
-                    if len(contexts) >= top_k:
-                        break
+                if not node:
+                    continue
+                name = node.get("name")
+                if name in existing_names:
+                    continue
+                ctx = f"[{node.get('category', '知识点')}] {name}"
+                if node.get('description'):
+                    ctx += f": {node.get('description')}"
+                contexts.append(ctx)
+                if len(contexts) >= top_k:
+                    break
 
         return contexts
 
-    async def ask(self, question: str, course_id: str = None) -> str:
+    async def ask(self, question: str, course_id=None) -> str:
         """
         回答问题（RAG模式）
         """
