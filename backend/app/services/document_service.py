@@ -53,9 +53,9 @@ class DocumentService:
             return {"ok": False, "code": 1002,
                     "message": f"文件大小超限，最大 {settings.MAX_UPLOAD_SIZE // 1024 // 1024}MB"}
 
-        # 3. 教师（认证未实现，缺省用默认教师；显式传入但不存在则报错）
+        # 3. 教师（由 JWT 注入，缺省即报错；显式传入但不存在则报错）
         if teacher_id is None:
-            teacher_id = sql_db.ensure_default_teacher()
+            return {"ok": False, "code": 1004, "message": "缺少教师信息"}
         elif sql_db.get_user_by_id(teacher_id) is None:
             return {"ok": False, "code": 1004, "message": f"教师账号不存在: user_id={teacher_id}"}
 

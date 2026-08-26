@@ -1,10 +1,11 @@
 """
 图谱查询与手动编辑 API（对齐规划文档 6.3.2 查询 + 6.3.3/6.3.4 手动编辑）
 """
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel
 
 from ..core.response import success, error
+from ..core.dependencies import get_current_user, require_teacher
 from ..services.kg_manager import KnowledgeGraphManager
 
 router = APIRouter(prefix="/api/v1/graph", tags=["知识图谱"])
@@ -45,6 +46,7 @@ async def get_graph(
     course_id: str,
     limit: int = Query(500, ge=1, le=2000, description="节点数量上限"),
     node_type: str = Query(None, description="按类别过滤：概念/定理/公式/方法"),
+    current_user: dict = Depends(get_current_user),
 ):
     """获取指定课程的知识图谱数据（节点 + 关系）"""
     try:
@@ -61,7 +63,7 @@ async def get_graph(
 # ---------------- 手动编辑：节点 ----------------
 
 @router.post("/{course_id}/nodes")
-async def create_node(course_id: str, body: NodeCreate):
+async def create_node(course_id: str, body: NodeCreate, current_user: dict = Depends(require_teacher)):
     """教师手动新增知识点（is_manual=True）"""
     try:
         cid = _coerce_course_id(course_id)
@@ -72,7 +74,8 @@ async def create_node(course_id: str, body: NodeCreate):
 
 
 @router.put("/{course_id}/nodes/{node_id}")
-async def update_node(course_id: str, node_id: str, body: NodeUpdate):
+async def update_node(course_id: str, node_id: str, body: NodeUpdate,
+                      current_user: dict = Depends(require_teacher)):
     """教师手动更新知识点（按 kp_id 定位）"""
     try:
         cid = _coerce_course_id(course_id)
@@ -85,7 +88,7 @@ async def update_node(course_id: str, node_id: str, body: NodeUpdate):
 
 
 @router.delete("/{course_id}/nodes/{node_id}")
-async def delete_node(course_id: str, node_id: str):
+async def delete_node(course_id: str, node_id: str, current_user: dict = Depends(require_teacher)):
     """教师手动删除知识点及其关系（按 kp_id 定位）"""
     try:
         cid = _coerce_course_id(course_id)
@@ -98,7 +101,7 @@ async def delete_node(course_id: str, node_id: str):
 # ---------------- 手动编辑：关系 ----------------
 
 @router.post("/{course_id}/edges")
-async def create_edge(course_id: str, body: EdgeCreate):
+async def create_edge(course_id: str, body: EdgeCreate, current_user: dict = Depends(require_teacher)):
     """教师手动新增关系（source/target 为 kp_id）"""
     try:
         cid = _coerce_course_id(course_id)
@@ -109,7 +112,7 @@ async def create_edge(course_id: str, body: EdgeCreate):
 
 
 @router.delete("/{course_id}/edges/{edge_id}")
-async def delete_edge(course_id: str, edge_id: str):
+async def delete_edge(course_id: str, edge_id: str, current_user: dict = Depends(require_teacher)):
     """教师手动删除关系（按 edge_id = elementId(r)）"""
     try:
         cid = _coerce_course_id(course_id)

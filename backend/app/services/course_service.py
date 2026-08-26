@@ -24,9 +24,9 @@ class CourseService:
         if description and len(description) > 500:
             return {"ok": False, "code": 1001, "message": "课程简介过长（最大500字符）"}
 
-        # 教师：认证未实现，缺省用默认教师；显式传入需校验角色
+        # 教师：由 JWT 注入，缺省即报错；显式传入需校验角色
         if teacher_id is None:
-            teacher_id = sql_db.ensure_default_teacher()
+            return {"ok": False, "code": 1004, "message": "缺少教师信息"}
         user = sql_db.get_user_by_id(teacher_id)
         if user is None:
             return {"ok": False, "code": 1004, "message": f"教师账号不存在: user_id={teacher_id}"}

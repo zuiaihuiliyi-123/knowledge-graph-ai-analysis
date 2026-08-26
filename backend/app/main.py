@@ -5,9 +5,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.core.sql_database import sql_db
-from app.api import auth, courses, knowledge_graph, qa, learning_path, graph, documents
+from .core.config import settings
+from .core.sql_database import sql_db
+from .api import auth, courses, knowledge_graph, qa, learning_path, graph, documents
 
 
 @asynccontextmanager

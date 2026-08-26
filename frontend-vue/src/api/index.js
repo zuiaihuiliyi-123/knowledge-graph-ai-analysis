@@ -5,6 +5,10 @@ import request from './request'
  * 教师端图谱编辑（新增/更新/删除节点、新增/删除关系）对齐后端 /api/v1/graph 编辑端点。
  */
 export const api = {
+  // ---- 用户认证（对齐后端 /api/auth，注意路由无 /v1 版本号） ----
+  login: (data) => request.post('/api/auth/login', data),
+  register: (data) => request.post('/api/auth/register', data),
+
   // ---- 健康检查 ----
   health: () => request.get('/health'),
 

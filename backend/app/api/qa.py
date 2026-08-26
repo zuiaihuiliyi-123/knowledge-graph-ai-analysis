@@ -1,10 +1,11 @@
 """
 智能问答 API（对齐规划文档 6.4，响应格式统一 {code, message, data, timestamp}）
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from ..core.response import success
+from ..core.dependencies import get_current_user
 from ..services.qa_service import QAService
 
 router = APIRouter(prefix="/api/v1/qa", tags=["智能问答"])
@@ -18,7 +19,7 @@ class QuestionRequest(BaseModel):
 
 
 @router.post("/ask")
-async def ask_question(request: QuestionRequest):
+async def ask_question(request: QuestionRequest, current_user: dict = Depends(get_current_user)):
     """
     学生向AI提问（RAG模式）
     """

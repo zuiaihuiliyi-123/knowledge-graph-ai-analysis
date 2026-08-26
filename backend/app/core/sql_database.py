@@ -17,6 +17,7 @@ import sqlite3
 from datetime import datetime
 
 from .config import settings
+from .security import hash_password
 
 # 枚举取值（与规划文档表格 8/9/10/11 的 ENUM 定义一致，供应用层校验）
 USER_ROLES = ("teacher", "student")
@@ -25,6 +26,9 @@ DOC_PARSE_STATUS = ("UPLOADED", "PARSING", "PARSED", "FAILED")
 DOC_EXTRACT_STATUS = ("PENDING", "EXTRACTING", "COMPLETED", "FAILED")
 RECORD_STATUS = ("MASTERED", "LEARNING", "RECOMMENDED")
 RECORD_SOURCE = ("MANUAL", "SYSTEM")
+
+# 默认教师账号初始密码（仅用于演示/初始开发；生产环境应删除默认账号或改为环境变量注入）
+DEFAULT_TEACHER_PASSWORD = "admin123"
 
 
 def _now() -> str:
@@ -183,12 +187,19 @@ class SQLDatabase:
         return self._query("SELECT * FROM t_user ORDER BY user_id")
 
     def ensure_default_teacher(self) -> int:
-        """确保存在默认教师账号（认证未实现前的占位），返回其 user_id"""
+        """确保存在默认教师账号 admin（初始密码 admin123，仅用于演示），返回其 user_id"""
         existing = self.get_user_by_username("admin")
         if existing:
+            # 迁移：旧版占位密码 "<not-implemented>" 无法通过校验，替换为真实哈希
+            if existing["password_hash"] == "<not-implemented>":
+                self._execute(
+                    "UPDATE t_user SET password_hash = ? WHERE user_id = ?",
+                    (hash_password(DEFAULT_TEACHER_PASSWORD), existing["user_id"]),
+                )
+                existing = self.get_user_by_username("admin")
             return existing["user_id"]
         return self.create_user(
-            username="admin", password_hash="<not-implemented>",
+            username="admin", password_hash=hash_password(DEFAULT_TEACHER_PASSWORD),
             role="teacher", display_name="默认教师",
         )
 

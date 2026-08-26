@@ -1,5 +1,6 @@
 # Web框架
 fastapi==0.115.6
+starlette==0.41.3  # 与 fastapi 0.115.x 兼容；不锁定会漂移到 1.x 导致启动崩溃
 uvicorn[standard]==0.34.0
 python-multipart==0.0.19
 
@@ -28,6 +29,3 @@ pydantic==2.10.4
 python-dotenv==1.0.1
 aiofiles==24.1.0
 PyJWT==2.12.1
-
-# 前端（如果使用Streamlit原型）
-streamlit==1.41.1

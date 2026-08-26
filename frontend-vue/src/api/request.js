@@ -12,6 +12,19 @@ const request = axios.create({
   timeout: 120000,
 })
 
+// 请求拦截器：自动携带 JWT（token 由 stores/app.js 写入 localStorage 的 kg_token）
+request.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('kg_token')
+    if (token) {
+      config.headers = config.headers || {}
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (err) => Promise.reject(err)
+)
+
 request.interceptors.response.use(
   (resp) => {
     const body = resp.data
@@ -22,6 +35,14 @@ request.interceptors.response.use(
     return body
   },
   (err) => {
+    // 401 未认证/登录过期：清除本地凭证并跳转登录页（整页跳转，避免与 router/store 循环依赖）
+    if (err.response?.status === 401) {
+      localStorage.removeItem('kg_token')
+      localStorage.removeItem('kg_user')
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    }
     let message = '网络请求失败'
     if (err.response?.data?.detail) {
       message =

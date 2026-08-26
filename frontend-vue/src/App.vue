@@ -1,5 +1,8 @@
 <template>
-  <el-container class="app-layout">
+  <!-- 登录页为独立整页，不套侧边栏布局 -->
+  <router-view v-if="$route.name === 'login'" />
+
+  <el-container v-else class="app-layout">
     <!-- 侧边栏 -->
     <el-aside width="230px" class="app-aside">
       <div class="logo">
@@ -10,32 +13,40 @@
         </div>
       </div>
 
-      <div class="role-switch">
-        <el-radio-group :model-value="store.role" @update:model-value="onRoleChange">
-          <el-radio-button value="teacher">👩‍🏫 教师端</el-radio-button>
-          <el-radio-button value="student">👨‍🎓 学生端</el-radio-button>
-        </el-radio-group>
+      <div class="user-box">
+        <div class="user-avatar">{{ store.username.slice(0, 1).toUpperCase() }}</div>
+        <div class="user-meta">
+          <div class="user-name">{{ store.username }}</div>
+          <el-tag size="small" :type="store.role === 'teacher' ? 'warning' : 'success'">
+            {{ store.role === 'teacher' ? '教师' : '学生' }}
+          </el-tag>
+        </div>
+        <el-button text size="small" type="danger" @click="onLogout">退出</el-button>
       </div>
 
       <el-menu :default-active="$route.path" router class="app-menu">
-        <el-menu-item index="/teacher?tab=upload">
-          <el-icon><Upload /></el-icon><span>文档上传</span>
-        </el-menu-item>
-        <el-menu-item index="/teacher?tab=preview" class="menu-sub">
-          <span>· 图谱预览</span>
-        </el-menu-item>
-        <el-menu-item index="/teacher?tab=edit" class="menu-sub">
-          <span>· 编辑图谱</span>
-        </el-menu-item>
-        <el-menu-item index="/student?tab=browse">
-          <el-icon><Compass /></el-icon><span>图谱浏览</span>
-        </el-menu-item>
-        <el-menu-item index="/student?tab=qa" class="menu-sub">
-          <span>· 智能问答</span>
-        </el-menu-item>
-        <el-menu-item index="/student?tab=path" class="menu-sub">
-          <span>· 学习路径推荐</span>
-        </el-menu-item>
+        <template v-if="store.role === 'teacher'">
+          <el-menu-item index="/teacher?tab=upload">
+            <el-icon><Upload /></el-icon><span>文档上传</span>
+          </el-menu-item>
+          <el-menu-item index="/teacher?tab=preview" class="menu-sub">
+            <span>· 图谱预览</span>
+          </el-menu-item>
+          <el-menu-item index="/teacher?tab=edit" class="menu-sub">
+            <span>· 编辑图谱</span>
+          </el-menu-item>
+        </template>
+        <template v-else>
+          <el-menu-item index="/student?tab=browse">
+            <el-icon><Compass /></el-icon><span>图谱浏览</span>
+          </el-menu-item>
+          <el-menu-item index="/student?tab=qa" class="menu-sub">
+            <span>· 智能问答</span>
+          </el-menu-item>
+          <el-menu-item index="/student?tab=path" class="menu-sub">
+            <span>· 学习路径推荐</span>
+          </el-menu-item>
+        </template>
       </el-menu>
 
       <div class="aside-footer">
@@ -65,9 +76,9 @@ import { useAppStore } from './stores/app'
 const store = useAppStore()
 const router = useRouter()
 
-function onRoleChange(role) {
-  store.setRole(role)
-  router.push(role === 'teacher' ? '/teacher' : '/student')
+function onLogout() {
+  store.logout()
+  router.push('/login')
 }
 
 onMounted(() => {
@@ -105,18 +116,38 @@ onMounted(() => {
   font-size: 12px;
   color: #909399;
 }
-.role-switch {
-  padding: 0 16px 8px;
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid #f0f2f5;
 }
-.role-switch :deep(.el-radio-group) {
-  width: 100%;
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #409eff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
 }
-.role-switch :deep(.el-radio-button) {
-  width: 50%;
+.user-meta {
+  flex: 1;
+  min-width: 0;
 }
-.role-switch :deep(.el-radio-button__inner) {
-  width: 100%;
-  padding: 8px 0;
+.user-name {
+  font-size: 13px;
+  color: #303133;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
 }
 .app-menu {
   border-right: none;
