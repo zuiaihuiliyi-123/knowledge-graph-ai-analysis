@@ -24,16 +24,9 @@
             <el-input v-model="form.description" type="textarea" :rows="4" />
           </el-form-item>
         </el-form>
-        <el-alert
-          type="info"
-          :closable="false"
-          title="节点编辑功能开发中"
-          description="后端节点编辑接口（6.3.3/6.3.4）尚未实现。"
-          style="margin-bottom: 12px"
-        />
         <div class="btn-row">
-          <el-button type="primary" :loading="saving" disabled @click="save">保存修改</el-button>
-          <el-button type="danger" plain :loading="deleting" disabled @click="remove">删除节点</el-button>
+          <el-button type="primary" :loading="saving" @click="save">保存修改</el-button>
+          <el-button type="danger" plain :loading="deleting" @click="remove">删除节点</el-button>
         </div>
       </template>
 
@@ -120,16 +113,15 @@ async function save() {
   }
   saving.value = true
   try {
-    await api.updateNode(props.courseId, originalName.value, {
+    await api.updateNode(props.courseId, props.node.id, {
       name: form.value.name.trim(),
       category: form.value.category,
       description: form.value.description,
-      is_manual: true,
     })
     ElMessage.success('保存成功')
     emit('saved')
   } catch (e) {
-    ElMessage.error(`保存失败：${e.message}（注：后端该接口目前查询的节点标签为 KnowledgeNode，新数据为 KnowledgePoint，需修复后端）`)
+    ElMessage.error(`保存失败：${e.message}`)
   } finally {
     saving.value = false
   }
@@ -147,11 +139,11 @@ async function remove() {
   }
   deleting.value = true
   try {
-    await api.deleteNode(props.courseId, originalName.value)
+    await api.deleteNode(props.courseId, props.node.id)
     ElMessage.success('已删除')
     emit('deleted')
   } catch (e) {
-    ElMessage.error(`删除失败：${e.message}（注：后端该接口目前查询的节点标签为 KnowledgeNode，新数据为 KnowledgePoint，需修复后端）`)
+    ElMessage.error(`删除失败：${e.message}`)
   } finally {
     deleting.value = false
   }
@@ -163,7 +155,7 @@ async function loadPrereqs() {
     const res = await api.getPrerequisites(originalName.value, props.courseId)
     prereqs.value = res.prerequisites || []
   } catch (e) {
-    ElMessage.warning(`查询失败：${e.message}（注：后端该接口仍使用旧图模型 KnowledgeNode/前置知识，与当前 KnowledgePoint 数据不匹配）`)
+    ElMessage.warning(`查询失败：${e.message}`)
   } finally {
     prereqLoading.value = false
     prereqLoaded.value = true

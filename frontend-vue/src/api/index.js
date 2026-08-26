@@ -2,9 +2,7 @@ import request from './request'
 
 /**
  * 后端 API 封装
- * 注意：教师端"新增节点/新增关系/删除关系"三个接口后端尚未实现，
- * 前端按约定好的 REST 风格调用 /api/v1/graph/...，后端补齐后即可直接工作
- * （见根目录 README 与开发报告的"后端待补接口"章节）。
+ * 教师端图谱编辑（新增/更新/删除节点、新增/删除关系）对齐后端 /api/v1/graph 编辑端点。
  */
 export const api = {
   // ---- 健康检查 ----
@@ -30,12 +28,13 @@ export const api = {
   getGraphV1: (courseId, params = {}) =>
     request.get(`/api/v1/graph/${courseId}`, { params }),
 
-  // ---- 教师编辑（后端图谱节点/关系编辑接口 6.3.3/6.3.4 尚未实现，前端暂屏蔽） ----
-  updateNode: () => Promise.reject(new Error('节点编辑功能开发中')),
-  deleteNode: () => Promise.reject(new Error('节点删除功能开发中')),
-  createNode: () => Promise.reject(new Error('新增知识点功能开发中')),
-  createEdge: () => Promise.reject(new Error('新增关系功能开发中')),
-  deleteEdge: () => Promise.reject(new Error('删除关系功能开发中')),
+  // ---- 教师编辑（对齐后端 /api/v1/graph 编辑端点 6.3.3/6.3.4） ----
+  createNode: (courseId, data) => request.post(`/api/v1/graph/${courseId}/nodes`, data),
+  updateNode: (courseId, nodeId, data) =>
+    request.put(`/api/v1/graph/${courseId}/nodes/${nodeId}`, data),
+  deleteNode: (courseId, nodeId) => request.delete(`/api/v1/graph/${courseId}/nodes/${nodeId}`),
+  createEdge: (courseId, data) => request.post(`/api/v1/graph/${courseId}/edges`, data),
+  deleteEdge: (courseId, edgeId) => request.delete(`/api/v1/graph/${courseId}/edges/${edgeId}`),
 
   // ---- 图谱统计 ----
   getStats: () => request.get('/api/kg/stats'),

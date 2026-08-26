@@ -125,14 +125,14 @@
           <el-alert
             type="info"
             :closable="false"
-            title="节点 / 关系编辑功能开发中"
-            description="后端图谱节点编辑接口（6.3.3/6.3.4）尚未实现，当前仅支持预览浏览。"
+            title="手动编辑图谱"
+            description="点击节点/关系可编辑或删除；也可手动新增知识点和关系。手动改动会标记 is_manual=true。"
             style="margin-bottom: 12px"
           />
           <div class="toolbar">
             <CourseSelector v-model="editCourseId" @change="onEditCourseChange" />
-            <el-button type="primary" :icon="Plus" disabled>新增知识点</el-button>
-            <el-button type="success" plain :icon="Connection" disabled>新增关系</el-button>
+            <el-button type="primary" :icon="Plus" @click="openAddNode">新增知识点</el-button>
+            <el-button type="success" plain :icon="Connection" @click="openAddEdge">新增关系</el-button>
             <el-button :icon="Refresh" circle title="刷新" @click="refreshEdit" />
             <span class="stats-text edit-hint">节点 / 关系编辑开发中，暂仅支持预览</span>
           </div>
@@ -188,7 +188,7 @@
       <el-form label-width="80px">
         <el-form-item label="源知识点">
           <el-select v-model="addEdgeForm.source" filterable style="width: 100%">
-            <el-option v-for="n in editNodes" :key="n.id" :label="n.label" :value="n.label" />
+            <el-option v-for="n in editNodes" :key="n.id" :label="n.label" :value="n.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="关系类型">
@@ -201,7 +201,7 @@
         </el-form-item>
         <el-form-item label="目标知识点">
           <el-select v-model="addEdgeForm.target" filterable style="width: 100%">
-            <el-option v-for="n in editNodes" :key="n.id" :label="n.label" :value="n.label" />
+            <el-option v-for="n in editNodes" :key="n.id" :label="n.label" :value="n.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -231,9 +231,8 @@
         <el-button
           type="danger"
           :loading="deleteEdgeLoading"
-          disabled
           @click="removeEdge"
-        >删除关系（开发中）</el-button>
+        >删除关系</el-button>
       </template>
     </el-dialog>
   </div>
@@ -408,7 +407,7 @@ async function submitAddNode() {
     addNodeVisible.value = false
     refreshEdit()
   } catch (e) {
-    ElMessage.error(`新增失败：${e.message}（该接口后端尚未实现，见开发报告"后端待补接口"）`)
+    ElMessage.error(`新增失败：${e.message}`)
   } finally {
     addNodeLoading.value = false
   }
@@ -441,7 +440,7 @@ async function submitAddEdge() {
     addEdgeVisible.value = false
     refreshEdit()
   } catch (e) {
-    ElMessage.error(`创建失败：${e.message}（该接口后端尚未实现，见开发报告"后端待补接口"）`)
+    ElMessage.error(`创建失败：${e.message}`)
   } finally {
     addEdgeLoading.value = false
   }
@@ -460,16 +459,12 @@ async function removeEdge() {
   }
   deleteEdgeLoading.value = true
   try {
-    await api.deleteEdge(editCourseId.value, {
-      source: clickedEdge.value.sourceLabel || clickedEdge.value.source,
-      target: clickedEdge.value.targetLabel || clickedEdge.value.target,
-      type: clickedEdge.value.type,
-    })
+    await api.deleteEdge(editCourseId.value, clickedEdge.value.id)
     ElMessage.success('关系已删除')
     edgeDialogVisible.value = false
     refreshEdit()
   } catch (e) {
-    ElMessage.error(`删除失败：${e.message}（该接口后端尚未实现，见开发报告"后端待补接口"）`)
+    ElMessage.error(`删除失败：${e.message}`)
   } finally {
     deleteEdgeLoading.value = false
   }

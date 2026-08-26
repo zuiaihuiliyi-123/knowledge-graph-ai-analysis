@@ -1,13 +1,44 @@
 """
-图谱查询 API（对齐规划文档 6.3.2）
+图谱查询与手动编辑 API（对齐规划文档 6.3.2 查询 + 6.3.3/6.3.4 手动编辑）
 """
 from fastapi import APIRouter, Query
+from pydantic import BaseModel
 
 from ..core.response import success, error
 from ..services.kg_manager import KnowledgeGraphManager
 
 router = APIRouter(prefix="/api/v1/graph", tags=["知识图谱"])
 
+
+def _coerce_course_id(course_id: str) -> int:
+    """course_id 统一为整数；非法则抛 ValueError"""
+    try:
+        return int(course_id)
+    except (TypeError, ValueError):
+        raise ValueError(f"course_id 必须为整数，收到: {course_id}")
+
+
+# ---------------- 请求体模型 ----------------
+
+class NodeCreate(BaseModel):
+    name: str
+    category: str = "概念"
+    description: str = ""
+
+
+class NodeUpdate(BaseModel):
+    name: str = None
+    category: str = None
+    description: str = None
+
+
+class EdgeCreate(BaseModel):
+    source: str  # 源知识点 kp_id
+    target: str  # 目标知识点 kp_id
+    type: str = "RELATED_TO"
+
+
+# ---------------- 查询 ----------------
 
 @router.get("/{course_id}")
 async def get_graph(
@@ -16,13 +47,73 @@ async def get_graph(
     node_type: str = Query(None, description="按类别过滤：概念/定理/公式/方法"),
 ):
     """获取指定课程的知识图谱数据（节点 + 关系）"""
-    # course_id 统一为整数（对齐决策：SQLite 自增整数 -> Neo4j 存整数 -> API 传整数）
     try:
-        course_id_int = int(course_id)
-    except ValueError:
-        return error(1001, f"course_id 必须为整数，收到: {course_id}")
+        course_id_int = _coerce_course_id(course_id)
+    except ValueError as e:
+        return error(1001, str(e))
     try:
         graph = KnowledgeGraphManager.get_graph_v1(course_id_int, limit=limit, node_type=node_type)
     except Exception as e:
         return error(3000, f"图谱查询失败: {str(e)}")
     return success(graph)
+
+
+# ---------------- 手动编辑：节点 ----------------
+
+@router.post("/{course_id}/nodes")
+async def create_node(course_id: str, body: NodeCreate):
+    """教师手动新增知识点（is_manual=True）"""
+    try:
+        cid = _coerce_course_id(course_id)
+        node = KnowledgeGraphManager.create_node(cid, body.name, body.category, body.description)
+    except ValueError as e:
+        return error(1001, str(e))
+    return success(node)
+
+
+@router.put("/{course_id}/nodes/{node_id}")
+async def update_node(course_id: str, node_id: str, body: NodeUpdate):
+    """教师手动更新知识点（按 kp_id 定位）"""
+    try:
+        cid = _coerce_course_id(course_id)
+        node = KnowledgeGraphManager.update_node(
+            cid, node_id, name=body.name, category=body.category, description=body.description,
+        )
+    except ValueError as e:
+        return error(1001, str(e))
+    return success(node)
+
+
+@router.delete("/{course_id}/nodes/{node_id}")
+async def delete_node(course_id: str, node_id: str):
+    """教师手动删除知识点及其关系（按 kp_id 定位）"""
+    try:
+        cid = _coerce_course_id(course_id)
+        result = KnowledgeGraphManager.delete_node(cid, node_id)
+    except ValueError as e:
+        return error(1001, str(e))
+    return success(result)
+
+
+# ---------------- 手动编辑：关系 ----------------
+
+@router.post("/{course_id}/edges")
+async def create_edge(course_id: str, body: EdgeCreate):
+    """教师手动新增关系（source/target 为 kp_id）"""
+    try:
+        cid = _coerce_course_id(course_id)
+        edge = KnowledgeGraphManager.create_relationship(cid, body.source, body.target, body.type)
+    except ValueError as e:
+        return error(1001, str(e))
+    return success(edge)
+
+
+@router.delete("/{course_id}/edges/{edge_id}")
+async def delete_edge(course_id: str, edge_id: str):
+    """教师手动删除关系（按 edge_id = elementId(r)）"""
+    try:
+        cid = _coerce_course_id(course_id)
+        result = KnowledgeGraphManager.delete_relationship(cid, edge_id)
+    except ValueError as e:
+        return error(1001, str(e))
+    return success(result)
