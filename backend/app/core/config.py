@@ -34,8 +34,8 @@ class Settings:
     EXTRACTION_TIMEOUT: int = 60  # 秒
     QA_TIMEOUT: int = 15  # 秒
 
-    #认证
-    SECRET_KEY: str = "default-secret-key"
+    # 认证（JWT 签名密钥，务必在 .env 中覆盖为随机值）
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "please-set-a-random-secret-key-of-at-least-32-bytes")
 
 
 settings = Settings()

@@ -27,6 +27,7 @@ jieba==0.42.1
 pydantic==2.10.4
 python-dotenv==1.0.1
 aiofiles==24.1.0
+PyJWT==2.12.1
 
 # 前端（如果使用Streamlit原型）
 streamlit==1.41.1
