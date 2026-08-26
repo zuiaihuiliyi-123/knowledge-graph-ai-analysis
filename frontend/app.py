@@ -15,9 +15,102 @@ st.set_page_config(
 
 # 后端API地址
 API_BASE = "http://localhost:8000"
+# ==================== 新增：认证状态管理 ====================
+if "token" not in st.session_state:
+    st.session_state.token = None
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+def login(username, password):
+    """调用后端登录接口，成功则保存 token"""
+    try:
+        resp = requests.post(
+            f"{API_BASE}/api/auth/login",
+            json={"username": username, "password": password}
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            st.session_state.token = data["access_token"]
+            st.session_state.user = {"username": username}
+            return True, "登录成功"
+        else:
+            return False, resp.json().get("detail", "登录失败")
+    except Exception as e:
+        return False, f"连接后端失败: {e}"
+
+def register(username, password, role="student", email=None, display_name=None):
+    """调用后端注册接口"""
+    try:
+        payload = {
+            "username": username,
+            "password": password,
+            "role": role
+        }
+        if email:
+            payload["email"] = email
+        if display_name:
+            payload["display_name"] = display_name
+        resp = requests.post(
+            f"{API_BASE}/api/auth/register",
+            json=payload
+        )
+        if resp.status_code in (200, 201):
+            return True, "注册成功，请登录"
+        else:
+            return False, resp.json().get("detail", "注册失败")
+    except Exception as e:
+        return False, f"连接后端失败: {e}"
+
+def logout():
+    st.session_state.token = None
+    st.session_state.user = None
+    st.rerun()
+
+# 如果未登录，显示认证界面并停止执行后续代码
+if st.session_state.token is None:
+    st.title("🔐 登录 / 注册")
+    auth_mode = st.radio("选择操作", ["登录", "注册"])
+
+    if auth_mode == "登录":
+        with st.form("login_form"):
+            username = st.text_input("用户名")
+            password = st.text_input("密码", type="password")
+            submitted = st.form_submit_button("登录")
+            if submitted:
+                success, msg = login(username, password)
+                if success:
+                    st.success(msg)
+                    st.rerun()
+                else:
+                    st.error(msg)
+    else:
+        with st.form("register_form"):
+            username = st.text_input("用户名")
+            password = st.text_input("密码", type="password")
+            email = st.text_input("邮箱（可选）")
+            display_name = st.text_input("显示名称（可选）")
+            role = st.selectbox("角色", ["student", "teacher"])
+            submitted = st.form_submit_button("注册")
+            if submitted:
+                success, msg = register(username, password, role, email, display_name)
+                if success:
+                    st.success(msg)
+                else:
+                    st.error(msg)
+
+    st.stop()  # 阻止后续代码执行
+
+# ==================== 新增结束 ====================
+
+# 已登录，定义认证请求头（后续API调用需添加 headers=headers）
+headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
 # 侧边栏：角色选择
 st.sidebar.title("📚 课程知识图谱系统")
+st.sidebar.write(f"当前用户：{st.session_state.user['username']}")
+if st.sidebar.button("退出登录"):
+    logout()
+
 role = st.sidebar.radio("选择角色", ["👩‍🏫 教师端", "👨‍🎓 学生端"])
 
 # =====================

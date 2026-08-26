@@ -34,5 +34,8 @@ class Settings:
     EXTRACTION_TIMEOUT: int = 60  # 秒
     QA_TIMEOUT: int = 15  # 秒
 
+    #认证
+    SECRET_KEY: str = "default-secret-key"
+
 
 settings = Settings()
