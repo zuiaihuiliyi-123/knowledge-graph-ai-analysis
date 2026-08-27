@@ -17,6 +17,11 @@ class Settings:
     LLM_API_BASE: str = os.getenv("LLM_API_BASE", "https://api.deepseek.com/v1")
     LLM_MODEL: str = os.getenv("LLM_MODEL", "deepseek-chat")
 
+    # Embedding API 配置（RAG 向量检索；DeepSeek 无 embedding 接口，改用 SiliconFlow BAAI/bge-m3）
+    EMBEDDING_API_KEY: str = os.getenv("EMBEDDING_API_KEY", "")
+    EMBEDDING_API_BASE: str = os.getenv("EMBEDDING_API_BASE", "https://api.siliconflow.cn/v1")
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
+
     # Neo4j 图数据库配置
     NEO4J_URI: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")

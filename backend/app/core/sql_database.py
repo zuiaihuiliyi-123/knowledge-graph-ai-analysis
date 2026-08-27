@@ -13,6 +13,7 @@ SQLite 关系型数据库访问层（对齐规划文档 4.2 节：t_user / t_cou
     ON UPDATE CURRENT_TIMESTAMP  -> 应用层在 UPDATE 时显式写入 updated_at（见 _update 相关方法）
 """
 import os
+import json
 import sqlite3
 from datetime import datetime
 
@@ -122,6 +123,17 @@ _SCHEMA_SQL = [
     """,
     "CREATE INDEX IF NOT EXISTS idx_user_course ON t_learning_record(user_id, course_id);",
     "CREATE INDEX IF NOT EXISTS idx_course_kp ON t_learning_record(course_id, kp_id);",
+
+    # 4.2.5 知识点向量表（RAG 向量检索；embedding 存 JSON 数组文本）
+    """
+    CREATE TABLE IF NOT EXISTS t_kp_embedding (
+        course_id  INTEGER NOT NULL,
+        kp_id      TEXT NOT NULL,
+        embedding  TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        PRIMARY KEY (course_id, kp_id)
+    )
+    """,
 ]
 
 
@@ -361,6 +373,40 @@ class SQLDatabase:
             "ORDER BY record_id",
             (user_id, course_id),
         )
+
+    # ---------- 知识点向量（RAG 向量检索） ----------
+
+    def upsert_kp_embedding(self, course_id: int, kp_id: str, embedding: list) -> int:
+        """写入/更新知识点向量（embedding 序列化为 JSON 文本）"""
+        return self._execute(
+            "INSERT INTO t_kp_embedding (course_id, kp_id, embedding, updated_at) "
+            "VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(course_id, kp_id) DO UPDATE SET "
+            "embedding = excluded.embedding, updated_at = excluded.updated_at",
+            (course_id, kp_id, json.dumps(embedding), _now()),
+        )
+
+    def get_embeddings_by_course(self, course_id: int) -> list:
+        """返回课程全部知识点向量，[{kp_id, embedding(list[float])}]"""
+        rows = self._query(
+            "SELECT kp_id, embedding FROM t_kp_embedding WHERE course_id = ?",
+            (course_id,),
+        )
+        result = []
+        for r in rows:
+            try:
+                vec = json.loads(r["embedding"])
+            except (ValueError, TypeError):
+                continue
+            result.append({"kp_id": r["kp_id"], "embedding": vec})
+        return result
+
+    def delete_embeddings_by_course(self, course_id: int) -> int:
+        """删除课程全部知识点向量，返回删除条数"""
+        with self._connect() as conn:
+            cur = conn.execute("DELETE FROM t_kp_embedding WHERE course_id = ?", (course_id,))
+            conn.commit()
+            return cur.rowcount
 
 
 # 全局关系型数据库实例

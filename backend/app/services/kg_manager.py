@@ -4,6 +4,7 @@
 from datetime import datetime, timezone
 from typing import List, Dict
 from ..core.database import db, VALID_RELATION_TYPES, RELATION_TYPE_LABELS
+from ..core.sql_database import sql_db
 
 
 def _now_iso() -> str:
@@ -214,6 +215,8 @@ class KnowledgeGraphManager:
             properties={"confidence": 1.0, "is_manual": bool(is_manual)},
         )
         kp_id = recs[0]["kp_id"] if recs else None
+        # 节点变更后使向量索引失效，下次问答时懒重建
+        sql_db.delete_embeddings_by_course(int(course_id))
         return {"kp_id": kp_id, "name": name, "category": category}
 
     @staticmethod
@@ -256,6 +259,7 @@ class KnowledgeGraphManager:
             "SET n += $props RETURN n.name AS name, n.category AS category",
             {"kp_id": kp_id, "cid": course_id, "props": props},
         )
+        sql_db.delete_embeddings_by_course(int(course_id))
         return {"kp_id": kp_id, "updated": True, **props}
 
     @staticmethod
@@ -269,6 +273,7 @@ class KnowledgeGraphManager:
         cnt = recs[0]["cnt"] if recs else 0
         if cnt == 0:
             raise ValueError(f"知识点不存在: {kp_id}")
+        sql_db.delete_embeddings_by_course(int(course_id))
         return {"kp_id": kp_id, "deleted": True}
 
     @staticmethod

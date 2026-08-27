@@ -1,5 +1,20 @@
 <template>
   <div class="dashboard">
+    <!-- 页头 -->
+    <div class="page-header">
+      <h2 class="page-title">数据总览（演示占位）</h2>
+      <p class="page-desc">课程知识图谱数据概览</p>
+    </div>
+
+    <!-- 开发中提示 Banner -->
+    <el-alert
+      type="warning"
+      :closable="false"
+      show-icon
+      title="数据总览功能开发中，当前展示数据为演示占位，正式数据将在后续版本接入。"
+      class="placeholder-banner"
+    />
+
     <!-- 顶部统计卡片（模仿视频风格） -->
     <div class="stats-row">
       <div class="stat-card" v-for="(item, idx) in statCards" :key="idx" :style="{ borderTopColor: item.color }">
@@ -286,6 +301,9 @@ onBeforeUnmount(() => {
 <style scoped>
 .dashboard {
   min-height: 100%;
+}
+.placeholder-banner {
+  margin-bottom: 16px;
 }
 
 /* ===== 统计卡片行 ===== */
