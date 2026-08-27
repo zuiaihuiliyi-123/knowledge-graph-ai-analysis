@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import TeacherView from '../views/TeacherView.vue'
 import StudentView from '../views/StudentView.vue'
+import DashboardView from '../views/DashboardView.vue'
 
 function readRole() {
   try {
@@ -22,8 +23,9 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: () => (readRole() === 'teacher' ? '/teacher' : '/student'),
+      redirect: '/dashboard',
     },
+    { path: '/dashboard', name: 'dashboard', component: DashboardView, meta: { title: '数据总览' } },
     { path: '/teacher', name: 'teacher', component: TeacherView, meta: { title: '教师工作台' } },
     { path: '/student', name: 'student', component: StudentView, meta: { title: '学习空间' } },
   ],
@@ -36,13 +38,13 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.name === 'login' && token) {
-    return { path: readRole() === 'teacher' ? '/teacher' : '/student' }
+    return { path: '/dashboard' }
   }
 })
 
 router.afterEach((to) => {
   if (to.meta?.title) {
-    document.title = `${to.meta.title} - 课程知识图谱系统`
+    document.title = `${to.meta.title} - 智育数据 · 课程知识图谱系统`
   }
 })
 

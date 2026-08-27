@@ -9,7 +9,12 @@ body,
 body {
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei',
     Arial, sans-serif;
-  background-color: #f5f7fa;
+  background-color: #f0f2f8;
+}
+
+/* ===== 全局 Element Plus 样式微调（适配深色侧边栏） ===== */
+.el-main {
+  --el-bg-color: #f0f2f8;
 }
 
 /* 图谱画布容器 */
@@ -25,6 +30,16 @@ body {
 
 .page-card {
   margin-bottom: 16px;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.page-card :deep(.el-card__header) {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f2f5;
+  font-weight: 600;
+}
+.page-card :deep(.el-card__body) {
+  padding: 16px 18px;
 }
 
 /* 聊天区域滚动条美化 */
@@ -37,4 +52,82 @@ body {
 .chat-scroll::-webkit-scrollbar-thumb {
   background: #dcdfe6;
   border-radius: 3px;
+}
+
+/* ===== 页面标题适配新风格 ===== */
+.page-header {
+  margin-bottom: 12px;
+}
+.page-title {
+  margin: 0 0 4px;
+  color: #1a1f36;
+  font-size: 20px;
+  font-weight: 700;
+}
+.page-desc {
+  margin: 0 0 12px;
+  color: #909399;
+  font-size: 13px;
+}
+
+/* ===== Tab 面板适配 ===== */
+.el-tabs :deep(.el-tabs__header) {
+  background: #fff;
+  border-radius: 10px 10px 0 0;
+  padding: 0 16px;
+  margin: 0;
+}
+.el-tabs :deep(.el-tabs__content) {
+  padding: 0;
+}
+.el-tabs :deep(.el-tab-pane) {
+  padding: 0;
+}
+
+/* ===== 工具栏 ===== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stats-text {
+  color: #909399;
+  font-size: 13px;
+}
+.graph-card {
+  height: 620px;
+}
+.graph-card :deep(.el-card__body) {
+  height: 100%;
+  padding: 12px;
+}
+
+/* ===== 问答区域 ===== */
+.qa-card {
+  max-width: 860px;
+  background: #fff;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.qa-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.chat-box {
+  height: 460px;
+  padding: 12px;
+  background: #fafbfc;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+}
+
+/* ===== 登录页背景适配 ===== */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1f36 0%, #2d3555 50%, #1a1f36 100%);
 }

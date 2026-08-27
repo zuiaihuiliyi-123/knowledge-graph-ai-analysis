@@ -3,13 +3,13 @@
   <router-view v-if="$route.name === 'login'" />
 
   <el-container v-else class="app-layout">
-    <!-- 侧边栏 -->
+    <!-- 深色侧边栏（模仿视频风格） -->
     <el-aside width="230px" class="app-aside">
       <div class="logo">
-        <span class="logo-icon">📚</span>
+        <span class="logo-icon">📊</span>
         <div>
-          <div class="logo-title">课程知识图谱系统</div>
-          <div class="logo-sub">AIGC 智能构建与学习</div>
+          <div class="logo-title">智育数据</div>
+          <div class="logo-sub">课程知识图谱智能系统</div>
         </div>
       </div>
 
@@ -17,14 +17,27 @@
         <div class="user-avatar">{{ store.username.slice(0, 1).toUpperCase() }}</div>
         <div class="user-meta">
           <div class="user-name">{{ store.username }}</div>
-          <el-tag size="small" :type="store.role === 'teacher' ? 'warning' : 'success'">
+          <el-tag size="small" :type="store.role === 'teacher' ? 'warning' : 'success'" effect="dark">
             {{ store.role === 'teacher' ? '教师' : '学生' }}
           </el-tag>
         </div>
-        <el-button text size="small" type="danger" @click="onLogout">退出</el-button>
+        <el-button text size="small" type="danger" @click="onLogout" class="logout-btn">退出</el-button>
       </div>
 
-      <el-menu :default-active="$route.path" router class="app-menu">
+      <el-menu
+        :default-active="$route.path"
+        router
+        class="app-menu"
+        background-color="transparent"
+        text-color="#b0b8d1"
+        active-text-color="#409eff"
+      >
+        <!-- 数据总览（新增，模仿视频首页） -->
+        <el-menu-item index="/dashboard">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>数据总览</span>
+        </el-menu-item>
+
         <template v-if="store.role === 'teacher'">
           <el-menu-item index="/teacher?tab=upload">
             <el-icon><Upload /></el-icon><span>文档上传</span>
@@ -60,7 +73,7 @@
       </div>
     </el-aside>
 
-    <!-- 主内容区 -->
+    <!-- 主内容区（浅色背景） -->
     <el-main class="app-main">
       <router-view />
     </el-main>
@@ -70,7 +83,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Upload, Compass } from '@element-plus/icons-vue'
+import { Upload, Compass, DataAnalysis } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 
 const store = useAppStore()
@@ -91,43 +104,51 @@ onMounted(() => {
 .app-layout {
   height: 100vh;
 }
+
+/* ===== 深色侧边栏（核心风格改动） ===== */
 .app-aside {
-  background: #fff;
-  border-right: 1px solid #e4e7ed;
+  background: linear-gradient(180deg, #1a1f36 0%, #161b2e 100%);
+  border-right: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  color: #b0b8d1;
 }
+
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 16px 12px;
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .logo-icon {
-  font-size: 30px;
+  font-size: 28px;
 }
 .logo-title {
   font-weight: 700;
-  font-size: 15px;
-  color: #303133;
+  font-size: 16px;
+  color: #e8ecf4;
+  letter-spacing: 1px;
 }
 .logo-sub {
-  font-size: 12px;
-  color: #909399;
+  font-size: 11px;
+  color: #6b7394;
+  margin-top: 2px;
 }
+
 .user-box {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px 12px;
-  border-bottom: 1px solid #f0f2f5;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .user-avatar {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #409eff;
+  background: linear-gradient(135deg, #409eff, #337ecc);
   color: #fff;
   display: flex;
   align-items: center;
@@ -142,35 +163,63 @@ onMounted(() => {
 }
 .user-name {
   font-size: 13px;
-  color: #303133;
+  color: #e0e4ef;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
+.logout-btn {
+  color: #f56c6c !important;
+}
+
+/* 菜单样式 */
 .app-menu {
-  border-right: none;
+  border-right: none !important;
   flex: 1;
+  padding: 8px 0;
+}
+.app-menu .el-menu-item {
+  height: 44px;
+  line-height: 44px;
+  margin: 2px 8px;
+  border-radius: 8px;
+  color: #9ba3c4 !important;
+}
+.app-menu .el-menu-item:hover {
+  background-color: rgba(64,158,255,0.1) !important;
+  color: #409eff !important;
+}
+.app-menu .el-menu-item.is-active {
+  background-color: rgba(64,158,255,0.15) !important;
+  color: #409eff !important;
+  font-weight: 600;
 }
 .menu-sub {
-  height: 36px;
-  line-height: 36px;
-  color: #909399;
+  height: 38px !important;
+  line-height: 38px !important;
+  padding-left: 52px !important;
   font-size: 13px;
-  padding-left: 44px !important;
+  color: #7b83a5 !important;
+  margin: 0 8px !important;
 }
+.menu-sub:hover {
+  color: #409eff !important;
+  background-color: transparent !important;
+}
+
 .aside-footer {
   padding: 12px 16px 16px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid rgba(255,255,255,0.06);
   font-size: 12px;
-  color: #909399;
+  color: #6b7394;
 }
 .health-line {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #606266;
+  color: #7b83a5;
 }
 .health-dot {
   width: 8px;
@@ -180,19 +229,27 @@ onMounted(() => {
 }
 .health-dot.on {
   background: #67c23a;
+  box-shadow: 0 0 6px #67c23a;
 }
 .health-dot.off {
   background: #f56c6c;
+  box-shadow: 0 0 6px #f56c6c;
 }
 .health-tip {
   margin-top: 6px;
 }
 .health-tip code {
-  font-size: 11px;
+  font-size: 10px;
+  color: #555c7a;
+  background: rgba(0,0,0,0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
+
+/* ===== 主内容区 ===== */
 .app-main {
-  padding: 16px;
+  padding: 20px;
   overflow-y: auto;
-  background: #f5f7fa;
+  background: #f0f2f8;
 }
 </style>
