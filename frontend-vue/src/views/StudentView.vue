@@ -7,7 +7,8 @@
 
     <el-tabs v-model="activeTab">
       <!-- ===================== Tab 1：图谱浏览 ===================== -->
-      <el-tab-pane label="🗺️ 图谱浏览" name="browse">
+      <el-tab-pane name="browse">
+        <template #label><span class="tab-label"><el-icon><Compass /></el-icon>图谱浏览</span></template>
         <el-card class="page-card">
           <div class="toolbar">
             <CourseSelector v-model="browseCourseId" />
@@ -35,7 +36,8 @@
       </el-tab-pane>
 
       <!-- ===================== Tab 2：智能问答 ===================== -->
-      <el-tab-pane label="💬 智能问答" name="qa">
+      <el-tab-pane name="qa">
+        <template #label><span class="tab-label"><el-icon><ChatDotRound /></el-icon>智能问答</span></template>
         <el-card class="qa-card">
           <div class="qa-toolbar">
             <CourseSelector v-model="qaCourseId" />
@@ -91,7 +93,8 @@
       </el-tab-pane>
 
       <!-- ===================== Tab 3：学习路径推荐 ===================== -->
-      <el-tab-pane label="🎯 学习路径推荐" name="path">
+      <el-tab-pane name="path">
+        <template #label><span class="tab-label"><el-icon><Guide /></el-icon>学习路径推荐</span></template>
         <el-row :gutter="16">
           <!-- 推荐下一步 -->
           <el-col :span="12">
@@ -205,7 +208,7 @@
 import { ref, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
+import { Refresh, Compass, ChatDotRound, Guide } from '@element-plus/icons-vue'
 import { api } from '../api'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import CourseSelector from '../components/CourseSelector.vue'

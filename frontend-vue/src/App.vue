@@ -6,7 +6,7 @@
     <!-- 深色侧边栏（模仿视频风格） -->
     <el-aside width="230px" class="app-aside">
       <div class="logo">
-        <span class="logo-icon">📊</span>
+        <el-icon class="logo-icon" :size="26"><DataAnalysis /></el-icon>
         <div>
           <div class="logo-title">智育数据</div>
           <div class="logo-sub">课程知识图谱智能系统</div>

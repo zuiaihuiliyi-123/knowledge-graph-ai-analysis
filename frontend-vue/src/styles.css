@@ -131,3 +131,10 @@ body {
   justify-content: center;
   background: linear-gradient(135deg, #1a1f36 0%, #2d3555 50%, #1a1f36 100%);
 }
+
+/* Tab 标签图标对齐 */
+.tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}

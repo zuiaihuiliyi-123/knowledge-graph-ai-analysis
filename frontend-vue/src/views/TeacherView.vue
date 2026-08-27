@@ -7,7 +7,8 @@
 
     <el-tabs v-model="activeTab">
       <!-- ===================== Tab 1：文档上传 ===================== -->
-      <el-tab-pane label="📤 文档上传" name="upload">
+      <el-tab-pane name="upload">
+        <template #label><span class="tab-label"><el-icon><Upload /></el-icon>文档上传</span></template>
         <el-card class="page-card">
           <el-form label-width="90px">
             <el-form-item label="课程名称">
@@ -91,7 +92,8 @@
       </el-tab-pane>
 
       <!-- ===================== Tab 2：图谱预览 ===================== -->
-      <el-tab-pane label="🔍 图谱预览" name="preview">
+      <el-tab-pane name="preview">
+        <template #label><span class="tab-label"><el-icon><Search /></el-icon>图谱预览</span></template>
         <el-card class="page-card">
           <div class="toolbar">
             <CourseSelector v-model="previewCourseId" @change="onPreviewCourseChange" />
@@ -120,7 +122,8 @@
       </el-tab-pane>
 
       <!-- ===================== Tab 3：编辑图谱 ===================== -->
-      <el-tab-pane label="✏️ 编辑图谱（开发中）" name="edit">
+      <el-tab-pane name="edit">
+        <template #label><span class="tab-label"><el-icon><EditPen /></el-icon>编辑图谱（开发中）</span></template>
         <el-card class="page-card">
           <el-alert
             type="info"
@@ -244,6 +247,9 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   UploadFilled,
+  Upload,
+  Search,
+  EditPen,
   Refresh,
   FullScreen,
   Plus,

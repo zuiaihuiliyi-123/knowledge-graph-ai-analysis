@@ -13,7 +13,7 @@
       <!-- 柱状图 + 折线图（知识点分布趋势） -->
       <el-col :span="16">
         <div class="chart-card">
-          <div class="chart-title">📊 各课程知识图谱数据概览</div>
+          <div class="chart-title"><el-icon><DataAnalysis /></el-icon> 各课程知识图谱数据概览</div>
           <div ref="barChartRef" class="chart-body"></div>
         </div>
       </el-col>
@@ -21,7 +21,7 @@
       <!-- 雷达图（学习维度分析） -->
       <el-col :span="8">
         <div class="chart-card">
-          <div class="chart-title">🎯 知识覆盖雷达</div>
+          <div class="chart-title"><el-icon><Aim /></el-icon> 知识覆盖雷达</div>
           <div ref="radarChartRef" class="chart-body"></div>
         </div>
       </el-col>
@@ -31,7 +31,7 @@
       <!-- 饼图（知识点分类分布） -->
       <el-col :span="12">
         <div class="chart-card">
-          <div class="chart-title">📐 知识点分类占比</div>
+          <div class="chart-title"><el-icon><PieChart /></el-icon> 知识点分类占比</div>
           <div ref="pieChartRef" class="chart-body"></div>
         </div>
       </el-col>
@@ -39,7 +39,7 @@
       <!-- 关系类型分布 -->
       <el-col :span="12">
         <div class="chart-card">
-          <div class="chart-title">🔗 关系类型统计</div>
+          <div class="chart-title"><el-icon><Connection /></el-icon> 关系类型统计</div>
           <div ref="relationChartRef" class="chart-body"></div>
         </div>
       </el-col>
@@ -50,6 +50,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import { DataAnalysis, Aim, PieChart, Connection } from '@element-plus/icons-vue'
 
 const barChartRef = ref(null)
 const radarChartRef = ref(null)
@@ -330,6 +331,9 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .chart-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
   font-weight: 600;
   color: #303133;
