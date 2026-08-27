@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core.sql_database import sql_db
-from .api import auth, courses, knowledge_graph, qa, learning_path, graph, documents
+from .api import auth, courses, knowledge_graph, qa, learning_path, graph, documents, learning
 
 
 @asynccontextmanager
@@ -40,6 +40,7 @@ app.include_router(courses.router)
 app.include_router(knowledge_graph.router)
 app.include_router(qa.router)
 app.include_router(learning_path.router)
+app.include_router(learning.router)
 app.include_router(graph.router)
 app.include_router(documents.router)
 

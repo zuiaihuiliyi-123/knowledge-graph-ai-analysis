@@ -374,6 +374,22 @@ class SQLDatabase:
             (user_id, course_id),
         )
 
+    def list_records_by_user(self, user_id: int) -> list:
+        return self._query(
+            "SELECT * FROM t_learning_record WHERE user_id = ? ORDER BY course_id, record_id",
+            (user_id,),
+        )
+
+    def delete_learning_record(self, user_id: int, course_id: int, kp_id: str) -> int:
+        """删除某用户某课程某知识点的学习记录（用于取消掌握标记）"""
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_learning_record WHERE user_id = ? AND course_id = ? AND kp_id = ?",
+                (user_id, course_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
     # ---------- 知识点向量（RAG 向量检索） ----------
 
     def upsert_kp_embedding(self, course_id: int, kp_id: str, embedding: list) -> int:

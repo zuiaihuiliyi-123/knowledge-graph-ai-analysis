@@ -22,10 +22,14 @@ EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请
 ## 关系要求（严格遵循以下优先级规则）
 关系只能使用以下 4 种类型，必须使用英文大写标识符，且方向严格遵循约定：
 
-### 规则1：PRECEDES（前置知识）—— 优先级最高！
+### 规则1：PRECEDES（前置知识）
 - 定义：source 是 target 的前置知识，即学习 target 之前需先掌握 source。
 - 方向：source → target
-- **重要：识别到任何"先学后学"的先后顺序关系时，必须使用 PRECEDES，不得降级为 RELATED_TO！**
+- **重要：只有当两个知识点之间存在明确的"必须先掌握 A 才能学习 B"的先后依赖关系时，才使用 PRECEDES。**
+- **关键排除规则：以下情况严禁使用 PRECEDES，应使用 CONTAINS：**
+  - "X 是 Y 的一种" → Y CONTAINS X
+  - "X 是 Y 的特殊形式" → Y CONTAINS X
+  - "X 是 Y 的变体" → Y CONTAINS X
 - 典型触发词："基础"、"先修"、"前提"、"掌握…之后"、"进一步学习"、"入门"、"进阶"
 
 ### 规则2：CONTAINS（包含关系）
@@ -66,6 +70,14 @@ EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请
     {"source": "神经网络", "target": "卷积神经网络", "type": "CONTAINS"},
     {"source": "卷积神经网络", "target": "图像识别", "type": "APPLIES_TO"}
   （注意：这里"神经网络→卷积神经网络"是包含关系，没有先后顺序，所以用 CONTAINS 而非 PRECEDES）
+
+示例5（关键区分：CONTAINS vs PRECEDES，必须理解）：
+  文本："栈是一种操作受限的线性表。"
+  正确输出：{"source": "线性表", "target": "栈", "type": "CONTAINS"}
+  错误输出：{"source": "线性表", "target": "栈", "type": "PRECEDES"}  ← 这是错的！"是一种"表示包含，不是先后学习顺序。
+
+  文本："要学习多态，必须先掌握继承。"
+  正确输出：{"source": "继承", "target": "多态", "type": "PRECEDES"}
 
 ## 约束
 - 不要输出 source 与 target 相同的自环关系
@@ -126,7 +138,7 @@ class KnowledgeExtractor:
                     {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
                     {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
                 ],
-                temperature=0.3,  # 从0.1调高至0.3，给模型更多"判断空间"识别前置关系，同时保持稳定
+                temperature=0.15,  # 关系类型判别需稳定，0.15 在稳定性与判断力之间取平衡
                 max_tokens=4096,
                 timeout=settings.EXTRACTION_TIMEOUT
             )

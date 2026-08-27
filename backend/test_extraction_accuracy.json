@@ -1,0 +1,326 @@
+{
+  "gold_entities": [
+    "栈",
+    "线性表",
+    "链表",
+    "队列",
+    "顺序表"
+  ],
+  "gold_relations": [
+    "线性表 -[CONTAINS]-> 栈",
+    "线性表 -[CONTAINS]-> 链表",
+    "线性表 -[CONTAINS]-> 队列",
+    "线性表 -[CONTAINS]-> 顺序表"
+  ],
+  "summary": {
+    "runs": 3,
+    "avg_entity_precision": 1.0,
+    "avg_entity_recall": 1.0,
+    "avg_entity_f1": 1.0,
+    "avg_relation_strict_precision": 0.8889,
+    "avg_relation_strict_recall": 1.0,
+    "avg_relation_strict_f1": 0.9333,
+    "avg_relation_lenient_precision": 0.8889,
+    "avg_relation_lenient_recall": 1.0,
+    "avg_relation_lenient_f1": 0.9333,
+    "entity_stability": {
+      "队列": 3,
+      "线性表": 3,
+      "链表": 3,
+      "栈": 3,
+      "顺序表": 3
+    },
+    "relation_stability": {
+      "线性表 -[CONTAINS]-> 顺序表": 3,
+      "线性表 -[CONTAINS]-> 链表": 3,
+      "线性表 -[CONTAINS]-> 栈": 3,
+      "线性表 -[CONTAINS]-> 队列": 3,
+      "顺序表 -[RELATED_TO]-> 链表": 1,
+      "栈 -[RELATED_TO]-> 队列": 1
+    }
+  },
+  "runs": [
+    {
+      "entities": [
+        {
+          "name": "线性表",
+          "category": "概念",
+          "description": "由n个数据元素组成的有限序列，是数据结构中最基本的结构。"
+        },
+        {
+          "name": "顺序表",
+          "category": "概念",
+          "description": "线性表的顺序存储结构，用地址连续的存储单元存储数据，支持随机访问。"
+        },
+        {
+          "name": "链表",
+          "category": "概念",
+          "description": "线性表的链式存储结构，通过指针链接结点，插入删除不需移动元素。"
+        },
+        {
+          "name": "栈",
+          "category": "概念",
+          "description": "操作受限的线性表，只能在一端插入和删除，遵循后进先出原则。"
+        },
+        {
+          "name": "队列",
+          "category": "概念",
+          "description": "操作受限的线性表，一端插入另一端删除，遵循先进先出原则。"
+        }
+      ],
+      "relations": [
+        {
+          "source": "线性表",
+          "target": "顺序表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "链表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "栈",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "队列",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "顺序表",
+          "target": "链表",
+          "type": "RELATED_TO"
+        },
+        {
+          "source": "栈",
+          "target": "队列",
+          "type": "RELATED_TO"
+        }
+      ],
+      "metrics": {
+        "entities": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relations_strict": {
+          "tp": 4,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1": 0.8
+        },
+        "relations_lenient": {
+          "tp": 4,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1": 0.8
+        },
+        "pred_entities": [
+          "栈",
+          "线性表",
+          "链表",
+          "队列",
+          "顺序表"
+        ],
+        "pred_relations": [
+          "栈 -[RELATED_TO]-> 队列",
+          "线性表 -[CONTAINS]-> 栈",
+          "线性表 -[CONTAINS]-> 链表",
+          "线性表 -[CONTAINS]-> 队列",
+          "线性表 -[CONTAINS]-> 顺序表",
+          "顺序表 -[RELATED_TO]-> 链表"
+        ]
+      }
+    },
+    {
+      "entities": [
+        {
+          "name": "线性表",
+          "category": "概念",
+          "description": "由n个数据元素组成的有限序列，是数据结构中最基本的结构。"
+        },
+        {
+          "name": "顺序表",
+          "category": "概念",
+          "description": "线性表的顺序存储结构，用地址连续的存储单元存储数据，支持随机访问。"
+        },
+        {
+          "name": "链表",
+          "category": "概念",
+          "description": "线性表的链式存储结构，通过指针链接结点，插入删除不需移动元素。"
+        },
+        {
+          "name": "栈",
+          "category": "概念",
+          "description": "操作受限的线性表，只能在一端插入删除，遵循后进先出原则。"
+        },
+        {
+          "name": "队列",
+          "category": "概念",
+          "description": "操作受限的线性表，一端插入另一端删除，遵循先进先出原则。"
+        }
+      ],
+      "relations": [
+        {
+          "source": "线性表",
+          "target": "顺序表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "链表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "栈",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "队列",
+          "type": "CONTAINS"
+        }
+      ],
+      "metrics": {
+        "entities": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relations_strict": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relations_lenient": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "pred_entities": [
+          "栈",
+          "线性表",
+          "链表",
+          "队列",
+          "顺序表"
+        ],
+        "pred_relations": [
+          "线性表 -[CONTAINS]-> 栈",
+          "线性表 -[CONTAINS]-> 链表",
+          "线性表 -[CONTAINS]-> 队列",
+          "线性表 -[CONTAINS]-> 顺序表"
+        ]
+      }
+    },
+    {
+      "entities": [
+        {
+          "name": "线性表",
+          "category": "概念",
+          "description": "由n个数据元素组成的有限序列，是数据结构中最基本的结构。"
+        },
+        {
+          "name": "顺序表",
+          "category": "概念",
+          "description": "线性表的顺序存储结构，用地址连续的存储单元存储数据，支持随机访问。"
+        },
+        {
+          "name": "链表",
+          "category": "概念",
+          "description": "线性表的链式存储结构，通过指针链接结点，插入删除不需移动元素。"
+        },
+        {
+          "name": "栈",
+          "category": "概念",
+          "description": "操作受限的线性表，只能在一端插入删除，遵循后进先出原则。"
+        },
+        {
+          "name": "队列",
+          "category": "概念",
+          "description": "操作受限的线性表，一端插入另一端删除，遵循先进先出原则。"
+        }
+      ],
+      "relations": [
+        {
+          "source": "线性表",
+          "target": "顺序表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "链表",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "栈",
+          "type": "CONTAINS"
+        },
+        {
+          "source": "线性表",
+          "target": "队列",
+          "type": "CONTAINS"
+        }
+      ],
+      "metrics": {
+        "entities": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relations_strict": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "relations_lenient": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "pred_entities": [
+          "栈",
+          "线性表",
+          "链表",
+          "队列",
+          "顺序表"
+        ],
+        "pred_relations": [
+          "线性表 -[CONTAINS]-> 栈",
+          "线性表 -[CONTAINS]-> 链表",
+          "线性表 -[CONTAINS]-> 队列",
+          "线性表 -[CONTAINS]-> 顺序表"
+        ]
+      }
+    }
+  ]
+}
