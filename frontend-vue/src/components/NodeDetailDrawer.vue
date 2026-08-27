@@ -47,6 +47,18 @@
           </el-descriptions-item>
         </el-descriptions>
 
+        <template v-if="showMastery">
+          <el-divider content-position="left">学习进度</el-divider>
+          <el-button
+            :type="mastered ? 'success' : 'primary'"
+            :loading="masteryLoading"
+            style="width: 100%"
+            @click="$emit('toggle-mastery')"
+          >
+            {{ mastered ? '✓ 已掌握（点击取消标记）' : '标记为已掌握' }}
+          </el-button>
+        </template>
+
         <el-divider content-position="left">前置知识</el-divider>
         <el-button size="small" :loading="prereqLoading" @click="loadPrereqs">
           查询前置知识
@@ -79,8 +91,14 @@ const props = defineProps({
   node: { type: Object, default: null },
   editable: { type: Boolean, default: false },
   courseId: { type: String, default: '' },
+  /** 学生端：是否显示"掌握"标记按钮 */
+  showMastery: { type: Boolean, default: false },
+  /** 当前节点是否已掌握 */
+  mastered: { type: Boolean, default: false },
+  /** 标记进行中（禁用按钮） */
+  masteryLoading: { type: Boolean, default: false },
 })
-const emit = defineEmits(['update:modelValue', 'saved', 'deleted'])
+const emit = defineEmits(['update:modelValue', 'saved', 'deleted', 'toggle-mastery'])
 
 const form = ref({ name: '', category: '概念', description: '' })
 const saving = ref(false)

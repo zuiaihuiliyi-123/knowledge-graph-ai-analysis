@@ -63,4 +63,21 @@ export const api = {
     request.get(`/api/v1/learning-path/prerequisites/${encodeURIComponent(name)}`, {
       params: { course_id: courseId || undefined },
     }),
+
+  // ---- 学习记录（标记掌握 / 查询进度） ----
+  markMastered: (courseId, kpId, status = 'MASTERED', masteryLevel = 100) =>
+    request.post('/api/v1/learning/mark', {
+      course_id: courseId,
+      kp_id: kpId,
+      status,
+      mastery_level: masteryLevel,
+    }),
+  unmarkMastered: (courseId, kpId) =>
+    request.delete('/api/v1/learning/mark', {
+      params: { course_id: courseId, kp_id: kpId },
+    }),
+  getProgress: (courseId) =>
+    request.get('/api/v1/learning/progress', {
+      params: { course_id: courseId || undefined },
+    }),
 }

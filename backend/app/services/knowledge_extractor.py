@@ -101,6 +101,10 @@ EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请
 请只输出JSON，不要包含任何其他内容。"""
 
 
+# 单文档多分块并发抽取的最大并发数（控制同时发往 LLM 的请求量，避免触发限流）
+_MAX_CONCURRENCY = 4
+
+
 class KnowledgeExtractor:
     """基于LLM的知识提取器"""
 
@@ -119,18 +123,20 @@ class KnowledgeExtractor:
         chunks = chunk_text_for_llm(text, max_tokens=3000)
 
         if len(chunks) == 1:
-            return await self._extract_single(chunks[0])
-        else:
-            # 分批提取后合并去重
-            all_results = []
-            for chunk in chunks:
-                result = await self._extract_single(chunk)
-                all_results.append(result)
+            return await asyncio.to_thread(self._extract_single, chunks[0])
 
-            return self._merge_results(all_results)
+        # 并发抽取：同步 LLM 客户端放在线程池中并行执行，避免逐块串行阻塞事件循环
+        sem = asyncio.Semaphore(_MAX_CONCURRENCY)
 
-    async def _extract_single(self, text: str) -> dict:
-        """对单个文本块执行提取"""
+        async def _run_one(chunk: str) -> dict:
+            async with sem:
+                return await asyncio.to_thread(self._extract_single, chunk)
+
+        results = await asyncio.gather(*[_run_one(c) for c in chunks])
+        return self._merge_results(list(results))
+
+    def _extract_single(self, text: str) -> dict:
+        """对单个文本块执行提取（同步；由 extract 通过线程池并发调用）"""
         try:
             response = self.client.chat.completions.create(
                 model=settings.LLM_MODEL,

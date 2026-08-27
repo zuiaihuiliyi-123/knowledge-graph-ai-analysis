@@ -34,6 +34,8 @@ const props = defineProps({
   editable: { type: Boolean, default: false },
   /** 搜索关键词：命中节点高亮，其余变暗 */
   searchText: { type: String, default: '' },
+  /** 已掌握知识点 kp_id 列表（学生端绿色描边高亮） */
+  masteredKpIds: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits([
@@ -50,6 +52,11 @@ let graph = null
 let rawNodes = [] // 后端原始节点数据
 let rawEdges = [] // 后端原始边数据
 let resizeObserver = null
+
+// 已掌握知识点集合（用于绿色描边高亮）
+function masteredIdSet() {
+  return new Set((props.masteredKpIds || []).map(String))
+}
 
 // ---------------------------------------------------------------
 // 数据加载：调用 /api/v1/graph/{courseId}（G6 格式）
@@ -145,14 +152,18 @@ async function renderGraph() {
   await initGraph()
   if (!graph) return
 
-  const gNodes = rawNodes.map((n) => ({
-    id: String(n.id),
-    style: {
-      fill: nodeColor(n.type),
-      labelText: String(n.label ?? n.id).slice(0, 30),
-    },
-    data: n,
-  }))
+  const gNodes = rawNodes.map((n) => {
+    const isMastered = masteredIdSet().has(String(n.id))
+    return {
+      id: String(n.id),
+      style: {
+        fill: nodeColor(n.type),
+        labelText: String(n.label ?? n.id).slice(0, 30),
+        ...(isMastered ? { stroke: '#67c23a', lineWidth: 3 } : {}),
+      },
+      data: n,
+    }
+  })
   const gEdges = rawEdges.map((e) => ({
     id: String(e.id || `${e.source}-${e.target}`),
     source: String(e.source),
@@ -173,6 +184,7 @@ async function renderGraph() {
 async function applySearchHighlight() {
   if (!graph || !rawNodes.length) return
   const kw = (props.searchText || '').trim().toLowerCase()
+  const masteredSet = masteredIdSet()
   const updates = rawNodes.map((n) => {
     const label = String(n.label ?? n.id).toLowerCase()
     const desc = String(n.description ?? '').toLowerCase()
@@ -188,6 +200,11 @@ async function applySearchHighlight() {
     } else {
       style.opacity = 1
       style.halo = false
+    }
+    // 已掌握知识点：绿色描边标记（与搜索红色 halo 相互独立）
+    if (masteredSet.has(String(n.id))) {
+      style.stroke = '#67c23a'
+      style.lineWidth = 3
     }
     return { id: String(n.id), style }
   })
@@ -240,6 +257,11 @@ watch(
 
 watch(
   () => props.searchText,
+  () => applySearchHighlight()
+)
+
+watch(
+  () => props.masteredKpIds,
   () => applySearchHighlight()
 )
 </script>

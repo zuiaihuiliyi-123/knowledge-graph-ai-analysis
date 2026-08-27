@@ -29,6 +29,7 @@
             ref="browseGraphRef"
             :course-id="browseCourseId"
             :search-text="searchText"
+            :mastered-kp-ids="masteredKpIds"
             @node-click="onNodeClick"
             @loaded="(s) => (stats = s)"
           />
@@ -200,12 +201,16 @@
       v-model="drawerVisible"
       :node="drawerNode"
       :course-id="browseCourseId"
+      show-mastery
+      :mastered="drawerMastered"
+      :mastery-loading="masteryLoading"
+      @toggle-mastery="onToggleMastery"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Refresh, Compass, ChatDotRound, Guide } from '@element-plus/icons-vue'
@@ -233,6 +238,49 @@ const stats = ref(null)
 const drawerVisible = ref(false)
 const drawerNode = ref(null)
 
+// ===================== 学习记录（掌握标记） =====================
+const masteredKpIds = ref([])
+const masteryLoading = ref(false)
+const drawerMastered = computed(() =>
+  drawerNode.value ? masteredKpIds.value.includes(String(drawerNode.value.id)) : false
+)
+
+async function loadProgress() {
+  if (!browseCourseId.value) {
+    masteredKpIds.value = []
+    return
+  }
+  try {
+    const res = await api.getProgress(browseCourseId.value)
+    masteredKpIds.value = res.mastered_kp_ids || []
+  } catch (e) {
+    masteredKpIds.value = []
+  }
+}
+
+async function onToggleMastery() {
+  const node = drawerNode.value
+  if (!node || !browseCourseId.value) return
+  const kpId = String(node.id)
+  const isMastered = masteredKpIds.value.includes(kpId)
+  masteryLoading.value = true
+  try {
+    if (isMastered) {
+      await api.unmarkMastered(browseCourseId.value, kpId)
+      masteredKpIds.value = masteredKpIds.value.filter((id) => id !== kpId)
+      ElMessage.success('已取消掌握标记')
+    } else {
+      await api.markMastered(browseCourseId.value, kpId)
+      masteredKpIds.value = [...masteredKpIds.value, kpId]
+      ElMessage.success('已标记为掌握')
+    }
+  } catch (e) {
+    ElMessage.error(`操作失败：${e.message}`)
+  } finally {
+    masteryLoading.value = false
+  }
+}
+
 function refreshBrowse() {
   browseGraphRef.value?.refresh()
 }
@@ -240,6 +288,9 @@ function onNodeClick(node) {
   drawerNode.value = node
   drawerVisible.value = true
 }
+
+// 切换课程时重新加载该课程的学习进度
+watch(browseCourseId, loadProgress)
 
 // ===================== 智能问答 =====================
 const qaCourseId = ref('')
