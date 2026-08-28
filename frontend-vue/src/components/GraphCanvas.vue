@@ -36,6 +36,8 @@ const props = defineProps({
   searchText: { type: String, default: '' },
   /** 已掌握知识点 kp_id 列表（学生端绿色描边高亮） */
   masteredKpIds: { type: Array, default: () => [] },
+  /** 路径高亮：路径节点名（按顺序），用于高亮推荐路径 */
+  highlightPath: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits([
@@ -56,6 +58,18 @@ let resizeObserver = null
 // 已掌握知识点集合（用于绿色描边高亮）
 function masteredIdSet() {
   return new Set((props.masteredKpIds || []).map(String))
+}
+
+// 路径节点名集合（用于路径高亮）
+function pathNameSet() {
+  return new Set((props.highlightPath || []).filter(Boolean).map(String))
+}
+
+// 路径节点名序列 → kp_id 序列（用于路径边高亮）
+function pathIdSequence() {
+  const seq = (props.highlightPath || []).filter(Boolean).map(String)
+  const nameToId = new Map(rawNodes.map((n) => [String(n.label), String(n.id)]))
+  return seq.map((name) => nameToId.get(name)).filter(Boolean)
 }
 
 // ---------------------------------------------------------------
@@ -152,25 +166,50 @@ async function renderGraph() {
   await initGraph()
   if (!graph) return
 
+  const pathSet = pathNameSet()
+  const pathSeq = pathIdSequence()
+  const pathEdgeSet = new Set()
+  for (let i = 0; i < pathSeq.length - 1; i++) {
+    pathEdgeSet.add(`${pathSeq[i]}-${pathSeq[i + 1]}`)
+  }
+
   const gNodes = rawNodes.map((n) => {
-    const isMastered = masteredIdSet().has(String(n.id))
+    const id = String(n.id)
+    const label = String(n.label ?? n.id)
+    const isMastered = masteredIdSet().has(id)
+    const inPath = pathSet.has(label) || pathSet.has(id)
+    const style = {
+      fill: inPath ? '#e6a23c' : nodeColor(n.type),
+      labelText: label.slice(0, 30),
+    }
+    if (inPath) {
+      // 路径高亮：金色填充 + 描边 + 光晕（优先级高于已掌握绿边）
+      style.stroke = '#b88230'
+      style.lineWidth = 3
+      style.halo = true
+      style.haloStroke = '#e6a23c'
+      style.haloLineWidth = 4
+    } else if (isMastered) {
+      style.stroke = '#67c23a'
+      style.lineWidth = 3
+    }
+    return { id, style, data: n }
+  })
+  const gEdges = rawEdges.map((e) => {
+    const src = String(e.source)
+    const tgt = String(e.target)
+    const inPath = pathEdgeSet.has(`${src}-${tgt}`)
     return {
-      id: String(n.id),
+      id: String(e.id || `${src}-${tgt}`),
+      source: src,
+      target: tgt,
       style: {
-        fill: nodeColor(n.type),
-        labelText: String(n.label ?? n.id).slice(0, 30),
-        ...(isMastered ? { stroke: '#67c23a', lineWidth: 3 } : {}),
+        labelText: edgeTypeLabel(e.type, e.label),
+        ...(inPath ? { stroke: '#e6a23c', lineWidth: 3 } : {}),
       },
-      data: n,
+      data: e,
     }
   })
-  const gEdges = rawEdges.map((e) => ({
-    id: String(e.id || `${e.source}-${e.target}`),
-    source: String(e.source),
-    target: String(e.target),
-    style: { labelText: edgeTypeLabel(e.type, e.label) },
-    data: e,
-  }))
 
   graph.setData({ nodes: gNodes, edges: gEdges })
   // 全量数据变更需 render()（含布局计算 + 适配视图），draw() 只绘制、不布局
@@ -263,6 +302,13 @@ watch(
 watch(
   () => props.masteredKpIds,
   () => applySearchHighlight()
+)
+
+watch(
+  () => props.highlightPath,
+  () => {
+    if (rawNodes.length) renderGraph()
+  }
 )
 </script>
 

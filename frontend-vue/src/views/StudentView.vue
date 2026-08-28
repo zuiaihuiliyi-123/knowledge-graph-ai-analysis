@@ -30,6 +30,7 @@
             :course-id="browseCourseId"
             :search-text="searchText"
             :mastered-kp-ids="masteredKpIds"
+            :highlight-path="highlightPathNodes"
             @node-click="onNodeClick"
             @loaded="(s) => (stats = s)"
           />
@@ -130,7 +131,7 @@
               </template>
               <el-empty
                 v-else-if="recommendChecked && !recommendLoading"
-                description="暂无推荐结果"
+                description="未找到可推荐的知识点（请确认已掌握知识点名称与图谱一致）"
                 :image-size="60"
               />
             </el-card>
@@ -165,9 +166,29 @@
                   </div>
                 </div>
               </template>
+              <template v-else-if="pathFallback">
+                <div class="rec-item">
+                  <div class="rec-name">
+                    <el-tag size="small" :type="categoryTagType(pathTargetNode?.category)">
+                      {{ pathTargetNode?.category || '知识点' }}
+                    </el-tag>
+                    <b>{{ pathTargetNode?.name || targetKnowledge }}</b>
+                  </div>
+                  <div class="rec-desc">{{ pathTargetNode?.description }}</div>
+                  <div class="rec-reason">💡 {{ pathReason }}</div>
+                </div>
+                <el-divider content-position="left">相关概念（{{ pathRelated.length }}）</el-divider>
+                <div v-for="r in pathRelated" :key="r.name" class="rec-item">
+                  <div class="rec-name">
+                    <el-tag size="small" :type="categoryTagType(r.category)">{{ r.category }}</el-tag>
+                    <b>{{ r.name }}</b>
+                  </div>
+                  <div class="rec-desc">{{ r.description }}</div>
+                </div>
+              </template>
               <el-empty
                 v-else-if="pathChecked && !pathLoading"
-                description="暂无路径（请确认目标知识点名称准确）"
+                description="未找到该知识点（请确认名称与图谱一致）"
                 :image-size="60"
               />
             </el-card>
@@ -180,16 +201,21 @@
                 <el-input v-model="prereqName" placeholder="知识点名称" style="max-width: 320px" />
                 <el-button :loading="prereqLoading" @click="doQueryPrereqs">查询</el-button>
               </div>
-              <template v-if="prereqResult">
+              <template v-if="prereqResult && prereqResult.count">
                 <el-divider content-position="left">共 {{ prereqResult.count }} 个前置知识</el-divider>
                 <div v-for="p in prereqResult.prerequisites" :key="p.name" class="rec-item">
                   <div class="rec-name">
-                    <el-tag size="small" type="info">{{ p.depth }} 级前置</el-tag>
+                    <el-tag size="small" type="info">{{ p.reason || `${p.depth} 级前置` }}</el-tag>
                     <b>{{ p.name }}</b>
                   </div>
                   <div class="rec-desc">{{ p.description }}</div>
                 </div>
               </template>
+              <el-empty
+                v-else-if="prereqResult && !prereqLoading"
+                description="未查询到前置知识（请确认知识点名称准确）"
+                :image-size="60"
+              />
             </el-card>
           </el-col>
         </el-row>
@@ -344,6 +370,11 @@ const targetKnowledge = ref('')
 const paths = ref([])
 const pathLoading = ref(false)
 const pathChecked = ref(false)
+const pathFallback = ref(false)
+const pathTargetNode = ref(null)
+const pathRelated = ref([])
+const pathReason = ref('')
+const highlightPathNodes = ref([])
 
 const prereqName = ref('')
 const prereqResult = ref(null)
@@ -360,7 +391,7 @@ async function doRecommend() {
     recommendations.value = res.recommendations || []
     recommendChecked.value = true
   } catch (e) {
-    ElMessage.error(`推荐失败：${e.message}（注：后端该接口仍使用旧图模型，需迁移到 KnowledgePoint/PRECEDES）`)
+    ElMessage.error(`推荐失败：${e.message}`)
   } finally {
     recommendLoading.value = false
   }
@@ -375,9 +406,22 @@ async function doPathToTarget() {
   try {
     const res = await api.pathToTarget(targetKnowledge.value.trim(), pathCourseId.value)
     paths.value = res.paths || []
+    pathFallback.value = !!res.fallback
+    pathTargetNode.value = res.target_node || null
+    pathRelated.value = res.related || []
+    pathReason.value = res.reason || ''
     pathChecked.value = true
+    // 有真实路径时，高亮到图谱（对齐课程 + 切到浏览 Tab）
+    if (res.paths && res.paths.length && pathCourseId.value) {
+      highlightPathNodes.value = res.paths[0].map((s) => s.name)
+      browseCourseId.value = pathCourseId.value
+      activeTab.value = 'browse'
+      ElMessage.success('已生成路径，正在图谱中高亮')
+    } else {
+      highlightPathNodes.value = []
+    }
   } catch (e) {
-    ElMessage.error(`生成失败：${e.message}（注：后端该接口仍使用旧图模型，需迁移到 KnowledgePoint/PRECEDES）`)
+    ElMessage.error(`生成失败：${e.message}`)
   } finally {
     pathLoading.value = false
   }
@@ -393,7 +437,7 @@ async function doQueryPrereqs() {
   try {
     prereqResult.value = await api.getPrerequisites(prereqName.value.trim(), pathCourseId.value)
   } catch (e) {
-    ElMessage.error(`查询失败：${e.message}（注：后端该接口仍使用旧图模型，需迁移到 KnowledgePoint/PRECEDES）`)
+    ElMessage.error(`查询失败：${e.message}`)
   } finally {
     prereqLoading.value = false
   }

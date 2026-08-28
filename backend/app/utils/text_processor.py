@@ -62,28 +62,44 @@ def estimate_tokens(text: str) -> int:
     return int(chinese_chars / 1.5 + other_chars / 4)
 
 
-def chunk_text_for_llm(text: str, max_tokens: int = 4000) -> List[str]:
+def chunk_text_for_llm(text: str, max_tokens: int = 4000, overlap_tokens: int = 0) -> List[str]:
     """
     将长文本分割成适合LLM处理的块
-    按段落边界分割，每块不超过 max_tokens
+    按段落边界分割，每块不超过 max_tokens；相邻块之间保留 overlap_tokens 的上下文，
+    用于解决「上述方法」「该算法」「在此基础上」等跨块指代问题。
+    注：overlap 会造成段落重复，实体/关系的重复由上层合并去重兜底。
     """
-    paragraphs = text.split('\n')
+    paragraphs = [p for p in text.split('\n') if p.strip()]
+    if not paragraphs:
+        return []
+
     chunks = []
-    current_chunk = ""
+    current = []          # 当前块包含的段落
     current_tokens = 0
 
     for para in paragraphs:
         para_tokens = estimate_tokens(para)
 
-        if current_tokens + para_tokens > max_tokens and current_chunk:
-            chunks.append(current_chunk.strip())
-            current_chunk = para + '\n'
-            current_tokens = para_tokens
-        else:
-            current_chunk += para + '\n'
-            current_tokens += para_tokens
+        # 当前块已有内容且加入本段会超限：切块，并用上一块末尾做 overlap 作为新块开头
+        if current and current_tokens + para_tokens > max_tokens:
+            chunks.append("\n".join(current).strip())
 
-    if current_chunk.strip():
-        chunks.append(current_chunk.strip())
+            # 从上一块末尾回溯约 overlap_tokens 的段落，作为新块的上下文前缀
+            overlap = []
+            overlap_tok = 0
+            for p in reversed(current):
+                pt = estimate_tokens(p)
+                if overlap_tok + pt > overlap_tokens:
+                    break
+                overlap.insert(0, p)
+                overlap_tok += pt
+            current = overlap
+            current_tokens = overlap_tok
+
+        current.append(para)
+        current_tokens += para_tokens
+
+    if current:
+        chunks.append("\n".join(current).strip())
 
     return chunks

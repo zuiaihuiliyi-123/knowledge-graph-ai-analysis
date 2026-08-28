@@ -40,16 +40,20 @@ async def recommend_next(request: RecommendRequest, current_user: dict = Depends
 @router.post("/path-to-target")
 async def path_to_target(request: TargetPathRequest, current_user: dict = Depends(get_current_user)):
     """
-    生成到达目标知识点的学习路径
+    生成到达目标知识点的学习路径；无先修路径时降级返回目标点 + 相关概念
     """
-    paths = PathRecommender.get_learning_path(
+    result = PathRecommender.get_learning_path(
         target_knowledge=request.target,
         course_id=request.course_id
     )
     return success({
         "target": request.target,
-        "paths": paths,
-        "path_count": len(paths),
+        "paths": result["paths"],
+        "path_count": len(result["paths"]),
+        "fallback": result["fallback"],
+        "target_node": result["target"],
+        "related": result["related"],
+        "reason": result["reason"],
     })
 
 

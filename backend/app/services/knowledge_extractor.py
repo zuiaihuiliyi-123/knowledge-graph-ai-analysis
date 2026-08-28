@@ -7,102 +7,147 @@ import asyncio
 from typing import List, Tuple
 from openai import OpenAI
 from ..core.config import settings
+from ..core.database import VALID_RELATION_TYPES
 from ..utils.text_processor import chunk_text_for_llm
 
 
-# 知识提取的 Prompt 模板（修改版）
-EXTRACTION_PROMPT = """你是一个教育领域的知识图谱构建专家。请从以下课程文本中提取知识点实体和它们之间的关系。
+# 知识提取的 Prompt 模板（决策树式关系判定，强化学习依赖与文本顺序的区分）
+EXTRACTION_PROMPT = """你是高校课程知识图谱构建专家。请从给定课程文本中抽取「可用于知识图谱与学习路径推荐」的知识点实体，并识别实体之间明确存在的语义关系。
 
-## 实体要求
+## 核心原则
+宁可少抽取，也不要臆造关系。禁止仅凭文本先后顺序、常识或名称相似性推断关系。
+若对某条关系证据不足，直接不输出该关系。
+
+## 一、实体要求
 每个实体包含：
-- name：知识点名称（简洁规范，去除冗余修饰）
-- category：类别，只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
-- description：一句话描述
+- name：知识点名称，简洁、规范、稳定
+- category：只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
+- description：一句话描述该知识点在课程中的含义
 
-## 关系要求（严格遵循以下优先级规则）
-关系只能使用以下 4 种类型，必须使用英文大写标识符，且方向严格遵循约定：
+实体粒度：
+- 一个实体应是一个「独立可学习的知识点」，不要过度拆分，也不要堆砌冗余修饰。
+- 同义词、英文缩写与中文全称属于同一知识点时，只保留一个规范名称。例如 CNN 与「卷积神经网络」合并为「卷积神经网络」。
+- 不要抽取：人名、学校、公司、页码、章节标题本身、「本节」「上述方法」等指代词、普通名词、单纯例子名。
 
-### 规则1：PRECEDES（前置知识）
-- 定义：source 是 target 的前置知识，即学习 target 之前需先掌握 source。
-- 方向：source → target
-- **重要：只有当两个知识点之间存在明确的"必须先掌握 A 才能学习 B"的先后依赖关系时，才使用 PRECEDES。**
-- **关键排除规则：以下情况严禁使用 PRECEDES，应使用 CONTAINS：**
-  - "X 是 Y 的一种" → Y CONTAINS X
-  - "X 是 Y 的特殊形式" → Y CONTAINS X
-  - "X 是 Y 的变体" → Y CONTAINS X
-- 典型触发词："基础"、"先修"、"前提"、"掌握…之后"、"进一步学习"、"入门"、"进阶"
+## 二、关系类型（仅限 4 种，英文大写，方向严格）
+PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 
-### 规则2：CONTAINS（包含关系）
-- 定义：source 包含 target，即 source 是上层概念，target 是其子概念或组成部分。
-- 方向：source → target
-- 示例：神经网络 CONTAINS 卷积神经网络
+## 三、关系判定必须按下述顺序（决策树）
+对任意两个知识点，按顺序判断：
 
-### 规则3：RELATED_TO（相关概念）
-- 定义：source 与 target 密切相关，但**不存在先后学习顺序**。
-- 方向：无方向
-- **只有确认不存在先后顺序时，才使用 RELATED_TO**
+1. 上下位 / 整体-部分 / 类别-成员？ → CONTAINS（source 是 target 的上位概念/整体/类别，方向 source→target）
+2. 否则，文本明确表达「学习 source 是理解 target 的必要前提」？ → PRECEDES（方向 source→target）
+3. 否则，source 是方法/算法/技术，且文本明确说明其用于解决 target 代表的问题/对象？ → APPLIES_TO（方向 source→target）
+4. 否则，文本明确说明二者存在密切关联？ → RELATED_TO
+5. 以上均不满足或证据不足 → 不输出关系
 
-### 规则4：APPLIES_TO（应用关系）
-- 定义：source 应用到 target。
-- 方向：source → target
-- 示例：梯度下降 APPLIES_TO 损失函数优化
+## 四、PRECEDES 只表示「学习依赖」，不表示「文本顺序」
+只有文本明确表达以下语义才用 PRECEDES：学习 B 前须掌握 A；A 是理解 B 的基础；B 建立在 A 之上；掌握 A 后才能学 B。
+典型触发词：「基础」「先修」「前提」「掌握…之后」「进一步学习」。
 
-## PRECEDES 示例（特别注意，优先产出此类关系）
-以下示例帮助你识别什么情况下必须输出 PRECEDES：
+反例（以下禁止推断为 PRECEDES）：
+- 「本章首先介绍线性表，然后介绍栈」→ 这是叙述顺序，不是学习依赖，不得输出「线性表 PRECEDES 栈」。
+- 「卷积神经网络是神经网络的一种」→ 是包含关系，必须用「神经网络 CONTAINS 卷积神经网络」，不得用 PRECEDES。
+- 「算法运行后生成结果」→ 时间先后，不是 PRECEDES。
 
-示例1：
-  文本："要学习面向对象编程，必须先理解类和对象的概念。"
-  输出：{"source": "类和对象", "target": "面向对象编程", "type": "PRECEDES"}
+## 五、CONTAINS 与 PRECEDES 的关键区分
+- 「X 是 Y 的一种 / 特殊形式 / 变体 / 属于 Y」「Y 包含 X」→ Y CONTAINS X（绝不 PRECEDES）
+  例：「栈是一种操作受限的线性表」→ 线性表 CONTAINS 栈
+- 「要学习 X，必须先掌握 Y」→ Y PRECEDES X
+  例：「要学习多态，必须先掌握继承」→ 继承 PRECEDES 多态
 
-示例2：
-  文本："学习递归之前，需先掌握函数调用的概念。"
-  输出：{"source": "函数调用", "target": "递归", "type": "PRECEDES"}
+## 六、RELATED_TO 严格限制
+仅用于「明确密切相关、但既非上下位、也非学习前置、也非应用」的情况，且文本有明确关联表述。
+不要仅因两个概念出现在同一段就输出 RELATED_TO。
 
-示例3：
-  文本："学习机器学习之前，建议先掌握线性代数和概率论。"
-  输出：
-    {"source": "线性代数", "target": "机器学习", "type": "PRECEDES"},
-    {"source": "概率论", "target": "机器学习", "type": "PRECEDES"}
+## 七、每条关系必须携带证据与置信度
+- evidence：支持该关系的原文短句（必须来自输入文本，不得编造）
+- confidence：0~1 的置信度，如实反映证据强弱，不确定就降低
 
-示例4（关键区分）：
-  文本："卷积神经网络是神经网络的一种，常用于图像识别任务。"
-  输出：
-    {"source": "神经网络", "target": "卷积神经网络", "type": "CONTAINS"},
-    {"source": "卷积神经网络", "target": "图像识别", "type": "APPLIES_TO"}
-  （注意：这里"神经网络→卷积神经网络"是包含关系，没有先后顺序，所以用 CONTAINS 而非 PRECEDES）
+## 八、输出约束
+- source 与 target 必须都出现在 entities 中，且 source ≠ target
+- 不重复输出相同 (source, type, target)；文本中因分块出现的重复段落，同一知识点/关系只输出一次
+- type 只能是 PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
+- 严格只输出 JSON，不要 Markdown 代码块，不要解释文字
 
-示例5（关键区分：CONTAINS vs PRECEDES，必须理解）：
-  文本："栈是一种操作受限的线性表。"
-  正确输出：{"source": "线性表", "target": "栈", "type": "CONTAINS"}
-  错误输出：{"source": "线性表", "target": "栈", "type": "PRECEDES"}  ← 这是错的！"是一种"表示包含，不是先后学习顺序。
-
-  文本："要学习多态，必须先掌握继承。"
-  正确输出：{"source": "继承", "target": "多态", "type": "PRECEDES"}
-
-## 约束
-- 不要输出 source 与 target 相同的自环关系
-- 不要输出重复关系（相同 source、type、target 只保留一条）
-- 关系的 source 和 target 必须出现在实体列表中
-- 同一段文本中，PRECEDES 占比不应为 0。如果存在任何先后顺序表述，必须产出 PRECEDES。
-
-## 输出格式（严格JSON，只输出JSON）
+## 九、输出格式
 {
   "entities": [
-    {"name": "实体名", "category": "概念", "description": "简要描述"}
+    {"name": "实体名", "category": "概念", "description": "一句话描述"}
   ],
   "relations": [
-    {"source": "源实体名", "target": "目标实体名", "type": "PRECEDES"}
+    {"source": "源实体名", "target": "目标实体名", "type": "PRECEDES", "evidence": "原文证据", "confidence": 0.95}
   ]
 }
 
 ## 课程文本
 {text}
 
-请只输出JSON，不要包含任何其他内容。"""
+请只输出 JSON，不要包含任何其他内容。"""
 
 
 # 单文档多分块并发抽取的最大并发数（控制同时发往 LLM 的请求量，避免触发限流）
 _MAX_CONCURRENCY = 4
+
+# 各关系类型的最低置信度阈值：LLM 明确给出且低于阈值时丢弃。
+# PRECEDES 是学习路径的基础、RELATED_TO 最易泛化，二者阈值相对高（偏向高精度）。
+_RELATION_CONFIDENCE_THRESHOLDS = {
+    "PRECEDES": 0.6,
+    "CONTAINS": 0.5,
+    "APPLIES_TO": 0.5,
+    "RELATED_TO": 0.6,
+}
+
+# LLM 未提供 confidence 时的默认值（保守）
+_DEFAULT_RELATION_CONFIDENCE = 0.8
+
+# 常见缩写/别名 -> 规范名 映射（课程相关，按需扩充）。
+# 示例：{"cnn": "卷积神经网络", "bp网络": "反向传播神经网络"}
+# 注意：不同课程语境下缩写含义可能不同，默认留空，避免误伤。
+_SYNONYM_MAP = {}
+
+
+def _fullwidth_to_halfwidth(text: str) -> str:
+    """全角字符转半角（空格/字母/数字/常见 ASCII 符号），例如 ＣＮＮ -> CNN"""
+    out = []
+    for ch in text:
+        code = ord(ch)
+        if code == 0x3000:  # 全角空格
+            out.append(" ")
+        elif 0xFF01 <= code <= 0xFF5E:  # 全角 ASCII 区
+            out.append(chr(code - 0xFEE0))
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _normalize_entity_name(name: str) -> str:
+    """轻量实体名规范化：全角转半角、折叠空白、去首尾；纯英文缩写统一大写"""
+    if not name:
+        return ""
+    name = _fullwidth_to_halfwidth(name)
+    name = re.sub(r"\s+", " ", name).strip()
+    # 纯英文（不含中文）且无空格：统一为大写，合并 CNN/cnn/ＣＮＮ 等写法
+    if name and not re.search(r"[一-鿿]", name) and " " not in name:
+        name = name.upper()
+    # 常见缩写映射（默认空表，可按课程扩充）
+    key = name.lower()
+    if key in _SYNONYM_MAP:
+        return _SYNONYM_MAP[key]
+    return name
+
+
+def _parse_confidence(value) -> float:
+    """把 LLM 返回的 confidence 解析为 float；非法/越界/缺失返回 None（由调用方决定默认值）"""
+    if value is None:
+        return None
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return None
+    if v < 0 or v > 1:
+        return None
+    return v
 
 
 class KnowledgeExtractor:
@@ -119,8 +164,8 @@ class KnowledgeExtractor:
         从文本中提取知识实体和关系
         返回 {"entities": [...], "relations": [...]}
         """
-        # 分割长文本
-        chunks = chunk_text_for_llm(text, max_tokens=3000)
+        # 分割长文本（分块上限 6000 tokens，overlap 400 tokens 解决跨块指代）
+        chunks = chunk_text_for_llm(text, max_tokens=6000, overlap_tokens=400)
 
         if len(chunks) == 1:
             return await asyncio.to_thread(self._extract_single, chunks[0])
@@ -198,46 +243,73 @@ class KnowledgeExtractor:
         raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
     def _merge_results(self, results: List[dict]) -> dict:
-        """合并多个提取结果：实体按名称去重、关系按三元组去重并过滤自环；透传分块错误"""
-        seen_entities = set()
-        merged_entities = []
+        """
+        合并多个提取结果（数据完整性约束不依赖 LLM，全部在此兜底）：
+        - 实体：轻量规范化后按规范名去重
+        - 关系：类型白名单、source/target 实体存在、自环、重复、confidence 阈值过滤
+        """
+        # 第一遍：规范化实体并按规范名去重（保留首个出现的字段）
+        merged_entities = {}  # 规范名 -> entity dict
+        for result in results:
+            for entity in result.get("entities", []):
+                name = _normalize_entity_name(entity.get("name", ""))
+                if not name:
+                    continue
+                if name not in merged_entities:
+                    category = entity.get("category", "概念")
+                    if category not in ("概念", "定理", "公式", "方法"):
+                        category = "概念"
+                    merged_entities[name] = {
+                        "name": name,
+                        "category": category,
+                        "description": (entity.get("description") or "").strip(),
+                    }
+        entity_names = set(merged_entities.keys())
+
+        # 第二遍：关系校验（source/target 使用同一套规范化，保证与实体名对齐）
         seen_relations = set()
         merged_relations = []
         errors = []
-
         for result in results:
-            for entity in result.get("entities", []):
-                name = entity.get("name", "").strip()
-                if name and name not in seen_entities:
-                    seen_entities.add(name)
-                    merged_entities.append(entity)
-
             for relation in result.get("relations", []):
-                source = relation.get("source", "").strip()
-                target = relation.get("target", "").strip()
-                rel_type = relation.get("type", "").strip()
+                source = _normalize_entity_name(relation.get("source", ""))
+                target = _normalize_entity_name(relation.get("target", ""))
+                rel_type = (relation.get("type", "") or "").strip().upper()
 
-                # 过滤空值
-                if not source or not target or not rel_type:
+                # 关系类型白名单（不依赖 LLM）
+                if rel_type not in VALID_RELATION_TYPES:
                     continue
-                # 过滤自环（source == target）
-                if source == target:
+                # 过滤空值 / 自环
+                if not source or not target or source == target:
+                    continue
+                # source/target 必须存在于实体列表（避免孤立关系 / 悬空边）
+                if source not in entity_names or target not in entity_names:
                     continue
                 # 按 (source, type, target) 去重
                 key = (source, rel_type, target)
                 if key in seen_relations:
                     continue
                 seen_relations.add(key)
-                merged_relations.append(relation)
+
+                # confidence 解析 + 阈值过滤
+                confidence = _parse_confidence(relation.get("confidence"))
+                threshold = _RELATION_CONFIDENCE_THRESHOLDS.get(rel_type, 0.5)
+                if confidence is not None and confidence < threshold:
+                    continue
+
+                merged_relations.append({
+                    "source": source,
+                    "target": target,
+                    "type": rel_type,
+                    "evidence": (relation.get("evidence") or "").strip(),
+                    "confidence": confidence if confidence is not None else _DEFAULT_RELATION_CONFIDENCE,
+                })
 
             if result.get("error"):
                 errors.append(result["error"])
 
-        merged = {"entities": merged_entities, "relations": merged_relations}
+        merged = {"entities": list(merged_entities.values()), "relations": merged_relations}
         # 分块错误透传（最多携带前 3 条，避免信息过长），供上层判断抽取是否真正成功
         if errors:
             merged["error"] = "；".join(errors[:3])
         return merged
-
-    print(f"[DEBUG] LLM_API_KEY = '{settings.LLM_API_KEY}'")
-    print(f"[DEBUG] LLM_API_BASE = '{settings.LLM_API_BASE}'")

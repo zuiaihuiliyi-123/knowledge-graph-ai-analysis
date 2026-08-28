@@ -29,7 +29,9 @@ class PathRecommender:
     @staticmethod
     def get_prerequisites(knowledge_name: str, course_id=None) -> List[dict]:
         """
-        获取某个知识点的所有前置知识（递归），沿 PRECEDES 入边向上遍历
+        获取某个知识点的所有前置知识（递归），沿 PRECEDES 入边向上遍历。
+        若没有 PRECEDES 前置，则降级返回其 CONTAINS 上层概念（建议先了解）。
+        每个结果携带 reason 字段，供前端区分展示。
         """
         cid = _coerce_course_id(course_id)
         if cid is not None:
@@ -51,12 +53,41 @@ class PathRecommender:
             params = {"name": knowledge_name}
 
         records = db.query(cypher, params)
+        if records:
+            return [
+                {
+                    "name": r.get("name"),
+                    "category": r.get("category") or "",
+                    "description": r.get("description") or "",
+                    "depth": r.get("depth") or 1,
+                    "reason": f"第 {r.get('depth') or 1} 级前置",
+                }
+                for r in records
+            ]
+
+        # 降级：无 PRECEDES 前置时，返回 CONTAINS 上层概念（"建议先了解"）
+        if cid is not None:
+            cypher = """
+            MATCH (parent:KnowledgePoint {course_id: $course_id})
+                  -[:CONTAINS]->(n:KnowledgePoint {name: $name, course_id: $course_id})
+            RETURN parent.name AS name, parent.category AS category, parent.description AS description
+            """
+            params = {"name": knowledge_name, "course_id": cid}
+        else:
+            cypher = """
+            MATCH (parent:KnowledgePoint)-[:CONTAINS]->(n:KnowledgePoint {name: $name})
+            RETURN parent.name AS name, parent.category AS category, parent.description AS description
+            """
+            params = {"name": knowledge_name}
+
+        records = db.query(cypher, params)
         return [
             {
                 "name": r.get("name"),
                 "category": r.get("category") or "",
                 "description": r.get("description") or "",
-                "depth": r.get("depth") or 1,
+                "depth": None,
+                "reason": "建议先了解的上层概念",
             }
             for r in records
         ]
@@ -151,14 +182,45 @@ class PathRecommender:
 
         # 按优先级排序（前置条件多的优先）
         recommendations.sort(key=lambda x: -x["priority"])
+        if recommendations:
+            return recommendations[:10]
 
-        return recommendations[:10]
+        # 降级：已掌握知识点未解锁任何新知识点时，返回该课程的入门根节点（排除已掌握）
+        if cid is not None:
+            cypher = """
+            MATCH (n:KnowledgePoint {course_id: $course_id})
+            WHERE NOT ()-[:PRECEDES]->(n) AND NOT n.name IN $mastered
+            RETURN n.name AS name, n.category AS category, n.description AS description
+            LIMIT 10
+            """
+            params = {"course_id": cid, "mastered": mastered}
+        else:
+            cypher = """
+            MATCH (n:KnowledgePoint)
+            WHERE NOT ()-[:PRECEDES]->(n) AND NOT n.name IN $mastered
+            RETURN n.name AS name, n.category AS category, n.description AS description
+            LIMIT 10
+            """
+            params = {"mastered": mastered}
+        records = db.query(cypher, params)
+        return [
+            {
+                "name": r.get("name"),
+                "category": r.get("category") or "",
+                "description": r.get("description") or "",
+                "reason": "未解锁新知识点，以下为课程入门知识点（可先掌握）",
+            }
+            for r in records
+        ]
 
     @staticmethod
-    def get_learning_path(target_knowledge: str, course_id=None) -> List[List[dict]]:
+    def get_learning_path(target_knowledge: str, course_id=None) -> dict:
         """
-        生成到达目标知识点的学习路径（可能有多个）
-        沿 PRECEDES 从根节点（无前置）走到目标节点
+        生成到达目标知识点的学习路径（可能有多个），沿 PRECEDES 从根节点（无前置）走到目标节点。
+        若目标点没有 PRECEDES 路径，则降级返回该点本身 + 其 RELATED_TO 相关概念，供前端提示。
+
+        返回 {"paths": [...], "fallback": bool, "target": dict|None,
+              "related": [...], "reason": str|None}
         """
         cid = _coerce_course_id(course_id)
         if cid is not None:
@@ -189,4 +251,57 @@ class PathRecommender:
             steps = r.get("steps") or []
             if steps:
                 paths.append(steps)
-        return paths
+        if paths:
+            return {"paths": paths, "fallback": False, "target": None, "related": [], "reason": None}
+
+        # 降级：查目标点本身 + RELATED_TO 相关概念
+        if cid is not None:
+            target_cypher = """
+            MATCH (n:KnowledgePoint {name: $target, course_id: $course_id})
+            RETURN n.name AS name, n.category AS category, n.description AS description
+            LIMIT 1
+            """
+            related_cypher = """
+            MATCH (n:KnowledgePoint {name: $target, course_id: $course_id})
+                  -[r:RELATED_TO]-(m:KnowledgePoint {course_id: $course_id})
+            RETURN m.name AS name, m.category AS category, m.description AS description
+            """
+            params = {"target": target_knowledge, "course_id": cid}
+        else:
+            target_cypher = """
+            MATCH (n:KnowledgePoint {name: $target})
+            RETURN n.name AS name, n.category AS category, n.description AS description
+            LIMIT 1
+            """
+            related_cypher = """
+            MATCH (n:KnowledgePoint {name: $target})-[r:RELATED_TO]-(m:KnowledgePoint)
+            RETURN m.name AS name, m.category AS category, m.description AS description
+            """
+            params = {"target": target_knowledge}
+
+        target_recs = db.query(target_cypher, params)
+        target = target_recs[0] if target_recs else None
+        if target is None:
+            # 目标知识点本身不存在，交给前端提示"知识点不存在"
+            return {"paths": [], "fallback": False, "target": None, "related": [], "reason": None}
+
+        related_recs = db.query(related_cypher, params)
+        related = [
+            {
+                "name": r.get("name"),
+                "category": r.get("category") or "",
+                "description": r.get("description") or "",
+            }
+            for r in related_recs
+        ]
+        return {
+            "paths": [],
+            "fallback": True,
+            "target": {
+                "name": target.get("name"),
+                "category": target.get("category") or "",
+                "description": target.get("description") or "",
+            },
+            "related": related,
+            "reason": "该知识点未抽取到先修路径，以下为相关概念，可先了解",
+        }

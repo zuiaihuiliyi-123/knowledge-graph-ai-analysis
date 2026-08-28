@@ -47,19 +47,34 @@ class KnowledgeGraphManager:
 
         # 创建关系
         for rel in relations:
-            source = rel.get("source", "").strip()
-            target = rel.get("target", "").strip()
-            rel_type = rel.get("type", "RELATED_TO")
-            # 应用层校验：过滤空值与自环（对齐规划文档「表格4」）
+            source = (rel.get("source") or "").strip()
+            target = (rel.get("target") or "").strip()
+            rel_type = (rel.get("type") or "").strip().upper()
+            # 应用层校验：类型白名单、过滤空值与自环（对齐规划文档「表格4」）
+            if rel_type not in VALID_RELATION_TYPES:
+                continue
             if not source or not target or source == target:
                 continue
+
+            # 置信度取关系自带值（LLM 判断），缺失时保守默认；证据原文短句入图供教师审核
+            confidence = rel.get("confidence")
+            try:
+                confidence = float(confidence)
+            except (TypeError, ValueError):
+                confidence = 0.8
+            evidence = (rel.get("evidence") or "").strip()
+
             try:
                 db.create_relationship(
                     course_id=course_id,
                     source=source,
                     target=target,
                     rel_type=rel_type,
-                    properties={"confidence": 0.9, "is_manual": False}
+                    properties={
+                        "confidence": confidence,
+                        "evidence": evidence,
+                        "is_manual": False,
+                    }
                 )
                 relation_count += 1
             except Exception:
