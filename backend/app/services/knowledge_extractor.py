@@ -238,3 +238,6 @@ class KnowledgeExtractor:
         if errors:
             merged["error"] = "；".join(errors[:3])
         return merged
+
+    print(f"[DEBUG] LLM_API_KEY = '{settings.LLM_API_KEY}'")
+    print(f"[DEBUG] LLM_API_BASE = '{settings.LLM_API_BASE}'")
