@@ -89,6 +89,11 @@ class DocumentService:
             sql_db.update_document(doc_id, parse_status="FAILED", error_message=f"解析失败: {str(e)}")
             return {"ok": False, "code": 2005, "message": f"文档解析失败: {str(e)}"}
         sql_db.update_document(doc_id, parse_status="PARSED")
+        # 解析结果为空（如扫描版 PDF 无文本层）时提前报错，避免静默产出 0 知识点
+        if not text or not text.strip():
+            sql_db.update_document(doc_id, parse_status="FAILED", error_message="解析结果为空")
+            return {"ok": False, "code": 2005,
+                    "message": "文档解析结果为空（可能是扫描版 PDF 无文本层，无法抽取知识）"}
 
         # 8. 抽取（extract_status: PENDING -> EXTRACTING -> COMPLETED/FAILED）
         sql_db.update_document(doc_id, extract_status="EXTRACTING")
@@ -97,6 +102,12 @@ class DocumentService:
         except Exception as e:
             sql_db.update_document(doc_id, extract_status="FAILED", error_message=f"抽取失败: {str(e)}")
             return {"ok": False, "code": 3003, "message": f"知识抽取失败: {str(e)}"}
+
+        # 抽取结果带 error（JSON 解析失败 / LLM 异常等）时，不应静默当作 0 实体成功
+        if result.get("error"):
+            sql_db.update_document(doc_id, extract_status="FAILED", error_message=result["error"])
+            return {"ok": False, "code": 3003, "message": f"知识抽取失败: {result['error']}"}
+
         entities = result.get("entities", [])
         relations = result.get("relations", [])
 

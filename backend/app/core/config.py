@@ -2,9 +2,23 @@
 应用全局配置管理
 """
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# 后端根目录（backend/）。用于把 .env 与相对路径锚定到固定位置，
+# 避免因启动时工作目录不同而导致读错 .env 或数据目录漂移。
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # backend/
+
+# 显式指定 .env 路径，不依赖 find_dotenv 的向上搜索（防止误拾取上级目录的其他 .env）
+load_dotenv(BASE_DIR / ".env")
+
+
+def _resolve_path(value: str) -> str:
+    """把 .env 中的相对路径解析为基于 backend/ 的绝对路径；已是绝对路径则原样返回。"""
+    p = Path(value)
+    if not p.is_absolute():
+        p = BASE_DIR / p
+    return str(p.resolve())
 
 
 class Settings:
@@ -25,13 +39,14 @@ class Settings:
     # Neo4j 图数据库配置
     NEO4J_URI: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
-    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
+    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "Dream@161616")
 
     # SQLite 关系型数据库配置（第一阶段，第二阶段迁移 MySQL）
-    SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "./data/app.db")
+    # 锚定到 backend/ 目录，消除“从哪个目录启动”导致的路径漂移
+    SQLITE_DB_PATH: str = _resolve_path(os.getenv("SQLITE_DB_PATH", "./data/app.db"))
 
     # 文件上传配置
-    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./data/uploads")
+    UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB
     ALLOWED_EXTENSIONS: set = {".pdf", ".docx", ".txt", ".md"}
 

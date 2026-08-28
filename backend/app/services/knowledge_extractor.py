@@ -133,7 +133,16 @@ class KnowledgeExtractor:
                 return await asyncio.to_thread(self._extract_single, chunk)
 
         results = await asyncio.gather(*[_run_one(c) for c in chunks])
-        return self._merge_results(list(results))
+
+        # 并发下偶发限流/超时会导致个别分块失败：对失败分块串行重试一次，提升成功率
+        retried = []
+        for i, r in enumerate(results):
+            if r.get("error"):
+                retried.append(await asyncio.to_thread(self._extract_single, chunks[i]))
+            else:
+                retried.append(r)
+
+        return self._merge_results(retried)
 
     def _extract_single(self, text: str) -> dict:
         """对单个文本块执行提取（同步；由 extract 通过线程池并发调用）"""
@@ -189,11 +198,12 @@ class KnowledgeExtractor:
         raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
     def _merge_results(self, results: List[dict]) -> dict:
-        """合并多个提取结果：实体按名称去重、关系按三元组去重并过滤自环"""
+        """合并多个提取结果：实体按名称去重、关系按三元组去重并过滤自环；透传分块错误"""
         seen_entities = set()
         merged_entities = []
         seen_relations = set()
         merged_relations = []
+        errors = []
 
         for result in results:
             for entity in result.get("entities", []):
@@ -220,4 +230,11 @@ class KnowledgeExtractor:
                 seen_relations.add(key)
                 merged_relations.append(relation)
 
-        return {"entities": merged_entities, "relations": merged_relations}
+            if result.get("error"):
+                errors.append(result["error"])
+
+        merged = {"entities": merged_entities, "relations": merged_relations}
+        # 分块错误透传（最多携带前 3 条，避免信息过长），供上层判断抽取是否真正成功
+        if errors:
+            merged["error"] = "；".join(errors[:3])
+        return merged
