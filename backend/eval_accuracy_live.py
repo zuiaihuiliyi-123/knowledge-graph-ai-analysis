@@ -135,11 +135,24 @@ def evaluate(gold: dict, entities: list, relations: list) -> dict:
     }
 
 
+def _resolve_paths():
+    """支持 --gold <文件> 指定金标准；报告文件名由 gold 文件名推导"""
+    if "--gold" in sys.argv:
+        gold_path = Path(sys.argv[sys.argv.index("--gold") + 1])
+        if not gold_path.is_absolute():
+            gold_path = BACKEND_DIR / gold_path
+    else:
+        gold_path = GOLD_FILE
+    report_name = "eval_report_" + gold_path.stem.replace("gold_", "", 1) + ".json"
+    return gold_path, EVAL_DIR / report_name
+
+
 async def main():
-    gold = json.loads(GOLD_FILE.read_text(encoding="utf-8"))
+    gold_path, report_path = _resolve_paths()
+    gold = json.loads(gold_path.read_text(encoding="utf-8"))
     text = TEXT_FILE.read_text(encoding="utf-8")
 
-    print(f"金标准: {len(gold['entities'])} 实体 / {len(gold['relations'])} 关系")
+    print(f"金标准: {gold_path.name}（{len(gold['entities'])} 实体 / {len(gold['relations'])} 关系）")
     print(f"测试文本: {len(text)} 字符 / {TEXT_FILE.name}\n")
 
     extractor = KnowledgeExtractor()
@@ -224,7 +237,7 @@ async def main():
         "relation_stability": {f"{s} -[{t}]-> {o}": c for (s, t, o), c in rel_freq.most_common()},
         "runs": all_results,
     }
-    REPORT_FILE.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # ---- 控制台报告 ----
     print("\n" + "=" * 62)
@@ -248,7 +261,7 @@ async def main():
     if per_type_avg["PRECEDES"]["avg_fp"] > 0:
         print(f"\n⚠ 模型输出了 {per_type_avg['PRECEDES']['avg_fp']} 条 PRECEDES 误报"
               f"（gold 中 PRECEDES 应为 0，见标注说明的边界判定）")
-    print(f"\n完整结果已写入 {REPORT_FILE}")
+    print(f"\n完整结果已写入 {report_path}")
 
 
 def rescore_from_report():

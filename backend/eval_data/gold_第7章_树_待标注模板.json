@@ -1,0 +1,10 @@
+{
+  "text_id": "Hello算法_第7章_树",
+  "source": "Hello算法_第7章_树",
+  "entities": [
+    {"name": "", "category": "概念", "description": ""}
+  ],
+  "relations": [
+    {"source": "", "target": "", "type": "CONTAINS", "evidence": "", "confidence": 0.9}
+  ]
+}
