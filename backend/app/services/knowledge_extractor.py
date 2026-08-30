@@ -37,7 +37,7 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 
 1. 上下位 / 整体-部分 / 类别-成员？ → CONTAINS（source 是 target 的上位概念/整体/类别，方向 source→target）
 2. 否则，文本明确表达「学习 source 是理解 target 的必要前提」？ → PRECEDES（方向 source→target）
-3. 否则，source 是方法/算法/技术，且文本明确说明其用于解决 target 代表的问题/对象？ → APPLIES_TO（方向 source→target）
+3. 否则，source 是方法/算法/技术，且文本明确说明其用于解决 target 代表的问题/对象？ → APPLIES_TO（方向 source→target，判定边界见第六节）
 4. 否则，文本明确说明二者存在密切关联？ → RELATED_TO
 5. 以上均不满足或证据不足 → 不输出关系
 
@@ -56,21 +56,34 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 - 「要学习 X，必须先掌握 Y」→ Y PRECEDES X
   例：「要学习多态，必须先掌握继承」→ 继承 PRECEDES 多态
 
-## 六、RELATED_TO 严格限制
+## 六、APPLIES_TO 与「实现 / 构成」关系的区分
+只有当 source 被用于解决、处理、计算、优化或完成 target 所代表的问题/任务时，才能使用 APPLIES_TO。
+
+以下表达不得自动视为 APPLIES_TO：
+- 「X 通过 Y 实现」「X 由 Y 实现」「X 使用 Y 构成」「X 建立在 Y 之上」「X 包含 Y」「X 可以利用 Y 实现」
+
+若文本表达的是「Y 是 X 的实现机制、组成部分或实现方式」，而当前关系集合中没有专门的 IMPLEMENTED_BY 关系：
+- 不要强行转换成 APPLIES_TO；
+- 根据上下文判断是否为 CONTAINS；
+- 若无法确定，则不输出关系。
+
+不要为了覆盖所有语义而强行映射到现有四类关系；证据不足时宁可不输出。
+
+## 七、RELATED_TO 严格限制
 仅用于「明确密切相关、但既非上下位、也非学习前置、也非应用」的情况，且文本有明确关联表述。
 不要仅因两个概念出现在同一段就输出 RELATED_TO。
 
-## 七、每条关系必须携带证据与置信度
+## 八、每条关系必须携带证据与置信度
 - evidence：支持该关系的原文短句（必须来自输入文本，不得编造）
 - confidence：0~1 的置信度，如实反映证据强弱，不确定就降低
 
-## 八、输出约束
+## 九、输出约束
 - source 与 target 必须都出现在 entities 中，且 source ≠ target
 - 不重复输出相同 (source, type, target)；文本中因分块出现的重复段落，同一知识点/关系只输出一次
 - type 只能是 PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 - 严格只输出 JSON，不要 Markdown 代码块，不要解释文字
 
-## 九、输出格式
+## 十、输出格式
 {
   "entities": [
     {"name": "实体名", "category": "概念", "description": "一句话描述"}
@@ -89,6 +102,11 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 # 单文档多分块并发抽取的最大并发数（控制同时发往 LLM 的请求量，避免触发限流）
 _MAX_CONCURRENCY = 4
 
+# 分块与输出参数（正式评测需冻结，由 eval_config.make_config 记录到 experiment_config.json）
+_CHUNK_MAX_TOKENS = 6000
+_OVERLAP_TOKENS = 400
+_MAX_OUTPUT_TOKENS = 4096
+
 # 各关系类型的最低置信度阈值：LLM 明确给出且低于阈值时丢弃。
 # PRECEDES 是学习路径的基础、RELATED_TO 最易泛化，二者阈值相对高（偏向高精度）。
 _RELATION_CONFIDENCE_THRESHOLDS = {
@@ -98,7 +116,9 @@ _RELATION_CONFIDENCE_THRESHOLDS = {
     "RELATED_TO": 0.6,
 }
 
-# LLM 未提供 confidence 时的默认值（保守）
+# LLM 未提供 confidence 时的默认值。
+# 语义澄清：这不是"系统认为该关系有 80% 准确率"，而只是缺省值填充（保证边有 confidence 字段入图），
+# 不参与 Precision / Recall / F1 的准确率计算。真实准确率仅由 Gold 标注 + eval_accuracy.py 计算。
 _DEFAULT_RELATION_CONFIDENCE = 0.8
 
 # 常见缩写/别名 -> 规范名 映射（课程相关，按需扩充）。
@@ -153,19 +173,22 @@ def _parse_confidence(value) -> float:
 class KnowledgeExtractor:
     """基于LLM的知识提取器"""
 
-    def __init__(self):
+    def __init__(self, temperature: float = 0.15):
         self.client = OpenAI(
             api_key=settings.LLM_API_KEY,
             base_url=settings.LLM_API_BASE
         )
+        # 开发期用 0.15 平衡稳定性与判断力；正式评测（A/B、Gold）传 0 消除采样随机性
+        self.temperature = temperature
 
-    async def extract(self, text: str) -> dict:
+    async def extract(self, text: str, overlap_tokens: int = _OVERLAP_TOKENS) -> dict:
         """
         从文本中提取知识实体和关系
         返回 {"entities": [...], "relations": [...]}
+        overlap_tokens：相邻分块的重叠 token 数，用于解决跨块指代（评测 A/B 时可传 0 对照）
         """
-        # 分割长文本（分块上限 6000 tokens，overlap 400 tokens 解决跨块指代）
-        chunks = chunk_text_for_llm(text, max_tokens=6000, overlap_tokens=400)
+        # 分割长文本（分块上限 _CHUNK_MAX_TOKENS tokens，overlap 解决跨块指代）
+        chunks = chunk_text_for_llm(text, max_tokens=_CHUNK_MAX_TOKENS, overlap_tokens=overlap_tokens)
 
         if len(chunks) == 1:
             return await asyncio.to_thread(self._extract_single, chunks[0])
@@ -198,8 +221,8 @@ class KnowledgeExtractor:
                     {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
                     {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
                 ],
-                temperature=0.15,  # 关系类型判别需稳定，0.15 在稳定性与判断力之间取平衡
-                max_tokens=4096,
+                temperature=self.temperature,
+                max_tokens=_MAX_OUTPUT_TOKENS,
                 timeout=settings.EXTRACTION_TIMEOUT
             )
 

@@ -55,11 +55,13 @@ def split_by_chapter(text: str) -> List[dict]:
     return chunks
 
 
-def estimate_tokens(text: str) -> int:
-    """估算文本的 token 数（中文约1.5字符/token，英文约4字符/token）"""
+def estimate_tokens(text: str) -> float:
+    """估算文本的 token 数（中文约1.5字符/token，英文约4字符/token）。
+    返回 float 而非 int：分块累加时 int 截断会在短段落多的情况下累积误差，
+    导致本该分块的长文本被误判为未超阈值而不分块。"""
     chinese_chars = len(re.findall(r'[一-鿿]', text))
     other_chars = len(text) - chinese_chars
-    return int(chinese_chars / 1.5 + other_chars / 4)
+    return chinese_chars / 1.5 + other_chars / 4
 
 
 def chunk_text_for_llm(text: str, max_tokens: int = 4000, overlap_tokens: int = 0) -> List[str]:
