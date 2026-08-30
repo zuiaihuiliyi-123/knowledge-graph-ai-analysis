@@ -116,11 +116,34 @@
         </el-tabs>
       </div>
     </div>
+
+    <!-- 右下角后端服务状态（模仿教师/学生端） -->
+    <div
+      class="backend-status"
+      :class="store.backendOnline ? 'online' : store.healthChecked ? 'offline' : 'checking'"
+    >
+      <img :src="brandImage" class="status-avatar" alt="服务状态" />
+      <div class="status-meta">
+        <div class="status-title">
+          <i class="status-dot"></i>
+          <span>
+            {{ store.backendOnline ? '后端服务在线' : store.healthChecked ? '后端服务离线' : '检查后端服务…' }}
+          </span>
+        </div>
+        <div class="status-desc">
+          {{
+            store.backendOnline
+              ? '所有功能可正常使用'
+              : '请启动后端：python -m uvicorn app.main:app --reload'
+          }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
@@ -188,6 +211,10 @@ async function onLogin() {
     loading.value = false
   }
 }
+
+onMounted(() => {
+  store.checkHealth()
+})
 
 async function onRegister() {
   if (loading.value) return
@@ -310,6 +337,66 @@ async function onRegister() {
   font-size: 16px;
   letter-spacing: 6px;
   border-radius: 8px;
+}
+
+/* ===== 右下角后端服务状态浮窗 ===== */
+.backend-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 12px 12px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #eef0f6;
+  box-shadow: 0 10px 30px rgba(31, 48, 92, 0.16);
+}
+.status-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.status-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.status-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #909399;
+  flex-shrink: 0;
+}
+.backend-status.online .status-dot {
+  background: #67c23a;
+  box-shadow: 0 0 6px #67c23a;
+}
+.backend-status.offline .status-dot {
+  background: #f56c6c;
+  box-shadow: 0 0 6px #f56c6c;
+}
+.backend-status.checking .status-dot {
+  background: #e6a23c;
+}
+.status-desc {
+  font-size: 11px;
+  color: #909399;
+  max-width: 320px;
+  line-height: 1.5;
 }
 
 /* 响应式：窄屏隐藏品牌区 */
