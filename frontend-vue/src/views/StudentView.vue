@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="page-header">
-      <h2 class="page-title">👨‍🎓 学习空间</h2>
+      <h2 class="page-title">学习空间</h2>
       <p class="page-desc">浏览课程知识图谱，智能问答与个性化学习路径推荐</p>
     </div>
 
@@ -48,7 +48,7 @@
 
           <div ref="chatBoxRef" class="chat-box chat-scroll">
             <div v-if="!messages.length" class="chat-welcome">
-              <div class="welcome-icon">🤖</div>
+              <div class="welcome-icon"><el-icon :size="40" color="#409eff"><MagicStick /></el-icon></div>
               <p>基于课程知识图谱的 AI 问答助手</p>
               <p class="welcome-sub">例如：什么是线性表？栈和队列有什么区别？</p>
             </div>
@@ -63,7 +63,8 @@
                 <div class="msg-text">{{ m.content }}</div>
                 <template v-if="m.sources && m.sources.length">
                   <el-collapse class="msg-sources">
-                    <el-collapse-item title="📖 参考来源" name="src">
+                    <el-collapse-item name="src">
+                      <template #title><el-icon class="icon-gap"><Document /></el-icon>参考来源</template>
                       <div v-for="(s, j) in m.sources" :key="j" class="source-line">
                         {{ s }}
                       </div>
@@ -97,12 +98,98 @@
       <!-- ===================== Tab 3：学习路径推荐 ===================== -->
       <el-tab-pane name="path">
         <template #label><span class="tab-label"><el-icon><Guide /></el-icon>学习路径推荐</span></template>
+
+        <!-- P5：学习路径视觉层级（已掌握 → 当前 → 推荐 → 未学习） -->
+        <el-card class="page-card path-hero">
+          <template #header>
+            <div class="path-hero-header">
+              <span class="path-hero-title"><el-icon><Guide /></el-icon>学习路径</span>
+              <CourseSelector v-model="pathCourseId" />
+            </div>
+          </template>
+
+          <el-empty
+            v-if="!pathCourseId"
+            description="请先选择课程，查看你的学习路径"
+            :image-size="80"
+          />
+
+          <template v-else>
+            <!-- 学习进度摘要 -->
+            <div class="path-summary">
+              <div class="summary-left">
+                <div class="summary-line">
+                  已掌握 <b class="num">{{ pathProgress.mastered }}</b>
+                  <span class="muted">/ {{ pathProgress.total }} 个知识点</span>
+                </div>
+                <div v-if="pathProgress.current" class="summary-suggestion">
+                  当前建议：继续学习「<b>{{ pathProgress.current }}</b>」
+                </div>
+                <div
+                  v-else-if="pathProgress.total && pathProgress.mastered >= pathProgress.total"
+                  class="summary-suggestion success"
+                >
+                  <el-icon><CircleCheckFilled /></el-icon> 太棒了，本课程知识点已全部掌握
+                </div>
+                <div v-else class="summary-suggestion muted">
+                  完成知识点标记后，这里会给出下一步学习建议
+                </div>
+              </div>
+              <div class="summary-progress">
+                <el-progress
+                  :percentage="pathProgress.pct"
+                  :stroke-width="14"
+                  :text-inside="true"
+                  color="#409eff"
+                />
+              </div>
+            </div>
+
+            <!-- 路径链 -->
+            <div v-loading="pathDataLoading" class="path-chain-wrap">
+              <el-empty
+                v-if="!pathDataLoading && pathDataChecked && !pathChain.length"
+                :description="pathProgress.total && pathProgress.mastered >= pathProgress.total ? '已掌握全部知识点' : '请先在「图谱浏览」中标记已掌握知识点，系统据此推荐学习路径'"
+                :image-size="60"
+              />
+              <div v-else-if="pathChain.length" class="path-chain">
+                <template v-for="(seg, i) in pathChain" :key="seg.node.id">
+                  <div class="chain-node" :class="'state-' + seg.state">
+                    <div class="chain-icon">{{ STATE_META[seg.state].glyph }}</div>
+                    <div class="chain-content">
+                      <div class="chain-head">
+                        <span class="chain-name">{{ seg.node.label }}</span>
+                        <el-tag size="small" effect="plain" :type="categoryTagType(seg.node.properties?.category)">
+                          {{ seg.node.properties?.category || '知识点' }}
+                        </el-tag>
+                        <span class="state-label" :class="'state-label-' + seg.state">{{ STATE_META[seg.state].label }}</span>
+                      </div>
+                      <div v-if="seg.reason" class="chain-reason">原因：{{ seg.reason }}</div>
+                      <div v-if="seg.state === 'recommended'" class="chain-status">当前状态：未掌握</div>
+                    </div>
+                  </div>
+                  <div v-if="i < pathChain.length - 1" class="chain-link">
+                    <el-icon><ArrowDown /></el-icon>
+                    <span>前置知识</span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="path-actions">
+              <el-button type="primary" size="large" :disabled="!pathProgress.current" @click="startLearning">
+                开始学习
+              </el-button>
+            </div>
+          </template>
+        </el-card>
+
         <el-row :gutter="16">
           <!-- 推荐下一步 -->
           <el-col :span="12">
             <el-card class="page-card">
               <template #header>
-                <b>📌 推荐下一步学习内容</b>
+                <b><el-icon class="icon-gap" color="#409eff"><Aim /></el-icon>推荐下一步学习内容</b>
               </template>
               <p class="tip">输入你已掌握的知识点（每行一个），系统根据图谱前置关系推荐可学习的知识点</p>
               <el-input
@@ -126,7 +213,7 @@
                     <b>{{ r.name }}</b>
                   </div>
                   <div class="rec-desc">{{ r.description }}</div>
-                  <div class="rec-reason">💡 {{ r.reason }}</div>
+                  <div class="rec-reason"><el-icon class="icon-gap" color="#e6a23c"><Opportunity /></el-icon>{{ r.reason }}</div>
                 </div>
               </template>
               <el-empty
@@ -141,7 +228,7 @@
           <el-col :span="12">
             <el-card class="page-card">
               <template #header>
-                <b>🧭 到达目标知识点的学习路径</b>
+                <b><el-icon class="icon-gap" color="#409eff"><Guide /></el-icon>到达目标知识点的学习路径</b>
               </template>
               <p class="tip">输入目标知识点，系统自动生成从入门到该知识点的最短学习路径</p>
               <div class="btn-row">
@@ -175,7 +262,7 @@
                     <b>{{ pathTargetNode?.name || targetKnowledge }}</b>
                   </div>
                   <div class="rec-desc">{{ pathTargetNode?.description }}</div>
-                  <div class="rec-reason">💡 {{ pathReason }}</div>
+                  <div class="rec-reason"><el-icon class="icon-gap" color="#e6a23c"><Opportunity /></el-icon>{{ pathReason }}</div>
                 </div>
                 <el-divider content-position="left">相关概念（{{ pathRelated.length }}）</el-divider>
                 <div v-for="r in pathRelated" :key="r.name" class="rec-item">
@@ -195,7 +282,7 @@
 
             <el-card class="page-card">
               <template #header>
-                <b>🔎 前置知识查询</b>
+                <b><el-icon class="icon-gap" color="#409eff"><Search /></el-icon>前置知识查询</b>
               </template>
               <div class="btn-row">
                 <el-input v-model="prereqName" placeholder="知识点名称" style="max-width: 320px" />
@@ -239,7 +326,7 @@
 import { ref, nextTick, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Refresh, Compass, ChatDotRound, Guide } from '@element-plus/icons-vue'
+import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled } from '@element-plus/icons-vue'
 import { api } from '../api'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import CourseSelector from '../components/CourseSelector.vue'
@@ -447,6 +534,141 @@ function categoryTagType(category) {
   const map = { 概念: 'primary', 定理: 'danger', 公式: 'warning', 方法: 'success' }
   return map[category] || 'info'
 }
+
+// ===================== 学习路径视觉层级（P5：已掌握/当前/推荐/未学习） =====================
+const pathMasteredIds = ref([])
+const pathGraphNodes = ref([])
+const pathGraphEdges = ref([])
+const pathRecs = ref([])
+const pathDataLoading = ref(false)
+const pathDataChecked = ref(false)
+
+const STATE_META = {
+  mastered: { label: '已掌握', glyph: '✓' },
+  current: { label: '当前学习', glyph: '●' },
+  recommended: { label: '推荐学习', glyph: '★' },
+  unlearned: { label: '未学习', glyph: '○' },
+}
+
+async function loadPathData() {
+  if (!pathCourseId.value) {
+    pathMasteredIds.value = []
+    pathGraphNodes.value = []
+    pathGraphEdges.value = []
+    pathRecs.value = []
+    pathDataChecked.value = false
+    return
+  }
+  pathDataLoading.value = true
+  try {
+    const [graph, progress] = await Promise.all([
+      api.getGraphV1(pathCourseId.value, { limit: 800 }),
+      api.getProgress(pathCourseId.value),
+    ])
+    pathGraphNodes.value = graph.nodes || []
+    pathGraphEdges.value = graph.edges || []
+    pathMasteredIds.value = progress.mastered_kp_ids || []
+
+    // 已掌握 kp_id → 名称（recommendNext 入参需名称）
+    const byId = new Map(pathGraphNodes.value.map((n) => [String(n.id), n]))
+    const masteredNames = pathMasteredIds.value
+      .map((id) => byId.get(String(id))?.label)
+      .filter(Boolean)
+    const res = await api.recommendNext(masteredNames, pathCourseId.value)
+    pathRecs.value = res.recommendations || []
+  } catch (e) {
+    pathRecs.value = []
+  } finally {
+    pathDataLoading.value = false
+    pathDataChecked.value = true
+  }
+}
+
+watch(pathCourseId, loadPathData)
+
+const pathProgress = computed(() => {
+  const total = pathGraphNodes.value.length
+  const mastered = pathMasteredIds.value.length
+  const pct = total ? Math.round((mastered / total) * 100) : 0
+  return { total, mastered, pct, current: pathRecs.value[0]?.name || '' }
+})
+
+// 基于图谱 PRECEDES 边 + 学习状态，构建「已掌握 → 当前 → 推荐 → 未学习」展示链
+const pathChain = computed(() => {
+  const nodes = pathGraphNodes.value
+  if (!nodes.length) return []
+
+  const byId = new Map(nodes.map((n) => [String(n.id), n]))
+  const byName = new Map(nodes.map((n) => [n.label, n]))
+  const masteredSet = new Set(pathMasteredIds.value.map(String))
+
+  const succ = new Map() // name -> [name]（PRECEDES：source 是 target 的前置）
+  const pred = new Map()
+  for (const e of pathGraphEdges.value) {
+    if (e.type !== 'PRECEDES') continue
+    const s = byId.get(String(e.source))?.label
+    const t = byId.get(String(e.target))?.label
+    if (!s || !t || s === t) continue
+    if (!succ.has(s)) succ.set(s, [])
+    succ.get(s).push(t)
+    if (!pred.has(t)) pred.set(t, [])
+    pred.get(t).push(s)
+  }
+
+  const current = pathRecs.value[0]
+  if (!current) return []
+
+  const segs = []
+  const used = new Set()
+
+  // 1) 已掌握：current 的直接前置（且已掌握）
+  for (const pname of pred.get(current.name) || []) {
+    const node = byName.get(pname)
+    if (node && masteredSet.has(String(node.id)) && !used.has(node.id)) {
+      used.add(node.id)
+      segs.push({ node, state: 'mastered', reason: '' })
+    }
+  }
+
+  // 2) 当前学习
+  const curNode = byName.get(current.name)
+  if (curNode && !used.has(curNode.id)) {
+    used.add(curNode.id)
+    segs.push({ node: curNode, state: 'current', reason: current.reason || '' })
+  }
+
+  // 3) 推荐学习：current 的第一个后继
+  const nexts = succ.get(current.name) || []
+  const firstNext = nexts[0]
+  if (firstNext) {
+    const rNode = byName.get(firstNext)
+    if (rNode && !used.has(rNode.id)) {
+      used.add(rNode.id)
+      segs.push({ node: rNode, state: 'recommended', reason: `前置知识「${current.name}」掌握后即可学习` })
+    }
+    // 4) 未学习：推荐节点的后继（再进一步）
+    const next2 = succ.get(firstNext) || []
+    for (const n2name of next2) {
+      const n2 = byName.get(n2name)
+      if (n2 && !used.has(n2.id)) {
+        used.add(n2.id)
+        segs.push({ node: n2, state: 'unlearned', reason: '' })
+        break
+      }
+    }
+  }
+
+  return segs
+})
+
+function startLearning() {
+  const current = pathRecs.value[0]
+  if (!current) return
+  browseCourseId.value = pathCourseId.value
+  highlightPathNodes.value = [current.name]
+  activeTab.value = 'browse'
+  ElMessage.success(`开始学习「${current.name}」`)
+}
 </script>
 
 <style scoped>
@@ -640,5 +862,193 @@ function categoryTagType(category) {
 .path-arrow {
   color: #67c23a;
   font-weight: 700;
+}
+.icon-gap {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+/* ===== P5 学习路径视觉层级 ===== */
+.path-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.path-hero-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.path-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 16px;
+  background: #fafbfc;
+  border: 1px solid #f0f2f5;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.summary-left {
+  flex: 1;
+  min-width: 0;
+}
+.summary-line {
+  font-size: 14px;
+  color: #606266;
+}
+.summary-line .num {
+  font-size: 22px;
+  font-weight: 700;
+  color: #409eff;
+  margin: 0 2px;
+}
+.summary-line .muted {
+  color: #909399;
+  font-size: 13px;
+}
+.summary-suggestion {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #409eff;
+  font-weight: 600;
+}
+.summary-suggestion.success {
+  color: #67c23a;
+}
+.summary-suggestion.muted {
+  color: #909399;
+  font-weight: 400;
+}
+.summary-progress {
+  width: 220px;
+  flex-shrink: 0;
+}
+.path-chain-wrap {
+  min-height: 120px;
+}
+.path-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+.chain-node {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-left: 4px solid #c0c4cc;
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+}
+.chain-node.state-mastered {
+  border-left-color: #67c23a;
+}
+.chain-node.state-current {
+  border-left-color: #409eff;
+  background: #f0f7ff;
+  border-color: #d9ecff;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
+}
+.chain-node.state-recommended {
+  border-left-color: #e6a23c;
+}
+.chain-node.state-unlearned {
+  border-left-color: #dcdfe6;
+  opacity: 0.72;
+}
+.chain-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.state-mastered .chain-icon {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+.state-current .chain-icon {
+  background: #409eff;
+  color: #fff;
+}
+.state-recommended .chain-icon {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+.state-unlearned .chain-icon {
+  background: #f5f7fa;
+  color: #c0c4cc;
+}
+.chain-content {
+  flex: 1;
+  min-width: 0;
+}
+.chain-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chain-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #303133;
+}
+.state-label {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.state-label-mastered {
+  color: #67c23a;
+  background: #f0f9eb;
+}
+.state-label-current {
+  color: #409eff;
+  background: #ecf5ff;
+}
+.state-label-recommended {
+  color: #e6a23c;
+  background: #fdf6ec;
+}
+.state-label-unlearned {
+  color: #909399;
+  background: #f4f4f5;
+}
+.chain-reason {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #606266;
+}
+.chain-status {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+.chain-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #c0c4cc;
+  font-size: 12px;
+  padding: 4px 0;
+}
+.path-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
 }
 </style>

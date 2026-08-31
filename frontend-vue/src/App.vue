@@ -3,80 +3,121 @@
   <router-view v-if="$route.name === 'login'" />
 
   <el-container v-else class="app-layout">
-    <!-- 深色侧边栏（模仿视频风格） -->
-    <el-aside width="230px" class="app-aside">
+    <!-- 深色侧边栏（可折叠） -->
+    <el-aside :width="collapsed ? '64px' : '230px'" class="app-aside">
       <div class="logo">
         <el-icon class="logo-icon" :size="26"><DataAnalysis /></el-icon>
-        <div>
+        <div v-if="!collapsed" class="logo-text">
           <div class="logo-title">智育数据</div>
           <div class="logo-sub">课程知识图谱智能系统</div>
         </div>
       </div>
 
-      <div class="user-box">
+      <div class="user-box" :class="{ collapsed }">
         <div class="user-avatar">{{ store.username.slice(0, 1).toUpperCase() }}</div>
-        <div class="user-meta">
+        <div v-if="!collapsed" class="user-meta">
           <div class="user-name">{{ store.username }}</div>
           <el-tag size="small" :type="store.role === 'teacher' ? 'warning' : 'success'" effect="dark">
             {{ store.role === 'teacher' ? '教师' : '学生' }}
           </el-tag>
         </div>
-        <el-button text size="small" type="danger" @click="onLogout" class="logout-btn">退出</el-button>
+        <el-button
+          v-if="!collapsed"
+          text
+          size="small"
+          type="danger"
+          @click="onLogout"
+          class="logout-btn"
+        >退出</el-button>
       </div>
 
       <el-menu
-        :default-active="$route.path"
+        :default-active="activeMenu"
+        :collapse="collapsed"
+        :collapse-transition="false"
         router
         class="app-menu"
         background-color="transparent"
         text-color="#b0b8d1"
         active-text-color="#409eff"
       >
-        <!-- 数据总览（新增，模仿视频首页） -->
+        <!-- 数据总览 -->
         <el-menu-item index="/dashboard">
           <el-icon><DataAnalysis /></el-icon>
-          <span>数据总览</span>
+          <template #title>数据总览</template>
         </el-menu-item>
 
         <template v-if="store.role === 'teacher'">
+          <el-menu-item index="/teacher?tab=courses">
+            <el-icon><Notebook /></el-icon>
+            <template #title>课程管理</template>
+          </el-menu-item>
           <el-menu-item index="/teacher?tab=upload">
-            <el-icon><Upload /></el-icon><span>文档上传</span>
+            <el-icon><Upload /></el-icon>
+            <template #title>文档上传</template>
           </el-menu-item>
           <el-menu-item index="/teacher?tab=preview" class="menu-sub">
-            <span>· 图谱预览</span>
+            <el-icon><Search /></el-icon>
+            <template #title>图谱预览</template>
           </el-menu-item>
           <el-menu-item index="/teacher?tab=edit" class="menu-sub">
-            <span>· 编辑图谱</span>
+            <el-icon><EditPen /></el-icon>
+            <template #title>编辑图谱</template>
           </el-menu-item>
         </template>
         <template v-else>
           <el-menu-item index="/student?tab=browse">
-            <el-icon><Compass /></el-icon><span>图谱浏览</span>
+            <el-icon><Compass /></el-icon>
+            <template #title>图谱浏览</template>
           </el-menu-item>
           <el-menu-item index="/student?tab=qa" class="menu-sub">
-            <span>· 智能问答</span>
+            <el-icon><ChatDotRound /></el-icon>
+            <template #title>智能问答</template>
           </el-menu-item>
           <el-menu-item index="/student?tab=path" class="menu-sub">
-            <span>· 学习路径推荐</span>
+            <el-icon><Guide /></el-icon>
+            <template #title>学习路径推荐</template>
           </el-menu-item>
         </template>
       </el-menu>
 
-      <div class="aside-footer">
-        <div class="health-line">
+      <div class="aside-footer" :class="{ collapsed }">
+        <div v-if="!collapsed" class="health-line">
           <i class="health-dot" :class="store.backendOnline ? 'on' : 'off'"></i>
           <span v-if="store.backendOnline">后端服务在线</span>
           <span v-else-if="store.healthChecked">后端服务离线</span>
           <span v-else>检查后端中…</span>
         </div>
-        <div class="health-tip">启动后端：<code>python -m uvicorn app.main:app --reload</code></div>
+        <div v-if="!collapsed" class="health-tip">启动后端：<code>python -m uvicorn app.main:app --reload</code></div>
       </div>
     </el-aside>
 
-    <!-- 主内容区（浅色背景） -->
-    <el-main class="app-main">
-      <router-view />
-    </el-main>
+    <!-- 右侧：顶部 Header + 主内容 -->
+    <el-container class="app-body">
+      <el-header class="app-header" height="56px">
+        <div class="header-left">
+          <el-button
+            text
+            class="collapse-btn"
+            :icon="collapsed ? Expand : Fold"
+            @click="collapsed = !collapsed"
+          />
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ pageBase }}</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="pageTab">{{ pageTab }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+        <div class="header-right">
+          <span class="welcome">欢迎，{{ store.username }}</span>
+        </div>
+      </el-header>
+
+      <!-- 主内容区（浅色背景） -->
+      <el-main class="app-main">
+        <router-view />
+      </el-main>
+    </el-container>
 
     <!-- 右下角后端服务状态（教师/学生端） -->
     <div
@@ -104,14 +145,38 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { Upload, Compass, DataAnalysis } from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  Upload, Compass, DataAnalysis, Search, EditPen, ChatDotRound, Guide, Fold, Expand, Notebook,
+} from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import statusImage from './phtotos/A10赛题项目理解(1).png'
 
 const store = useAppStore()
 const router = useRouter()
+const route = useRoute()
+
+const collapsed = ref(false)
+
+// Tab 子页面中文名（面包屑 + 侧边栏 active 一致）
+const TAB_LABELS = {
+  courses: '课程管理',
+  upload: '文档上传',
+  preview: '图谱预览',
+  edit: '编辑图谱',
+  browse: '图谱浏览',
+  qa: '智能问答',
+  path: '学习路径推荐',
+}
+
+// 侧边栏 active：将 /teacher?tab=upload 等映射为菜单 index，保证 URL / 菜单 / 面包屑三者一致
+const activeMenu = computed(() => {
+  const tab = route.query.tab
+  return tab ? `${route.path}?tab=${tab}` : route.path
+})
+const pageBase = computed(() => route.meta?.title || '')
+const pageTab = computed(() => TAB_LABELS[route.query.tab] || '')
 
 function onLogout() {
   store.logout()
@@ -137,28 +202,39 @@ onMounted(() => {
   flex-direction: column;
   overflow: hidden;
   color: #b0b8d1;
+  transition: width 0.25s ease;
 }
 
 .logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 20px 16px 14px;
+  padding: 0 16px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  height: 56px;
+  box-sizing: border-box;
 }
 .logo-icon {
-  font-size: 28px;
+  font-size: 26px;
+  color: #409eff;
+  flex-shrink: 0;
+}
+.logo-text {
+  min-width: 0;
 }
 .logo-title {
   font-weight: 700;
   font-size: 16px;
   color: #e8ecf4;
   letter-spacing: 1px;
+  white-space: nowrap;
 }
 .logo-sub {
   font-size: 11px;
   color: #6b7394;
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 .user-box {
@@ -167,6 +243,10 @@ onMounted(() => {
   gap: 8px;
   padding: 10px 16px 12px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.user-box.collapsed {
+  justify-content: center;
+  padding: 12px 0;
 }
 .user-avatar {
   width: 34px;
@@ -203,6 +283,7 @@ onMounted(() => {
   border-right: none !important;
   flex: 1;
   padding: 8px 0;
+  overflow-y: auto;
 }
 .app-menu .el-menu-item {
   height: 44px;
@@ -220,7 +301,8 @@ onMounted(() => {
   color: #409eff !important;
   font-weight: 600;
 }
-.menu-sub {
+/* 子菜单项（仅展开态缩进，折叠态交由 Element Plus 显示图标 + Tooltip） */
+.app-menu:not(.el-menu--collapse) .menu-sub {
   height: 38px !important;
   line-height: 38px !important;
   padding-left: 52px !important;
@@ -228,7 +310,7 @@ onMounted(() => {
   color: #7b83a5 !important;
   margin: 0 8px !important;
 }
-.menu-sub:hover {
+.app-menu:not(.el-menu--collapse) .menu-sub:hover {
   color: #409eff !important;
   background-color: transparent !important;
 }
@@ -238,6 +320,9 @@ onMounted(() => {
   border-top: 1px solid rgba(255,255,255,0.06);
   font-size: 12px;
   color: #6b7394;
+}
+.aside-footer.collapsed {
+  padding: 12px 0;
 }
 .health-line {
   display: flex;
@@ -270,11 +355,45 @@ onMounted(() => {
   border-radius: 3px;
 }
 
+/* ===== 右侧主体 ===== */
+.app-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== 顶部 Header ===== */
+.app-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.collapse-btn {
+  font-size: 18px;
+  color: var(--text-regular);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.welcome {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 /* ===== 主内容区 ===== */
 .app-main {
   padding: 20px;
   overflow-y: auto;
-  background: #f0f2f8;
+  background: var(--bg-page);
 }
 
 /* ===== 右下角后端服务状态浮窗 ===== */

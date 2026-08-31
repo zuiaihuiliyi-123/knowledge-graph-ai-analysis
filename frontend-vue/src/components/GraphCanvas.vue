@@ -255,12 +255,30 @@ function fitView() {
   if (graph) graph.fitView()
 }
 
+// 聚焦某个节点：其余节点变暗，目标节点高亮并居中（教师端「知识点列表 → 图谱定位」）
+async function focusNode(id) {
+  if (!graph) return
+  const targetId = String(id)
+  const updates = rawNodes.map((n) => {
+    const isTarget = String(n.id) === targetId
+    return {
+      id: String(n.id),
+      style: isTarget
+        ? { opacity: 1, halo: true, haloStroke: '#409eff', haloLineWidth: 4 }
+        : { opacity: 0.15, halo: false },
+    }
+  })
+  await graph.updateNodeData(updates)
+  await graph.focusItem(targetId, { animation: { duration: 300 } })
+}
+
 // ---------------------------------------------------------------
 // 对外方法（父组件通过 ref 调用）
 // ---------------------------------------------------------------
 defineExpose({
   refresh: loadGraph,
   fitView,
+  focusNode,
 })
 
 // ---------------------------------------------------------------

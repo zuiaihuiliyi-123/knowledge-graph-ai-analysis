@@ -55,7 +55,7 @@
             style="width: 100%"
             @click="$emit('toggle-mastery')"
           >
-            {{ mastered ? '✓ 已掌握（点击取消标记）' : '标记为已掌握' }}
+            {{ mastered ? '已掌握（点击取消标记）' : '标记为已掌握' }}
           </el-button>
         </template>
 

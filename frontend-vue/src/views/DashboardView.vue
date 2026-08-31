@@ -3,28 +3,35 @@
     <!-- 页头 -->
     <div class="page-header">
       <h2 class="page-title">数据总览</h2>
-      <p class="page-desc">课程知识图谱数据概览</p>
+      <p class="page-desc">课程知识图谱与学习数据概览</p>
     </div>
 
-    <!-- 顶部统计卡片 -->
+    <!-- 第一层：核心统计卡 -->
     <div class="stats-row">
-      <div class="stat-card" v-for="(item, idx) in statCards" :key="idx" :style="{ borderTopColor: item.color }">
-        <div class="stat-value" :style="{ color: item.color }">{{ item.value }}</div>
-        <div class="stat-label">{{ item.label }}</div>
+      <div
+        v-for="(item, idx) in statCards"
+        :key="idx"
+        class="stat-card"
+        :style="{ borderLeftColor: item.color }"
+      >
+        <div class="stat-icon-box" :style="{ background: item.color + '1a', color: item.color }">
+          <el-icon :size="22"><component :is="item.icon" /></el-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" :style="{ color: item.color }">{{ item.value }}</div>
+          <div class="stat-label">{{ item.label }}</div>
+        </div>
       </div>
     </div>
 
-    <!-- 图表区域 -->
+    <!-- 第二层：课程概览 + 知识点类别覆盖 -->
     <el-row :gutter="16" class="chart-row">
-      <!-- 柱状图 + 折线图（各课程知识点/关系概览） -->
       <el-col :span="16">
         <div class="chart-card">
-          <div class="chart-title"><el-icon><DataAnalysis /></el-icon> 各课程知识图谱数据概览</div>
+          <div class="chart-title"><el-icon><DataAnalysis /></el-icon> 各课程知识图谱概览</div>
           <div ref="barChartRef" class="chart-body"></div>
         </div>
       </el-col>
-
-      <!-- 雷达图（知识点类别覆盖） -->
       <el-col :span="8">
         <div class="chart-card">
           <div class="chart-title"><el-icon><Aim /></el-icon> 知识点类别覆盖</div>
@@ -33,20 +40,32 @@
       </el-col>
     </el-row>
 
+    <!-- 第三层：关系结构 + 快速入口 -->
     <el-row :gutter="16" class="chart-row">
-      <!-- 饼图（知识点分类占比） -->
       <el-col :span="12">
         <div class="chart-card">
-          <div class="chart-title"><el-icon><PieChart /></el-icon> 知识点分类占比</div>
-          <div ref="pieChartRef" class="chart-body"></div>
+          <div class="chart-title"><el-icon><Connection /></el-icon> 关系结构</div>
+          <div ref="relationChartRef" class="chart-body"></div>
         </div>
       </el-col>
-
-      <!-- 关系类型分布 -->
       <el-col :span="12">
-        <div class="chart-card">
-          <div class="chart-title"><el-icon><Connection /></el-icon> 关系类型统计</div>
-          <div ref="relationChartRef" class="chart-body"></div>
+        <div class="chart-card quick-card">
+          <div class="chart-title"><el-icon><Compass /></el-icon> 快速入口</div>
+          <div class="quick-list">
+            <div
+              v-for="(q, i) in quickLinks"
+              :key="i"
+              class="quick-item"
+              @click="goQuick(q.path)"
+            >
+              <div class="quick-icon"><el-icon :size="18"><component :is="q.icon" /></el-icon></div>
+              <div class="quick-meta">
+                <div class="quick-label">{{ q.label }}</div>
+                <div class="quick-desc">{{ q.desc }}</div>
+              </div>
+              <el-icon class="quick-arrow"><ArrowRight /></el-icon>
+            </div>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -55,19 +74,25 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
-import { DataAnalysis, Aim, PieChart, Connection } from '@element-plus/icons-vue'
+import {
+  DataAnalysis, Aim, Connection, Compass, ArrowRight,
+  Collection, Document, User, UserFilled, Upload, Search, EditPen, ChatDotRound, Guide,
+} from '@element-plus/icons-vue'
 import { api } from '../api'
+import { useAppStore } from '../stores/app'
+
+const router = useRouter()
+const store = useAppStore()
 
 const barChartRef = ref(null)
 const radarChartRef = ref(null)
-const pieChartRef = ref(null)
 const relationChartRef = ref(null)
 
 let barChart = null
 let radarChart = null
-let pieChart = null
 let relationChart = null
 
 // 默认统计（后端不可用/缺数据时全 0）
@@ -86,16 +111,35 @@ const defaultStats = () => ({
 
 const stats = ref(defaultStats())
 
-// 统计卡片（7 张，全部取自真实数据）
+// 统计卡（7 张，真实数据 + 图标）
 const statCards = computed(() => [
-  { label: '课程总数', value: stats.value.course_count, color: '#409eff' },
-  { label: '知识点数', value: stats.value.node_count, color: '#e6a23c' },
-  { label: '关系数量', value: stats.value.edge_count, color: '#f56c6c' },
-  { label: '概念节点', value: stats.value.concept_node_count, color: '#67c23a' },
-  { label: '学生人数', value: stats.value.student_count, color: '#b37feb' },
-  { label: '教师人数', value: stats.value.teacher_count, color: '#909399' },
-  { label: '文档数', value: stats.value.document_count, color: '#ff85c0' },
+  { label: '课程总数', value: stats.value.course_count, color: '#409eff', icon: Collection },
+  { label: '知识点数', value: stats.value.node_count, color: '#e6a23c', icon: DataAnalysis },
+  { label: '关系数量', value: stats.value.edge_count, color: '#f56c6c', icon: Connection },
+  { label: '概念节点', value: stats.value.concept_node_count, color: '#67c23a', icon: Aim },
+  { label: '学生人数', value: stats.value.student_count, color: '#b37feb', icon: User },
+  { label: '教师人数', value: stats.value.teacher_count, color: '#909399', icon: UserFilled },
+  { label: '文档数', value: stats.value.document_count, color: '#ff85c0', icon: Document },
 ])
+
+// 快速入口（角色区分，全部指向真实页面）
+const quickLinks = computed(() =>
+  store.role === 'teacher'
+    ? [
+        { label: '文档上传', desc: '上传课程资料，自动构建图谱', icon: Upload, path: '/teacher?tab=upload' },
+        { label: '图谱预览', desc: '浏览已生成的课程知识图谱', icon: Search, path: '/teacher?tab=preview' },
+        { label: '编辑图谱', desc: '手动增删知识点与关系', icon: EditPen, path: '/teacher?tab=edit' },
+      ]
+    : [
+        { label: '图谱浏览', desc: '浏览课程知识图谱', icon: Compass, path: '/student?tab=browse' },
+        { label: '智能问答', desc: '基于课程知识库提问', icon: ChatDotRound, path: '/student?tab=qa' },
+        { label: '学习路径推荐', desc: '获取个性化学习建议', icon: Guide, path: '/student?tab=path' },
+      ]
+)
+
+function goQuick(path) {
+  router.push(path)
+}
 
 // 空数据提示（图表无数据时居中显示）
 function emptyGraphic() {
@@ -226,39 +270,6 @@ function initRadarChart() {
   radarChart.setOption(option)
 }
 
-function initPieChart() {
-  if (!pieChartRef.value) return
-  pieChart = echarts.init(pieChartRef.value)
-  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399']
-  const data = Object.entries(stats.value.category_distribution || {}).map(
-    ([name, value], i) => ({ name, value, itemStyle: { color: colors[i % colors.length] } })
-  )
-  const option = {
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: {
-      orient: 'vertical',
-      right: '5%',
-      top: 'center',
-      textStyle: { color: '#606266', fontSize: 12 },
-    },
-    series: [{
-      type: 'pie',
-      radius: ['42%', '68%'],
-      center: ['38%', '50%'],
-      avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: false, position: 'center' },
-      emphasis: {
-        label: { show: true, fontSize: 16, fontWeight: 'bold', formatter: '{b}\n{d}%' },
-      },
-      labelLine: { show: false },
-      data,
-    }],
-  }
-  if (data.every((d) => d.value === 0)) option.graphic = emptyGraphic()
-  pieChart.setOption(option)
-}
-
 function initRelationChart() {
   if (!relationChartRef.value) return
   relationChart = echarts.init(relationChartRef.value)
@@ -303,7 +314,6 @@ function initRelationChart() {
 function handleResize() {
   barChart?.resize()
   radarChart?.resize()
-  pieChart?.resize()
   relationChart?.resize()
 }
 
@@ -312,7 +322,6 @@ onMounted(async () => {
   await nextTick()
   initBarChart()
   initRadarChart()
-  initPieChart()
   initRelationChart()
   window.addEventListener('resize', handleResize)
 })
@@ -321,7 +330,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   barChart?.dispose()
   radarChart?.dispose()
-  pieChart?.dispose()
   relationChart?.dispose()
 })
 </script>
@@ -330,8 +338,22 @@ onBeforeUnmount(() => {
 .dashboard {
   min-height: 100%;
 }
+.page-header {
+  margin-bottom: 16px;
+}
+.page-title {
+  margin: 0 0 4px;
+  color: #1a1f36;
+  font-size: 20px;
+  font-weight: 700;
+}
+.page-desc {
+  margin: 0;
+  color: #909399;
+  font-size: 13px;
+}
 
-/* ===== 统计卡片行 ===== */
+/* ===== 第一层：统计卡 ===== */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -341,9 +363,11 @@ onBeforeUnmount(() => {
 .stat-card {
   background: #fff;
   border-radius: 10px;
-  padding: 18px 14px;
-  text-align: center;
-  border-top: 3px solid #409eff;
+  padding: 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 3px solid #409eff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -351,16 +375,28 @@ onBeforeUnmount(() => {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
+.stat-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-info {
+  min-width: 0;
+}
 .stat-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.1;
   font-family: 'DIN Alternate', 'Helvetica Neue', sans-serif;
 }
 .stat-label {
   font-size: 12px;
   color: #909399;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* ===== 图表卡片 ===== */
@@ -389,8 +425,61 @@ onBeforeUnmount(() => {
   height: 320px;
 }
 
+/* ===== 快速入口 ===== */
+.quick-card {
+  height: 100%;
+}
+.quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quick-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #f0f2f5;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.quick-item:hover {
+  background: #f5f9ff;
+  border-color: #d9ecff;
+  transform: translateX(2px);
+}
+.quick-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ecf5ff;
+  color: #409eff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.quick-meta {
+  flex: 1;
+  min-width: 0;
+}
+.quick-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+.quick-desc {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
+}
+.quick-arrow {
+  color: #c0c4cc;
+}
+
 /* 响应式：小屏幕时统计卡片换行 */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .stats-row {
     grid-template-columns: repeat(4, 1fr);
   }

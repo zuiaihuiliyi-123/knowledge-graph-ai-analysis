@@ -1,3 +1,71 @@
+/* ==========================================================================
+   Design Token：全局设计变量（暗色 + 蓝色企业级视觉体系）
+   颜色复用项目现有配色，不做风格变更，仅统一为变量，供全局/组件复用。
+   ========================================================================== */
+:root {
+  /* ---- 主色（蓝） ---- */
+  --primary: #409eff;
+  --primary-hover: #66b1ff;
+  --primary-active: #337ecc;
+  --primary-light: #ecf5ff;
+  --primary-lighter: #f0f7ff;
+
+  /* ---- 语义色 ---- */
+  --success: #67c23a;
+  --warning: #e6a23c;
+  --danger: #f56c6c;
+  --info: #909399;
+
+  /* ---- 背景 ---- */
+  --bg-page: #f0f2f8;
+  --bg-card: #ffffff;
+  --bg-hover: rgba(64, 158, 255, 0.1);
+  --bg-soft: #fafbfc;
+  --sidebar-bg: #1a1f36;
+  --sidebar-bg-deep: #161b2e;
+
+  /* ---- 文本 ---- */
+  --text-primary: #303133;
+  --text-regular: #606266;
+  --text-secondary: #909399;
+  --text-muted: #c0c4cc;
+  --text-inverse: #ffffff;
+  --text-sidebar: #b0b8d1;
+  --text-sidebar-muted: #6b7394;
+
+  /* ---- 边框 ---- */
+  --border-color: #e4e7ed;
+  --border-light: #f0f2f5;
+  --border-sidebar: rgba(255, 255, 255, 0.06);
+
+  /* ---- 阴影 ---- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 10px 30px rgba(31, 48, 92, 0.16);
+
+  /* ---- 圆角 ---- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-round: 50%;
+
+  /* ---- 布局 ---- */
+  --sidebar-width: 230px;
+  --sidebar-width-collapsed: 64px;
+  --header-height: 56px;
+
+  /* ---- Element Plus 主题映射（主色与项目蓝保持一致） ---- */
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-8: #d9ecff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-2: #337ecc;
+  --el-border-radius-base: 6px;
+}
+
 html,
 body,
 #app {
@@ -9,40 +77,48 @@ body,
 body {
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei',
     Arial, sans-serif;
-  background-color: #f0f2f8;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ===== 全局 Element Plus 样式微调（适配深色侧边栏） ===== */
+/* ===== 全局 Element Plus 样式微调（适配深色侧边栏 + 统一卡片） ===== */
 .el-main {
-  --el-bg-color: #f0f2f8;
+  --el-bg-color: var(--bg-page);
 }
 
-/* 图谱画布容器 */
+.el-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card) !important;
+  border: 1px solid var(--border-light);
+}
+
+/* ===== 图谱画布容器 ===== */
 .graph-container {
   width: 100%;
   height: 100%;
   min-height: 520px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   background: #fdfdfd;
   overflow: hidden;
 }
 
 .page-card {
   margin-bottom: 16px;
-  border-radius: 10px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
 }
 .page-card :deep(.el-card__header) {
   padding: 14px 18px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--border-light);
   font-weight: 600;
 }
 .page-card :deep(.el-card__body) {
   padding: 16px 18px;
 }
 
-/* 聊天区域滚动条美化 */
+/* ===== 聊天区域滚动条美化 ===== */
 .chat-scroll {
   overflow-y: auto;
 }
@@ -54,7 +130,7 @@ body {
   border-radius: 3px;
 }
 
-/* ===== 页面标题适配新风格 ===== */
+/* ===== 页面标题 ===== */
 .page-header {
   margin-bottom: 12px;
 }
@@ -66,14 +142,14 @@ body {
 }
 .page-desc {
   margin: 0 0 12px;
-  color: #909399;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 /* ===== Tab 面板适配 ===== */
 .el-tabs :deep(.el-tabs__header) {
-  background: #fff;
-  border-radius: 10px 10px 0 0;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: 0 16px;
   margin: 0;
 }
@@ -91,7 +167,7 @@ body {
   gap: 12px;
 }
 .stats-text {
-  color: #909399;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 .graph-card {
@@ -105,9 +181,9 @@ body {
 /* ===== 问答区域 ===== */
 .qa-card {
   max-width: 860px;
-  background: #fff;
-  border-radius: 10px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
 }
 .qa-toolbar {
   display: flex;
@@ -118,9 +194,9 @@ body {
 .chat-box {
   height: 460px;
   padding: 12px;
-  background: #fafbfc;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
 }
 
 /* ===== 登录页背景适配 ===== */
@@ -137,4 +213,17 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+/* ===== 全局滚动条统一 ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #dcdfe6;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c0c4cc;
 }

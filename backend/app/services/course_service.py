@@ -53,11 +53,20 @@ class CourseService:
         page_size = min(max(1, page_size), 100)
         total, rows = sql_db.list_courses_page(page, page_size, teacher_id, keyword)
 
-        # 文档数（SQLite 按课程聚合）与节点数（Neo4j 按课程聚合）
+        # 文档数（SQLite 按课程聚合）与节点数/关系数（Neo4j 按课程聚合；Neo4j 不可用时置 0）
         doc_counts = sql_db.count_documents_grouped()
-        node_counts = {}
-        for r in db.query("MATCH (n:KnowledgePoint) RETURN n.course_id AS cid, count(n) AS cnt"):
-            node_counts[r["cid"]] = r["cnt"]
+        node_counts, edge_counts = {}, {}
+        try:
+            for r in db.query("MATCH (n:KnowledgePoint) RETURN n.course_id AS cid, count(n) AS cnt"):
+                node_counts[r["cid"]] = r["cnt"]
+            for r in db.query(
+                "MATCH (a:KnowledgePoint)-[rel]->(b:KnowledgePoint) "
+                "WHERE a.course_id = b.course_id "
+                "RETURN a.course_id AS cid, count(rel) AS cnt"
+            ):
+                edge_counts[r["cid"]] = r["cnt"]
+        except Exception:
+            pass
 
         items = []
         for r in rows:
@@ -71,8 +80,10 @@ class CourseService:
                 "teacher_name": r.get("teacher_name", ""),
                 "document_count": doc_counts.get(cid, 0),
                 "node_count": node_counts.get(cid, 0),
+                "edge_count": edge_counts.get(cid, 0),
                 "status": r["status"],
                 "created_at": r["created_at"],
+                "updated_at": r.get("updated_at"),
             })
 
         return {"ok": True, "code": 0, "message": "success",
