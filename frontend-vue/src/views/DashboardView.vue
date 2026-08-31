@@ -2,20 +2,11 @@
   <div class="dashboard">
     <!-- 页头 -->
     <div class="page-header">
-      <h2 class="page-title">数据总览（演示占位）</h2>
+      <h2 class="page-title">数据总览</h2>
       <p class="page-desc">课程知识图谱数据概览</p>
     </div>
 
-    <!-- 开发中提示 Banner -->
-    <el-alert
-      type="warning"
-      :closable="false"
-      show-icon
-      title="数据总览功能开发中，当前展示数据为演示占位，正式数据将在后续版本接入。"
-      class="placeholder-banner"
-    />
-
-    <!-- 顶部统计卡片（模仿视频风格） -->
+    <!-- 顶部统计卡片 -->
     <div class="stats-row">
       <div class="stat-card" v-for="(item, idx) in statCards" :key="idx" :style="{ borderTopColor: item.color }">
         <div class="stat-value" :style="{ color: item.color }">{{ item.value }}</div>
@@ -25,7 +16,7 @@
 
     <!-- 图表区域 -->
     <el-row :gutter="16" class="chart-row">
-      <!-- 柱状图 + 折线图（知识点分布趋势） -->
+      <!-- 柱状图 + 折线图（各课程知识点/关系概览） -->
       <el-col :span="16">
         <div class="chart-card">
           <div class="chart-title"><el-icon><DataAnalysis /></el-icon> 各课程知识图谱数据概览</div>
@@ -33,17 +24,17 @@
         </div>
       </el-col>
 
-      <!-- 雷达图（学习维度分析） -->
+      <!-- 雷达图（知识点类别覆盖） -->
       <el-col :span="8">
         <div class="chart-card">
-          <div class="chart-title"><el-icon><Aim /></el-icon> 知识覆盖雷达</div>
+          <div class="chart-title"><el-icon><Aim /></el-icon> 知识点类别覆盖</div>
           <div ref="radarChartRef" class="chart-body"></div>
         </div>
       </el-col>
     </el-row>
 
     <el-row :gutter="16" class="chart-row">
-      <!-- 饼图（知识点分类分布） -->
+      <!-- 饼图（知识点分类占比） -->
       <el-col :span="12">
         <div class="chart-card">
           <div class="chart-title"><el-icon><PieChart /></el-icon> 知识点分类占比</div>
@@ -63,9 +54,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import { ElMessage } from 'element-plus'
 import { DataAnalysis, Aim, PieChart, Connection } from '@element-plus/icons-vue'
+import { api } from '../api'
 
 const barChartRef = ref(null)
 const radarChartRef = ref(null)
@@ -77,20 +70,57 @@ let radarChart = null
 let pieChart = null
 let relationChart = null
 
-// 统计卡片数据（与你的知识图谱系统相关）
-const statCards = ref([
-  { label: '课程总数', value: '3', color: '#409eff' },
-  { label: '专业方向', value: '2', color: '#67c23a' },
-  { label: '知识点数', value: '60', color: '#e6a23c' },
-  { label: '关系数量', value: '45', color: '#f56c6c' },
-  { label: '概念节点', value: '60', color: '#909399' },
-  { label: '学生人数', value: '58', color: '#b37feb' },
-  { label: '问答次数', value: '226', color: '#ff85c0' },
+// 默认统计（后端不可用/缺数据时全 0）
+const defaultStats = () => ({
+  course_count: 0,
+  teacher_count: 0,
+  student_count: 0,
+  document_count: 0,
+  node_count: 0,
+  edge_count: 0,
+  concept_node_count: 0,
+  category_distribution: { 概念: 0, 定理: 0, 公式: 0, 方法: 0, 其他: 0 },
+  relation_distribution: { 前置知识: 0, 包含: 0, 相关概念: 0, 应用: 0 },
+  per_course: [],
+})
+
+const stats = ref(defaultStats())
+
+// 统计卡片（7 张，全部取自真实数据）
+const statCards = computed(() => [
+  { label: '课程总数', value: stats.value.course_count, color: '#409eff' },
+  { label: '知识点数', value: stats.value.node_count, color: '#e6a23c' },
+  { label: '关系数量', value: stats.value.edge_count, color: '#f56c6c' },
+  { label: '概念节点', value: stats.value.concept_node_count, color: '#67c23a' },
+  { label: '学生人数', value: stats.value.student_count, color: '#b37feb' },
+  { label: '教师人数', value: stats.value.teacher_count, color: '#909399' },
+  { label: '文档数', value: stats.value.document_count, color: '#ff85c0' },
 ])
+
+// 空数据提示（图表无数据时居中显示）
+function emptyGraphic() {
+  return {
+    type: 'text',
+    left: 'center',
+    top: 'middle',
+    style: { text: '暂无数据', fill: '#909399', fontSize: 14 },
+  }
+}
+
+async function fetchStats() {
+  try {
+    const data = await api.getDashboardStats()
+    stats.value = { ...defaultStats(), ...data }
+  } catch (e) {
+    ElMessage.warning(`数据总览加载失败：${e.message}`)
+    stats.value = defaultStats()
+  }
+}
 
 function initBarChart() {
   if (!barChartRef.value) return
   barChart = echarts.init(barChartRef.value)
+  const courses = stats.value.per_course || []
   const option = {
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
     legend: {
@@ -101,13 +131,14 @@ function initBarChart() {
     grid: { left: '3%', right: '4%', bottom: '10%', top: '18%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: ['数据结构', '算法设计', '操作系统', '计算机网络', '数据库原理', '编译原理', '软件工程'],
-      axisLabel: { color: '#606266', fontSize: 11, rotate: 20 },
+      data: courses.map((c) => c.course_name),
+      axisLabel: { color: '#606266', fontSize: 11, rotate: courses.length > 5 ? 20 : 0 },
       axisLine: { lineStyle: { color: '#dcdfe6' } },
     },
     yAxis: [
       { type: 'value', name: '数量', nameTextStyle: { color: '#909399', fontSize: 11 },
-        axisLabel: { color: '#909399' }, splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } } },
+        minInterval: 1, axisLabel: { color: '#909399' },
+        splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } } },
       { type: 'value', name: '平均关联度', nameTextStyle: { color: '#909399', fontSize: 11 },
         axisLabel: { color: '#909399', formatter: '{value}' }, splitLine: { show: false } },
     ],
@@ -123,7 +154,7 @@ function initBarChart() {
             { offset: 1, color: '#79bbff' },
           ]),
         },
-        data: [12, 15, 8, 10, 9, 6, 8],
+        data: courses.map((c) => c.node_count),
       },
       {
         name: '关系数量',
@@ -136,7 +167,7 @@ function initBarChart() {
             { offset: 1, color: '#95d475' },
           ]),
         },
-        data: [10, 12, 7, 8, 7, 5, 6],
+        data: courses.map((c) => c.edge_count),
       },
       {
         name: '平均关联度',
@@ -153,26 +184,24 @@ function initBarChart() {
             { offset: 1, color: 'rgba(230,162,60,0.02)' },
           ]),
         },
-        data: [3.2, 3.8, 2.9, 3.1, 2.8, 2.5, 3.0],
+        data: courses.map((c) => c.avg_degree),
       },
     ],
   }
+  if (!courses.length) option.graphic = emptyGraphic()
   barChart.setOption(option)
 }
 
 function initRadarChart() {
   if (!radarChartRef.value) return
   radarChart = echarts.init(radarChartRef.value)
+  const catLabels = ['概念', '定理', '公式', '方法']
+  const values = catLabels.map((l) => stats.value.category_distribution[l] || 0)
+  const max = Math.max(...values, 1)
   const option = {
     tooltip: {},
     radar: {
-      indicator: [
-        { name: '概念掌握', max: 100 },
-        { name: '定理理解', max: 100 },
-        { name: '公式应用', max: 100 },
-        { name: '方法实践', max: 100 },
-        { name: '综合能力', max: 100 },
-      ],
+      indicator: catLabels.map((name) => ({ name, max })),
       shape: 'polygon',
       splitNumber: 4,
       axisName: { color: '#606266', fontSize: 11 },
@@ -184,28 +213,26 @@ function initRadarChart() {
       type: 'radar',
       data: [
         {
-          value: [78, 65, 72, 85, 70],
-          name: '当前水平',
+          value: values,
+          name: '知识点数量',
           areaStyle: { color: 'rgba(64,158,255,0.2)' },
           lineStyle: { color: '#409eff', width: 2 },
           itemStyle: { color: '#409eff' },
         },
-        {
-          value: [92, 88, 85, 90, 87],
-          name: '目标水平',
-          areaStyle: { color: 'rgba(103,194,58,0.15)' },
-          lineStyle: { color: '#67c23a', width: 2, type: 'dashed' },
-          itemStyle: { color: '#67c23a' },
-        },
       ],
     }],
   }
+  if (values.every((v) => v === 0)) option.graphic = emptyGraphic()
   radarChart.setOption(option)
 }
 
 function initPieChart() {
   if (!pieChartRef.value) return
   pieChart = echarts.init(pieChartRef.value)
+  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399']
+  const data = Object.entries(stats.value.category_distribution || {}).map(
+    ([name, value], i) => ({ name, value, itemStyle: { color: colors[i % colors.length] } })
+  )
   const option = {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
     legend: {
@@ -225,32 +252,31 @@ function initPieChart() {
         label: { show: true, fontSize: 16, fontWeight: 'bold', formatter: '{b}\n{d}%' },
       },
       labelLine: { show: false },
-      data: [
-        { value: 22, name: '概念', itemStyle: { color: '#409eff' } },
-        { value: 15, name: '定理', itemStyle: { color: '#67c23a' } },
-        { value: 12, name: '公式', itemStyle: { color: '#e6a23c' } },
-        { value: 18, name: '方法', itemStyle: { color: '#f56c6c' } },
-        { value: 8, name: '其他', itemStyle: { color: '#909399' } },
-      ],
+      data,
     }],
   }
+  if (data.every((d) => d.value === 0)) option.graphic = emptyGraphic()
   pieChart.setOption(option)
 }
 
 function initRelationChart() {
   if (!relationChartRef.value) return
   relationChart = echarts.init(relationChartRef.value)
+  const labels = Object.keys(stats.value.relation_distribution || {})
+  const values = labels.map((l) => stats.value.relation_distribution[l])
+  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c']
   const option = {
     tooltip: { trigger: 'item' },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '12%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: ['前置关系', '包含关系', '相似关系', '引用关系', '扩展关系'],
+      data: labels,
       axisLabel: { color: '#606266', fontSize: 11 },
       axisLine: { lineStyle: { color: '#dcdfe6' } },
     },
     yAxis: {
       type: 'value',
+      minInterval: 1,
       axisLabel: { color: '#909399' },
       splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
     },
@@ -259,17 +285,18 @@ function initRelationChart() {
       barWidth: '45%',
       itemStyle: {
         borderRadius: [6, 6, 0, 0],
-        color: function(params) {
-          const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#b37feb']
+        color: function (params) {
+          const c = colors[params.dataIndex % colors.length]
           return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: colors[params.dataIndex] },
-            { offset: 1, color: colors[params.dataIndex] + '99' },
+            { offset: 0, color: c },
+            { offset: 1, color: c + '99' },
           ])
         },
       },
-      data: [18, 12, 8, 5, 4],
+      data: values,
     }],
   }
+  if (values.every((v) => v === 0)) option.graphic = emptyGraphic()
   relationChart.setOption(option)
 }
 
@@ -281,6 +308,7 @@ function handleResize() {
 }
 
 onMounted(async () => {
+  await fetchStats()
   await nextTick()
   initBarChart()
   initRadarChart()
@@ -301,9 +329,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .dashboard {
   min-height: 100%;
-}
-.placeholder-banner {
-  margin-bottom: 16px;
 }
 
 /* ===== 统计卡片行 ===== */

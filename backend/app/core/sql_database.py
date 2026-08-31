@@ -424,6 +424,22 @@ class SQLDatabase:
             conn.commit()
             return cur.rowcount
 
+    # ---------- 统计（数据总览） ----------
+
+    def count_courses(self) -> int:
+        """课程总数"""
+        return self._query_one("SELECT count(*) AS cnt FROM t_course")["cnt"]
+
+    def count_users_by_role(self, role: str) -> int:
+        """按角色统计用户数（teacher / student）"""
+        return self._query_one(
+            "SELECT count(*) AS cnt FROM t_user WHERE role = ?", (role,),
+        )["cnt"]
+
+    def count_documents(self) -> int:
+        """文档总数"""
+        return self._query_one("SELECT count(*) AS cnt FROM t_document")["cnt"]
+
 
 # 全局关系型数据库实例
 sql_db = SQLDatabase()

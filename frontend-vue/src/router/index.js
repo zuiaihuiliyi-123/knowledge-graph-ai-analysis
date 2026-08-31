@@ -28,7 +28,7 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
-      meta: { title: '数据总览（演示占位）' },
+      meta: { title: '数据总览' },
     },
     { path: '/teacher', name: 'teacher', component: TeacherView, meta: { title: '教师工作台' } },
     { path: '/student', name: 'student', component: StudentView, meta: { title: '学习空间' } },
