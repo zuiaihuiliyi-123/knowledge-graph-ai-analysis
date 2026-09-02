@@ -119,6 +119,7 @@
 
     <!-- 右下角后端服务状态（模仿教师/学生端） -->
     <div
+      v-if="!store.backendStatusDismissed"
       class="backend-status"
       :class="store.backendOnline ? 'online' : store.healthChecked ? 'offline' : 'checking'"
     >
@@ -138,6 +139,15 @@
           }}
         </div>
       </div>
+      <button
+        class="status-close"
+        type="button"
+        aria-label="关闭"
+        title="关闭"
+        @click="store.dismissBackendStatus()"
+      >
+        <el-icon :size="12"><Close /></el-icon>
+      </button>
     </div>
   </div>
 </template>
@@ -146,7 +156,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock } from '@element-plus/icons-vue'
+import { User, Lock, Close } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
 import brandImage from '../phtotos/A10赛题项目理解(1).png'
 
@@ -348,7 +358,7 @@ async function onRegister() {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px 12px 12px;
+  padding: 12px 32px 12px 12px;
   background: #fff;
   border-radius: 14px;
   border: 1px solid #eef0f6;
@@ -397,6 +407,27 @@ async function onRegister() {
   color: #909399;
   max-width: 320px;
   line-height: 1.5;
+}
+.status-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #c0c4cc;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  transition: all 0.2s;
+}
+.status-close:hover {
+  color: #f56c6c;
+  background: #fef0f0;
 }
 
 /* 响应式：窄屏隐藏品牌区 */

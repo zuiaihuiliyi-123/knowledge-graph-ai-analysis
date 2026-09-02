@@ -51,9 +51,11 @@
         <i class="legend-dot" :style="{ background: t.color }"></i>{{ t.label }}
       </span>
       <div class="legend-section">节点状态</div>
-      <span class="legend-item"><i class="legend-dot legend-stroke-green"></i>已掌握</span>
-      <span class="legend-item"><i class="legend-dot legend-fill-gold"></i>路径高亮</span>
-      <span class="legend-item"><i class="legend-dot legend-focus"></i>聚焦节点</span>
+      <span class="legend-item"><i class="legend-shape legend-mastered">✓</i>已掌握</span>
+      <span class="legend-item"><i class="legend-shape legend-diamond"></i>当前学习</span>
+      <span class="legend-item"><i class="legend-shape legend-star">★</i>推荐学习</span>
+      <span class="legend-item"><i class="legend-shape legend-ring-dark"></i>路径高亮</span>
+      <span class="legend-item"><i class="legend-shape legend-halo-dark"></i>聚焦节点</span>
       <div class="legend-section">关系类型</div>
       <span v-for="(label, key) in EDGE_TYPE_LABELS" :key="key" class="legend-item">
         <i class="legend-line" :style="{ background: EDGE_TYPE_COLORS[key] }"></i>{{ label }}
@@ -107,6 +109,10 @@ const props = defineProps({
   focusOnClick: { type: Boolean, default: false },
   /** P6：局部展开模式——默认只显示核心节点 + 一阶关系，逐层展开 */
   progressive: { type: Boolean, default: false },
+  /** P7：当前学习知识点 kp_id（图谱中蓝描边 + ● 前缀，展示层唯一状态源） */
+  currentKpId: { type: String, default: '' },
+  /** P7：推荐学习知识点 kp_id 列表（图谱中金描边 + ★ 前缀） */
+  recommendedKpIds: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits([
@@ -124,6 +130,9 @@ let graph = null
 let rawNodes = [] // 后端原始节点数据
 let rawEdges = [] // 后端原始边数据
 let resizeObserver = null
+
+// 节点状态 / 强调统一使用中性深色（--text-primary），避免与知识点类型色（蓝/红/橙/绿）重合
+const STATE_STROKE = '#303133'
 
 // ---------------------------------------------------------------
 // P6 交互状态
@@ -145,11 +154,16 @@ function pathNameSet() {
   return new Set((props.highlightPath || []).filter(Boolean).map(String))
 }
 
-// 路径节点名序列 → kp_id 序列
-function pathIdSequence() {
+// 路径高亮条目 → kp_id 序列（条目可为知识点名称，也可为 kp_id，P8 保证始终以 kp_id 对齐）
+function highlightToIds() {
   const seq = (props.highlightPath || []).filter(Boolean).map(String)
   const nameToId = new Map(rawNodes.map((n) => [String(n.label), String(n.id)]))
-  return seq.map((name) => nameToId.get(name)).filter(Boolean)
+  const idSet = new Set(rawNodes.map((n) => String(n.id)))
+  return seq.map((v) => (idSet.has(v) ? v : nameToId.get(v))).filter(Boolean)
+}
+
+function pathIdSequence() {
+  return highlightToIds()
 }
 
 // ---------------------------------------------------------------
@@ -197,10 +211,7 @@ const focusedNeighborSet = computed(() => {
 })
 
 // 路径高亮强制可见的节点 id（即使局部展开模式下也保证路径节点露出）
-const highlightForceIds = computed(() => {
-  const nameToId = new Map(rawNodes.map((n) => [String(n.label), String(n.id)]))
-  return (props.highlightPath || []).map((name) => nameToId.get(String(name))).filter(Boolean)
-})
+const highlightForceIds = computed(() => highlightToIds())
 
 // 可见节点 id（综合：隔离聚焦 > 搜索 > 局部展开 > 全量；再叠加类型筛选 + 路径强制露出）
 const visibleNodeIds = computed(() => {
@@ -361,6 +372,8 @@ function buildGraphData() {
   const kw = (props.searchText || '').trim().toLowerCase()
   const focusId = focusedId.value
   const fNbr = focusedNeighborSet.value
+  const curId = props.currentKpId ? String(props.currentKpId) : ''
+  const recSet = new Set((props.recommendedKpIds || []).map(String))
 
   const gNodes = rawNodes
     .filter((n) => nodeSet.has(String(n.id)))
@@ -369,32 +382,75 @@ function buildGraphData() {
       const label = String(n.label ?? n.id)
       const isMastered = masteredSet.has(id)
       const inPath = pathSet.has(label) || pathSet.has(id)
-      const style = { fill: inPath ? '#e6a23c' : nodeColor(n.type), labelText: label.slice(0, 30) }
+      // 已掌握优先：已掌握节点不再显示为「当前学习」或「推荐学习」
+      const isCurrent = !inPath && !isMastered && !!curId && id === curId
+      const isRecommended = !inPath && !isCurrent && !isMastered && recSet.has(id)
 
-      if (inPath) {
-        style.stroke = '#b88230'
-        style.lineWidth = 3
-        style.halo = true
-        style.haloStroke = '#e6a23c'
-        style.haloLineWidth = 4
-      } else if (isMastered) {
-        style.stroke = '#67c23a'
-        style.lineWidth = 3
+      // P7：节点状态不靠颜色表达（避免与类型色重合），改用「形状 + 字形前缀 + 徽标 + 中性描边」；
+      // 填充始终为类型色，保持不变。
+      let labelText = label.slice(0, 30)
+      if (isCurrent) labelText = '● ' + labelText
+      else if (isRecommended) labelText = '★ ' + labelText
+
+      // 完整样式：显式给出所有可变键，避免 updateNodeData 浅合并残留旧状态
+      const style = {
+        fill: nodeColor(n.type),
+        labelText,
+        stroke: 'transparent',
+        lineWidth: 1,
+        halo: false,
+        haloStroke: STATE_STROKE,
+        haloLineWidth: 3,
+        badges: [],
+        opacity: 1,
+      }
+      let shape = 'circle'
+
+      // 学习状态：已掌握（✓ 徽标）优先于当前（菱形）/ 推荐（星形）——标记掌握后不再显示为推荐/当前
+      if (isMastered) {
+        // 已掌握：右上角 ✓ 徽标（小型状态图标，非节点着色）
+        style.badges = [
+          {
+            text: '✓',
+            placement: 'right-top',
+            fill: '#ffffff',
+            background: true,
+            backgroundFill: '#67c23a',
+            backgroundRadius: '50%',
+          },
+        ]
+      } else if (isCurrent) {
+        // 当前学习：菱形形状（形状为主信号）+ 中性描边
+        shape = 'diamond'
+        style.size = 40
+        style.stroke = STATE_STROKE
+        style.lineWidth = 2
+      } else if (isRecommended) {
+        // 推荐学习：星形形状（形状为主信号）+ 中性描边
+        shape = 'star'
+        style.size = 40
+        style.stroke = STATE_STROKE
+        style.lineWidth = 1.5
       }
 
-      // 强调优先级：聚焦 > 搜索 > 无
+      // 路径高亮：中性深色粗描边 + 深色光晕（可与已掌握/当前/推荐叠加，不覆盖类型填充色）
+      if (inPath) {
+        style.stroke = STATE_STROKE
+        style.lineWidth = 3
+        style.halo = true
+        style.haloLineWidth = 4
+      }
+
+      // 强调优先级：聚焦 > 搜索 > 无（聚焦光晕改用中性深色，与状态统一）
       if (focusId) {
         if (id === focusId) {
           style.opacity = 1
           style.halo = true
-          style.haloStroke = '#409eff'
           style.haloLineWidth = 4
         } else if (fNbr.has(id)) {
           style.opacity = 0.9
-          style.halo = false
         } else {
           style.opacity = 0.15
-          style.halo = false
         }
       } else if (kw) {
         const hit =
@@ -405,15 +461,10 @@ function buildGraphData() {
           style.halo = true
           style.haloStroke = '#f56c6c'
           style.haloLineWidth = 3
-        } else {
-          style.halo = false
         }
-      } else {
-        style.opacity = 1
-        if (!style.halo) style.halo = false
       }
 
-      return { id, style, data: n }
+      return { id, type: shape, style, data: n }
     })
 
   const gEdges = visibleEdges.value.map((e) => {
@@ -455,7 +506,7 @@ async function renderGraph() {
 async function rehighlight() {
   if (!graph) return
   const d = buildGraphData()
-  await graph.updateNodeData(d.nodes.map((n) => ({ id: n.id, style: n.style })))
+  await graph.updateNodeData(d.nodes.map((n) => ({ id: n.id, type: n.type, style: n.style })))
   await graph.updateEdgeData(d.edges.map((e) => ({ id: e.id, style: e.style })))
   await graph.draw()
 }
@@ -620,6 +671,17 @@ watch(
   () => rehighlight()
 )
 
+// 当前学习 / 推荐学习状态变化：仅改变形状/徽标/描边强调（不重布局）
+watch(
+  () => props.currentKpId,
+  () => rehighlight()
+)
+
+watch(
+  () => props.recommendedKpIds,
+  () => rehighlight()
+)
+
 watch(
   () => props.highlightPath,
   () => {
@@ -739,17 +801,51 @@ function centerOnSearch() {
   display: inline-block;
   flex-shrink: 0;
 }
-.legend-stroke-green {
-  background: transparent;
-  border: 2px solid #67c23a;
+.legend-shape {
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: #303133;
+}
+/* 已掌握：绿底白勾徽标（小型状态图标，非节点着色） */
+.legend-mastered {
+  background: #67c23a;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 9px;
+}
+/* 当前学习：菱形（旋转正方形，形状为主信号） */
+.legend-diamond {
   width: 8px;
   height: 8px;
+  border: 2px solid #303133;
+  background: #fff;
+  transform: rotate(45deg);
 }
-.legend-fill-gold {
-  background: #e6a23c;
+/* 推荐学习：星形（形状为主信号） */
+.legend-star {
+  background: transparent;
+  color: #303133;
+  font-size: 13px;
 }
-.legend-focus {
-  background: #409eff;
+/* 路径高亮：中性深色粗描边圆环 */
+.legend-ring-dark {
+  width: 8px;
+  height: 8px;
+  border: 3px solid #303133;
+  border-radius: 50%;
+  background: transparent;
+}
+/* 聚焦：中性深色光晕圆点 */
+.legend-halo-dark {
+  background: #303133;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(48, 49, 51, 0.22);
 }
 .legend-line {
   width: 16px;

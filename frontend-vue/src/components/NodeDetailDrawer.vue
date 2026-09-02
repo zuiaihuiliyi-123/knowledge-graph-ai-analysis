@@ -32,7 +32,11 @@
 
       <template v-else>
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="名称">{{ node.label }}</el-descriptions-item>
+          <el-descriptions-item label="名称">
+            {{ node.label }}
+            <el-tag v-if="state === 'current'" size="small" type="primary" effect="dark" style="margin-left: 8px">当前学习</el-tag>
+            <el-tag v-else-if="state === 'recommended'" size="small" type="warning" effect="dark" style="margin-left: 8px">推荐学习</el-tag>
+          </el-descriptions-item>
           <el-descriptions-item label="类别">
             <el-tag size="small">{{ nodeTypeLabel(node.type) }}</el-tag>
           </el-descriptions-item>
@@ -59,13 +63,41 @@
           </el-button>
         </template>
 
+        <template v-if="showFavorite">
+          <el-divider content-position="left">收藏</el-divider>
+          <el-button
+            :type="favorited ? 'warning' : 'default'"
+            :loading="favoriteLoading"
+            style="width: 100%"
+            @click="$emit('toggle-favorite')"
+          >
+            <el-icon v-if="favorited" class="icon-gap"><StarFilled /></el-icon>
+            <el-icon v-else class="icon-gap"><Star /></el-icon>
+            {{ favorited ? '已收藏（点击取消收藏）' : '收藏' }}
+          </el-button>
+        </template>
+
         <el-divider content-position="left">前置知识</el-divider>
+        <ul v-if="predecessors.length" class="prereq-list">
+          <li
+            v-for="p in predecessors"
+            :key="p.id || p.label"
+            class="related-item"
+            @click="$emit('jump-to', p)"
+          >
+            <el-tag size="small" effect="plain" :type="categoryTagType(p.properties?.category)">
+              {{ p.properties?.category || '知识点' }}
+            </el-tag>
+            <span class="prereq-name">{{ p.label }}</span>
+            <el-icon class="related-jump"><Right /></el-icon>
+          </li>
+        </ul>
         <el-button size="small" :loading="prereqLoading" @click="loadPrereqs">
-          查询前置知识
+          查询多级前置知识
         </el-button>
         <el-empty
           v-if="!prereqLoading && prereqLoaded && !prereqs.length"
-          description="未查询到前置知识"
+          description="未查询到多级前置知识"
           :image-size="60"
         />
         <ul class="prereq-list">
@@ -114,7 +146,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Right } from '@element-plus/icons-vue'
+import { Right, Star, StarFilled } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { nodeTypeLabel } from '../utils/graphStyle'
 
@@ -135,6 +167,16 @@ const props = defineProps({
   expanded: { type: Boolean, default: false },
   /** P6：相关知识（客户端一阶邻居，点击可跳转聚焦） */
   related: { type: Array, default: () => [] },
+  /** P7：直接前置知识（客户端一阶前置，点击可跳转聚焦） */
+  predecessors: { type: Array, default: () => [] },
+  /** P7：节点学习状态（current/recommended，用于展示状态标签） */
+  state: { type: String, default: '' },
+  /** 学生端：是否显示"收藏"按钮 */
+  showFavorite: { type: Boolean, default: false },
+  /** 当前节点是否已收藏 */
+  favorited: { type: Boolean, default: false },
+  /** 收藏操作进行中（禁用按钮） */
+  favoriteLoading: { type: Boolean, default: false },
 })
 const emit = defineEmits([
   'update:modelValue',
@@ -143,6 +185,7 @@ const emit = defineEmits([
   'toggle-mastery',
   'expand-toggle',
   'jump-to',
+  'toggle-favorite',
 ])
 
 const form = ref({ name: '', category: '概念', description: '' })
@@ -200,7 +243,12 @@ async function remove() {
     await ElMessageBox.confirm(
       `确定删除知识点「${originalName.value}」及其全部关系吗？`,
       '删除确认',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
     )
   } catch {
     return
@@ -268,5 +316,9 @@ async function loadPrereqs() {
   margin-left: auto;
   color: #c0c4cc;
   font-size: 14px;
+}
+.icon-gap {
+  vertical-align: -2px;
+  margin-right: 4px;
 }
 </style>

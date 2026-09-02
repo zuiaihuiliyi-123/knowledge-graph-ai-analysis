@@ -3,6 +3,7 @@ import { api } from '../api'
 
 const TOKEN_KEY = 'kg_token'
 const USER_KEY = 'kg_user'
+const STATUS_DISMISS_KEY = 'kg_backend_status_dismissed'
 
 function readUser() {
   try {
@@ -22,6 +23,8 @@ export const useAppStore = defineStore('app', {
     user: readUser(),
     backendOnline: false,
     healthChecked: false,
+    // 右下角后端服务状态浮窗是否已被用户关闭（会话级，下次登录重新显示）
+    backendStatusDismissed: sessionStorage.getItem(STATUS_DISMISS_KEY) === '1',
     courses: [], // [{course_id, course_name, node_count, ...}] 后端课程列表
     currentCourseId: '', // 当前选中的课程 ID（字符串）
     isLoading: false,
@@ -42,6 +45,9 @@ export const useAppStore = defineStore('app', {
       this.user = user
       localStorage.setItem(TOKEN_KEY, token)
       localStorage.setItem(USER_KEY, JSON.stringify(user))
+      // 重新登录后，右下角后端服务状态浮窗重新显示
+      this.backendStatusDismissed = false
+      sessionStorage.removeItem(STATUS_DISMISS_KEY)
     },
     /** 登录：成功后写入 token/user 并持久化 */
     async login(username, password) {
@@ -61,6 +67,9 @@ export const useAppStore = defineStore('app', {
       this.courses = []
       this.coursesLoaded = false
       this.currentCourseId = ''
+      // 退出后回到登录页，状态浮窗重新显示
+      this.backendStatusDismissed = false
+      sessionStorage.removeItem(STATUS_DISMISS_KEY)
     },
 
     // ---- 健康检查 ----
@@ -73,6 +82,12 @@ export const useAppStore = defineStore('app', {
       } finally {
         this.healthChecked = true
       }
+    },
+
+    /** 关闭右下角后端服务状态浮窗：本次登录会话内不再显示，下次登录重新出现 */
+    dismissBackendStatus() {
+      this.backendStatusDismissed = true
+      sessionStorage.setItem(STATUS_DISMISS_KEY, '1')
     },
 
     // ---- 课程 ----

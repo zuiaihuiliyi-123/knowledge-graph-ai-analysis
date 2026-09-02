@@ -1,13 +1,13 @@
 <template>
-  <div class="course-selector">
-    <span class="label">课程</span>
+  <div class="course-selector" :class="{ compact }">
+    <span v-if="!compact" class="label">课程</span>
     <el-select
       :model-value="modelValue"
       filterable
       clearable
       :loading="store.isLoading"
       placeholder="选择课程"
-      style="width: 240px"
+      :style="selectStyle"
       @update:model-value="onChange"
     >
       <el-option
@@ -29,8 +29,23 @@
         </span>
       </el-option>
     </el-select>
-    <el-button :icon="Plus" circle size="small" title="新建课程" @click="openCreate" />
-    <el-tooltip content="课程列表来自后端；点击 + 新建课程，悬停课程项可删除" placement="top">
+    <el-button
+      v-if="store.role === 'teacher' && !compact"
+      :icon="Plus"
+      circle
+      size="small"
+      title="新建课程"
+      @click="openCreate"
+    />
+    <el-tooltip
+      v-if="!compact"
+      :content="
+        store.role === 'teacher'
+          ? '点击 + 新建课程，悬停课程项可删除'
+          : '选择课程后浏览知识图谱、问答与学习路径'
+      "
+      placement="top"
+    >
       <el-icon class="hint-icon"><QuestionFilled /></el-icon>
     </el-tooltip>
 
@@ -54,16 +69,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Plus, QuestionFilled, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '../stores/app'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
+  /** 紧凑模式：用于窄列（如问答左栏），隐藏标签与提示，下拉自适应宽度 */
+  compact: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'change'])
 const store = useAppStore()
+
+const selectStyle = computed(() =>
+  props.compact ? { flex: 1, minWidth: '120px' } : { width: '240px' }
+)
 
 const createVisible = ref(false)
 const createName = ref('')
@@ -80,6 +101,7 @@ function onChange(val) {
 }
 
 function openCreate() {
+  if (store.role !== 'teacher') return
   createName.value = ''
   createVisible.value = true
 }
@@ -140,6 +162,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.course-selector.compact {
+  width: 100%;
 }
 .label {
   color: #606266;

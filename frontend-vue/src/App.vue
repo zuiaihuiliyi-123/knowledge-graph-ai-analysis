@@ -78,6 +78,10 @@
             <el-icon><Guide /></el-icon>
             <template #title>学习路径推荐</template>
           </el-menu-item>
+          <el-menu-item index="/student?tab=favorites" class="menu-sub">
+            <el-icon><StarFilled /></el-icon>
+            <template #title>收藏夹</template>
+          </el-menu-item>
         </template>
       </el-menu>
 
@@ -121,6 +125,7 @@
 
     <!-- 右下角后端服务状态（教师/学生端） -->
     <div
+      v-if="!store.backendStatusDismissed"
       class="backend-status"
       :class="store.backendOnline ? 'online' : store.healthChecked ? 'offline' : 'checking'"
     >
@@ -140,6 +145,15 @@
           }}
         </div>
       </div>
+      <button
+        class="status-close"
+        type="button"
+        aria-label="关闭"
+        title="关闭"
+        @click="store.dismissBackendStatus()"
+      >
+        <el-icon :size="12"><Close /></el-icon>
+      </button>
     </div>
   </el-container>
 </template>
@@ -148,7 +162,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  Upload, Compass, DataAnalysis, Search, EditPen, ChatDotRound, Guide, Fold, Expand, Notebook,
+  Upload, Compass, DataAnalysis, Search, EditPen, ChatDotRound, Guide, Fold, Expand, Notebook, Close, StarFilled,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import statusImage from './phtotos/A10赛题项目理解(1).png'
@@ -405,7 +419,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px 12px 12px;
+  padding: 12px 32px 12px 12px;
   background: #fff;
   border-radius: 14px;
   border: 1px solid #eef0f6;
@@ -454,5 +468,26 @@ onMounted(() => {
   color: #909399;
   max-width: 320px;
   line-height: 1.5;
+}
+.status-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #c0c4cc;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  transition: all 0.2s;
+}
+.status-close:hover {
+  color: #f56c6c;
+  background: #fef0f0;
 }
 </style>

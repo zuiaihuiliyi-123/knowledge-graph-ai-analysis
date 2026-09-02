@@ -84,4 +84,16 @@ export const api = {
     request.get('/api/v1/learning/progress', {
       params: { course_id: courseId || undefined },
     }),
+
+  // ---- 收藏夹（学生个人知识点书签，独立于学习状态） ----
+  getFavorites: (courseId) =>
+    request.get('/api/v1/favorites', {
+      params: { course_id: courseId || undefined },
+    }),
+  addFavorite: (courseId, kpId) =>
+    request.post('/api/v1/favorites', { course_id: courseId, kp_id: kpId }),
+  removeFavorite: (courseId, kpId) =>
+    request.delete(`/api/v1/favorites/${encodeURIComponent(kpId)}`, {
+      params: { course_id: courseId },
+    }),
 }

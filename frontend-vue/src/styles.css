@@ -165,6 +165,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap; /* 窄屏下自动换行，避免横向溢出 */
 }
 .stats-text {
   color: var(--text-secondary);

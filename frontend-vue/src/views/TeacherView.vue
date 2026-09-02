@@ -660,7 +660,12 @@ async function deleteNode() {
     await ElMessageBox.confirm(
       `确定删除知识点「${node.label}」及其全部关系吗？`,
       '删除确认',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
     )
   } catch {
     return
@@ -763,6 +768,7 @@ async function removeEdge() {
       type: 'warning',
       confirmButtonText: '删除',
       cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger',
     })
   } catch {
     return
@@ -848,7 +854,12 @@ async function deleteCourse(c) {
     await ElMessageBox.confirm(
       `确定删除课程「${c.course_name}」吗？将同时删除该课程下的文档、图谱数据及学习记录，此操作不可恢复。`,
       '删除课程',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
     )
   } catch {
     return

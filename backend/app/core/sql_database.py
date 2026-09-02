@@ -134,6 +134,21 @@ _SCHEMA_SQL = [
         PRIMARY KEY (course_id, kp_id)
     )
     """,
+
+    # 4.2.6 学生收藏表（收藏 = 学生个人知识点书签，独立于学习状态；kp_id 为逻辑外键指向 Neo4j）
+    """
+    CREATE TABLE IF NOT EXISTS t_student_favorite (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id    INTEGER NOT NULL,
+        course_id  INTEGER NOT NULL,
+        kp_id      TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        FOREIGN KEY (user_id) REFERENCES t_user(user_id),
+        FOREIGN KEY (course_id) REFERENCES t_course(course_id),
+        UNIQUE (user_id, course_id, kp_id)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_fav_user_course ON t_student_favorite(user_id, course_id);",
 ]
 
 
@@ -282,9 +297,10 @@ class SQLDatabase:
         self._execute(f"UPDATE t_course SET {', '.join(sets)} WHERE course_id = ?", tuple(params))
 
     def delete_course(self, course_id: int) -> int:
-        """删除课程及其文档、学习记录（按子表->父表顺序满足外键），返回删除的文档数"""
+        """删除课程及其文档、学习记录、收藏（按子表->父表顺序满足外键），返回删除的文档数"""
         doc_count = self.count_documents_by_course(course_id)
         with self._connect() as conn:
+            conn.execute("DELETE FROM t_student_favorite WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_learning_record WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_document WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_course WHERE course_id = ?", (course_id,))
@@ -389,6 +405,46 @@ class SQLDatabase:
             )
             conn.commit()
             return cur.rowcount
+
+    # ---------- 学生收藏（收藏 = 个人知识点书签，独立于学习状态） ----------
+
+    def add_favorite(self, user_id: int, course_id: int, kp_id: str) -> bool:
+        """新增收藏（INSERT OR IGNORE 幂等）；返回是否新插入（True=新增，False=已存在未重复）"""
+        with self._connect() as conn:
+            cur = conn.execute(
+                "INSERT OR IGNORE INTO t_student_favorite (user_id, course_id, kp_id) "
+                "VALUES (?, ?, ?)",
+                (user_id, course_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+
+    def remove_favorite(self, user_id: int, course_id: int, kp_id: str) -> int:
+        """取消收藏，返回删除条数"""
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_student_favorite "
+                "WHERE user_id = ? AND course_id = ? AND kp_id = ?",
+                (user_id, course_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def list_favorites_by_user_course(self, user_id: int, course_id: int) -> list:
+        """查询某用户某课程的收藏（按收藏时间倒序）"""
+        return self._query(
+            "SELECT kp_id, course_id, created_at FROM t_student_favorite "
+            "WHERE user_id = ? AND course_id = ? ORDER BY id DESC",
+            (user_id, course_id),
+        )
+
+    def list_favorites_by_user(self, user_id: int) -> list:
+        """查询某用户全部课程的收藏（按课程 + 收藏时间倒序）"""
+        return self._query(
+            "SELECT kp_id, course_id, created_at FROM t_student_favorite "
+            "WHERE user_id = ? ORDER BY course_id, id DESC",
+            (user_id,),
+        )
 
     # ---------- 知识点向量（RAG 向量检索） ----------
 
