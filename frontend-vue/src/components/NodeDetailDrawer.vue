@@ -75,6 +75,37 @@
             <div class="prereq-desc">{{ p.description }}</div>
           </li>
         </ul>
+
+        <template v-if="related.length">
+          <el-divider content-position="left">相关知识</el-divider>
+          <ul class="prereq-list">
+            <li
+              v-for="r in related"
+              :key="r.id || r.label"
+              class="related-item"
+              @click="$emit('jump-to', r)"
+            >
+              <el-tag size="small" effect="plain" :type="categoryTagType(r.properties?.category)">
+                {{ r.properties?.category || '知识点' }}
+              </el-tag>
+              <span class="prereq-name">{{ r.label }}</span>
+              <el-icon class="related-jump"><Right /></el-icon>
+            </li>
+          </ul>
+        </template>
+
+        <template v-if="showExpand">
+          <el-divider content-position="left">图谱展开</el-divider>
+          <el-button
+            size="small"
+            style="width: 100%"
+            :type="expanded ? 'warning' : 'primary'"
+            plain
+            @click="$emit('expand-toggle')"
+          >
+            {{ expanded ? '收起相关知识' : '展开相关知识' }}
+          </el-button>
+        </template>
       </template>
     </template>
   </el-drawer>
@@ -83,6 +114,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Right } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { nodeTypeLabel } from '../utils/graphStyle'
 
@@ -97,8 +129,21 @@ const props = defineProps({
   mastered: { type: Boolean, default: false },
   /** 标记进行中（禁用按钮） */
   masteryLoading: { type: Boolean, default: false },
+  /** P6：显示"展开/收起相关知识"按钮（学生端局部展开模式） */
+  showExpand: { type: Boolean, default: false },
+  /** P6：当前节点是否已展开 */
+  expanded: { type: Boolean, default: false },
+  /** P6：相关知识（客户端一阶邻居，点击可跳转聚焦） */
+  related: { type: Array, default: () => [] },
 })
-const emit = defineEmits(['update:modelValue', 'saved', 'deleted', 'toggle-mastery'])
+const emit = defineEmits([
+  'update:modelValue',
+  'saved',
+  'deleted',
+  'toggle-mastery',
+  'expand-toggle',
+  'jump-to',
+])
 
 const form = ref({ name: '', category: '概念', description: '' })
 const saving = ref(false)
@@ -123,6 +168,11 @@ watch(
     prereqLoaded.value = false
   }
 )
+
+function categoryTagType(category) {
+  const map = { 概念: 'primary', 定理: 'danger', 公式: 'warning', 方法: 'success' }
+  return map[category] || 'info'
+}
 
 async function save() {
   if (!form.value.name.trim()) {
@@ -204,5 +254,19 @@ async function loadPrereqs() {
   color: #909399;
   font-size: 12px;
   margin-top: 4px;
+}
+.related-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.related-item:hover {
+  background: #f5f7fa;
+}
+.related-jump {
+  margin-left: auto;
+  color: #c0c4cc;
+  font-size: 14px;
 }
 </style>

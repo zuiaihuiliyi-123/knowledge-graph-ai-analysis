@@ -25,8 +25,8 @@ async def ask_question(request: QuestionRequest, current_user: dict = Depends(ge
     """
     answer = await qa_service.ask(request.question, request.course_id)
 
-    # 获取引用来源
-    sources = qa_service.search_related_knowledge(request.question, request.course_id)
+    # 获取引用来源（结构化：kp_id/name/category/description，供前端"证据链"展示）
+    sources = qa_service.search_related_nodes(request.question, request.course_id)
 
     return success({
         "question": request.question,

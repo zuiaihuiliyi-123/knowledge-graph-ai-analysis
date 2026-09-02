@@ -19,8 +19,20 @@ export const EDGE_TYPE_LABELS = {
   APPLIES_TO: '应用',
 }
 
+// 关系类型配色（沿用暗色 + 蓝色体系，用于边着色与图例）
+export const EDGE_TYPE_COLORS = {
+  PRECEDES: '#409EFF', // 前置知识：蓝色（学习依赖主结构）
+  CONTAINS: '#67C23A', // 包含：绿色
+  RELATED_TO: '#909399', // 相关概念：灰色
+  APPLIES_TO: '#E6A23C', // 应用：橙色
+}
+
 export function nodeColor(type) {
   return NODE_TYPES[type]?.color || '#909399'
+}
+
+export function edgeColor(type) {
+  return EDGE_TYPE_COLORS[type] || '#c0c4cc'
 }
 
 export function nodeTypeLabel(type) {

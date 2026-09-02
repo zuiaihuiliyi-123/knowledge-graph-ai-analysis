@@ -72,8 +72,18 @@ class QAService:
 
     # ---------- 向量检索 ----------
 
-    def _vector_search(self, question: str, course_id, top_k: int) -> List[str]:
-        """真向量检索：问题与课程知识点 embedding 做余弦相似度排序，返回上下文列表"""
+    @staticmethod
+    def _node_dict(n) -> dict:
+        """Neo4j 节点 → 结构化引用（供前端"证据链"展示）"""
+        return {
+            "kp_id": n.get("kp_id"),
+            "name": n.get("name", ""),
+            "category": n.get("category", ""),
+            "description": n.get("description", ""),
+        }
+
+    def _vector_search(self, question: str, course_id, top_k: int) -> List[dict]:
+        """真向量检索：问题与课程知识点 embedding 做余弦相似度排序，返回结构化节点列表"""
         cid = _coerce_course_id(course_id)
         if cid is None:
             return []  # 跨课程向量检索暂不支持，退回关键词
@@ -100,12 +110,12 @@ class QAService:
             if n:
                 nodes[n.get("kp_id")] = n
 
-        return [_format_node(nodes[r["kp_id"]]) for r in ranked if r["kp_id"] in nodes]
+        return [self._node_dict(nodes[r["kp_id"]]) for r in ranked if r["kp_id"] in nodes]
 
     # ---------- 关键词检索（兜底） ----------
 
-    def _keyword_search(self, question: str, course_id, top_k: int) -> List[str]:
-        """关键词检索（向量不可用时的兜底，逻辑保留自旧实现）"""
+    def _keyword_search(self, question: str, course_id, top_k: int) -> List[dict]:
+        """关键词检索（向量不可用时的兜底），返回结构化节点列表"""
         cid = _coerce_course_id(course_id)
         keyword = (question or "")[:20]
 
@@ -125,11 +135,11 @@ class QAService:
             params = {"keyword": keyword, "top_k": top_k}
 
         records = db.query(cypher, params)
-        contexts = [_format_node(rec["n"]) for rec in records if rec.get("n")]
+        contexts = [self._node_dict(rec["n"]) for rec in records if rec.get("n")]
 
         # 结果不足 top_k 时，用同课程节点兜底补足
         if len(contexts) < top_k:
-            existing_names = {c.split("] ", 1)[-1].split(":")[0] for c in contexts}
+            existing_names = {c["name"] for c in contexts}
             if cid is not None:
                 records = db.query(
                     "MATCH (n:KnowledgePoint {course_id: $course_id}) RETURN n LIMIT $top_k",
@@ -143,17 +153,21 @@ class QAService:
                 n = rec.get("n")
                 if not n or n.get("name") in existing_names:
                     continue
-                contexts.append(_format_node(n))
+                contexts.append(self._node_dict(n))
                 if len(contexts) >= top_k:
                     break
         return contexts
 
+    def search_related_nodes(self, question: str, course_id=None, top_k: int = 5) -> List[dict]:
+        """检索相关知识（优先向量，失败退回关键词），返回结构化节点（含 kp_id/name/category/description）"""
+        nodes = self._vector_search(question, course_id, top_k)
+        if not nodes:
+            nodes = self._keyword_search(question, course_id, top_k)
+        return nodes
+
     def search_related_knowledge(self, question: str, course_id=None, top_k: int = 5) -> List[str]:
-        """检索相关知识（优先向量检索，失败退回关键词检索）"""
-        contexts = self._vector_search(question, course_id, top_k)
-        if not contexts:
-            contexts = self._keyword_search(question, course_id, top_k)
-        return contexts
+        """检索相关知识，返回格式化字符串（供 LLM 上下文 / 向后兼容）"""
+        return [_format_node(n) for n in self.search_related_nodes(question, course_id, top_k)]
 
     async def ask(self, question: str, course_id=None) -> str:
         """回答问题（RAG 模式）"""

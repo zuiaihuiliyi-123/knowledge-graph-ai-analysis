@@ -20,7 +20,7 @@
             />
             <el-button :icon="Refresh" circle title="刷新" @click="refreshBrowse" />
             <span v-if="stats" class="stats-text">
-              节点 {{ stats.nodeCount }} · 关系 {{ stats.edgeCount }}
+              节点 {{ stats.visibleNodeCount }} / {{ stats.nodeCount }} · 关系 {{ stats.visibleEdgeCount }} / {{ stats.edgeCount }}
             </span>
           </div>
         </el-card>
@@ -31,68 +31,115 @@
             :search-text="searchText"
             :mastered-kp-ids="masteredKpIds"
             :highlight-path="highlightPathNodes"
+            focus-on-click
+            progressive
             @node-click="onNodeClick"
-            @loaded="(s) => (stats = s)"
+            @stats="(s) => (stats = s)"
           />
         </el-card>
       </el-tab-pane>
 
-      <!-- ===================== Tab 2：智能问答 ===================== -->
+      <!-- ===================== Tab 2：智能问答（证据链） ===================== -->
       <el-tab-pane name="qa">
         <template #label><span class="tab-label"><el-icon><ChatDotRound /></el-icon>智能问答</span></template>
-        <el-card class="qa-card">
-          <div class="qa-toolbar">
-            <CourseSelector v-model="qaCourseId" />
-            <el-button size="small" @click="clearChat">清空对话</el-button>
-          </div>
 
-          <div ref="chatBoxRef" class="chat-box chat-scroll">
-            <div v-if="!messages.length" class="chat-welcome">
-              <div class="welcome-icon"><el-icon :size="40" color="#409eff"><MagicStick /></el-icon></div>
-              <p>基于课程知识图谱的 AI 问答助手</p>
-              <p class="welcome-sub">例如：什么是线性表？栈和队列有什么区别？</p>
-            </div>
+        <el-row :gutter="16" class="qa-layout">
+          <!-- 左栏：当前课程 + 相关知识点 -->
+          <el-col :span="6">
+            <el-card class="page-card qa-side">
+              <template #header>
+                <div class="qa-side-title"><el-icon><Collection /></el-icon>当前课程</div>
+              </template>
+              <CourseSelector v-model="qaCourseId" />
 
-            <div
-              v-for="(m, i) in messages"
-              :key="i"
-              class="msg-row"
-              :class="m.role === 'user' ? 'msg-user' : 'msg-ai'"
-            >
-              <div class="msg-bubble">
-                <div class="msg-text">{{ m.content }}</div>
-                <template v-if="m.sources && m.sources.length">
-                  <el-collapse class="msg-sources">
-                    <el-collapse-item name="src">
-                      <template #title><el-icon class="icon-gap"><Document /></el-icon>参考来源</template>
-                      <div v-for="(s, j) in m.sources" :key="j" class="source-line">
-                        {{ s }}
+              <el-divider content-position="left">相关知识点</el-divider>
+              <el-empty
+                v-if="!relatedKps.length"
+                description="提问后，此处展示答案引用的知识点"
+                :image-size="60"
+              />
+              <div v-else class="kp-list">
+                <div v-for="kp in relatedKps" :key="kp.kp_id || kp.name" class="kp-item" @click="jumpToKp(kp)">
+                  <el-tag size="small" effect="plain" :type="categoryTagType(kp.category)">
+                    {{ kp.category || '知识点' }}
+                  </el-tag>
+                  <span class="kp-name">{{ kp.name }}</span>
+                  <el-icon class="kp-jump"><Right /></el-icon>
+                </div>
+              </div>
+            </el-card>
+          </el-col>
+
+          <!-- 右栏：AI 学习助手 -->
+          <el-col :span="18">
+            <el-card class="qa-card qa-main">
+              <div class="qa-toolbar">
+                <span class="qa-title"><el-icon><MagicStick /></el-icon>AI 学习助手</span>
+                <el-button size="small" @click="clearChat">清空对话</el-button>
+              </div>
+
+              <div ref="chatBoxRef" class="chat-box chat-scroll">
+                <div v-if="!messages.length" class="chat-welcome">
+                  <div class="welcome-icon"><el-icon :size="40" color="#409eff"><MagicStick /></el-icon></div>
+                  <p>基于课程知识图谱的 AI 问答助手</p>
+                  <p class="welcome-sub">例如：什么是线性表？栈和队列有什么区别？</p>
+                </div>
+
+                <div
+                  v-for="(m, i) in messages"
+                  :key="i"
+                  class="msg-row"
+                  :class="m.role === 'user' ? 'msg-user' : 'msg-ai'"
+                >
+                  <div class="msg-bubble">
+                    <div class="msg-text">{{ m.content }}</div>
+                    <!-- 证据链：回答正文 → 引用来源 → 相关知识点（点击可定位图谱） -->
+                    <template v-if="m.sources && m.sources.length">
+                      <div class="msg-sources">
+                        <div class="sources-title">
+                          <el-icon><Document /></el-icon> 参考来源 · 课程知识库
+                        </div>
+                        <div
+                          v-for="(s, j) in m.sources"
+                          :key="j"
+                          class="source-card"
+                          @click="jumpToKp(s)"
+                        >
+                          <div class="source-head">
+                            <el-tag size="small" effect="plain" :type="categoryTagType(s.category)">
+                              {{ s.category || '知识点' }}
+                            </el-tag>
+                            <span class="source-name">{{ s.name }}</span>
+                            <el-icon class="source-jump"><Right /></el-icon>
+                          </div>
+                          <div v-if="s.description" class="source-desc">{{ s.description }}</div>
+                        </div>
                       </div>
-                    </el-collapse-item>
-                  </el-collapse>
-                </template>
-              </div>
-            </div>
+                    </template>
+                  </div>
+                </div>
 
-            <div v-if="asking" class="msg-row msg-ai">
-              <div class="msg-bubble typing">
-                <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+                <div v-if="asking" class="msg-row msg-ai">
+                  <div class="msg-bubble typing">
+                    <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div class="chat-input">
-            <el-input
-              v-model="question"
-              placeholder="输入你的问题，回车发送"
-              :disabled="asking"
-              @keyup.enter="sendQuestion"
-            />
-            <el-button type="primary" :loading="asking" @click="sendQuestion">
-              发送
-            </el-button>
-          </div>
-        </el-card>
+              <div class="chat-input">
+                <el-input
+                  v-model="question"
+                  placeholder="输入你的问题，回车发送"
+                  :disabled="asking"
+                  @keyup.enter="sendQuestion"
+                />
+                <el-button type="primary" :loading="asking" @click="sendQuestion">
+                  发送
+                </el-button>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
       </el-tab-pane>
 
       <!-- ===================== Tab 3：学习路径推荐 ===================== -->
@@ -317,7 +364,12 @@
       show-mastery
       :mastered="drawerMastered"
       :mastery-loading="masteryLoading"
+      show-expand
+      :expanded="drawerExpanded"
+      :related="drawerRelated"
       @toggle-mastery="onToggleMastery"
+      @expand-toggle="onExpandToggle"
+      @jump-to="onJumpToNode"
     />
   </div>
 </template>
@@ -326,7 +378,7 @@
 import { ref, nextTick, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled } from '@element-plus/icons-vue'
+import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled, Right, Collection } from '@element-plus/icons-vue'
 import { api } from '../api'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import CourseSelector from '../components/CourseSelector.vue'
@@ -350,6 +402,8 @@ const searchText = ref('')
 const stats = ref(null)
 const drawerVisible = ref(false)
 const drawerNode = ref(null)
+const drawerRelated = ref([])
+const drawerExpanded = ref(false)
 
 // ===================== 学习记录（掌握标记） =====================
 const masteredKpIds = ref([])
@@ -397,9 +451,23 @@ async function onToggleMastery() {
 function refreshBrowse() {
   browseGraphRef.value?.refresh()
 }
-function onNodeClick(node) {
+function onNodeClick(node, info) {
   drawerNode.value = node
+  drawerRelated.value = [...(info?.successors || []), ...(info?.related || [])]
+  drawerExpanded.value = !!info?.expanded
   drawerVisible.value = true
+}
+
+// P6：展开/收起当前节点的相关知识（局部展开模式）
+function onExpandToggle() {
+  if (!drawerNode.value || !browseGraphRef.value) return
+  drawerExpanded.value = browseGraphRef.value.toggleExpand(String(drawerNode.value.id))
+}
+
+// P6：点击「相关知识」项 → 图谱聚焦并联动更新抽屉
+function onJumpToNode(node) {
+  if (!node || !browseGraphRef.value) return
+  browseGraphRef.value.selectNode(String(node.id))
 }
 
 // 切换课程时重新加载该课程的学习进度
@@ -424,7 +492,7 @@ async function sendQuestion() {
     messages.value.push({
       role: 'ai',
       content: res.answer || '（无回答）',
-      sources: res.sources || [],
+      sources: (res.sources || []).map(normalizeSource),
     })
   } catch (e) {
     messages.value.push({ role: 'ai', content: `回答失败：${e.message}` })
@@ -444,6 +512,31 @@ function scrollChatToBottom() {
 
 function clearChat() {
   messages.value = []
+}
+
+// 引用来源归一化：后端返回结构化对象；兼容旧字符串格式（[类别] 名称: 描述）
+function normalizeSource(s) {
+  if (typeof s !== 'string') return s || {}
+  const m = s.match(/^\[(.+?)\]\s*(.+?)(?::\s*([\s\S]*))?$/)
+  if (m) return { category: m[1], name: m[2].trim(), description: (m[3] || '').trim() }
+  return { category: '', name: s, description: '' }
+}
+
+// 左栏「相关知识点」= 最近一条 AI 回答的引用来源
+const relatedKps = computed(() => {
+  for (let i = messages.value.length - 1; i >= 0; i--) {
+    const m = messages.value[i]
+    if (m.role === 'ai' && m.sources?.length) return m.sources
+  }
+  return []
+})
+
+// 点击引用/相关知识点 → 跳图谱浏览并高亮该知识点（原文/证据链字段将在 P6/P8 补充）
+function jumpToKp(kp) {
+  if (!kp || !kp.name) return
+  browseCourseId.value = qaCourseId.value
+  highlightPathNodes.value = [kp.name]
+  activeTab.value = 'browse'
 }
 
 // ===================== 学习路径推荐 =====================
@@ -703,7 +796,7 @@ function startLearning() {
 
 /* 问答 */
 .qa-card {
-  max-width: 860px;
+  max-width: 100%;
 }
 .qa-toolbar {
   display: flex;
@@ -757,12 +850,58 @@ function startLearning() {
   border: 1px solid #e4e7ed;
 }
 .msg-sources {
-  margin-top: 8px;
-  font-size: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e4e7ed;
 }
-.source-line {
+.sources-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
   color: #909399;
-  padding: 2px 0;
+  margin-bottom: 8px;
+}
+.source-card {
+  padding: 8px 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #fafbfc;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.source-card:hover {
+  background: #f0f7ff;
+  border-color: #d9ecff;
+}
+.source-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.source-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.source-jump {
+  color: #c0c4cc;
+  flex-shrink: 0;
+}
+.source-card:hover .source-jump {
+  color: #409eff;
+}
+.source-desc {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.5;
 }
 .typing {
   display: flex;
@@ -796,6 +935,64 @@ function startLearning() {
   display: flex;
   gap: 10px;
   margin-top: 12px;
+}
+.qa-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+.qa-side-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #303133;
+}
+.qa-side :deep(.course-selector) {
+  flex-wrap: wrap;
+  width: 100%;
+}
+.qa-side :deep(.course-selector .el-select) {
+  width: 100% !important;
+}
+.kp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.kp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #f0f2f5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.kp-item:hover {
+  background: #f0f7ff;
+  border-color: #d9ecff;
+}
+.kp-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kp-jump {
+  color: #c0c4cc;
+  flex-shrink: 0;
+}
+.kp-item:hover .kp-jump {
+  color: #409eff;
 }
 
 /* 路径推荐 */
