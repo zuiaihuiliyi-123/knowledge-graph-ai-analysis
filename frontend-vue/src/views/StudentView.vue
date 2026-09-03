@@ -6,6 +6,180 @@
     </div>
 
     <el-tabs v-model="activeTab">
+      <!-- ===================== Tab 0：学习总览（学习驾驶舱，P11：复用统一学习状态，不新建状态源） ===================== -->
+      <el-tab-pane name="overview">
+        <template #label><span class="tab-label"><el-icon><DataAnalysis /></el-icon>学习总览</span></template>
+
+        <!-- 页头：当前课程 + 欢迎语 -->
+        <el-card class="page-card">
+          <div class="ov-hero">
+            <div class="ov-hero-left">
+              <div class="ov-title">学习总览</div>
+              <div class="ov-sub">欢迎回来，{{ store.username }}，继续你的学习</div>
+            </div>
+            <CourseSelector v-model="pathCourseId" />
+          </div>
+        </el-card>
+
+        <!-- 未选择课程 -->
+        <el-empty
+          v-if="!pathCourseId"
+          description="请先选择课程，查看你的学习驾驶舱"
+          :image-size="90"
+        />
+
+        <template v-else>
+          <!-- 第一层：学习概况 KPI（知识点总数 / 已掌握 / 学习进度 / 我的收藏） -->
+          <div v-loading="pathDataLoading" class="ov-kpi-row">
+            <div v-for="k in overviewKpis" :key="k.label" class="ov-kpi">
+              <div class="ov-kpi-icon" :style="{ background: k.color + '1a', color: k.color }"><el-icon :size="22"><component :is="k.icon" /></el-icon></div>
+              <div class="ov-kpi-meta">
+                <div class="ov-kpi-value">{{ k.value }}</div>
+                <div class="ov-kpi-label">{{ k.label }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第二层：掌握情况 + 继续学习 -->
+          <el-row :gutter="16" class="ov-row">
+            <el-col :xs="24" :md="12">
+              <el-card class="page-card ov-card">
+                <template #header>
+                  <div class="ov-card-title"><el-icon><Histogram /></el-icon>知识点掌握情况</div>
+                </template>
+                <div v-loading="pathDataLoading" class="ov-state-list">
+                  <div v-for="s in overviewStateList" :key="s.key" class="ov-state-row">
+                    <span class="ov-state-glyph" :class="'st-' + s.key">{{ s.glyph }}</span>
+                    <span class="ov-state-name">{{ s.label }}</span>
+                    <el-progress
+                      class="ov-state-bar"
+                      :percentage="s.pct"
+                      :stroke-width="8"
+                      :color="s.color"
+                      :show-text="false"
+                    />
+                    <span class="ov-state-num">{{ s.count }}</span>
+                  </div>
+                  <div class="ov-state-total">
+                    共 {{ overviewTotal }} 个知识点 · 学习进度 {{ overviewPct }}%
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <el-card class="page-card ov-card">
+                <template #header>
+                  <div class="ov-card-title"><el-icon><Guide /></el-icon>继续学习</div>
+                </template>
+                <div v-if="overviewCurrentNode" class="ov-continue">
+                  <div class="ov-current">
+                    <span class="ov-state-glyph st-current">●</span>
+                    <div class="ov-current-meta">
+                      <div class="ov-current-name">{{ overviewCurrentNode.label }}</div>
+                      <el-tag size="small" effect="plain" :type="categoryTagType(overviewCurrentNode.properties?.category)">
+                        {{ overviewCurrentNode.properties?.category || '知识点' }}
+                      </el-tag>
+                    </div>
+                  </div>
+                  <div v-if="overviewRecommended.length" class="ov-next">
+                    <div class="ov-next-title">推荐下一步</div>
+                    <div
+                      v-for="r in overviewRecommended"
+                      :key="r.name"
+                      class="ov-next-item"
+                      @click="overviewViewName(r.name)"
+                    >
+                      <span class="ov-state-glyph st-recommended">★</span>
+                      <span class="ov-next-name">{{ r.name }}</span>
+                      <el-icon class="ov-next-jump"><Right /></el-icon>
+                    </div>
+                  </div>
+                  <div class="ov-actions">
+                    <el-button type="primary" @click="overviewContinue">继续学习</el-button>
+                    <el-button @click="overviewGoPath">查看学习路径</el-button>
+                  </div>
+                </div>
+                <el-empty
+                  v-else
+                  description="暂无当前学习内容，标记已掌握知识点后将生成推荐"
+                  :image-size="60"
+                />
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <!-- 第三层：建议重点学习 + 我的收藏 -->
+          <el-row :gutter="16" class="ov-row">
+            <el-col :xs="24" :md="12">
+              <el-card class="page-card ov-card">
+                <template #header>
+                  <div class="ov-card-title"><el-icon><Aim /></el-icon>建议重点学习</div>
+                </template>
+                <div v-if="overviewFocusList.length" class="ov-focus-list">
+                  <div
+                    v-for="f in overviewFocusList"
+                    :key="f.kpId || f.name"
+                    class="ov-focus-item"
+                    @click="overviewViewFocus(f)"
+                  >
+                    <div class="ov-focus-head">
+                      <span class="ov-focus-name">{{ f.name }}</span>
+                      <el-tag size="small" effect="plain" :type="categoryTagType(f.category)">{{ f.category || '知识点' }}</el-tag>
+                      <el-button size="small" text type="primary" class="ov-focus-view" @click.stop="overviewViewFocus(f)">查看</el-button>
+                    </div>
+                    <div v-if="f.reason" class="ov-focus-reason">{{ f.reason }}</div>
+                  </div>
+                </div>
+                <el-empty v-else description="暂无推荐，请先在课程中标记已掌握知识点" :image-size="60" />
+              </el-card>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <el-card class="page-card ov-card">
+                <template #header>
+                  <div class="ov-card-title">
+                    <el-icon><StarFilled /></el-icon>我的收藏
+                    <span class="ov-card-count">{{ overviewFavIds.length }}</span>
+                  </div>
+                </template>
+                <div v-if="overviewRecentFavs.length" class="ov-fav-list">
+                  <div v-for="n in overviewRecentFavs" :key="n.id" class="ov-fav-item" @click="overviewViewFav(n)">
+                    <el-icon class="ov-fav-star"><StarFilled /></el-icon>
+                    <span class="ov-fav-name">{{ n.label }}</span>
+                    <el-tag size="small" effect="plain" :type="categoryTagType(n.properties?.category)">{{ n.properties?.category || '知识点' }}</el-tag>
+                    <el-icon class="ov-next-jump"><Right /></el-icon>
+                  </div>
+                </div>
+                <el-empty v-else description="还没有收藏知识点" :image-size="60" />
+                <div class="ov-actions">
+                  <el-button @click="overviewGoFavorites">查看收藏夹</el-button>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <!-- 第四层：AI 学习助手（复用现有 QA 能力，自动带入问题） -->
+          <el-card class="page-card ov-card">
+            <template #header>
+              <div class="ov-card-title"><el-icon><MagicStick /></el-icon>AI 学习助手</div>
+            </template>
+            <p class="ov-ai-tip">你可以直接询问当前课程中的知识点问题，例如：</p>
+            <div class="ov-ai-quick">
+              <el-tag
+                v-for="q in overviewQuickQuestions"
+                :key="q"
+                class="ov-ai-chip"
+                effect="plain"
+                @click="overviewAsk(q)"
+              >{{ q }}</el-tag>
+            </div>
+            <div class="ov-ai-input">
+              <el-input v-model="overviewQuestion" placeholder="输入课程问题…" @keyup.enter="overviewAsk()" />
+              <el-button type="primary" @click="overviewAsk()">提问</el-button>
+            </div>
+          </el-card>
+        </template>
+      </el-tab-pane>
+
       <!-- ===================== Tab 1：图谱浏览 ===================== -->
       <el-tab-pane name="browse">
         <template #label><span class="tab-label"><el-icon><Compass /></el-icon>图谱浏览</span></template>
@@ -491,13 +665,15 @@
 import { ref, nextTick, watch, computed, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled, Right, Collection, WarningFilled, Star, StarFilled } from '@element-plus/icons-vue'
+import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled, Right, Collection, WarningFilled, Star, StarFilled, DataAnalysis, Histogram, Odometer, Checked } from '@element-plus/icons-vue'
 import { api } from '../api'
 import GraphCanvas from '../components/GraphCanvas.vue'
 import CourseSelector from '../components/CourseSelector.vue'
 import NodeDetailDrawer from '../components/NodeDetailDrawer.vue'
+import { useAppStore } from '../stores/app'
 
 const route = useRoute()
+const store = useAppStore()
 
 // 支持从菜单直接进入指定子功能（/student?tab=qa）
 const activeTab = ref(route.query.tab || 'browse')
@@ -1004,7 +1180,11 @@ async function loadPathData() {
   }
 }
 
-watch(pathCourseId, loadPathData)
+// 学习课程切换：加载路径数据（图谱 + 进度 + 推荐），并同步加载该课程收藏，供学习总览复用
+watch(pathCourseId, (id) => {
+  loadPathData()
+  if (id) loadFavorites(id)
+})
 
 const pathProgress = computed(() => {
   const total = pathGraphNodes.value.length
@@ -1134,6 +1314,127 @@ function neighborsOf(nodeId) {
     successors: successors.filter(Boolean),
     related: related.filter(Boolean),
   }
+}
+
+// ===================== 学习总览（学习驾驶舱，P11） =====================
+// 统一复用学习状态源（pathCourseId / masteredCache / favoriteCache / pathRecs /
+// currentKnowledgePointId / recommendedKnowledgePointIds），不新建任何重复状态；
+// 所有数字均来自后端真实数据（图谱 / 学习进度 / 推荐 / 收藏），无伪造指标。
+const overviewQuestion = ref('')
+
+const overviewTotal = computed(() => pathGraphNodes.value.length)
+const overviewMastered = computed(() => pathMasteredIds.value.length)
+const overviewPct = computed(() => pathProgress.value.pct)
+const overviewFavIds = computed(() => favoriteCache[pathCourseId.value] || [])
+
+// 四态计数（互斥、求和 = 知识点总数，颜色仅辅助，字形 + 文本为主信号）
+const overviewStateCounts = computed(() => {
+  const total = pathGraphNodes.value.length
+  const masteredSet = new Set(pathMasteredIds.value.map(String))
+  const cur = currentKnowledgePointId.value
+  const curIsMastered = cur ? masteredSet.has(String(cur)) : false
+  const currentCount = cur && !curIsMastered ? 1 : 0
+  const recommendedCount = recommendedKnowledgePointIds.value.filter(
+    (id) => !masteredSet.has(String(id))
+  ).length
+  return {
+    total,
+    mastered: masteredSet.size,
+    current: currentCount,
+    recommended: recommendedCount,
+    unlearned: Math.max(0, total - masteredSet.size - currentCount - recommendedCount),
+  }
+})
+
+const overviewCurrentNode = computed(() => currentKnowledgePoint.value)
+
+// 推荐下一步 = recommendNext 结果中排除「当前学习」后的前 4 条（真实推荐逻辑）
+const overviewRecommended = computed(() => {
+  const curName = overviewCurrentNode.value?.label
+  return pathRecs.value.filter((r) => r.name !== curName).slice(0, 4)
+})
+
+// 建议重点学习 = recommendNext 推荐结果（含真实 reason，不伪造原因）
+const overviewFocusList = computed(() => {
+  const nameToId = new Map(pathGraphNodes.value.map((n) => [n.label, String(n.id)]))
+  return pathRecs.value.slice(0, 5).map((r) => ({
+    kpId: nameToId.get(r.name) || null,
+    name: r.name,
+    category: r.category,
+    description: r.description,
+    reason: r.reason,
+  }))
+})
+
+// 最近收藏 = favoriteCache（API 按收藏时间倒序返回，保持原序）映射到图谱节点
+const overviewRecentFavs = computed(() => {
+  const byId = new Map(pathGraphNodes.value.map((n) => [String(n.id), n]))
+  return overviewFavIds.value
+    .slice(0, 5)
+    .map((id) => byId.get(String(id)))
+    .filter(Boolean)
+})
+
+const overviewKpis = computed(() => [
+  { label: '知识点总数', value: overviewTotal.value, color: '#409eff', icon: Collection },
+  { label: '已掌握', value: overviewMastered.value, color: '#67c23a', icon: Checked },
+  { label: '学习进度', value: overviewPct.value + '%', color: '#e6a23c', icon: Odometer },
+  { label: '我的收藏', value: overviewFavIds.value.length, color: '#f56c6c', icon: StarFilled },
+])
+
+const overviewStateList = computed(() => {
+  const c = overviewStateCounts.value
+  const pct = (n) => (c.total ? Math.round((n / c.total) * 100) : 0)
+  return [
+    { key: 'mastered', label: '已掌握', glyph: '✓', count: c.mastered, pct: pct(c.mastered), color: '#67c23a' },
+    { key: 'current', label: '当前学习', glyph: '●', count: c.current, pct: pct(c.current), color: '#409eff' },
+    { key: 'recommended', label: '推荐学习', glyph: '★', count: c.recommended, pct: pct(c.recommended), color: '#e6a23c' },
+    { key: 'unlearned', label: '未学习', glyph: '○', count: c.unlearned, pct: pct(c.unlearned), color: '#c0c4cc' },
+  ]
+})
+
+const overviewQuickQuestions = computed(() => {
+  const cur = overviewCurrentNode.value?.label
+  const qs = ['本课程有哪些入门知识点？', '如何安排本课程的学习顺序？']
+  if (cur) qs.unshift(`学习「${cur}」之前需要掌握哪些知识？`)
+  return qs
+})
+
+// 继续学习 → 复用 P7 统一定位（切图谱 + kp_id 高亮 + 居中 + 打开详情）
+function overviewContinue() {
+  if (!overviewCurrentNode.value) return
+  locateKnowledgePoint(overviewCurrentNode.value)
+  ElMessage.success(`继续学习「${overviewCurrentNode.value.label}」`)
+}
+function overviewGoPath() {
+  activeTab.value = 'path'
+}
+function overviewViewName(name) {
+  const node = pathGraphNodes.value.find((n) => n.label === name)
+  if (node) locateKnowledgePoint(node)
+}
+function overviewViewFocus(item) {
+  const node = pathGraphNodes.value.find((n) => String(n.id) === String(item.kpId))
+  if (node) locateKnowledgePoint(node)
+}
+function overviewViewFav(node) {
+  if (node) locateKnowledgePoint(node, pathCourseId.value)
+}
+function overviewGoFavorites() {
+  favCourseId.value = pathCourseId.value
+  activeTab.value = 'favorites'
+}
+// AI 学习助手：带入问题进入现有 QA tab（复用 sendQuestion 同源 API）
+function overviewAsk(q) {
+  const text = (q || overviewQuestion.value || '').trim()
+  if (!text) {
+    ElMessage.warning('请输入问题')
+    return
+  }
+  qaCourseId.value = pathCourseId.value
+  question.value = text
+  overviewQuestion.value = ''
+  activeTab.value = 'qa'
 }
 </script>
 
@@ -1730,5 +2031,326 @@ function neighborsOf(nodeId) {
   flex-shrink: 0;
   margin-left: auto;
   padding: 2px;
+}
+
+/* ===== P11 学习总览（学习驾驶舱） ===== */
+.ov-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ov-hero-left {
+  min-width: 0;
+}
+.ov-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #303133;
+}
+.ov-sub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #909399;
+}
+
+/* 第一层：KPI 卡片 */
+.ov-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.ov-kpi {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.ov-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ov-kpi-meta {
+  min-width: 0;
+}
+.ov-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #303133;
+  font-family: 'DIN Alternate', 'Helvetica Neue', sans-serif;
+}
+.ov-kpi-label {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.ov-row {
+  margin-bottom: 16px;
+}
+.ov-card {
+  height: 100%;
+}
+.ov-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #303133;
+}
+.ov-card-count {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #ecf5ff;
+  color: #409eff;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 第二层：掌握情况 */
+.ov-state-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 180px;
+}
+.ov-state-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ov-state-glyph {
+  width: 22px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.ov-state-name {
+  width: 60px;
+  font-size: 13px;
+  color: #606266;
+  flex-shrink: 0;
+}
+.ov-state-bar {
+  flex: 1;
+}
+.ov-state-num {
+  width: 32px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  color: #303133;
+  flex-shrink: 0;
+}
+.ov-state-glyph.st-mastered {
+  color: #67c23a;
+}
+.ov-state-glyph.st-current {
+  color: #409eff;
+}
+.ov-state-glyph.st-recommended {
+  color: #e6a23c;
+}
+.ov-state-glyph.st-unlearned {
+  color: #c0c4cc;
+}
+.ov-state-total {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-light);
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 继续学习 */
+.ov-continue {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 180px;
+}
+.ov-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f0f7ff;
+  border: 1px solid #d9ecff;
+  border-radius: 10px;
+}
+.ov-current-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ov-current-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #303133;
+}
+.ov-next-title {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 6px;
+}
+.ov-next-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ov-next-item:hover {
+  background: #fdf6ec;
+  border-color: #f3d19e;
+}
+.ov-next-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ov-next-jump {
+  color: #c0c4cc;
+  flex-shrink: 0;
+}
+.ov-next-item:hover .ov-next-jump {
+  color: #e6a23c;
+}
+.ov-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* 第三层：重点学习 + 收藏 */
+.ov-focus-list,
+.ov-fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ov-focus-item {
+  padding: 10px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ov-focus-item:hover {
+  background: #f5f9ff;
+  border-color: #d9ecff;
+}
+.ov-focus-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ov-focus-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ov-focus-view {
+  flex-shrink: 0;
+  padding: 2px;
+}
+.ov-focus-reason {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.5;
+}
+.ov-fav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ov-fav-item:hover {
+  background: #fdf6ec;
+  border-color: #f3d19e;
+}
+.ov-fav-star {
+  color: #e6a23c;
+  flex-shrink: 0;
+}
+.ov-fav-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 第四层：AI 学习助手 */
+.ov-ai-tip {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #909399;
+}
+.ov-ai-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ov-ai-chip {
+  cursor: pointer;
+}
+.ov-ai-input {
+  display: flex;
+  gap: 10px;
+}
+.ov-ai-input .el-input {
+  flex: 1;
+}
+
+/* 响应式：窄屏 KPI 换行 */
+@media (max-width: 1100px) {
+  .ov-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

@@ -48,6 +48,11 @@ export const api = {
   /** 全局统计：课程/用户/文档/知识点/关系 + 每课程概览 + 类别/关系分布 */
   getDashboardStats: () => request.get('/api/v1/dashboard/stats'),
 
+  // ---- 教师教学监测 ----
+  /** 查看自己课程下的学生学习进度（课程归属校验） */
+  getTeacherStudentsProgress: (courseId) =>
+    request.get('/api/v1/teacher/students/progress', { params: { course_id: courseId } }),
+
   // ---- 智能问答 ----
   ask: (question, courseId) =>
     request.post('/api/v1/qa/ask', { question, course_id: courseId || null }),

@@ -396,6 +396,13 @@ class SQLDatabase:
             (user_id,),
         )
 
+    def list_records_by_course(self, course_id: int) -> list:
+        """查询某课程下全部学习记录（教师查看班级学习情况）"""
+        return self._query(
+            "SELECT * FROM t_learning_record WHERE course_id = ? ORDER BY user_id, record_id",
+            (course_id,),
+        )
+
     def delete_learning_record(self, user_id: int, course_id: int, kp_id: str) -> int:
         """删除某用户某课程某知识点的学习记录（用于取消掌握标记）"""
         with self._connect() as conn:
@@ -445,6 +452,15 @@ class SQLDatabase:
             "WHERE user_id = ? ORDER BY course_id, id DESC",
             (user_id,),
         )
+
+    def count_favorites_by_course(self, course_id: int) -> dict:
+        """按用户统计某课程的收藏数，返回 {user_id: count}（教师查看学生收藏情况）"""
+        rows = self._query(
+            "SELECT user_id, count(*) AS cnt FROM t_student_favorite "
+            "WHERE course_id = ? GROUP BY user_id",
+            (course_id,),
+        )
+        return {r["user_id"]: r["cnt"] for r in rows}
 
     # ---------- 知识点向量（RAG 向量检索） ----------
 

@@ -41,10 +41,10 @@
         text-color="#b0b8d1"
         active-text-color="#409eff"
       >
-        <!-- 数据总览 -->
-        <el-menu-item index="/dashboard">
+        <!-- 数据总览（教师全局统计）/ 学习总览（学生学习驾驶舱） -->
+        <el-menu-item :index="store.role === 'teacher' ? '/dashboard' : '/student?tab=overview'">
           <el-icon><DataAnalysis /></el-icon>
-          <template #title>数据总览</template>
+          <template #title>{{ store.role === 'teacher' ? '数据总览' : '学习总览' }}</template>
         </el-menu-item>
 
         <template v-if="store.role === 'teacher'">
@@ -175,6 +175,7 @@ const collapsed = ref(false)
 
 // Tab 子页面中文名（面包屑 + 侧边栏 active 一致）
 const TAB_LABELS = {
+  overview: '学习总览',
   courses: '课程管理',
   upload: '文档上传',
   preview: '图谱预览',
@@ -182,6 +183,7 @@ const TAB_LABELS = {
   browse: '图谱浏览',
   qa: '智能问答',
   path: '学习路径推荐',
+  favorites: '收藏夹',
 }
 
 // 侧边栏 active：将 /teacher?tab=upload 等映射为菜单 index，保证 URL / 菜单 / 面包屑三者一致

@@ -38,11 +38,18 @@ const router = createRouter({
 // 路由守卫：未登录访问受保护页 → 跳登录并携带回跳地址；已登录访问登录页 → 按角色回首页
 router.beforeEach((to) => {
   const token = localStorage.getItem('kg_token')
+  const role = readRole()
   if (!to.meta?.public && !token) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.name === 'login' && token) {
-    return { path: '/dashboard' }
+    return role === 'teacher'
+      ? { path: '/dashboard' }
+      : { path: '/student', query: { tab: 'overview' } }
+  }
+  // 学生访问全局「数据总览」→ 转「学习总览」驾驶舱（教师仍使用全局统计页）
+  if (to.name === 'dashboard' && role === 'student') {
+    return { path: '/student', query: { tab: 'overview' } }
   }
 })
 

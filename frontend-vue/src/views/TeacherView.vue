@@ -461,6 +461,18 @@ watch(
   }
 )
 
+// 从教师端数据总览「查看知识图谱」深链进入时，预选课程并切到预览 Tab
+watch(
+  () => route.query.course_id,
+  (cid) => {
+    if (cid) {
+      previewCourseId.value = String(cid)
+      if (activeTab.value !== 'preview') activeTab.value = 'preview'
+    }
+  },
+  { immediate: true }
+)
+
 // ===================== 上传 =====================
 const courseName = ref('')
 const selectedFile = ref(null)

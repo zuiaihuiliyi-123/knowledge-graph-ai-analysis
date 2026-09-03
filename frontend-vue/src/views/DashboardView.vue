@@ -3,10 +3,16 @@
     <!-- 页头 -->
     <div class="page-header">
       <h2 class="page-title">数据总览</h2>
-      <p class="page-desc">课程知识图谱与学习数据概览</p>
+      <p class="page-desc">课程知识图谱与班级学习情况监测</p>
     </div>
 
-    <!-- 第一层：核心统计卡 -->
+    <!-- 第一层：当前课程选择（班级学习情况按此课程统计） -->
+    <div class="course-select-row">
+      <span class="row-label">当前课程</span>
+      <CourseSelector v-model="classCourseId" @change="onClassCourseChange" />
+    </div>
+
+    <!-- 第二层：核心统计卡（原有 7 张 KPI，全部保留） -->
     <div class="stats-row">
       <div
         v-for="(item, idx) in statCards"
@@ -24,7 +30,29 @@
       </div>
     </div>
 
-    <!-- 第二层：课程概览 + 知识点类别覆盖 -->
+    <!-- 第三层：班级学习情况（真实学生数据） -->
+    <div v-if="classCourseId" class="chart-card class-card">
+      <div class="chart-title">
+        <el-icon><UserFilled /></el-icon> 班级学习情况
+        <span class="class-note">（无选课关系表，班级学生 = 在该课程有学习记录的学生）</span>
+      </div>
+
+      <div v-loading="classLoading" class="class-summary">
+        <div v-for="k in classKpis" :key="k.label" class="class-kpi">
+          <div class="class-kpi-value" :style="{ color: k.color }">{{ k.value }}</div>
+          <div class="class-kpi-label">{{ k.label }}</div>
+        </div>
+      </div>
+
+      <el-empty
+        v-if="!classLoading && classData && !classData.student_count"
+        description="暂无学生学习记录（尚未有学生开始学习该课程）"
+        :image-size="80"
+      />
+      <div v-else ref="progressDistRef" class="chart-body dist-chart"></div>
+    </div>
+
+    <!-- 第四层：课程概览 + 知识点类别覆盖 -->
     <el-row :gutter="16" class="chart-row">
       <el-col :span="16">
         <div class="chart-card">
@@ -40,7 +68,7 @@
       </el-col>
     </el-row>
 
-    <!-- 第三层：关系结构 + 快速入口 -->
+    <!-- 第五层：关系结构 + 快速入口 -->
     <el-row :gutter="16" class="chart-row">
       <el-col :span="12">
         <div class="chart-card">
@@ -69,20 +97,163 @@
         </div>
       </el-col>
     </el-row>
+
+    <!-- 第六层：学生学习情况表格 -->
+    <el-card v-if="classCourseId" class="chart-card">
+      <div class="chart-title"><el-icon><User /></el-icon> 学生学习情况</div>
+
+      <div class="table-toolbar">
+        <el-input
+          v-model="studentSearch"
+          placeholder="搜索学生姓名 / 用户名"
+          clearable
+          :prefix-icon="Search"
+          style="width: 240px"
+        />
+        <el-select v-model="progressFilter" placeholder="进度筛选" clearable style="width: 150px">
+          <el-option
+            v-for="b in progressBins"
+            :key="b.value"
+            :label="b.label"
+            :value="b.value"
+          />
+        </el-select>
+      </div>
+
+      <el-table
+        :data="pagedStudents"
+        v-loading="classLoading"
+        :default-sort="{ prop: 'progress', order: 'ascending' }"
+        @sort-change="onSortChange"
+      >
+        <el-table-column prop="student_name" label="学生" sortable="custom" min-width="140">
+          <template #default="{ row }">
+            <span class="student-cell">
+              {{ row.student_name }}
+              <span v-if="row.username && row.username !== row.student_name" class="student-username">
+                @{{ row.username }}
+              </span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="total_knowledge" label="知识点总数" width="110" align="center" />
+        <el-table-column prop="mastered_count" label="已掌握" width="90" align="center" />
+        <el-table-column prop="progress" label="学习进度" sortable="custom" min-width="150">
+          <template #default="{ row }">
+            <el-progress
+              :percentage="row.progress"
+              :color="progressColor(row.progress)"
+              :stroke-width="10"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="当前学习" min-width="160">
+          <template #default="{ row }">
+            <span v-if="row.current_name" class="current-name">{{ row.current_name }}</span>
+            <span v-else class="cell-empty">—</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="推荐学习" min-width="180">
+          <template #default="{ row }">
+            <template v-if="row.recommended && row.recommended.length">
+              <el-tag
+                v-for="r in row.recommended.slice(0, 3)"
+                :key="r.kp_id || r.name"
+                size="small"
+                class="rec-tag"
+              >{{ r.name }}</el-tag>
+            </template>
+            <span v-else class="cell-empty">—</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="statusType(row.progress)" size="small" effect="plain">
+              {{ statusText(row.progress) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="90" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" type="primary" link @click="openStudentDetail(row)">
+              查看
+            </el-button>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无学生学习记录" :image-size="80" />
+        </template>
+      </el-table>
+
+      <el-pagination
+        v-if="filteredStudents.length > pageSize"
+        class="table-pagination"
+        v-model:current-page="page"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50]"
+        :total="filteredStudents.length"
+        layout="total, sizes, prev, pager, next"
+      />
+    </el-card>
+
+    <!-- 第七层：学生详情 Drawer -->
+    <el-drawer v-model="detailVisible" title="学生学习详情" direction="rtl" size="480px">
+      <template v-if="detailStudent">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="学生">
+            {{ detailStudent.student_name }}
+            <span v-if="detailStudent.username && detailStudent.username !== detailStudent.student_name" class="detail-username">
+              @{{ detailStudent.username }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="当前课程">{{ currentCourseName }}</el-descriptions-item>
+          <el-descriptions-item label="学习进度">
+            <el-progress
+              :percentage="detailStudent.progress"
+              :color="progressColor(detailStudent.progress)"
+              :stroke-width="10"
+            />
+          </el-descriptions-item>
+          <el-descriptions-item label="已掌握数量">
+            {{ detailStudent.mastered_count }} / {{ detailStudent.total_knowledge }}
+          </el-descriptions-item>
+          <el-descriptions-item label="未学习数量">{{ detailStudent.unmastered_count }}</el-descriptions-item>
+          <el-descriptions-item label="当前学习知识点">
+            {{ detailStudent.current_name || '—' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="收藏数量">{{ detailStudent.favorite_count }}</el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider content-position="left">推荐学习知识点</el-divider>
+        <ul v-if="detailStudent.recommended && detailStudent.recommended.length" class="rec-list">
+          <li v-for="r in detailStudent.recommended" :key="r.kp_id || r.name">
+            <el-tag size="small" effect="plain">{{ r.category || '知识点' }}</el-tag>
+            <span class="rec-name">{{ r.name }}</span>
+            <div class="rec-reason">{{ r.reason }}</div>
+          </li>
+        </ul>
+        <el-empty v-else description="暂无推荐" :image-size="60" />
+
+        <div class="drawer-actions">
+          <el-button type="primary" @click="goGraph">查看知识图谱</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
 import {
-  DataAnalysis, Aim, Connection, Compass, ArrowRight,
-  Collection, Document, User, UserFilled, Upload, Search, EditPen, ChatDotRound, Guide,
+  DataAnalysis, Aim, Connection, Compass, ArrowRight, Search,
+  Collection, Document, User, UserFilled, Upload, EditPen, ChatDotRound, Guide,
 } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { useAppStore } from '../stores/app'
+import CourseSelector from '../components/CourseSelector.vue'
 
 const router = useRouter()
 const store = useAppStore()
@@ -90,10 +261,12 @@ const store = useAppStore()
 const barChartRef = ref(null)
 const radarChartRef = ref(null)
 const relationChartRef = ref(null)
+const progressDistRef = ref(null)
 
 let barChart = null
 let radarChart = null
 let relationChart = null
+let progressDistChart = null
 
 // 默认统计（后端不可用/缺数据时全 0）
 const defaultStats = () => ({
@@ -110,6 +283,86 @@ const defaultStats = () => ({
 })
 
 const stats = ref(defaultStats())
+
+// ===== 班级学习情况（教师教学监测） =====
+const classCourseId = ref('')
+const classData = ref(null)
+const classLoading = ref(false)
+const studentSearch = ref('')
+const progressFilter = ref('')
+const page = ref(1)
+const pageSize = ref(10)
+const sortState = ref({ prop: 'progress', order: 'ascending' })
+const detailVisible = ref(false)
+const detailStudent = ref(null)
+
+const progressBins = [
+  { value: '0', label: '0–20%' },
+  { value: '20', label: '20–40%' },
+  { value: '40', label: '40–60%' },
+  { value: '60', label: '60–80%' },
+  { value: '80', label: '80–100%' },
+]
+
+const currentCourseName = computed(() => {
+  const c = store.courseById(classCourseId.value)
+  return c ? c.course_name : `课程 #${classCourseId.value}`
+})
+
+const classKpis = computed(() => {
+  const d = classData.value
+  const total = d?.total_knowledge ?? 0
+  const count = d?.student_count ?? 0
+  const avg = d?.avg_progress ?? 0
+  return [
+    { label: '已开始学习人数', value: count, color: '#409eff' },
+    { label: '平均学习进度', value: avg + '%', color: '#e6a23c' },
+    { label: '课程知识点总数', value: total, color: '#67c23a' },
+  ]
+})
+
+function binFor(progress) {
+  if (progress >= 80) return 80
+  if (progress >= 60) return 60
+  if (progress >= 40) return 40
+  if (progress >= 20) return 20
+  return 0
+}
+
+const filteredStudents = computed(() => {
+  let list = classData.value?.students || []
+  const kw = studentSearch.value.trim().toLowerCase()
+  if (kw) {
+    list = list.filter(
+      (s) =>
+        (s.student_name || '').toLowerCase().includes(kw) ||
+        (s.username || '').toLowerCase().includes(kw)
+    )
+  }
+  if (progressFilter.value !== '') {
+    const min = Number(progressFilter.value)
+    list = list.filter((s) =>
+      min === 80 ? s.progress >= 80 : s.progress >= min && s.progress < min + 20
+    )
+  }
+  const { prop, order } = sortState.value
+  const dir = order === 'descending' ? -1 : 1
+  return [...list].sort((a, b) => {
+    const av = prop === 'student_name' ? a.student_name : a[prop]
+    const bv = prop === 'student_name' ? b.student_name : b[prop]
+    if (av === bv) return 0
+    return (av > bv ? 1 : -1) * dir
+  })
+})
+
+const pagedStudents = computed(() => {
+  const start = (page.value - 1) * pageSize.value
+  return filteredStudents.value.slice(start, start + pageSize.value)
+})
+
+function onSortChange({ prop, order }) {
+  sortState.value = { prop: prop || 'progress', order: order || 'ascending' }
+}
 
 // 统计卡（7 张，真实数据 + 图标）
 const statCards = computed(() => [
@@ -161,6 +414,62 @@ async function fetchStats() {
   }
 }
 
+// ===== 班级学习数据 =====
+async function loadClassData() {
+  if (!classCourseId.value) {
+    classData.value = null
+    return
+  }
+  classLoading.value = true
+  try {
+    classData.value = await api.getTeacherStudentsProgress(classCourseId.value)
+    await nextTick()
+    renderProgressDist()
+  } catch (e) {
+    ElMessage.warning(`班级学习情况加载失败：${e.message}`)
+    classData.value = null
+  } finally {
+    classLoading.value = false
+  }
+}
+
+function onClassCourseChange() {
+  classData.value = null
+  studentSearch.value = ''
+  progressFilter.value = ''
+  page.value = 1
+  if (classCourseId.value) loadClassData()
+}
+
+function openStudentDetail(row) {
+  detailStudent.value = row
+  detailVisible.value = true
+}
+
+function goGraph() {
+  if (!classCourseId.value) return
+  router.push({ path: '/teacher', query: { tab: 'preview', course_id: classCourseId.value } })
+}
+
+function progressColor(p) {
+  if (p >= 80) return '#67c23a'
+  if (p >= 40) return '#e6a23c'
+  return '#f56c6c'
+}
+
+function statusText(p) {
+  if (p >= 100) return '已完成'
+  if (p > 0) return '进行中'
+  return '未开始'
+}
+
+function statusType(p) {
+  if (p >= 100) return 'success'
+  if (p > 0) return 'primary'
+  return 'info'
+}
+
+// ===== 图表初始化 =====
 function initBarChart() {
   if (!barChartRef.value) return
   barChart = echarts.init(barChartRef.value)
@@ -311,18 +620,85 @@ function initRelationChart() {
   relationChart.setOption(option)
 }
 
+function renderProgressDist() {
+  if (!progressDistRef.value) return
+  if (!progressDistChart) progressDistChart = echarts.init(progressDistRef.value)
+  const students = classData.value?.students || []
+  const labels = progressBins.map((b) => b.label)
+  const counts = progressBins.map((b) => {
+    const min = Number(b.value)
+    return students.filter((s) =>
+      min === 80 ? s.progress >= 80 : s.progress >= min && s.progress < min + 20
+    ).length
+  })
+  const option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '8%', top: '10%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      name: '学习进度',
+      nameTextStyle: { color: '#909399', fontSize: 11 },
+      axisLabel: { color: '#606266', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#dcdfe6' } },
+    },
+    yAxis: {
+      type: 'value',
+      name: '学生数',
+      nameTextStyle: { color: '#909399', fontSize: 11 },
+      minInterval: 1,
+      axisLabel: { color: '#909399' },
+      splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+    },
+    series: [{
+      type: 'bar',
+      barWidth: '50%',
+      itemStyle: {
+        borderRadius: [6, 6, 0, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: '#409eff' },
+          { offset: 1, color: '#79bbff' },
+        ]),
+      },
+      data: counts,
+    }],
+  }
+  if (counts.every((v) => v === 0)) option.graphic = emptyGraphic()
+  progressDistChart.setOption(option)
+}
+
 function handleResize() {
   barChart?.resize()
   radarChart?.resize()
   relationChart?.resize()
+  progressDistChart?.resize()
+}
+
+async function ensureCourse() {
+  if (!store.courses.length) {
+    try {
+      await store.fetchCourses()
+    } catch {
+      /* 课程列表加载失败时保持空，选择器会显示加载状态 */
+    }
+  }
+  if (!classCourseId.value && store.courses.length) {
+    const cur = store.currentCourseId
+    classCourseId.value =
+      cur && store.courses.some((c) => String(c.course_id) === String(cur))
+        ? String(cur)
+        : String(store.courses[0].course_id)
+  }
 }
 
 onMounted(async () => {
+  await ensureCourse()
   await fetchStats()
   await nextTick()
   initBarChart()
   initRadarChart()
   initRelationChart()
+  if (classCourseId.value) await loadClassData()
   window.addEventListener('resize', handleResize)
 })
 
@@ -331,6 +707,7 @@ onBeforeUnmount(() => {
   barChart?.dispose()
   radarChart?.dispose()
   relationChart?.dispose()
+  progressDistChart?.dispose()
 })
 </script>
 
@@ -353,7 +730,24 @@ onBeforeUnmount(() => {
   font-size: 13px;
 }
 
-/* ===== 第一层：统计卡 ===== */
+/* ===== 第一层：课程选择 ===== */
+.course-select-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.row-label {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== 第二层：统计卡 ===== */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -368,12 +762,12 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 12px;
   border-left: 3px solid #409eff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 .stat-icon-box {
   width: 44px;
@@ -399,6 +793,42 @@ onBeforeUnmount(() => {
   margin-top: 4px;
 }
 
+/* ===== 第三层：班级学习情况 ===== */
+.class-card {
+  margin-bottom: 16px;
+}
+.class-note {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: #c0c4cc;
+}
+.class-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.class-kpi {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fafbfc;
+  border: 1px solid #f0f2f5;
+}
+.class-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'DIN Alternate', 'Helvetica Neue', sans-serif;
+}
+.class-kpi-label {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+.dist-chart {
+  height: 220px;
+}
+
 /* ===== 图表卡片 ===== */
 .chart-row {
   margin-bottom: 16px;
@@ -407,7 +837,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border-radius: 10px;
   padding: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 .chart-title {
   display: flex;
@@ -423,6 +853,66 @@ onBeforeUnmount(() => {
 .chart-body {
   width: 100%;
   height: 320px;
+}
+
+/* ===== 学生学习情况表格 ===== */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.student-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.student-username {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 400;
+}
+.current-name {
+  color: #409eff;
+}
+.cell-empty {
+  color: #c0c4cc;
+}
+.rec-tag {
+  margin: 2px 4px 2px 0;
+}
+.table-pagination {
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+/* ===== 学生详情 Drawer ===== */
+.detail-username {
+  font-size: 12px;
+  color: #909399;
+  margin-left: 6px;
+}
+.rec-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.rec-list li {
+  padding: 8px 0;
+  border-bottom: 1px dashed #e4e7ed;
+}
+.rec-name {
+  font-weight: 600;
+  margin-left: 8px;
+}
+.rec-reason {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.drawer-actions {
+  margin-top: 16px;
 }
 
 /* ===== 快速入口 ===== */
@@ -487,6 +977,9 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .class-summary {
+    flex-direction: column;
   }
 }
 </style>
