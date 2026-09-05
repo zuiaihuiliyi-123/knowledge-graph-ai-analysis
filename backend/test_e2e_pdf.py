@@ -21,6 +21,7 @@ from app.core.database import db
 
 PDF_PATH = os.path.join("data", "sample_docs", "数据结构第一章.pdf")
 COURSE_ID = "course_e2e_001"
+DOCUMENT_ID = "doc_e2e_001"
 
 
 async def main():
@@ -53,7 +54,7 @@ async def main():
     print("=" * 60)
     db.init_schema()
     db.query("MATCH (n:KnowledgePoint {course_id: $cid}) DETACH DELETE n", {"cid": COURSE_ID})
-    stats = KnowledgeGraphManager.build_graph(COURSE_ID, entities, relations)
+    stats = KnowledgeGraphManager.build_graph(COURSE_ID, DOCUMENT_ID, entities, relations)
     print(f"  写入 {stats['node_count']} 节点 / {stats['relation_count']} 关系")
 
     # Step 4: 查回验证

@@ -19,6 +19,7 @@ from app.services.kg_manager import KnowledgeGraphManager
 from app.core.database import db
 
 COURSE_ID = "course_test_001"
+DOCUMENT_ID = "doc_test_001"
 
 TEST_TEXT = """
 线性表是数据结构中最基本、最常见的一种结构，它由 n 个数据元素组成的有限序列。
@@ -57,7 +58,7 @@ async def main():
         {"cid": COURSE_ID},
     )
 
-    stats = KnowledgeGraphManager.build_graph(COURSE_ID, entities, relations)
+    stats = KnowledgeGraphManager.build_graph(COURSE_ID, DOCUMENT_ID, entities, relations)
     print(f"  写入 {stats['node_count']} 个节点、{stats['relation_count']} 条关系")
 
     # Step 3: 从库中查回验证

@@ -97,6 +97,8 @@ import {
 
 const props = defineProps({
   courseId: { type: String, default: '' },
+  /** 文档 ID（Phase 8：图谱按 course_id + document_id 隔离，必填） */
+  documentId: { type: String, default: '' },
   /** 编辑模式：点击节点/边时携带完整数据抛出事件 */
   editable: { type: Boolean, default: false },
   /** 搜索关键词：命中节点高亮，其余变暗 */
@@ -130,6 +132,7 @@ let graph = null
 let rawNodes = [] // 后端原始节点数据
 let rawEdges = [] // 后端原始边数据
 let resizeObserver = null
+let resizeTimer = null
 
 // 节点状态 / 强调统一使用中性深色（--text-primary），避免与知识点类型色（蓝/红/橙/绿）重合
 const STATE_STROKE = '#303133'
@@ -260,9 +263,9 @@ const visibleEmpty = computed(
 // 数据加载
 // ---------------------------------------------------------------
 async function loadGraph() {
-  if (!props.courseId) {
+  if (!props.courseId || !props.documentId) {
     empty.value = true
-    emptyText.value = '请先选择课程'
+    emptyText.value = '请先选择课程和学习资料'
     rawNodes = []
     rawEdges = []
     expandedIds.value = []
@@ -273,7 +276,7 @@ async function loadGraph() {
   loading.value = true
   empty.value = false
   try {
-    const data = await api.getGraphV1(props.courseId, { limit: 800 })
+    const data = await api.getGraphV1(props.courseId, props.documentId, { limit: 800 })
     rawNodes = data.nodes || []
     rawEdges = data.edges || []
     // 局部展开模式：默认展开核心节点 → 显示核心 + 一阶关系
@@ -629,19 +632,27 @@ defineExpose({
 // ---------------------------------------------------------------
 onMounted(() => {
   resizeObserver = new ResizeObserver(() => {
-    if (graph) {
+    // 容器尺寸变化（tab 从隐藏变可见、窗口缩放等）时，同步画布 backing store 并重新布局。
+    // 关键：图谱可能在编辑 Tab 尚处于 display:none 时就被 watch(courseId/documentId) 触发初始化，
+    // 此时容器 clientWidth/Height 为 0，G6 会退化为 100×100 画布，表现为「左上角一小块」且无法缩放/平移。
+    // 仅 fitView 不更新 backing store，必须 resize() + render() 重新布局。
+    if (!graph) return
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
       try {
-        graph.fitView()
+        graph.resize()
+        graph.render()
       } catch {
         /* 初始化前触发则忽略 */
       }
-    }
+    }, 150)
   })
   resizeObserver.observe(containerRef.value)
-  if (props.courseId) loadGraph()
+  if (props.courseId && props.documentId) loadGraph()
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(resizeTimer)
   resizeObserver?.disconnect()
   if (graph) {
     graph.destroy()
@@ -650,7 +661,7 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  () => props.courseId,
+  () => [props.courseId, props.documentId],
   () => loadGraph()
 )
 

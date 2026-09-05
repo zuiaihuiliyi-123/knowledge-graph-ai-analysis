@@ -1,6 +1,6 @@
 """
 学习路径推荐服务：基于知识图谱的个性化推荐
-（对齐规划文档：KnowledgePoint 节点 + PRECEDES 英文关系类型，按 course_id 隔离）
+（对齐规划文档：KnowledgePoint 节点 + PRECEDES 英文关系类型，按 course_id + document_id 隔离）
 
 关系方向约定（务必遵守）：
     A -[:PRECEDES]-> B 表示「A 是 B 的前置知识」，即先学 A 再学 B。
@@ -8,51 +8,78 @@
     - B 的前置知识 = 入边来源 = (A)-[:PRECEDES]->(B)
     - B 解锁的后继 = 出边目标 = (B)-[:PRECEDES]->(C)
     - 根节点（无前置） = 无入边 = NOT ()-[:PRECEDES]->(B)
+
+Phase 8B：所有查询按 course_id + document_id 隔离，结果不跨文档；
+document_id 为 None 时退化为课程级（仅教师教学监测等课程级汇总场景使用，不用于知识点访问）。
 """
 from typing import List, Set
 from ..core.database import db
 
 
-def _coerce_course_id(course_id):
-    """course_id 统一为整数（对齐 Neo4j 存储类型）；空值返回 None 表示不过滤"""
-    if course_id is None or course_id == "":
+def _coerce_id(value):
+    """course_id / document_id 统一为整数（对齐 Neo4j 存储类型）；空值返回 None 表示不过滤"""
+    if value is None or value == "":
         return None
     try:
-        return int(course_id)
+        return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _scope(cid, did):
+    """构建节点属性作用域。返回 (props_str, params)：
+    props_str 形如 "course_id: $course_id, document_id: $document_id"（不含花括号），
+    可直接拼接到 `(n:KnowledgePoint {<props_str>})`。
+    did 为 None 时退化为课程级（仅教师监测等汇总场景）。
+    """
+    parts, params = [], {}
+    if cid is not None:
+        parts.append("course_id: $course_id")
+        params["course_id"] = cid
+        if did is not None:
+            parts.append("document_id: $document_id")
+            params["document_id"] = did
+    return ", ".join(parts), params
+
+
+def _node(cid, did, var, extra=()):
+    """返回 (node_fragment, params)。node_fragment 形如
+    "(n:KnowledgePoint {course_id: $course_id, document_id: $document_id})"；
+    extra 为 [(key, value)] 追加属性（如 name）。
+    """
+    props, params = _scope(cid, did)
+    for key, val in extra:
+        props = (props + ", " if props else "") + f"{key}: ${key}"
+        params[key] = val
+    if props:
+        return f"({var}:KnowledgePoint {{{props}}})", params
+    return f"({var}:KnowledgePoint)", params
 
 
 class PathRecommender:
     """学习路径推荐器"""
 
     @staticmethod
-    def get_prerequisites(knowledge_name: str, course_id=None) -> List[dict]:
+    def get_prerequisites(knowledge_name: str, course_id=None, document_id=None) -> List[dict]:
         """
         获取某个知识点的所有前置知识（递归），沿 PRECEDES 入边向上遍历。
         若没有 PRECEDES 前置，则降级返回其 CONTAINS 上层概念（建议先了解）。
         每个结果携带 reason 字段，供前端区分展示。
         """
-        cid = _coerce_course_id(course_id)
-        if cid is not None:
-            cypher = """
-            MATCH path = (prereq:KnowledgePoint {course_id: $course_id})
-                         -[:PRECEDES*1..5]->(n:KnowledgePoint {name: $name, course_id: $course_id})
-            RETURN prereq.name AS name, prereq.category AS category,
-                   prereq.description AS description, length(path) AS depth
-            ORDER BY depth
-            """
-            params = {"name": knowledge_name, "course_id": cid}
-        else:
-            cypher = """
-            MATCH path = (prereq:KnowledgePoint)-[:PRECEDES*1..5]->(n:KnowledgePoint {name: $name})
-            RETURN prereq.name AS name, prereq.category AS category,
-                   prereq.description AS description, length(path) AS depth
-            ORDER BY depth
-            """
-            params = {"name": knowledge_name}
+        cid = _coerce_id(course_id)
+        did = _coerce_id(document_id)
+        target, tp = _node(cid, did, "n", [("name", knowledge_name)])
+        prereq, pp = _node(cid, did, "prereq")
 
-        records = db.query(cypher, params)
+        records = db.query(
+            f"""
+            MATCH path = {prereq} -[:PRECEDES*1..5]-> {target}
+            RETURN prereq.name AS name, prereq.category AS category,
+                   prereq.description AS description, length(path) AS depth
+            ORDER BY depth
+            """,
+            {**pp, **tp},
+        )
         if records:
             return [
                 {
@@ -66,21 +93,14 @@ class PathRecommender:
             ]
 
         # 降级：无 PRECEDES 前置时，返回 CONTAINS 上层概念（"建议先了解"）
-        if cid is not None:
-            cypher = """
-            MATCH (parent:KnowledgePoint {course_id: $course_id})
-                  -[:CONTAINS]->(n:KnowledgePoint {name: $name, course_id: $course_id})
+        parent, pop = _node(cid, did, "parent")
+        records = db.query(
+            f"""
+            MATCH {parent} -[:CONTAINS]-> {target}
             RETURN parent.name AS name, parent.category AS category, parent.description AS description
-            """
-            params = {"name": knowledge_name, "course_id": cid}
-        else:
-            cypher = """
-            MATCH (parent:KnowledgePoint)-[:CONTAINS]->(n:KnowledgePoint {name: $name})
-            RETURN parent.name AS name, parent.category AS category, parent.description AS description
-            """
-            params = {"name": knowledge_name}
-
-        records = db.query(cypher, params)
+            """,
+            {**pop, **tp},
+        )
         return [
             {
                 "name": r.get("name"),
@@ -93,34 +113,31 @@ class PathRecommender:
         ]
 
     @staticmethod
-    def recommend_next(mastered_knowledge: List[str], course_id=None) -> List[dict]:
+    def recommend_next(mastered_knowledge: List[str], course_id=None, document_id=None) -> List[dict]:
         """
         根据已掌握的知识点，推荐下一步应学习的知识点
 
         逻辑：找到所有"前置知识已全部满足"的节点
         """
         mastered = [m for m in (mastered_knowledge or []) if m]
-        cid = _coerce_course_id(course_id)
+        cid = _coerce_id(course_id)
+        did = _coerce_id(document_id)
 
         if not mastered:
-            # 没有已掌握的知识，推荐入门根节点（没有前置知识的节点，即无 PRECEDES 入边）
-            if cid is not None:
-                cypher = """
-                MATCH (n:KnowledgePoint {course_id: $course_id})
-                WHERE NOT ()-[:PRECEDES]->(n)
+            # 没有已掌握的知识，推荐入门根节点（无前置知识的节点，即无 PRECEDES 入边）
+            n, np_ = _node(cid, did, "n")
+            incoming, ip = _node(cid, did, "pre")
+            records = db.query(
+                f"""
+                MATCH {n}
+                WHERE NOT EXISTS {{
+                    MATCH {incoming}-[:PRECEDES]->(n)
+                }}
                 RETURN n.name AS name, n.category AS category, n.description AS description
                 LIMIT 10
-                """
-                params = {"course_id": cid}
-            else:
-                cypher = """
-                MATCH (n:KnowledgePoint)
-                WHERE NOT ()-[:PRECEDES]->(n)
-                RETURN n.name AS name, n.category AS category, n.description AS description
-                LIMIT 10
-                """
-                params = {}
-            records = db.query(cypher, params)
+                """,
+                {**np_, **ip},
+            )
             return [
                 {
                     "name": r.get("name"),
@@ -132,24 +149,17 @@ class PathRecommender:
             ]
 
         # 找到所有「某前置已掌握」的候选后继节点（known 是 next 的前置）
-        if cid is not None:
-            cypher = """
-            MATCH (known:KnowledgePoint {course_id: $course_id})-[:PRECEDES]->(next:KnowledgePoint {course_id: $course_id})
+        known, kp = _node(cid, did, "known")
+        nxt, nxp = _node(cid, did, "next")
+        records = db.query(
+            f"""
+            MATCH {known}-[:PRECEDES]->{nxt}
             WHERE known.name IN $mastered AND NOT next.name IN $mastered
             RETURN next.name AS name, next.category AS category, next.description AS description,
                    collect(known.name) AS prereqs_satisfied
-            """
-            params = {"mastered": mastered, "course_id": cid}
-        else:
-            cypher = """
-            MATCH (known:KnowledgePoint)-[:PRECEDES]->(next:KnowledgePoint)
-            WHERE known.name IN $mastered AND NOT next.name IN $mastered
-            RETURN next.name AS name, next.category AS category, next.description AS description,
-                   collect(known.name) AS prereqs_satisfied
-            """
-            params = {"mastered": mastered}
-
-        records = db.query(cypher, params)
+            """,
+            {**kp, **nxp, "mastered": mastered},
+        )
 
         recommendations = []
         for r in records:
@@ -157,18 +167,15 @@ class PathRecommender:
             prereqs = r.get("prereqs_satisfied") or []
 
             # 检查该节点的所有前置知识（PRECEDES 入边）是否都已掌握
-            if cid is not None:
-                all_prereqs = db.query("""
-                MATCH (prereq:KnowledgePoint {course_id: $course_id})
-                      -[:PRECEDES]->(n:KnowledgePoint {name: $name, course_id: $course_id})
+            prereq, prp = _node(cid, did, "prereq")
+            target, tp = _node(cid, did, "n", [("name", name)])
+            all_prereqs = db.query(
+                f"""
+                MATCH {prereq} -[:PRECEDES]-> {target}
                 RETURN prereq.name AS name
-                """, {"name": name, "course_id": cid})
-            else:
-                all_prereqs = db.query("""
-                MATCH (prereq:KnowledgePoint)-[:PRECEDES]->(n:KnowledgePoint {name: $name})
-                RETURN prereq.name AS name
-                """, {"name": name})
-
+                """,
+                {**prp, **tp},
+            )
             all_prereq_names = {p.get("name") for p in all_prereqs}
 
             if all_prereq_names.issubset(set(mastered)):
@@ -185,36 +192,32 @@ class PathRecommender:
         if recommendations:
             return recommendations[:10]
 
-        # 降级：已掌握知识点未解锁任何新知识点时，返回该课程的入门根节点（排除已掌握）
-        if cid is not None:
-            cypher = """
-            MATCH (n:KnowledgePoint {course_id: $course_id})
-            WHERE NOT ()-[:PRECEDES]->(n) AND NOT n.name IN $mastered
+        # 降级：已掌握知识点未解锁任何新知识点时，返回该作用域的入门根节点（排除已掌握）
+        n, np_ = _node(cid, did, "n")
+        incoming, ip = _node(cid, did, "pre")
+        records = db.query(
+            f"""
+            MATCH {n}
+            WHERE NOT EXISTS {{
+                MATCH {incoming}-[:PRECEDES]->(n)
+            }} AND NOT n.name IN $mastered
             RETURN n.name AS name, n.category AS category, n.description AS description
             LIMIT 10
-            """
-            params = {"course_id": cid, "mastered": mastered}
-        else:
-            cypher = """
-            MATCH (n:KnowledgePoint)
-            WHERE NOT ()-[:PRECEDES]->(n) AND NOT n.name IN $mastered
-            RETURN n.name AS name, n.category AS category, n.description AS description
-            LIMIT 10
-            """
-            params = {"mastered": mastered}
-        records = db.query(cypher, params)
+            """,
+            {**np_, **ip, "mastered": mastered},
+        )
         return [
             {
                 "name": r.get("name"),
                 "category": r.get("category") or "",
                 "description": r.get("description") or "",
-                "reason": "未解锁新知识点，以下为课程入门知识点（可先掌握）",
+                "reason": "未解锁新知识点，以下为入门知识点（可先掌握）",
             }
             for r in records
         ]
 
     @staticmethod
-    def get_learning_path(target_knowledge: str, course_id=None) -> dict:
+    def get_learning_path(target_knowledge: str, course_id=None, document_id=None) -> dict:
         """
         生成到达目标知识点的学习路径（可能有多个），沿 PRECEDES 从根节点（无前置）走到目标节点。
         若目标点没有 PRECEDES 路径，则降级返回该点本身 + 其 RELATED_TO 相关概念，供前端提示。
@@ -222,30 +225,25 @@ class PathRecommender:
         返回 {"paths": [...], "fallback": bool, "target": dict|None,
               "related": [...], "reason": str|None}
         """
-        cid = _coerce_course_id(course_id)
-        if cid is not None:
-            cypher = """
-            MATCH path = (start:KnowledgePoint {course_id: $course_id})
-                         -[:PRECEDES*1..10]->(target:KnowledgePoint {name: $target, course_id: $course_id})
-            WHERE NOT ()-[:PRECEDES]->(start)
-            RETURN [node in nodes(path) | {name: node.name, category: node.category}] AS steps,
-                   length(path) AS path_length
-            ORDER BY path_length
-            LIMIT 5
-            """
-            params = {"target": target_knowledge, "course_id": cid}
-        else:
-            cypher = """
-            MATCH path = (start:KnowledgePoint)-[:PRECEDES*1..10]->(target:KnowledgePoint {name: $target})
-            WHERE NOT ()-[:PRECEDES]->(start)
-            RETURN [node in nodes(path) | {name: node.name, category: node.category}] AS steps,
-                   length(path) AS path_length
-            ORDER BY path_length
-            LIMIT 5
-            """
-            params = {"target": target_knowledge}
+        cid = _coerce_id(course_id)
+        did = _coerce_id(document_id)
+        start, sp_ = _node(cid, did, "start")
+        target, tp = _node(cid, did, "target", [("name", target_knowledge)])
+        incoming, ip = _node(cid, did, "pre")
 
-        records = db.query(cypher, params)
+        records = db.query(
+            f"""
+            MATCH path = {start} -[:PRECEDES*1..10]-> {target}
+            WHERE NOT EXISTS {{
+                MATCH {incoming}-[:PRECEDES]->(start)
+            }}
+            RETURN [node in nodes(path) | {{name: node.name, category: node.category}}] AS steps,
+                   length(path) AS path_length
+            ORDER BY path_length
+            LIMIT 5
+            """,
+            {**sp_, **tp, **ip},
+        )
         paths = []
         for r in records:
             steps = r.get("steps") or []
@@ -255,37 +253,29 @@ class PathRecommender:
             return {"paths": paths, "fallback": False, "target": None, "related": [], "reason": None}
 
         # 降级：查目标点本身 + RELATED_TO 相关概念
-        if cid is not None:
-            target_cypher = """
-            MATCH (n:KnowledgePoint {name: $target, course_id: $course_id})
-            RETURN n.name AS name, n.category AS category, n.description AS description
-            LIMIT 1
-            """
-            related_cypher = """
-            MATCH (n:KnowledgePoint {name: $target, course_id: $course_id})
-                  -[r:RELATED_TO]-(m:KnowledgePoint {course_id: $course_id})
-            RETURN m.name AS name, m.category AS category, m.description AS description
-            """
-            params = {"target": target_knowledge, "course_id": cid}
-        else:
-            target_cypher = """
-            MATCH (n:KnowledgePoint {name: $target})
-            RETURN n.name AS name, n.category AS category, n.description AS description
-            LIMIT 1
-            """
-            related_cypher = """
-            MATCH (n:KnowledgePoint {name: $target})-[r:RELATED_TO]-(m:KnowledgePoint)
-            RETURN m.name AS name, m.category AS category, m.description AS description
-            """
-            params = {"target": target_knowledge}
+        n, np_ = _node(cid, did, "n", [("name", target_knowledge)])
+        m, mp_ = _node(cid, did, "m")
 
-        target_recs = db.query(target_cypher, params)
+        target_recs = db.query(
+            f"""
+            MATCH {n}
+            RETURN n.name AS name, n.category AS category, n.description AS description
+            LIMIT 1
+            """,
+            np_,
+        )
         target = target_recs[0] if target_recs else None
         if target is None:
             # 目标知识点本身不存在，交给前端提示"知识点不存在"
             return {"paths": [], "fallback": False, "target": None, "related": [], "reason": None}
 
-        related_recs = db.query(related_cypher, params)
+        related_recs = db.query(
+            f"""
+            MATCH {n} -[r:RELATED_TO]- {m}
+            RETURN m.name AS name, m.category AS category, m.description AS description
+            """,
+            {**np_, **mp_},
+        )
         related = [
             {
                 "name": r.get("name"),

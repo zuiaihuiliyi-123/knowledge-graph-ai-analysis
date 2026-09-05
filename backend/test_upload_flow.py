@@ -71,7 +71,7 @@ async def main():
     print("\n" + "=" * 60)
     print("Step 4: Neo4j 侧校验（course_id 应为整数）")
     print("=" * 60)
-    graph = KnowledgeGraphManager.get_graph_v1(course_id)
+    graph = KnowledgeGraphManager.get_graph_v1(course_id, doc_id)
     node_cnt = len(graph["nodes"])
     edge_cnt = len(graph["edges"])
     print(f"  节点数: {node_cnt} / 关系数: {edge_cnt}")

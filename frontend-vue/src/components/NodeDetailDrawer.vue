@@ -155,6 +155,8 @@ const props = defineProps({
   node: { type: Object, default: null },
   editable: { type: Boolean, default: false },
   courseId: { type: String, default: '' },
+  /** 文档 ID（Phase 8：编辑/前置查询按文档隔离） */
+  documentId: { type: String, default: '' },
   /** 学生端：是否显示"掌握"标记按钮 */
   showMastery: { type: Boolean, default: false },
   /** 当前节点是否已掌握 */
@@ -224,7 +226,7 @@ async function save() {
   }
   saving.value = true
   try {
-    await api.updateNode(props.courseId, props.node.id, {
+    await api.updateNode(props.courseId, props.documentId, props.node.id, {
       name: form.value.name.trim(),
       category: form.value.category,
       description: form.value.description,
@@ -255,7 +257,7 @@ async function remove() {
   }
   deleting.value = true
   try {
-    await api.deleteNode(props.courseId, props.node.id)
+    await api.deleteNode(props.courseId, props.documentId, props.node.id)
     ElMessage.success('已删除')
     emit('deleted')
   } catch (e) {
@@ -268,7 +270,7 @@ async function remove() {
 async function loadPrereqs() {
   prereqLoading.value = true
   try {
-    const res = await api.getPrerequisites(originalName.value, props.courseId)
+    const res = await api.getPrerequisites(originalName.value, props.courseId, props.documentId)
     prereqs.value = res.prerequisites || []
   } catch (e) {
     ElMessage.warning(`查询失败：${e.message}`)

@@ -53,6 +53,9 @@ def main():
 
     # 3. 取节点最多的课程做验证
     cid = node_stats[0]["cid"]
+    # Phase 9：文档作用域——取该课程的唯一文档 doc_id（一课程一文档前提）
+    docs = sql_db.list_documents_by_course(cid)
+    did = docs[0]["doc_id"] if docs else None
     nodes = db.query(
         "MATCH (n:KnowledgePoint {course_id: $cid}) "
         "RETURN n.name AS name, n.category AS category ORDER BY n.name",
@@ -60,7 +63,7 @@ def main():
     )
     names = [r["name"] for r in nodes]
     print("=" * 64)
-    print(f"[3] 选定课程 course_id={cid}，共 {len(names)} 个知识点")
+    print(f"[3] 选定课程 course_id={cid}，document_id={did}，共 {len(names)} 个知识点")
     print("    知识点：", ", ".join(names[:30]))
 
     # 4. 关系类型分布（判断是否有 PRECEDES 前置关系）
@@ -80,7 +83,7 @@ def main():
     # 5. recommend_next：无已掌握 -> 推荐入门节点
     print("=" * 64)
     print("[5] recommend_next(无已掌握) -> 入门节点")
-    recs = PathRecommender.recommend_next([], course_id=cid)
+    recs = PathRecommender.recommend_next([], course_id=cid, document_id=did)
     for i, r in enumerate(recs, 1):
         print(f"    {i}. {r['name']}（{r['category']}）: {r['reason']}")
 
@@ -89,9 +92,9 @@ def main():
         learned = names[:2]
         print("=" * 64)
         print(f"[6] recommend_next(已掌握 {learned}) -> 后继")
-        recs2 = PathRecommender.recommend_next(learned, course_id=cid)
+        recs2 = PathRecommender.recommend_next(learned, course_id=cid, document_id=did)
         for i, r in enumerate(recs2, 1):
-            print(f"    {i}. {r['name']}（{r['category']}）priority={r['priority']}: {r['reason']}")
+            print(f"    {i}. {r['name']}（{r['category']}）priority={r.get('priority', '-')}: {r['reason']}")
         if not recs2:
             print("    （无满足前置条件的后继节点）")
 
@@ -100,7 +103,7 @@ def main():
         target = names[-1]
         print("=" * 64)
         print(f"[7] get_prerequisites({target})")
-        prereqs = PathRecommender.get_prerequisites(target, course_id=cid)
+        prereqs = PathRecommender.get_prerequisites(target, course_id=cid, document_id=did)
         for p in prereqs:
             print(f"    - {p['name']}（{p['category']}）depth={p['depth']}")
         if not prereqs:
@@ -111,12 +114,17 @@ def main():
         target = names[-1]
         print("=" * 64)
         print(f"[8] get_learning_path(到 {target})")
-        paths = PathRecommender.get_learning_path(target, course_id=cid)
+        result = PathRecommender.get_learning_path(target, course_id=cid, document_id=did)
+        paths = result.get("paths", []) if isinstance(result, dict) else result
         for i, steps in enumerate(paths, 1):
             chain = " -> ".join(s["name"] for s in steps)
             print(f"    路径{i}（{len(steps)} 步）: {chain}")
         if not paths:
-            print("    （无可达路径，目标可能无前置链或已是根节点）")
+            if isinstance(result, dict) and result.get("related"):
+                print("    无可达路径，但相关概念：",
+                      ", ".join(r['name'] for r in result['related']))
+            else:
+                print("    （无可达路径，目标可能无前置链或已是根节点）")
 
     print("=" * 64)
     print("验证结束")

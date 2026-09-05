@@ -52,24 +52,24 @@ class KnowledgeEmbedder:
     def __init__(self):
         self.embedding = EmbeddingClient()
 
-    def ensure_index(self, course_id) -> int:
-        """确保课程知识点向量已构建；缺失时现场构建，返回向量条数"""
-        if course_id is None:
+    def ensure_index(self, course_id, document_id) -> int:
+        """确保文档知识点向量已构建；缺失时现场构建，返回向量条数"""
+        if course_id is None or document_id is None:
             return 0
-        existing = sql_db.get_embeddings_by_course(course_id)
+        existing = sql_db.get_embeddings_by_document(course_id, document_id)
         if existing:
             return len(existing)
-        return self.build_index(course_id)
+        return self.build_index(course_id, document_id)
 
-    def build_index(self, course_id) -> int:
-        """为课程全部知识点生成并持久化 embedding；无 key 或无节点时返回 0"""
+    def build_index(self, course_id, document_id) -> int:
+        """为文档全部知识点生成并持久化 embedding；无 key 或无节点时返回 0"""
         if not self.embedding.available:
             return 0
         recs = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid}) "
+            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "RETURN n.kp_id AS kp_id, n.name AS name, n.category AS category, "
             "n.description AS description",
-            {"cid": course_id},
+            {"cid": course_id, "did": document_id},
         )
         if not recs:
             return 0
@@ -79,5 +79,5 @@ class KnowledgeEmbedder:
         ]
         vecs = self.embedding.embed(texts)
         for r, vec in zip(recs, vecs):
-            sql_db.upsert_kp_embedding(course_id, r.get("kp_id"), vec)
+            sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
         return len(recs)

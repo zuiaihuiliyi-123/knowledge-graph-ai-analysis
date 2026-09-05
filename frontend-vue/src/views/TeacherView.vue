@@ -2,11 +2,11 @@
   <div>
     <div class="page-header">
       <h2 class="page-title">课程管理</h2>
-      <p class="page-desc">管理课程、构建知识图谱与教学监测</p>
+      <p class="page-desc">管理课程、课程文档、知识图谱与教学监测</p>
     </div>
 
-    <el-tabs v-model="activeTab">
-      <!-- ===================== Tab 0：课程管理 ===================== -->
+    <el-tabs v-model="activeTab" @tab-change="onTabChange">
+      <!-- ===================== Tab 0：课程列表 ===================== -->
       <el-tab-pane name="courses">
         <template #label><span class="tab-label"><el-icon><Notebook /></el-icon>课程管理</span></template>
 
@@ -18,7 +18,7 @@
         <div v-loading="store.isLoading" class="course-grid-wrap">
           <el-empty
             v-if="!store.isLoading && !store.courses.length"
-            description="暂无课程，点击「新建课程」或上传文档自动创建"
+            description="暂无课程，点击「新建课程」开始"
           >
             <el-button type="primary" :icon="Plus" @click="openCreateCourse">新建课程</el-button>
           </el-empty>
@@ -31,7 +31,9 @@
                   {{ c.status === 1 ? '正常' : '停用' }}
                 </el-tag>
               </div>
-              <div class="course-desc" :title="c.description">{{ c.description || '暂无课程简介' }}</div>
+              <div class="course-desc" :title="c.description">
+                {{ c.course_code ? `【${c.course_code}】` : '' }}{{ c.description || '暂无课程简介' }}
+              </div>
 
               <div class="course-stats">
                 <div class="course-stat">
@@ -54,9 +56,7 @@
               <div class="course-card-foot">
                 <span class="course-updated"><el-icon><Clock /></el-icon> 更新于 {{ fmtTime(c.updated_at) }}</span>
                 <div class="course-actions">
-                  <el-button size="small" type="primary" plain :icon="View" @click="viewCourse(c)">图谱预览</el-button>
-                  <el-button size="small" type="success" plain :icon="UserFilled" @click="monitorCourse(c)">教学监测</el-button>
-                  <el-button size="small" type="warning" plain :icon="EditPen" @click="editCourse(c)">编辑</el-button>
+                  <el-button size="small" type="primary" plain :icon="Files" @click="manageDocuments(c)">管理文档</el-button>
                   <el-button size="small" type="danger" plain :icon="Delete" @click="deleteCourse(c)">删除</el-button>
                 </div>
               </div>
@@ -65,20 +65,24 @@
         </div>
       </el-tab-pane>
 
-      <!-- ===================== Tab 1：文档上传 ===================== -->
-      <el-tab-pane name="upload">
-        <template #label><span class="tab-label"><el-icon><Upload /></el-icon>文档上传</span></template>
+      <!-- ===================== Tab 1：课程文档 ===================== -->
+      <el-tab-pane name="documents">
+        <template #label><span class="tab-label"><el-icon><FolderOpened /></el-icon>课程文档</span></template>
 
-        <el-card class="page-card">
-          <el-form label-width="90px">
-            <el-form-item label="课程名称">
-              <el-input
-                v-model="courseName"
-                placeholder="例如：数据结构（留空则使用文件名）"
-                style="max-width: 420px"
-              />
-            </el-form-item>
-            <el-form-item label="课程文档">
+        <div class="context-bar">
+          <el-button text :icon="Back" @click="backToCourses">返回课程列表</el-button>
+          <el-divider direction="vertical" />
+          <span class="context-title">{{ currentCourseName }}</span>
+          <el-tag v-if="currentCourse?.course_code" size="small" type="info">
+            {{ currentCourse.course_code }}
+          </el-tag>
+        </div>
+
+        <!-- 上传入口（上传到当前课程，不再自动建课） -->
+        <el-card class="page-card upload-card">
+          <template #header><span class="panel-header">上传文档</span></template>
+          <el-form label-width="80px">
+            <el-form-item label="选择文件">
               <el-upload
                 drag
                 :auto-upload="false"
@@ -91,82 +95,95 @@
                 <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
                 <div class="el-upload__text">将文件拖到此处，或<em>点击选择</em></div>
                 <template #tip>
-                  <div class="el-upload__tip">支持 PDF / DOCX / TXT / MD，单文件不超过 50MB</div>
+                  <div class="el-upload__tip">上传到当前课程，支持 PDF / DOCX / TXT / MD，单文件不超过 50MB</div>
                 </template>
               </el-upload>
             </el-form-item>
             <el-form-item>
               <el-button
                 type="primary"
-                size="large"
                 :icon="Upload"
                 :loading="uploading"
                 :disabled="!selectedFile"
                 @click="doUpload"
               >
-                开始分析并构建知识图谱
+                上传并构建知识图谱
               </el-button>
             </el-form-item>
           </el-form>
-        </el-card>
-
-        <!-- 构建流程 Stepper（上传成功后展示处理阶段） -->
-        <el-card v-if="uploadStage !== 'idle'" class="page-card">
-          <el-steps :active="stepActive" finish-status="success" align-center>
-            <el-step title="上传文件" description="课程资料已接收" />
-            <el-step title="解析文档" description="提取文本内容" />
-            <el-step title="知识抽取" description="LLM 识别知识点" />
-            <el-step title="构建关系" description="识别前置 / 包含等关系" />
-            <el-step title="生成图谱" description="写入知识图谱" />
-          </el-steps>
-
           <el-alert
-            v-if="uploadStage === 'uploading'"
-            type="info"
+            v-if="uploadResult"
+            type="success"
             :closable="false"
-            title="正在解析文档并调用大模型提取知识…"
-            description="长文档会分块逐次调用 LLM，整个过程可能需要 1-5 分钟，请勿关闭页面。"
-            class="uploading-alert"
+            class="upload-result-alert"
+            :title="`「${uploadResult.filename}」上传成功：知识点 ${uploadResult.entity_count ?? 0}，关系 ${uploadResult.relation_count ?? 0}`"
           />
           <el-alert
-            v-else-if="uploadStage === 'error'"
+            v-if="uploadError"
             type="error"
             :closable="false"
             :title="uploadError"
-            description="请检查后端服务是否在线、API Key 是否有效，然后重新上传。"
-            class="uploading-alert"
+            class="upload-result-alert"
           />
         </el-card>
 
-        <!-- 构建结果 -->
-        <el-card v-if="uploadResult" class="page-card result-card">
+        <!-- 文档列表 -->
+        <el-card class="page-card">
           <template #header>
-            <div class="result-header">
-              <span class="result-title"><el-icon color="#67c23a"><SuccessFilled /></el-icon> 知识图谱构建完成</span>
-              <el-button size="small" type="primary" :icon="ArrowRight" @click="goReview">
-                前往图谱审核
-              </el-button>
+            <div class="doc-toolbar">
+              <span class="panel-header">文档列表（{{ documents.length }}）</span>
+              <el-button :icon="Refresh" circle size="small" @click="loadDocuments" />
             </div>
           </template>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="课程 ID">
-              <code>{{ uploadResult.course_id }}</code>
-            </el-descriptions-item>
-            <el-descriptions-item label="文档名称">{{ uploadResult.filename }}</el-descriptions-item>
-            <el-descriptions-item label="知识点数量">{{ uploadResult.entity_count ?? 0 }}</el-descriptions-item>
-            <el-descriptions-item label="关系数量">{{ uploadResult.relation_count ?? 0 }}</el-descriptions-item>
-            <el-descriptions-item label="解析状态">{{ uploadResult.parse_status }}</el-descriptions-item>
-            <el-descriptions-item label="抽取状态">{{ uploadResult.extract_status }}</el-descriptions-item>
-          </el-descriptions>
+          <el-table :data="documents" v-loading="documentsLoading">
+            <el-table-column prop="file_name" label="文件名" min-width="180" show-overflow-tooltip />
+            <el-table-column prop="file_type" label="类型" width="80" align="center" />
+            <el-table-column label="大小" width="100" align="center">
+              <template #default="{ row }">{{ fmtSize(row.file_size) }}</template>
+            </el-table-column>
+            <el-table-column label="解析状态" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="parseStatusType(row.parse_status)" size="small">{{ parseStatusText(row.parse_status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="抽取状态" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="extractStatusType(row.extract_status)" size="small">{{ extractStatusText(row.extract_status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="entity_count" label="知识点" width="80" align="center" />
+            <el-table-column prop="relation_count" label="关系" width="70" align="center" />
+            <el-table-column label="创建时间" width="150">
+              <template #default="{ row }">{{ fmtTime(row.created_at) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="300" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" plain :icon="View" @click="viewDocumentGraph(row)">查看图谱</el-button>
+                <el-button size="small" type="warning" plain :icon="EditPen" @click="editDocumentGraph(row)">编辑</el-button>
+                <el-button size="small" type="success" plain :icon="UserFilled" @click="monitorDocument(row)">监测</el-button>
+                <el-button size="small" type="danger" plain :icon="Delete" @click="deleteDocument(row)">删除</el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty description="暂无文档，请在上方上传" :image-size="80" />
+            </template>
+          </el-table>
         </el-card>
       </el-tab-pane>
 
-      <!-- ===================== Tab 2：图谱预览 ===================== -->
+      <!-- ===================== Tab 2：文档图谱预览 ===================== -->
       <el-tab-pane name="preview">
         <template #label><span class="tab-label"><el-icon><View /></el-icon>图谱预览</span></template>
+
+        <div class="context-bar">
+          <el-button text :icon="Back" @click="backToDocuments">返回文档列表</el-button>
+          <el-divider direction="vertical" />
+          <span class="context-title">{{ currentCourseName }}</span>
+          <el-tag size="small" type="info">{{ currentDocumentName || '文档' }}</el-tag>
+        </div>
+
         <el-card class="page-card">
           <div class="toolbar">
-            <CourseSelector v-model="previewCourseId" @change="onPreviewCourseChange" />
             <el-input
               v-model="previewSearch"
               placeholder="搜索知识点…"
@@ -184,7 +201,8 @@
         <el-card class="page-card graph-card">
           <GraphCanvas
             ref="previewGraphRef"
-            :course-id="previewCourseId"
+            :course-id="currentCourseId"
+            :document-id="currentDocumentId"
             :search-text="previewSearch"
             @node-click="onNodeClick"
             @loaded="(s) => (previewStats = s)"
@@ -196,13 +214,19 @@
       <el-tab-pane name="edit">
         <template #label><span class="tab-label"><el-icon><EditPen /></el-icon>编辑图谱</span></template>
 
+        <div class="context-bar">
+          <el-button text :icon="Back" @click="backToDocuments">返回文档列表</el-button>
+          <el-divider direction="vertical" />
+          <span class="context-title">{{ currentCourseName }}</span>
+          <el-tag size="small" type="info">{{ currentDocumentName || '文档' }}</el-tag>
+        </div>
+
         <el-card class="page-card">
           <div class="toolbar">
-            <CourseSelector v-model="editCourseId" @change="onEditCourseChange" />
             <el-button type="primary" :icon="Plus" @click="openAddNode">新增知识点</el-button>
             <el-button type="success" plain :icon="Connection" @click="openAddEdge">新增关系</el-button>
             <el-button :icon="Refresh" circle title="刷新" @click="refreshEdit" />
-            <span v-if="editCourseId" class="stats-text">节点 {{ editNodes.length }}</span>
+            <span v-if="currentCourseId" class="stats-text">节点 {{ editNodes.length }}</span>
           </div>
         </el-card>
 
@@ -223,8 +247,8 @@
               />
               <div class="panel-scroll">
                 <el-empty
-                  v-if="!editCourseId"
-                  description="请先选择课程"
+                  v-if="!currentCourseId"
+                  description="请先选择文档"
                   :image-size="60"
                 />
                 <el-empty
@@ -251,7 +275,8 @@
             <el-card class="panel-card graph-panel">
               <GraphCanvas
                 ref="editGraphRef"
-                :course-id="editCourseId"
+                :course-id="currentCourseId"
+                :document-id="currentDocumentId"
                 :editable="true"
                 @node-click="onEditNodeClick"
                 @edge-click="onEditEdgeClick"
@@ -327,18 +352,20 @@
           </el-col>
         </el-row>
       </el-tab-pane>
+
       <!-- ===================== Tab 4：教学监测 ===================== -->
       <el-tab-pane name="monitor">
         <template #label><span class="tab-label"><el-icon><UserFilled /></el-icon>教学监测</span></template>
 
-        <!-- 当前课程选择 -->
-        <div class="monitor-course-row">
-          <span class="row-label">当前课程</span>
-          <CourseSelector v-model="monitorCourseId" @change="onMonitorCourseChange" />
+        <div class="context-bar">
+          <el-button text :icon="Back" @click="backToDocuments">返回文档列表</el-button>
+          <el-divider direction="vertical" />
+          <span class="context-title">{{ currentCourseName }}</span>
+          <el-tag size="small" type="info">{{ currentDocumentName || '文档' }}</el-tag>
         </div>
 
         <!-- 第一层：班级学习情况（真实学生数据） -->
-        <el-card v-if="monitorCourseId" class="page-card">
+        <el-card v-if="currentCourseId" class="page-card">
           <div class="chart-title-line">
             <el-icon><UserFilled /></el-icon> 班级学习情况
             <span class="class-note">（无选课关系表，班级学生 = 在该课程有学习记录的学生）</span>
@@ -360,7 +387,7 @@
         </el-card>
 
         <!-- 第二层：学生学习情况表格 -->
-        <el-card v-if="monitorCourseId" class="page-card">
+        <el-card v-if="currentCourseId" class="page-card">
           <div class="chart-title-line"><el-icon><User /></el-icon> 学生学习情况</div>
 
           <div class="table-toolbar">
@@ -463,7 +490,8 @@
     <NodeDetailDrawer
       v-model="drawerVisible"
       :node="drawerNode"
-      :course-id="previewCourseId"
+      :course-id="currentCourseId"
+      :document-id="currentDocumentId"
       @saved="afterNodeChanged"
       @deleted="afterNodeChanged"
     />
@@ -479,7 +507,7 @@
               class="detail-username"
             >@{{ monitorDetailStudent.username }}</span>
           </el-descriptions-item>
-          <el-descriptions-item label="当前课程">{{ monitorCourseName }}</el-descriptions-item>
+          <el-descriptions-item label="当前课程">{{ currentCourseName }}</el-descriptions-item>
           <el-descriptions-item label="学习进度">
             <el-progress
               :percentage="monitorDetailStudent.progress"
@@ -508,7 +536,7 @@
         <el-empty v-else description="暂无推荐" :image-size="60" />
 
         <div class="drawer-actions">
-          <el-button type="primary" @click="goMonitorGraph">查看课程知识图谱</el-button>
+          <el-button type="primary" @click="goMonitorGraph">查看知识图谱</el-button>
         </div>
       </template>
     </el-drawer>
@@ -611,57 +639,46 @@
 
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   UploadFilled, Upload, View, EditPen, Refresh, FullScreen, Plus, Connection, ArrowRight, Search, SuccessFilled,
-  Notebook, Document, Delete, DataAnalysis, Clock, User, UserFilled,
+  Notebook, Document, Delete, DataAnalysis, Clock, User, UserFilled, Back, Files, FolderOpened,
 } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { useAppStore } from '../stores/app'
 import GraphCanvas from '../components/GraphCanvas.vue'
-import CourseSelector from '../components/CourseSelector.vue'
 import NodeDetailDrawer from '../components/NodeDetailDrawer.vue'
 import { edgeTypeLabel, nodeTypeLabel, nodeColor } from '../utils/graphStyle'
 
 const store = useAppStore()
 const route = useRoute()
-const TEACHER_TABS = ['courses', 'upload', 'preview', 'edit', 'monitor']
+const router = useRouter()
+const TEACHER_TABS = ['courses', 'documents', 'preview', 'edit', 'monitor']
 const activeTab = ref(TEACHER_TABS.includes(route.query.tab) ? route.query.tab : 'courses')
 
-// 各 Tab 的课程选择状态（提前声明，供深链 watcher 使用，避免临时性死区）
-const monitorCourseId = ref('')
-const previewCourseId = ref('')
-const editCourseId = ref('')
+// ===================== 当前上下文：课程 + 文档（教师端不搬 student learningContext） =====================
+const currentCourseId = ref('')
+const currentDocumentId = ref('')
 
-// 深链：/teacher?tab=xxx&course_id=yyy 预选课程并切换到对应 Tab（tab 与 course_id 联动）
-watch(
-  () => [route.query.tab, route.query.course_id],
-  ([tab, cid]) => {
-    if (cid) {
-      const cidStr = String(cid)
-      if (tab === 'monitor') monitorCourseId.value = cidStr
-      else if (tab === 'edit') editCourseId.value = cidStr
-      else previewCourseId.value = cidStr
-    }
-    if (TEACHER_TABS.includes(tab)) activeTab.value = tab
-  },
-  { immediate: true }
+const currentCourse = computed(() => store.courseById(currentCourseId.value) || null)
+const currentCourseName = computed(() => {
+  const c = currentCourse.value
+  return c ? c.course_name : (currentCourseId.value ? `课程 #${currentCourseId.value}` : '')
+})
+const currentDocument = computed(() =>
+  documents.value.find((d) => String(d.doc_id) === String(currentDocumentId.value)) || null
 )
+const currentDocumentName = computed(() => currentDocument.value?.file_name || '')
 
-// ===================== 上传 =====================
-const courseName = ref('')
+// ===================== 文档列表 / 上传 =====================
+const documents = ref([])
+const documentsLoading = ref(false)
 const selectedFile = ref(null)
 const uploading = ref(false)
 const uploadResult = ref(null)
 const uploadError = ref('')
-const uploadStage = ref('idle') // idle | uploading | done | error
-
-const stepActive = computed(() => {
-  if (uploadStage.value === 'done') return 5
-  return 1 // 上传完成，正在解析/抽取/构建
-})
 
 function onFileChange(file) {
   selectedFile.value = file.raw
@@ -670,26 +687,40 @@ function onFileRemove() {
   selectedFile.value = null
 }
 
+async function loadDocuments() {
+  if (!currentCourseId.value) {
+    documents.value = []
+    return
+  }
+  documentsLoading.value = true
+  try {
+    documents.value = await api.getDocuments(currentCourseId.value)
+  } catch (e) {
+    documents.value = []
+    ElMessage.warning(`文档列表加载失败：${e.message}`)
+  } finally {
+    documentsLoading.value = false
+  }
+}
+
 async function doUpload() {
   if (!selectedFile.value) return
+  if (!currentCourseId.value) {
+    ElMessage.warning('请先选择课程')
+    return
+  }
   uploading.value = true
   uploadResult.value = null
   uploadError.value = ''
-  uploadStage.value = 'uploading'
   try {
     const formData = new FormData()
     formData.append('file', selectedFile.value)
-    // course_name 后端必填：为空时用文件名（去扩展名）兜底
-    const name = courseName.value.trim() || selectedFile.value.name.replace(/\.[^.]+$/, '')
-    const result = await api.uploadCourse(formData, name)
+    // 上传到当前课程：只传 course_id，不再传 course_name / 自动建课
+    const result = await api.uploadCourse(formData, currentCourseId.value)
     uploadResult.value = result
-    uploadStage.value = 'done'
-    // 上传会自动在后端建课程，刷新课程列表并选中新课程
-    store.fetchCourses(true).catch(() => {})
-    store.currentCourseId = String(result.course_id)
     ElMessage.success('知识图谱构建完成')
+    await loadDocuments()
   } catch (e) {
-    uploadStage.value = 'error'
     uploadError.value = e.message || '上传失败'
     ElMessage.error(`上传失败：${e.message}`)
   } finally {
@@ -697,11 +728,28 @@ async function doUpload() {
   }
 }
 
-function goReview() {
-  if (uploadResult.value?.course_id) {
-    editCourseId.value = uploadResult.value.course_id
+async function deleteDocument(doc) {
+  try {
+    await ElMessageBox.confirm(
+      '删除该文档后，该文档对应的资源将被删除，是否继续？',
+      '删除文档',
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
+    )
+  } catch {
+    return
   }
-  activeTab.value = 'edit'
+  try {
+    await api.deleteDocument(doc.doc_id)
+    ElMessage.success('文档已删除')
+    await loadDocuments()
+  } catch (e) {
+    ElMessage.error(`删除失败：${e.message}`)
+  }
 }
 
 // ===================== 预览 =====================
@@ -711,9 +759,6 @@ const previewStats = ref(null)
 const drawerVisible = ref(false)
 const drawerNode = ref(null)
 
-function onPreviewCourseChange() {
-  previewStats.value = null
-}
 function refreshPreview() {
   previewGraphRef.value?.refresh()
 }
@@ -723,6 +768,10 @@ function fitPreview() {
 function onNodeClick(node) {
   drawerNode.value = node
   drawerVisible.value = true
+}
+function afterNodeChanged() {
+  drawerVisible.value = false
+  refreshPreview()
 }
 
 // ===================== 编辑（三栏审核） =====================
@@ -758,24 +807,17 @@ const filteredEditNodes = computed(() => {
 })
 
 async function loadEditNodes() {
-  if (!editCourseId.value) {
+  if (!currentCourseId.value) {
     editNodes.value = []
     return
   }
   try {
-    const data = await api.getGraphV1(editCourseId.value, { limit: 800 })
+    const data = await api.getGraphV1(currentCourseId.value, currentDocumentId.value, { limit: 800 })
     editNodes.value = data.nodes || []
   } catch {
     editNodes.value = []
   }
 }
-
-watch(editCourseId, () => {
-  selectedNode.value = null
-  prereqs.value = []
-  prereqLoaded.value = false
-  loadEditNodes()
-})
 
 // 选中节点后同步编辑表单
 watch(selectedNode, (n) => {
@@ -789,11 +831,6 @@ watch(selectedNode, (n) => {
     }
   }
 })
-
-function onEditCourseChange() {
-  selectedNode.value = null
-  editNodes.value = []
-}
 
 function selectNode(node) {
   selectedNode.value = node
@@ -825,7 +862,7 @@ async function saveNode() {
   }
   savingNode.value = true
   try {
-    await api.updateNode(editCourseId.value, selectedNode.value.id, {
+    await api.updateNode(currentCourseId.value, currentDocumentId.value, selectedNode.value.id, {
       name: editForm.value.name.trim(),
       category: editForm.value.category,
       description: editForm.value.description,
@@ -859,7 +896,7 @@ async function deleteNode() {
   }
   deletingNode.value = true
   try {
-    await api.deleteNode(editCourseId.value, node.id)
+    await api.deleteNode(currentCourseId.value, currentDocumentId.value, node.id)
     ElMessage.success('已删除')
     selectedNode.value = null
     refreshEdit()
@@ -874,7 +911,7 @@ async function loadPrereqs() {
   if (!selectedNode.value) return
   prereqLoading.value = true
   try {
-    const res = await api.getPrerequisites(selectedNode.value.label, editCourseId.value)
+    const res = await api.getPrerequisites(selectedNode.value.label, currentCourseId.value, currentDocumentId.value)
     prereqs.value = res.prerequisites || []
   } catch (e) {
     ElMessage.warning(`查询失败：${e.message}`)
@@ -885,8 +922,8 @@ async function loadPrereqs() {
 }
 
 function openAddNode() {
-  if (!editCourseId.value) {
-    ElMessage.warning('请先选择课程')
+  if (!currentCourseId.value) {
+    ElMessage.warning('请先选择文档')
     return
   }
   addNodeForm.value = { name: '', category: '概念', description: '' }
@@ -900,7 +937,7 @@ async function submitAddNode() {
   }
   addNodeLoading.value = true
   try {
-    await api.createNode(editCourseId.value, {
+    await api.createNode(currentCourseId.value, currentDocumentId.value, {
       name: addNodeForm.value.name.trim(),
       category: addNodeForm.value.category,
       description: addNodeForm.value.description,
@@ -916,8 +953,8 @@ async function submitAddNode() {
 }
 
 function openAddEdge() {
-  if (!editCourseId.value) {
-    ElMessage.warning('请先选择课程')
+  if (!currentCourseId.value) {
+    ElMessage.warning('请先选择文档')
     return
   }
   if (!editNodes.value.length) loadEditNodes()
@@ -937,7 +974,7 @@ async function submitAddEdge() {
   }
   addEdgeLoading.value = true
   try {
-    await api.createEdge(editCourseId.value, { source, type, target })
+    await api.createEdge(currentCourseId.value, currentDocumentId.value, { source, type, target })
     ElMessage.success('关系创建成功')
     addEdgeVisible.value = false
     refreshEdit()
@@ -962,7 +999,7 @@ async function removeEdge() {
   }
   deleteEdgeLoading.value = true
   try {
-    await api.deleteEdge(editCourseId.value, clickedEdge.value.id)
+    await api.deleteEdge(currentCourseId.value, currentDocumentId.value, clickedEdge.value.id)
     ElMessage.success('关系已删除')
     edgeDialogVisible.value = false
     refreshEdit()
@@ -978,11 +1015,6 @@ function refreshEdit() {
   loadEditNodes()
 }
 
-function afterNodeChanged() {
-  drawerVisible.value = false
-  refreshPreview()
-}
-
 function edgeLabel(edge) {
   return edgeTypeLabel(edge?.type, edge?.label)
 }
@@ -992,24 +1024,56 @@ const createCourseVisible = ref(false)
 const createCourseForm = ref({ name: '', description: '' })
 const createCourseLoading = ref(false)
 
-// 进入课程管理 Tab 时强制刷新，保证节点/关系数最新；进入教学监测 Tab 时加载当前课程数据
-watch(activeTab, (tab) => {
-  if (tab === 'courses') store.fetchCourses(true).catch(() => {})
-  if (tab === 'monitor' && monitorCourseId.value) loadMonitorData()
-})
+function openCreateCourse() {
+  createCourseForm.value = { name: '', description: '' }
+  createCourseVisible.value = true
+}
 
-// 课程管理为默认 Tab（无 CourseSelector 触发加载），组件挂载时确保课程列表已加载
-onMounted(() => {
-  store.fetchCourses(true).catch(() => {})
-  window.addEventListener('resize', handleMonitorResize)
-  // 深链直达 /teacher?tab=monitor&course_id=xxx 时，activeTab 初始即 monitor，watcher 不会触发，需在此补一次加载
-  if (activeTab.value === 'monitor' && monitorCourseId.value) loadMonitorData()
-})
+async function submitCreateCourse() {
+  const name = createCourseForm.value.name.trim()
+  if (!name) {
+    ElMessage.warning('课程名称不能为空')
+    return
+  }
+  createCourseLoading.value = true
+  try {
+    await store.createCourse(name, { description: createCourseForm.value.description.trim() })
+    createCourseVisible.value = false
+    ElMessage.success(`课程「${name}」创建成功`)
+  } catch (e) {
+    ElMessage.error(`创建失败：${e.message}`)
+  } finally {
+    createCourseLoading.value = false
+  }
+}
 
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleMonitorResize)
-  progressDistChart?.dispose()
-})
+async function deleteCourse(c) {
+  const id = String(c.course_id)
+  try {
+    await ElMessageBox.confirm(
+      `确定删除课程「${c.course_name}」吗？将同时删除该课程下的文档、图谱数据及学习记录，此操作不可恢复。`,
+      '删除课程',
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+      }
+    )
+  } catch {
+    return
+  }
+  try {
+    await store.deleteCourse(id)
+    ElMessage.success('课程已删除')
+    if (String(currentCourseId.value) === id) {
+      currentCourseId.value = ''
+      currentDocumentId.value = ''
+    }
+  } catch (e) {
+    ElMessage.error(`删除失败：${e.message}`)
+  }
+}
 
 // ===================== 教学监测 =====================
 const monitorData = ref(null)
@@ -1032,12 +1096,6 @@ const progressBins = [
   { value: '80', label: '80–100%' },
 ]
 
-const monitorCourseName = computed(() => {
-  const c = store.courseById(monitorCourseId.value)
-  return c ? c.course_name : `课程 #${monitorCourseId.value}`
-})
-
-// 第一层：当前课程真实学习概况（口径与后端一致：已开始学习人数 / 平均进度 / 知识点总数）
 const monitorKpis = computed(() => {
   const d = monitorData.value
   return [
@@ -1083,13 +1141,13 @@ function onMonitorSortChange({ prop, order }) {
 }
 
 async function loadMonitorData() {
-  if (!monitorCourseId.value) {
+  if (!currentCourseId.value) {
     monitorData.value = null
     return
   }
   monitorLoading.value = true
   try {
-    monitorData.value = await api.getTeacherStudentsProgress(monitorCourseId.value)
+    monitorData.value = await api.getTeacherStudentsProgress(currentCourseId.value)
     if (activeTab.value === 'monitor') {
       await nextTick()
       renderProgressDist()
@@ -1102,23 +1160,17 @@ async function loadMonitorData() {
   }
 }
 
-function onMonitorCourseChange() {
-  monitorData.value = null
-  monitorSearch.value = ''
-  monitorProgressFilter.value = ''
-  monitorPage.value = 1
-  if (monitorCourseId.value) loadMonitorData()
-}
-
 function openMonitorStudentDetail(row) {
   monitorDetailStudent.value = row
   monitorDetailVisible.value = true
 }
 
 function goMonitorGraph() {
-  if (!monitorCourseId.value) return
-  previewCourseId.value = monitorCourseId.value
-  activeTab.value = 'preview'
+  if (!currentCourseId.value || !currentDocumentId.value) return
+  router.push({
+    path: '/teacher',
+    query: { tab: 'preview', course_id: currentCourseId.value, document_id: currentDocumentId.value },
+  })
 }
 
 function progressColor(p) {
@@ -1145,7 +1197,6 @@ function renderProgressDist() {
     progressDistChart = null
     return
   }
-  // 课程切换后容器 div 会被重建，复用旧实例前先校验其绑定的 DOM 仍是当前容器
   if (progressDistChart && progressDistChart.getDom() !== progressDistRef.value) {
     progressDistChart.dispose()
     progressDistChart = null
@@ -1202,72 +1253,167 @@ function handleMonitorResize() {
   progressDistChart?.resize()
 }
 
-function openCreateCourse() {
-  createCourseForm.value = { name: '', description: '' }
-  createCourseVisible.value = true
+// ===================== 导航 =====================
+function goCourses() {
+  router.push({ path: '/teacher', query: { tab: 'courses' } })
 }
-
-async function submitCreateCourse() {
-  const name = createCourseForm.value.name.trim()
-  if (!name) {
-    ElMessage.warning('课程名称不能为空')
-    return
-  }
-  createCourseLoading.value = true
-  try {
-    await store.createCourse(name, { description: createCourseForm.value.description.trim() })
-    createCourseVisible.value = false
-    ElMessage.success(`课程「${name}」创建成功`)
-  } catch (e) {
-    ElMessage.error(`创建失败：${e.message}`)
-  } finally {
-    createCourseLoading.value = false
+function manageDocuments(course) {
+  // 入参是课程卡片对象 c（非 id）：必须取 course.course_id，否则 String(对象) 会得到 "[object Object]"
+  router.push({ path: '/teacher', query: { tab: 'documents', course_id: String(course.course_id) } })
+}
+function backToCourses() {
+  goCourses()
+}
+function backToDocuments() {
+  if (currentCourseId.value) {
+    router.push({ path: '/teacher', query: { tab: 'documents', course_id: currentCourseId.value } })
+  } else {
+    goCourses()
   }
 }
-
-function viewCourse(c) {
-  previewCourseId.value = String(c.course_id)
-  activeTab.value = 'preview'
+function viewDocumentGraph(doc) {
+  router.push({
+    path: '/teacher',
+    query: { tab: 'preview', course_id: String(doc.course_id), document_id: String(doc.doc_id) },
+  })
+}
+function editDocumentGraph(doc) {
+  router.push({
+    path: '/teacher',
+    query: { tab: 'edit', course_id: String(doc.course_id), document_id: String(doc.doc_id) },
+  })
+}
+function monitorDocument(doc) {
+  router.push({
+    path: '/teacher',
+    query: { tab: 'monitor', course_id: String(doc.course_id), document_id: String(doc.doc_id) },
+  })
 }
 
-function editCourse(c) {
-  editCourseId.value = String(c.course_id)
-  activeTab.value = 'edit'
+// 用户直接点击 Tab 头：同步路由（缺失参数的守卫统一由 route watcher 处理）
+function onTabChange(name) {
+  if (name === 'courses') {
+    router.replace({ path: '/teacher', query: { tab: 'courses' } })
+  } else if (name === 'documents') {
+    router.replace({
+      path: '/teacher',
+      query: { tab: 'documents', course_id: currentCourseId.value || undefined },
+    })
+  } else {
+    router.replace({
+      path: '/teacher',
+      query: {
+        tab: name,
+        course_id: currentCourseId.value || undefined,
+        document_id: currentDocumentId.value || undefined,
+      },
+    })
+  }
 }
 
-function monitorCourse(c) {
-  monitorCourseId.value = String(c.course_id)
-  activeTab.value = 'monitor'
-}
-
-async function deleteCourse(c) {
-  const id = String(c.course_id)
-  try {
-    await ElMessageBox.confirm(
-      `确定删除课程「${c.course_name}」吗？将同时删除该课程下的文档、图谱数据及学习记录，此操作不可恢复。`,
-      '删除课程',
-      {
-        type: 'warning',
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
-        confirmButtonClass: 'el-button--danger',
+// ===================== 路由同步 + 守卫 =====================
+// 深链 /teacher?tab=xxx&course_id=yyy&document_id=zzz：同步上下文并守卫缺失参数
+watch(
+  () => [route.query.tab, route.query.course_id, route.query.document_id],
+  ([tab, cid, did]) => {
+    if (!tab) {
+      activeTab.value = 'courses'
+      currentCourseId.value = ''
+      currentDocumentId.value = ''
+      return
+    }
+    if (!TEACHER_TABS.includes(tab)) {
+      activeTab.value = 'courses'
+      return
+    }
+    if (['preview', 'edit', 'monitor'].includes(tab)) {
+      if (!cid) {
+        ElMessage.warning('请先选择课程')
+        router.replace({ path: '/teacher', query: { tab: 'courses' } })
+        return
       }
-    )
-  } catch {
-    return
-  }
-  try {
-    await store.deleteCourse(id)
-    ElMessage.success('课程已删除')
-    if (String(previewCourseId.value) === id) previewCourseId.value = ''
-    if (String(editCourseId.value) === id) editCourseId.value = ''
-  } catch (e) {
-    ElMessage.error(`删除失败：${e.message}`)
-  }
-}
+      if (!did) {
+        ElMessage.warning('请先选择一个文档')
+        router.replace({ path: '/teacher', query: { tab: 'documents', course_id: String(cid) } })
+        return
+      }
+      currentCourseId.value = String(cid)
+      currentDocumentId.value = String(did)
+    } else if (tab === 'documents') {
+      if (!cid) {
+        ElMessage.warning('请先选择课程')
+        router.replace({ path: '/teacher', query: { tab: 'courses' } })
+        return
+      }
+      currentCourseId.value = String(cid)
+      currentDocumentId.value = ''
+    } else {
+      currentCourseId.value = ''
+      currentDocumentId.value = ''
+    }
+    activeTab.value = tab
+  },
+  { immediate: true }
+)
 
+// 课程上下文变化 → 加载文档列表
+watch(currentCourseId, (cid) => {
+  if (cid) loadDocuments()
+  else documents.value = []
+})
+
+// Tab 变化 → 按需加载数据
+watch(activeTab, (tab) => {
+  if (tab === 'courses') store.fetchCourses(true).catch(() => {})
+  if (tab === 'documents' && currentCourseId.value) loadDocuments()
+  if (tab === 'preview') {
+    drawerVisible.value = false
+    drawerNode.value = null
+  }
+  if (tab === 'edit') {
+    selectedNode.value = null
+    prereqs.value = []
+    prereqLoaded.value = false
+    if (currentCourseId.value) loadEditNodes()
+  }
+  if (tab === 'monitor' && currentCourseId.value) loadMonitorData()
+})
+
+onMounted(() => {
+  store.fetchCourses(true).catch(() => {})
+  window.addEventListener('resize', handleMonitorResize)
+  // 深链直达时 activeTab 初始即等于目标 tab，activeTab watcher 不会触发，需在此补一次加载
+  if (activeTab.value === 'documents' && currentCourseId.value) loadDocuments()
+  if (activeTab.value === 'edit' && currentCourseId.value) loadEditNodes()
+  if (activeTab.value === 'monitor' && currentCourseId.value) loadMonitorData()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleMonitorResize)
+  progressDistChart?.dispose()
+})
+
+// ===================== 工具函数 =====================
 function fmtTime(t) {
   return t ? String(t).slice(0, 16) : '—'
+}
+function fmtSize(bytes) {
+  if (bytes == null) return '—'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+function parseStatusType(s) {
+  return s === 'PARSED' ? 'success' : s === 'FAILED' ? 'danger' : s === 'PARSING' ? 'warning' : 'info'
+}
+function parseStatusText(s) {
+  return { UPLOADED: '待解析', PARSING: '解析中', PARSED: '已解析', FAILED: '解析失败' }[s] || s
+}
+function extractStatusType(s) {
+  return s === 'COMPLETED' ? 'success' : s === 'FAILED' ? 'danger' : s === 'EXTRACTING' ? 'warning' : 'info'
+}
+function extractStatusText(s) {
+  return { PENDING: '待抽取', EXTRACTING: '抽取中', COMPLETED: '已完成', FAILED: '抽取失败' }[s] || s
 }
 </script>
 
@@ -1301,6 +1447,37 @@ function fmtTime(t) {
   height: 100%;
   padding: 12px;
 }
+
+/* ===== 上下文栏（课程/文档） ===== */
+.context-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #fafbfc;
+  border: 1px solid #f0f2f5;
+  border-radius: 8px;
+}
+.context-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+
+/* ===== 文档列表 / 上传 ===== */
+.upload-card {
+  margin-bottom: 12px;
+}
+.upload-result-alert {
+  margin-top: 12px;
+}
+.doc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .result-header {
   display: flex;
   justify-content: space-between;
@@ -1522,17 +1699,6 @@ function fmtTime(t) {
 }
 
 /* ===== 教学监测 ===== */
-.monitor-course-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.row-label {
-  color: #606266;
-  font-size: 14px;
-  font-weight: 600;
-}
 .chart-title-line {
   display: flex;
   align-items: center;

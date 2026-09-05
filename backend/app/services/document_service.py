@@ -1,12 +1,13 @@
 """
 文档上传与处理服务（对齐规划文档 6.2.1 上传文档接口 + 3.2.1 知识抽取数据流）
 
-流程：建课程记录(整数 course_id) -> 存文件 -> 建文档记录 -> 解析 -> 抽取 -> 入图 -> 回填状态
+流程：校验课程归属(整数 course_id) -> 存文件 -> 建文档记录 -> 解析 -> 抽取 -> 入图 -> 回填状态
 """
 import os
 import hashlib
 
 from ..core.config import settings
+from ..core.database import db
 from ..core.sql_database import sql_db
 from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
@@ -25,14 +26,32 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _doc_payload(doc: dict) -> dict:
+    """把 t_document 行映射为对外文档结构（不含 file_path/file_sha256 等内部字段）"""
+    return {
+        "doc_id": doc["doc_id"],
+        "course_id": doc["course_id"],
+        "file_name": doc["file_name"],
+        "file_type": doc["file_type"],
+        "file_size": doc["file_size"],
+        "parse_status": doc["parse_status"],
+        "extract_status": doc["extract_status"],
+        "entity_count": doc["entity_count"],
+        "relation_count": doc["relation_count"],
+        "vector_collection": doc.get("vector_collection"),
+        "created_at": doc["created_at"],
+        "updated_at": doc.get("updated_at"),
+    }
+
+
 class DocumentService:
     """文档上传与知识图谱构建服务"""
 
     @staticmethod
-    async def process_upload(content: bytes, filename: str, course_name: str,
+    async def process_upload(content: bytes, filename: str, course_id: int,
                              teacher_id: int = None) -> dict:
         """
-        处理文档上传全流程。
+        处理文档上传全流程（上传到已存在课程；不再自动建课）。
 
         返回 {"ok": bool, "code": int, "message": str, "data": dict}
         - ok=True：data 含 document_id/course_id/filename/status/counts
@@ -59,8 +78,12 @@ class DocumentService:
         elif sql_db.get_user_by_id(teacher_id) is None:
             return {"ok": False, "code": 1004, "message": f"教师账号不存在: user_id={teacher_id}"}
 
-        # 4. 建课程记录，拿到整数 course_id（对齐决策：course_id 统一整数）
-        course_id = sql_db.create_course(course_name=course_name, teacher_id=teacher_id)
+        # 4. 校验课程存在且归属当前教师（Phase 5：上传必须指定已存在课程，禁止自动建课）
+        course = sql_db.get_course(course_id)
+        if course is None:
+            return {"ok": False, "code": 2001, "message": f"课程不存在: course_id={course_id}"}
+        if course["teacher_id"] != teacher_id:
+            return {"ok": False, "code": 4003, "message": "无权限：仅该课程所属教师可上传文档"}
 
         # 5. 建文档记录（file_path 保存后回填）
         doc_id = sql_db.create_document(
@@ -111,8 +134,8 @@ class DocumentService:
         entities = result.get("entities", [])
         relations = result.get("relations", [])
 
-        # 9. 入图（整数 course_id）
-        KnowledgeGraphManager.build_graph(course_id, entities, relations)
+        # 9. 入图（整数 course_id + 文档级 document_id，Phase 8A：图谱按文档隔离）
+        KnowledgeGraphManager.build_graph(course_id, doc_id, entities, relations)
 
         # 10. 回填抽取结果统计
         sql_db.update_document(
@@ -137,3 +160,94 @@ class DocumentService:
                 "created_at": doc["created_at"],
             },
         }
+
+    @staticmethod
+    def list_documents(course_id: int, user_id: int, role: str = "teacher") -> dict:
+        """某课程文档列表。
+
+        Phase 7：学生端需读取可学习课程的文档。当前项目无选课/班级体系，
+        沿用现有「学生可见全部课程」规则——学生可读任意课程文档；教师仍校验课程归属。
+        """
+        course = sql_db.get_course(course_id)
+        if course is None:
+            return {"ok": False, "code": 2001, "message": f"课程不存在: course_id={course_id}"}
+        if role == "teacher" and course["teacher_id"] != user_id:
+            return {"ok": False, "code": 4003, "message": "无权限：仅该课程所属教师可查看文档列表"}
+        docs = sql_db.list_documents_by_course(course_id)
+        return {"ok": True, "code": 0, "message": "success",
+                "data": [_doc_payload(d) for d in docs]}
+
+    @staticmethod
+    def get_document_detail(doc_id: int, teacher_id: int) -> dict:
+        """文档详情（校验文档所属课程归属）"""
+        doc = sql_db.get_document(doc_id)
+        if doc is None:
+            return {"ok": False, "code": 2002, "message": f"文档不存在: doc_id={doc_id}"}
+        course = sql_db.get_course(doc["course_id"])
+        if course is None or course["teacher_id"] != teacher_id:
+            return {"ok": False, "code": 4003, "message": "无权限：仅该文档所属课程的教师可查看"}
+        return {"ok": True, "code": 0, "message": "success",
+                "data": _doc_payload(doc)}
+
+    @staticmethod
+    def delete_document(doc_id: int, teacher_id: int) -> dict:
+        """删除文档及其全部文档级资源（校验课程归属）。
+
+        Phase 8C：按顺序清理 Neo4j 图谱 → SQLite 向量 → 学习记录 → 收藏 → 本地文件 → 文档记录。
+        每步幂等可重试；任一步失败返回明确错误，不假装全部删除成功。
+        绝不误删同课程其他文档的图谱/向量/学习记录/收藏（均按 course_id + document_id 限定）。
+        """
+        doc = sql_db.get_document(doc_id)
+        if doc is None:
+            return {"ok": False, "code": 2002, "message": f"文档不存在: doc_id={doc_id}"}
+        course = sql_db.get_course(doc["course_id"])
+        if course is None or course["teacher_id"] != teacher_id:
+            return {"ok": False, "code": 4003, "message": "无权限：仅该文档所属课程的教师可删除"}
+
+        cid = doc["course_id"]
+
+        # 1. Neo4j 图谱（节点 + 关系；仅当前文档）
+        try:
+            removed_nodes, removed_edges = db.delete_document_graph(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档图谱失败: {str(e)}"}
+
+        # 2. SQLite 向量
+        try:
+            removed_embeddings = sql_db.delete_embeddings_by_document(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档向量失败: {str(e)}"}
+
+        # 3. 学习记录
+        try:
+            removed_records = sql_db.delete_learning_records_by_document(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档学习记录失败: {str(e)}"}
+
+        # 4. 收藏
+        try:
+            removed_favorites = sql_db.delete_favorites_by_document(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档收藏失败: {str(e)}"}
+
+        # 5. 本地文件（不存在视为已删，幂等）
+        path = doc.get("file_path")
+        if path and os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+        # 6. 文档记录
+        sql_db.delete_document(doc_id)
+
+        return {"ok": True, "code": 0, "message": "success", "data": {
+            "doc_id": doc_id,
+            "course_id": cid,
+            "deleted": True,
+            "removed_nodes": removed_nodes,
+            "removed_edges": removed_edges,
+            "removed_embeddings": removed_embeddings,
+            "removed_records": removed_records,
+            "removed_favorites": removed_favorites,
+        }}

@@ -13,11 +13,19 @@ export const api = {
   health: () => request.get('/health'),
 
   // ---- 文档 / 课程 ----
-  /** 上传课程文档（对齐后端 POST /api/v1/documents/upload；LLM 抽取耗时较长，超时放宽到 10 分钟） */
-  uploadCourse: (formData, courseName) => {
-    if (courseName) formData.append('course_name', courseName)
+  /** 上传文档到已有课程（对齐后端 POST /api/v1/documents/upload；LLM 抽取耗时较长，超时放宽到 10 分钟） */
+  uploadCourse: (formData, courseId) => {
+    if (courseId != null && courseId !== '') formData.append('course_id', courseId)
     return request.post('/api/v1/documents/upload', formData, { timeout: 600000 })
   },
+
+  // ---- 文档管理（对齐后端 /api/v1/documents CRUD） ----
+  /** 某课程文档列表 */
+  getDocuments: (courseId) => request.get('/api/v1/documents', { params: { course_id: courseId } }),
+  /** 文档详情 */
+  getDocumentDetail: (docId) => request.get(`/api/v1/documents/${docId}`),
+  /** 删除文档（Phase 5 后端仅删记录+文件，图谱级清理留待 Phase 8/9） */
+  deleteDocument: (docId) => request.delete(`/api/v1/documents/${docId}`),
 
   // ---- 课程管理（对齐后端 /api/v1/courses CRUD） ----
   listCourses: (params = {}) => request.get('/api/v1/courses', { params }),
@@ -28,17 +36,30 @@ export const api = {
     request.delete(`/api/v1/courses/${courseId}`, { params: { confirm } }),
 
   // ---- 知识图谱（G6 格式） ----
-  /** 图谱接口：{ nodes: [{id,label,type,description,properties}], edges: [...] } */
-  getGraphV1: (courseId, params = {}) =>
-    request.get(`/api/v1/graph/${courseId}`, { params }),
+  /** 图谱接口（Phase 8：按 course_id + document_id 隔离）：
+   *  { nodes: [{id,label,type,description,properties}], edges: [...] } */
+  getGraphV1: (courseId, documentId, params = {}) =>
+    request.get(`/api/v1/graph/${courseId}`, {
+      params: { document_id: documentId, ...params },
+    }),
 
-  // ---- 教师编辑（对齐后端 /api/v1/graph 编辑端点 6.3.3/6.3.4） ----
-  createNode: (courseId, data) => request.post(`/api/v1/graph/${courseId}/nodes`, data),
-  updateNode: (courseId, nodeId, data) =>
-    request.put(`/api/v1/graph/${courseId}/nodes/${nodeId}`, data),
-  deleteNode: (courseId, nodeId) => request.delete(`/api/v1/graph/${courseId}/nodes/${nodeId}`),
-  createEdge: (courseId, data) => request.post(`/api/v1/graph/${courseId}/edges`, data),
-  deleteEdge: (courseId, edgeId) => request.delete(`/api/v1/graph/${courseId}/edges/${edgeId}`),
+  // ---- 教师编辑（对齐后端 /api/v1/graph 编辑端点 6.3.3/6.3.4；Phase 8 全部带 document_id） ----
+  createNode: (courseId, documentId, data) =>
+    request.post(`/api/v1/graph/${courseId}/nodes`, data, { params: { document_id: documentId } }),
+  updateNode: (courseId, documentId, nodeId, data) =>
+    request.put(`/api/v1/graph/${courseId}/nodes/${nodeId}`, data, {
+      params: { document_id: documentId },
+    }),
+  deleteNode: (courseId, documentId, nodeId) =>
+    request.delete(`/api/v1/graph/${courseId}/nodes/${nodeId}`, {
+      params: { document_id: documentId },
+    }),
+  createEdge: (courseId, documentId, data) =>
+    request.post(`/api/v1/graph/${courseId}/edges`, data, { params: { document_id: documentId } }),
+  deleteEdge: (courseId, documentId, edgeId) =>
+    request.delete(`/api/v1/graph/${courseId}/edges/${edgeId}`, {
+      params: { document_id: documentId },
+    }),
 
   // ---- 图谱统计 ----
   getStats: () => request.get('/api/kg/stats'),
@@ -53,52 +74,59 @@ export const api = {
   getTeacherStudentsProgress: (courseId) =>
     request.get('/api/v1/teacher/students/progress', { params: { course_id: courseId } }),
 
-  // ---- 智能问答 ----
-  ask: (question, courseId) =>
-    request.post('/api/v1/qa/ask', { question, course_id: courseId || null }),
+  // ---- 智能问答（Phase 8C：course_id + document_id） ----
+  ask: (question, courseId, documentId) =>
+    request.post('/api/v1/qa/ask', {
+      question,
+      course_id: courseId || null,
+      document_id: documentId || null,
+    }),
 
-  // ---- 学习路径推荐 ----
-  recommendNext: (mastered, courseId) =>
+  // ---- 学习路径推荐（Phase 8B：course_id + document_id） ----
+  recommendNext: (mastered, courseId, documentId) =>
     request.post('/api/v1/learning-path/recommend', {
       mastered,
       course_id: courseId || null,
+      document_id: documentId || null,
     }),
-  pathToTarget: (target, courseId) =>
+  pathToTarget: (target, courseId, documentId) =>
     request.post('/api/v1/learning-path/path-to-target', {
       target,
       course_id: courseId || null,
+      document_id: documentId || null,
     }),
-  getPrerequisites: (name, courseId) =>
+  getPrerequisites: (name, courseId, documentId) =>
     request.get(`/api/v1/learning-path/prerequisites/${encodeURIComponent(name)}`, {
-      params: { course_id: courseId || undefined },
+      params: { course_id: courseId || undefined, document_id: documentId || undefined },
     }),
 
-  // ---- 学习记录（标记掌握 / 查询进度） ----
-  markMastered: (courseId, kpId, status = 'MASTERED', masteryLevel = 100) =>
+  // ---- 学习记录（标记掌握 / 查询进度；Phase 8B：document_id） ----
+  markMastered: (courseId, documentId, kpId, status = 'MASTERED', masteryLevel = 100) =>
     request.post('/api/v1/learning/mark', {
       course_id: courseId,
+      document_id: documentId,
       kp_id: kpId,
       status,
       mastery_level: masteryLevel,
     }),
-  unmarkMastered: (courseId, kpId) =>
+  unmarkMastered: (courseId, documentId, kpId) =>
     request.delete('/api/v1/learning/mark', {
-      params: { course_id: courseId, kp_id: kpId },
+      params: { course_id: courseId, document_id: documentId, kp_id: kpId },
     }),
-  getProgress: (courseId) =>
+  getProgress: (courseId, documentId) =>
     request.get('/api/v1/learning/progress', {
-      params: { course_id: courseId || undefined },
+      params: { course_id: courseId || undefined, document_id: documentId || undefined },
     }),
 
-  // ---- 收藏夹（学生个人知识点书签，独立于学习状态） ----
-  getFavorites: (courseId) =>
+  // ---- 收藏夹（学生个人知识点书签，独立于学习状态；Phase 8B：document_id） ----
+  getFavorites: (courseId, documentId) =>
     request.get('/api/v1/favorites', {
-      params: { course_id: courseId || undefined },
+      params: { course_id: courseId || undefined, document_id: documentId || undefined },
     }),
-  addFavorite: (courseId, kpId) =>
-    request.post('/api/v1/favorites', { course_id: courseId, kp_id: kpId }),
-  removeFavorite: (courseId, kpId) =>
+  addFavorite: (courseId, documentId, kpId) =>
+    request.post('/api/v1/favorites', { course_id: courseId, document_id: documentId, kp_id: kpId }),
+  removeFavorite: (courseId, documentId, kpId) =>
     request.delete(`/api/v1/favorites/${encodeURIComponent(kpId)}`, {
-      params: { course_id: courseId },
+      params: { course_id: courseId, document_id: documentId },
     }),
 }

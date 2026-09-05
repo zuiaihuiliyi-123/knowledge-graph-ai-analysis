@@ -61,9 +61,9 @@ def main():
     with open(tmp, "w") as f:
         f.write("x")
     sql_db.update_document(doc_id, file_path=tmp)
-    db.create_knowledge_node(aid, "线性表", "概念", "测试节点")
-    db.create_knowledge_node(aid, "顺序表", "概念", "测试节点")
-    db.create_relationship(aid, "线性表", "顺序表", "CONTAINS")
+    db.create_knowledge_node(aid, doc_id, "线性表", "概念", "测试节点")
+    db.create_knowledge_node(aid, doc_id, "顺序表", "概念", "测试节点")
+    db.create_relationship(aid, doc_id, "线性表", "顺序表", "CONTAINS")
 
     d = CourseService.get_course_detail(aid)["data"]
     print(f"  name={d['course_name']} teacher={d['teacher_name']} "

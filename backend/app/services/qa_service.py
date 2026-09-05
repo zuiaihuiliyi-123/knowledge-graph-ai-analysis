@@ -39,6 +39,16 @@ def _coerce_course_id(course_id):
         return None
 
 
+def _coerce_document_id(document_id):
+    """document_id 统一为整数（对齐 Neo4j 存储类型）；空值返回 None 表示不过滤"""
+    if document_id is None or document_id == "":
+        return None
+    try:
+        return int(document_id)
+    except (TypeError, ValueError):
+        return None
+
+
 def _cosine(a: List[float], b: List[float]) -> float:
     """余弦相似度（纯 Python 实现，避免引入 numpy 重依赖）"""
     if not a or not b or len(a) != len(b):
@@ -82,14 +92,15 @@ class QAService:
             "description": n.get("description", ""),
         }
 
-    def _vector_search(self, question: str, course_id, top_k: int) -> List[dict]:
-        """真向量检索：问题与课程知识点 embedding 做余弦相似度排序，返回结构化节点列表"""
+    def _vector_search(self, question: str, course_id, document_id, top_k: int) -> List[dict]:
+        """真向量检索：问题与文档知识点 embedding 做余弦相似度排序，返回结构化节点列表"""
         cid = _coerce_course_id(course_id)
-        if cid is None:
-            return []  # 跨课程向量检索暂不支持，退回关键词
+        did = _coerce_document_id(document_id)
+        if cid is None or did is None:
+            return []  # 缺少文档作用域，退回关键词
         try:
-            self.indexer.ensure_index(cid)
-            rows = sql_db.get_embeddings_by_course(cid)
+            self.indexer.ensure_index(cid, did)
+            rows = sql_db.get_embeddings_by_document(cid, did)
             if not rows:
                 return []
             q_vec = self.embedder.embed([question])[0]
@@ -98,12 +109,13 @@ class QAService:
 
         ranked = sorted(rows, key=lambda r: -_cosine(q_vec, r["embedding"]))[:top_k]
 
-        # 按 kp_id 回查节点元数据，拼接上下文
+        # 按 kp_id 回查节点元数据，拼接上下文（限定文档）
         kp_ids = [r["kp_id"] for r in ranked]
         nodes = {}
         recs = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid}) WHERE n.kp_id IN $ids RETURN n",
-            {"cid": cid, "ids": kp_ids},
+            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
+            "WHERE n.kp_id IN $ids RETURN n",
+            {"cid": cid, "did": did, "ids": kp_ids},
         )
         for rec in recs:
             n = rec.get("n")
@@ -114,12 +126,20 @@ class QAService:
 
     # ---------- 关键词检索（兜底） ----------
 
-    def _keyword_search(self, question: str, course_id, top_k: int) -> List[dict]:
+    def _keyword_search(self, question: str, course_id, document_id, top_k: int) -> List[dict]:
         """关键词检索（向量不可用时的兜底），返回结构化节点列表"""
         cid = _coerce_course_id(course_id)
+        did = _coerce_document_id(document_id)
         keyword = (question or "")[:20]
 
-        if cid is not None:
+        if cid is not None and did is not None:
+            cypher = """
+            MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id})
+            WHERE n.name CONTAINS $keyword OR n.description CONTAINS $keyword
+            RETURN n LIMIT $top_k
+            """
+            params = {"course_id": cid, "document_id": did, "keyword": keyword, "top_k": top_k}
+        elif cid is not None:
             cypher = """
             MATCH (n:KnowledgePoint {course_id: $course_id})
             WHERE n.name CONTAINS $keyword OR n.description CONTAINS $keyword
@@ -137,10 +157,16 @@ class QAService:
         records = db.query(cypher, params)
         contexts = [self._node_dict(rec["n"]) for rec in records if rec.get("n")]
 
-        # 结果不足 top_k 时，用同课程节点兜底补足
+        # 结果不足 top_k 时，用同文档节点兜底补足
         if len(contexts) < top_k:
             existing_names = {c["name"] for c in contexts}
-            if cid is not None:
+            if cid is not None and did is not None:
+                records = db.query(
+                    "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id}) "
+                    "RETURN n LIMIT $top_k",
+                    {"course_id": cid, "document_id": did, "top_k": top_k},
+                )
+            elif cid is not None:
                 records = db.query(
                     "MATCH (n:KnowledgePoint {course_id: $course_id}) RETURN n LIMIT $top_k",
                     {"course_id": cid, "top_k": top_k},
@@ -158,21 +184,23 @@ class QAService:
                     break
         return contexts
 
-    def search_related_nodes(self, question: str, course_id=None, top_k: int = 5) -> List[dict]:
+    def search_related_nodes(self, question: str, course_id=None, document_id=None,
+                             top_k: int = 5) -> List[dict]:
         """检索相关知识（优先向量，失败退回关键词），返回结构化节点（含 kp_id/name/category/description）"""
-        nodes = self._vector_search(question, course_id, top_k)
+        nodes = self._vector_search(question, course_id, document_id, top_k)
         if not nodes:
-            nodes = self._keyword_search(question, course_id, top_k)
+            nodes = self._keyword_search(question, course_id, document_id, top_k)
         return nodes
 
-    def search_related_knowledge(self, question: str, course_id=None, top_k: int = 5) -> List[str]:
+    def search_related_knowledge(self, question: str, course_id=None, document_id=None,
+                                 top_k: int = 5) -> List[str]:
         """检索相关知识，返回格式化字符串（供 LLM 上下文 / 向后兼容）"""
-        return [_format_node(n) for n in self.search_related_nodes(question, course_id, top_k)]
+        return [_format_node(n) for n in self.search_related_nodes(question, course_id, document_id, top_k)]
 
-    async def ask(self, question: str, course_id=None) -> str:
+    async def ask(self, question: str, course_id=None, document_id=None) -> str:
         """回答问题（RAG 模式）"""
-        # 1. 检索相关知识（向量优先）
-        contexts = self.search_related_knowledge(question, course_id)
+        # 1. 检索相关知识（向量优先，文档作用域）
+        contexts = self.search_related_knowledge(question, course_id, document_id)
         context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
 
         # 2. 调用 LLM 生成回答

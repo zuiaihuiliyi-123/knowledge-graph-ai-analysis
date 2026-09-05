@@ -5,7 +5,24 @@
       <p class="page-desc">浏览课程知识图谱，智能问答与个性化学习路径推荐</p>
     </div>
 
-    <el-tabs v-model="activeTab">
+    <!-- 统一学习上下文条（Phase 7）：当前课程 + 当前文档，所有学习 Tab 共享 -->
+    <el-card class="page-card ctx-bar">
+      <div class="ctx-left">
+        <template v-if="currentCourseId && currentDocumentId">
+          <span class="ctx-label">当前课程</span>
+          <b class="ctx-name">{{ currentCourseName }}</b>
+          <el-divider direction="vertical" />
+          <span class="ctx-label">当前文档</span>
+          <b class="ctx-name">{{ currentDocumentName }}</b>
+        </template>
+        <span v-else class="ctx-empty"><el-icon><Compass /></el-icon>请选择课程和学习资料</span>
+      </div>
+      <el-button type="primary" plain @click="openSelector">
+        {{ currentCourseId && currentDocumentId ? '切换课程/文档' : '选择课程/文档' }}
+      </el-button>
+    </el-card>
+
+    <el-tabs v-model="activeTab" @tab-change="onTabChange">
       <!-- ===================== Tab 0：学习总览（学习驾驶舱，P11：复用统一学习状态，不新建状态源） ===================== -->
       <el-tab-pane name="overview">
         <template #label><span class="tab-label"><el-icon><DataAnalysis /></el-icon>学习总览</span></template>
@@ -17,14 +34,13 @@
               <div class="ov-title">学习总览</div>
               <div class="ov-sub">欢迎回来，{{ store.username }}，继续你的学习</div>
             </div>
-            <CourseSelector v-model="pathCourseId" />
           </div>
         </el-card>
 
         <!-- 未选择课程 -->
         <el-empty
-          v-if="!pathCourseId"
-          description="请先选择课程，查看你的学习驾驶舱"
+          v-if="!ctxKey"
+          description="请先选择课程和学习资料，查看你的学习驾驶舱"
           :image-size="90"
         />
 
@@ -185,7 +201,6 @@
         <template #label><span class="tab-label"><el-icon><Compass /></el-icon>图谱浏览</span></template>
         <el-card class="page-card">
           <div class="toolbar">
-            <CourseSelector v-model="browseCourseId" />
             <el-input
               v-model="searchText"
               placeholder="搜索知识点名称或描述…"
@@ -201,7 +216,8 @@
         <el-card class="page-card graph-card">
           <GraphCanvas
             ref="browseGraphRef"
-            :course-id="browseCourseId"
+            :course-id="currentCourseId"
+            :document-id="currentDocumentId"
             :search-text="searchText"
             :mastered-kp-ids="masteredKpIds"
             :highlight-path="highlightPathNodes"
@@ -226,7 +242,7 @@
               <template #header>
                 <div class="qa-side-title"><el-icon><Collection /></el-icon>当前课程</div>
               </template>
-              <CourseSelector v-model="qaCourseId" compact />
+              <div class="qa-side-course">{{ currentCourseName }}</div>
 
               <el-divider content-position="left">相关知识点</el-divider>
               <el-empty
@@ -293,15 +309,15 @@
                               </el-tag>
                               <span class="source-name">{{ s.name }}</span>
                               <el-button
-                                v-if="s.kp_id && qaCourseId"
+                                v-if="s.kp_id && ctxKey"
                                 size="small"
                                 text
                                 class="source-fav"
-                                :title="isFavorited(qaCourseId, s.kp_id) ? '取消收藏' : '收藏'"
-                                :type="isFavorited(qaCourseId, s.kp_id) ? 'warning' : 'info'"
-                                @click.stop="toggleFavoriteSafe(qaCourseId, s.kp_id)"
+                                :title="isFavorited(s.kp_id) ? '取消收藏' : '收藏'"
+                                :type="isFavorited(s.kp_id) ? 'warning' : 'info'"
+                                @click.stop="toggleFavoriteSafe(s.kp_id)"
                               >
-                                <el-icon><StarFilled v-if="isFavorited(qaCourseId, s.kp_id)" /><Star v-else /></el-icon>
+                                <el-icon><StarFilled v-if="isFavorited(s.kp_id)" /><Star v-else /></el-icon>
                               </el-button>
                               <el-icon class="source-jump"><Right /></el-icon>
                             </div>
@@ -346,13 +362,12 @@
           <template #header>
             <div class="path-hero-header">
               <span class="path-hero-title"><el-icon><Guide /></el-icon>学习路径</span>
-              <CourseSelector v-model="pathCourseId" />
             </div>
           </template>
 
           <el-empty
-            v-if="!pathCourseId"
-            description="请先选择课程，查看你的学习路径"
+            v-if="!ctxKey"
+            description="请先选择课程和学习资料，查看你的学习路径"
             :image-size="80"
           />
 
@@ -411,15 +426,15 @@
                         </el-tag>
                         <span class="state-label" :class="'state-label-' + seg.state">{{ STATE_META[seg.state].label }}</span>
                         <el-button
-                          v-if="pathCourseId && seg.node.id != null"
+                          v-if="ctxKey && seg.node.id != null"
                           size="small"
                           text
                           class="chain-fav"
-                          :title="isFavorited(pathCourseId, seg.node.id) ? '取消收藏' : '收藏'"
-                          :type="isFavorited(pathCourseId, seg.node.id) ? 'warning' : 'info'"
-                          @click.stop="toggleFavoriteSafe(pathCourseId, seg.node.id)"
+                          :title="isFavorited(seg.node.id) ? '取消收藏' : '收藏'"
+                          :type="isFavorited(seg.node.id) ? 'warning' : 'info'"
+                          @click.stop="toggleFavoriteSafe(seg.node.id)"
                         >
-                          <el-icon><StarFilled v-if="isFavorited(pathCourseId, seg.node.id)" /><Star v-else /></el-icon>
+                          <el-icon><StarFilled v-if="isFavorited(seg.node.id)" /><Star v-else /></el-icon>
                         </el-button>
                       </div>
                       <div v-if="seg.reason" class="chain-reason">原因：{{ seg.reason }}</div>
@@ -460,7 +475,6 @@
                 <el-button type="primary" :loading="recommendLoading" @click="doRecommend">
                   推荐下一步
                 </el-button>
-                <CourseSelector v-model="pathCourseId" />
               </div>
 
               <template v-if="recommendations.length">
@@ -572,7 +586,6 @@
 
         <el-card class="page-card">
           <div class="toolbar">
-            <CourseSelector v-model="favCourseId" />
             <el-input
               v-model="favSearch"
               placeholder="搜索收藏的知识点…"
@@ -587,14 +600,14 @@
             </el-select>
           </div>
 
-          <div v-if="favCourseId" class="fav-count">
+          <div v-if="ctxKey" class="fav-count">
             共收藏 <b class="num">{{ favTotal }}</b> 个知识点
           </div>
 
           <div v-loading="favLoading" class="fav-list">
             <el-empty
-              v-if="!favLoading && !favCourseId"
-              description="请先选择课程，查看该课程的收藏"
+              v-if="!favLoading && !ctxKey"
+              description="请先选择课程和学习资料，查看该文档的收藏"
               :image-size="80"
             />
             <el-empty
@@ -626,7 +639,7 @@
                   <el-button size="small" type="primary" plain @click="viewFavorite(node)">
                     查看知识点
                   </el-button>
-                  <el-button size="small" type="danger" plain @click="toggleFavoriteSafe(favCourseId, node.id)">
+                  <el-button size="small" type="danger" plain @click="toggleFavoriteSafe(node.id)">
                     取消收藏
                   </el-button>
                 </div>
@@ -637,11 +650,22 @@
       </el-tab-pane>
     </el-tabs>
 
+    <!-- 课程 → 文档选择器（Phase 7） -->
+    <el-dialog v-model="selectorVisible" title="选择课程与学习资料" width="560px" :close-on-click-modal="false">
+      <CourseDocumentSelector
+        :initial-course-id="currentCourseId"
+        :initial-document-id="currentDocumentId"
+        @confirm="applyContext"
+        @cancel="selectorVisible = false"
+      />
+    </el-dialog>
+
     <!-- 知识点详情抽屉（只读） -->
     <NodeDetailDrawer
       v-model="drawerVisible"
       :node="drawerNode"
-      :course-id="browseCourseId"
+      :course-id="currentCourseId"
+      :document-id="currentDocumentId"
       show-mastery
       :mastered="drawerMastered"
       :mastery-loading="masteryLoading"
@@ -662,31 +686,118 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch, computed, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, nextTick, watch, computed, reactive, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Refresh, Compass, ChatDotRound, Guide, Aim, Search, Document, Opportunity, MagicStick, ArrowDown, CircleCheckFilled, Right, Collection, WarningFilled, Star, StarFilled, DataAnalysis, Histogram, Odometer, Checked } from '@element-plus/icons-vue'
 import { api } from '../api'
 import GraphCanvas from '../components/GraphCanvas.vue'
-import CourseSelector from '../components/CourseSelector.vue'
+import CourseDocumentSelector from '../components/CourseDocumentSelector.vue'
 import NodeDetailDrawer from '../components/NodeDetailDrawer.vue'
 import { useAppStore } from '../stores/app'
 
 const route = useRoute()
+const router = useRouter()
 const store = useAppStore()
 
-// 支持从菜单直接进入指定子功能（/student?tab=qa）
-const activeTab = ref(route.query.tab || 'browse')
+// ===================== 学习上下文（Phase 7：统一 Course → Document） =====================
+// 所有学习 Tab（overview/browse/qa/path/favorites）共享同一份学习上下文，不再各自维护 courseId。
+const currentCourseId = computed(() => store.learningContext.currentCourseId)
+const currentDocumentId = computed(() => store.learningContext.currentDocumentId)
+
+// 缓存作用域 key：`${courseId}:${documentId}`（禁止仅用 courseId 作为学习状态缓存 key）
+const ctxKey = computed(() => {
+  const cid = currentCourseId.value
+  const did = currentDocumentId.value
+  return cid && did ? `${cid}:${did}` : ''
+})
+
+const currentCourseName = computed(() => {
+  const c = store.courses.find((c) => String(c.course_id) === String(currentCourseId.value))
+  return c ? c.course_name : (currentCourseId.value || '')
+})
+const currentDocumentName = computed(() => {
+  const d = store.learningContext.documentList.find((d) => String(d.doc_id) === String(currentDocumentId.value))
+  return d ? d.file_name : (currentDocumentId.value || '')
+})
+
+// 需要学习上下文的学习 Tab（overview 无需强制上下文）
+const LEARNING_TABS = ['browse', 'qa', 'path', 'favorites']
+const activeTab = ref(route.query.tab || 'overview')
+
+// 课程 → 文档选择器
+const selectorVisible = ref(false)
+function openSelector() {
+  selectorVisible.value = true
+}
+
+// 选择确认：写 store + 同步 URL（ctxKey watcher 负责清空/重载文档级学习状态）
+// CourseDocumentSelector 的 confirm 事件载荷是单对象 { courseId, documentId }，这里必须解构
+function applyContext({ courseId, documentId }) {
+  store.setLearningContext({ courseId, documentId })
+  // 填充当前课程的文档列表，供上下文条正确显示文档名（否则切换后文档名会显示成裸 id）
+  store.fetchDocuments(courseId).catch(() => {})
+  selectorVisible.value = false
+  syncUrlToContext()
+}
+
+function syncUrlToContext() {
+  const query = { tab: activeTab.value }
+  if (currentCourseId.value) query.course_id = String(currentCourseId.value)
+  if (currentDocumentId.value) query.document_id = String(currentDocumentId.value)
+  router.replace({ path: '/student', query })
+}
+
+// 进入学习 Tab 前校验上下文：URL → learningContext → 不猜测
+function ensureContext() {
+  const cid = route.query.course_id
+  const did = route.query.document_id
+  if (cid && did) {
+    store.setLearningContext({ courseId: cid, documentId: did })
+    if (!store.learningContext.documentList.length) store.fetchDocuments(cid).catch(() => {})
+    return true
+  }
+  if (currentCourseId.value && currentDocumentId.value) {
+    syncUrlToContext()
+    return true
+  }
+  return false
+}
+
+// 进入指定 Tab（学习 Tab 缺上下文时不猜测，回退到选择态并提示）
+function enterTab(tab) {
+  const target = tab || 'overview'
+  if (LEARNING_TABS.includes(target) && !ensureContext()) {
+    activeTab.value = 'overview'
+    router.replace({ path: '/student', query: { tab: 'overview' } })
+    ElMessage.warning('请先选择课程和学习资料')
+    selectorVisible.value = true
+    return
+  }
+  activeTab.value = target
+}
+
+function onTabChange(tab) {
+  enterTab(tab)
+  if (activeTab.value === tab) syncUrlToContext()
+}
+
 watch(
-  () => route.query.tab,
-  (tab) => {
-    if (tab) activeTab.value = tab
+  () => [route.query.tab, route.query.course_id, route.query.document_id],
+  ([tab, cid, did]) => {
+    if (cid && did) store.setLearningContext({ courseId: cid, documentId: did })
+    if (tab) enterTab(tab)
   }
 )
 
+onMounted(() => {
+  store.fetchCourses().catch(() => {})
+  enterTab(route.query.tab || 'overview')
+  if (currentCourseId.value) store.fetchDocuments(currentCourseId.value).catch(() => {})
+})
+
 // ===================== 图谱浏览 =====================
 const browseGraphRef = ref(null)
-const browseCourseId = ref('')
 const searchText = ref('')
 const stats = ref(null)
 const drawerVisible = ref(false)
@@ -695,40 +806,31 @@ const drawerRelated = ref([])
 const drawerPredecessors = ref([])
 const drawerExpanded = ref(false)
 
-// ===================== 学习记录（掌握标记，P7：按课程缓存跨 tab 统一） =====================
-const masteredCache = reactive({}) // { courseId: [kpId, ...] }
+// ===================== 学习记录（掌握标记，P7：按文档作用域缓存跨 tab 统一） =====================
+const masteredCache = reactive({}) // { "courseId:documentId": [kpId, ...] }
 const masteryLoading = ref(false)
-const masteredKpIds = computed(() => masteredCache[browseCourseId.value] || [])
+const masteredKpIds = computed(() => masteredCache[ctxKey.value] || [])
 const drawerMastered = computed(() =>
   drawerNode.value ? masteredKpIds.value.includes(String(drawerNode.value.id)) : false
 )
 
-async function loadMastered(courseId) {
-  if (!courseId) return []
-  try {
-    const res = await api.getProgress(courseId)
-    masteredCache[courseId] = res.mastered_kp_ids || []
-  } catch (e) {
-    masteredCache[courseId] = []
-  }
-  return masteredCache[courseId]
-}
-
 async function onToggleMastery() {
   const node = drawerNode.value
-  if (!node || !browseCourseId.value) return
+  if (!node || !ctxKey.value) return
   const kpId = String(node.id)
-  const cid = browseCourseId.value
-  const isMastered = (masteredCache[cid] || []).includes(kpId)
+  const key = ctxKey.value
+  const cid = currentCourseId.value
+  const did = currentDocumentId.value
+  const isMastered = (masteredCache[key] || []).includes(kpId)
   masteryLoading.value = true
   try {
     if (isMastered) {
-      await api.unmarkMastered(cid, kpId)
-      masteredCache[cid] = (masteredCache[cid] || []).filter((id) => id !== kpId)
+      await api.unmarkMastered(cid, did, kpId)
+      masteredCache[key] = (masteredCache[key] || []).filter((id) => id !== kpId)
       ElMessage.success('已取消掌握标记')
     } else {
-      await api.markMastered(cid, kpId)
-      masteredCache[cid] = [...(masteredCache[cid] || []), kpId]
+      await api.markMastered(cid, did, kpId)
+      masteredCache[key] = [...(masteredCache[key] || []), kpId]
       ElMessage.success('已标记为掌握')
     }
   } catch (e) {
@@ -737,54 +839,57 @@ async function onToggleMastery() {
     masteryLoading.value = false
   }
 
-  // 掌握状态变更后，若浏览课程即学习路径课程，则刷新「当前/推荐」状态，推进学习进度
-  if (browseCourseId.value && browseCourseId.value === pathCourseId.value) {
-    loadPathData()
-  }
+  // 掌握状态变更后刷新「当前/推荐」状态，推进学习进度
+  loadPathData()
 }
 
-// ===================== 收藏（收藏 = 个人知识点书签，独立于学习状态，按课程缓存跨 tab 统一） =====================
-const favoriteCache = reactive({}) // { courseId: [kpId, ...] }
+// ===================== 收藏（收藏 = 个人知识点书签，独立于学习状态，按文档作用域缓存跨 tab 统一） =====================
+const favoriteCache = reactive({}) // { "courseId:documentId": [kpId, ...] }
 const favoriteLoading = ref(false)
 const drawerFavorited = computed(() =>
-  drawerNode.value ? isFavorited(browseCourseId.value, String(drawerNode.value.id)) : false
+  drawerNode.value ? isFavorited(String(drawerNode.value.id)) : false
 )
 
-async function loadFavorites(courseId) {
-  if (!courseId) return []
+async function loadFavorites() {
+  const key = ctxKey.value
+  const cid = currentCourseId.value
+  if (!key || !cid) return []
   try {
-    const res = await api.getFavorites(courseId)
-    favoriteCache[courseId] = (res.items || []).map((f) => f.kp_id)
+    const res = await api.getFavorites(cid, currentDocumentId.value)
+    favoriteCache[key] = (res.items || []).map((f) => f.kp_id)
   } catch (e) {
-    favoriteCache[courseId] = []
+    favoriteCache[key] = []
   }
-  return favoriteCache[courseId]
+  return favoriteCache[key]
 }
 
-function isFavorited(courseId, kpId) {
-  if (!courseId || kpId == null) return false
-  return (favoriteCache[courseId] || []).includes(String(kpId))
+function isFavorited(kpId) {
+  if (!ctxKey.value || kpId == null) return false
+  return (favoriteCache[ctxKey.value] || []).includes(String(kpId))
 }
 
 // 核心收藏/取消逻辑（详情抽屉 / 学习路径 / QA 来源 / 收藏夹全部走这里，统一维护收藏状态）
-async function toggleFavorite(courseId, kpId) {
-  if (!courseId || kpId == null) return
+async function toggleFavorite(kpId) {
+  const key = ctxKey.value
+  const cid = currentCourseId.value
+  const did = currentDocumentId.value
+  if (!key || !cid || kpId == null) return
   const kp = String(kpId)
-  if (isFavorited(courseId, kp)) {
-    await api.removeFavorite(courseId, kp)
-    favoriteCache[courseId] = (favoriteCache[courseId] || []).filter((id) => id !== kp)
+  if (isFavorited(kp)) {
+    await api.removeFavorite(cid, did, kp)
+    favoriteCache[key] = (favoriteCache[key] || []).filter((id) => id !== kp)
     ElMessage.success('已取消收藏')
   } else {
-    await api.addFavorite(courseId, kp)
-    favoriteCache[courseId] = [...(favoriteCache[courseId] || []), kp]
+    await api.addFavorite(cid, did, kp)
+    favoriteCache[key] = [...(favoriteCache[key] || []), kp]
     ElMessage.success('已收藏')
   }
 }
 
 // 轻量入口（QA 来源卡 / 学习路径 / 收藏夹）：无独立 loading，仅提示 + 状态同步
-async function toggleFavoriteSafe(courseId, kpId) {
+async function toggleFavoriteSafe(kpId) {
   try {
-    await toggleFavorite(courseId, kpId)
+    await toggleFavorite(kpId)
   } catch (e) {
     ElMessage.error(`操作失败：${e.message}`)
   }
@@ -793,10 +898,10 @@ async function toggleFavoriteSafe(courseId, kpId) {
 // 详情抽屉的收藏按钮（带 loading 态）
 async function onToggleFavorite() {
   const node = drawerNode.value
-  if (!node || !browseCourseId.value || node.id == null) return
+  if (!node || !ctxKey.value || node.id == null) return
   favoriteLoading.value = true
   try {
-    await toggleFavorite(browseCourseId.value, node.id)
+    await toggleFavorite(node.id)
   } catch (e) {
     ElMessage.error(`操作失败：${e.message}`)
   } finally {
@@ -827,14 +932,9 @@ function onJumpToNode(node) {
   browseGraphRef.value.selectNode(String(node.id))
 }
 
-// 切换课程时重新加载该课程的学习进度 + 收藏（写入 cache，跨 tab 同步）
-watch(browseCourseId, (id) => {
-  loadMastered(id)
-  loadFavorites(id)
-})
+// 学习上下文建立/切换时的数据加载统一收敛到下方 watch(ctxKey)，不再按 courseId 单独 watch
 
 // ===================== 智能问答 =====================
-const qaCourseId = ref('')
 const question = ref('')
 const asking = ref(false)
 const messages = ref([])
@@ -848,7 +948,7 @@ async function sendQuestion() {
   asking.value = true
   scrollChatToBottom()
   try {
-    const res = await api.ask(q, qaCourseId.value)
+    const res = await api.ask(q, currentCourseId.value, currentDocumentId.value)
     const sources = (res.sources || []).map(normalizeSource)
     // P8：区分「检索成功但生成失败」（LLM 降级文案）与「检索空结果」，统一前端状态
     messages.value.push({
@@ -903,7 +1003,6 @@ const relatedKps = computed(() => {
 // 点击引用/相关知识点 → 跳图谱浏览并高亮 + 打开详情（问答 → 详情 → 图谱聚焦闭环）
 function jumpToKp(kp) {
   if (!kp || !kp.name) return
-  browseCourseId.value = qaCourseId.value
   activeTab.value = 'browse'
   // QA 来源为 {kp_id, name, category, description}，构造详情所需节点对象
   drawerNode.value = {
@@ -921,17 +1020,16 @@ function jumpToKp(kp) {
 }
 
 // ===================== 收藏夹 Tab（学生个人知识点书签） =====================
-const favCourseId = ref('')
 const favSearch = ref('')
 const favCategory = ref('')
 const favNodes = ref([])
 const favLoading = ref(false)
 const favLoaded = ref(false)
 
-const favTotal = computed(() => (favoriteCache[favCourseId.value] || []).length)
+const favTotal = computed(() => (favoriteCache[ctxKey.value] || []).length)
 
 const favoriteList = computed(() => {
-  const ids = favoriteCache[favCourseId.value] || []
+  const ids = favoriteCache[ctxKey.value] || []
   const nodeById = new Map(favNodes.value.map((n) => [String(n.id), n]))
   const kw = favSearch.value.trim().toLowerCase()
   const cat = favCategory.value
@@ -948,18 +1046,15 @@ const favoriteList = computed(() => {
 })
 
 async function loadFavoritesTab() {
-  if (!favCourseId.value) {
+  if (!ctxKey.value) {
     favNodes.value = []
     favLoaded.value = false
     return
   }
   favLoading.value = true
   try {
-    const [favs, graph] = await Promise.all([
-      api.getFavorites(favCourseId.value),
-      api.getGraphV1(favCourseId.value, { limit: 800 }),
-    ])
-    favoriteCache[favCourseId.value] = (favs.items || []).map((f) => f.kp_id)
+    // favoriteCache 由 loadFavorites 统一写入（同一文档作用域），此处仅取图谱节点名/描述
+    const graph = await api.getGraphV1(currentCourseId.value, currentDocumentId.value, { limit: 800 })
     favNodes.value = graph.nodes || []
     favLoaded.value = true
   } catch (e) {
@@ -970,21 +1065,17 @@ async function loadFavoritesTab() {
   }
 }
 
-watch(favCourseId, loadFavoritesTab)
-
 // 收藏夹「查看知识点」→ 复用 P7 统一定位：切图谱 + kp_id 高亮 + 居中 + 打开详情
 function viewFavorite(node) {
   if (!node || node.id == null) return
-  locateKnowledgePoint(node, favCourseId.value)
+  locateKnowledgePoint(node)
 }
 
 function goBrowse() {
-  browseCourseId.value = favCourseId.value
   activeTab.value = 'browse'
 }
 
 // ===================== 学习路径推荐 =====================
-const pathCourseId = ref('')
 const masteredText = ref('')
 const recommendations = ref([])
 const recommendLoading = ref(false)
@@ -1011,7 +1102,7 @@ async function doRecommend() {
     .filter(Boolean)
   recommendLoading.value = true
   try {
-    const res = await api.recommendNext(mastered, pathCourseId.value)
+    const res = await api.recommendNext(mastered, currentCourseId.value, currentDocumentId.value)
     recommendations.value = res.recommendations || []
     recommendChecked.value = true
   } catch (e) {
@@ -1028,7 +1119,7 @@ async function doPathToTarget() {
   }
   pathLoading.value = true
   try {
-    const res = await api.pathToTarget(targetKnowledge.value.trim(), pathCourseId.value)
+    const res = await api.pathToTarget(targetKnowledge.value.trim(), currentCourseId.value, currentDocumentId.value)
     paths.value = res.paths || []
     pathFallback.value = !!res.fallback
     pathTargetNode.value = res.target_node || null
@@ -1036,9 +1127,8 @@ async function doPathToTarget() {
     pathReason.value = res.reason || ''
     pathChecked.value = true
     // 有真实路径时，高亮到图谱（对齐课程 + 切到浏览 Tab）
-    if (res.paths && res.paths.length && pathCourseId.value) {
+    if (res.paths && res.paths.length && ctxKey.value) {
       highlightPathNodes.value = res.paths[0].map((s) => s.name)
-      browseCourseId.value = pathCourseId.value
       activeTab.value = 'browse'
       ElMessage.success('已生成路径，正在图谱中高亮')
     } else {
@@ -1059,7 +1149,7 @@ async function doQueryPrereqs() {
   prereqLoading.value = true
   prereqResult.value = null
   try {
-    prereqResult.value = await api.getPrerequisites(prereqName.value.trim(), pathCourseId.value)
+    prereqResult.value = await api.getPrerequisites(prereqName.value.trim(), currentCourseId.value, currentDocumentId.value)
   } catch (e) {
     ElMessage.error(`查询失败：${e.message}`)
   } finally {
@@ -1080,11 +1170,11 @@ const pathDataLoading = ref(false)
 const pathDataChecked = ref(false)
 
 // P7：展示层唯一状态源（跨路径/图谱/详情/问答统一）
-// 「已掌握」来自 masteredCache（后端 getProgress，按课程缓存）；
+// 「已掌握」来自 masteredCache（后端 getProgress，按文档作用域缓存）；
 // 「当前学习」「推荐学习」来自 recommendNext 结果映射的 kp_id。
 const currentKnowledgePointId = ref(null) // 当前学习知识点 kp_id
 const recommendedKnowledgePointIds = ref([]) // 推荐学习知识点 kp_id 列表
-const pathMasteredIds = computed(() => masteredCache[pathCourseId.value] || [])
+const pathMasteredIds = computed(() => masteredCache[ctxKey.value] || [])
 
 const currentKnowledgePoint = computed(() => {
   const id = currentKnowledgePointId.value
@@ -1103,17 +1193,9 @@ const recById = computed(() => {
   return map
 })
 
-// P7：图谱状态仅在「浏览课程 === 路径课程」时生效（学习状态按课程作用域，避免串课）
-const browseCurrentKpId = computed(() =>
-  browseCourseId.value && browseCourseId.value === pathCourseId.value
-    ? currentKnowledgePointId.value
-    : null
-)
-const browseRecommendedKpIds = computed(() =>
-  browseCourseId.value && browseCourseId.value === pathCourseId.value
-    ? recommendedKnowledgePointIds.value
-    : []
-)
+// P7：图谱状态仅在当前文档上下文内生效（避免跨文档残留）
+const browseCurrentKpId = computed(() => (ctxKey.value ? currentKnowledgePointId.value : null))
+const browseRecommendedKpIds = computed(() => (ctxKey.value ? recommendedKnowledgePointIds.value : []))
 
 // 详情抽屉的节点学习状态（当前学习 / 推荐学习）
 const drawerLearningState = computed(() => {
@@ -1134,7 +1216,9 @@ const STATE_META = {
 }
 
 async function loadPathData() {
-  if (!pathCourseId.value) {
+  const key = ctxKey.value
+  const cid = currentCourseId.value
+  if (!key || !cid) {
     pathGraphNodes.value = []
     pathGraphEdges.value = []
     pathRecs.value = []
@@ -1146,12 +1230,13 @@ async function loadPathData() {
   pathDataLoading.value = true
   try {
     const [graph, progress] = await Promise.all([
-      api.getGraphV1(pathCourseId.value, { limit: 800 }),
-      api.getProgress(pathCourseId.value),
+      api.getGraphV1(cid, currentDocumentId.value, { limit: 800 }),
+      api.getProgress(cid, currentDocumentId.value),
     ])
+    if (ctxKey.value !== key) return // 上下文已切换，丢弃过期结果
     pathGraphNodes.value = graph.nodes || []
     pathGraphEdges.value = graph.edges || []
-    masteredCache[pathCourseId.value] = progress.mastered_kp_ids || []
+    masteredCache[key] = progress.mastered_kp_ids || []
 
     // 已掌握 kp_id → 名称（recommendNext 入参需名称）
     const byId = new Map(pathGraphNodes.value.map((n) => [String(n.id), n]))
@@ -1159,7 +1244,8 @@ async function loadPathData() {
     const masteredNames = (progress.mastered_kp_ids || [])
       .map((id) => byId.get(String(id))?.label)
       .filter(Boolean)
-    const res = await api.recommendNext(masteredNames, pathCourseId.value)
+    const res = await api.recommendNext(masteredNames, cid, currentDocumentId.value)
+    if (ctxKey.value !== key) return // 第二次 await 后再校验
     pathRecs.value = res.recommendations || []
 
     // P7：将 recommendNext 结果映射为 kp_id，建立展示层唯一状态源
@@ -1171,6 +1257,7 @@ async function loadPathData() {
       .map((r) => nameToId.get(r.name))
       .filter(Boolean)
   } catch (e) {
+    if (ctxKey.value !== key) return
     pathRecs.value = []
     currentKnowledgePointId.value = null
     recommendedKnowledgePointIds.value = []
@@ -1180,10 +1267,22 @@ async function loadPathData() {
   }
 }
 
-// 学习课程切换：加载路径数据（图谱 + 进度 + 推荐），并同步加载该课程收藏，供学习总览复用
-watch(pathCourseId, (id) => {
-  loadPathData()
-  if (id) loadFavorites(id)
+// 学习上下文切换：清空文档级学习状态，并加载对应文档作用域的数据
+watch(ctxKey, (key) => {
+  currentKnowledgePointId.value = null
+  recommendedKnowledgePointIds.value = []
+  if (key) {
+    loadPathData()
+    loadFavorites()
+    loadFavoritesTab()
+  } else {
+    pathGraphNodes.value = []
+    pathGraphEdges.value = []
+    pathRecs.value = []
+    favNodes.value = []
+    favLoaded.value = false
+    pathDataChecked.value = false
+  }
 })
 
 const pathProgress = computed(() => {
@@ -1275,10 +1374,8 @@ function startLearning() {
 }
 
 // P7：统一的「定位知识点」：切到图谱 → 打开详情 → 图谱金高亮 + 居中（路径/开始学习复用）
-function locateKnowledgePoint(node, courseId) {
+function locateKnowledgePoint(node) {
   if (!node || node.id == null) return
-  if (courseId != null) browseCourseId.value = courseId
-  else if (pathCourseId.value) browseCourseId.value = pathCourseId.value
   activeTab.value = 'browse'
   // 打开详情（用 pathGraph 邻接数据，无需等图谱加载完成）
   drawerNode.value = node
@@ -1317,7 +1414,7 @@ function neighborsOf(nodeId) {
 }
 
 // ===================== 学习总览（学习驾驶舱，P11） =====================
-// 统一复用学习状态源（pathCourseId / masteredCache / favoriteCache / pathRecs /
+// 统一复用学习状态源（learningContext / masteredCache / favoriteCache / pathRecs /
 // currentKnowledgePointId / recommendedKnowledgePointIds），不新建任何重复状态；
 // 所有数字均来自后端真实数据（图谱 / 学习进度 / 推荐 / 收藏），无伪造指标。
 const overviewQuestion = ref('')
@@ -1325,7 +1422,7 @@ const overviewQuestion = ref('')
 const overviewTotal = computed(() => pathGraphNodes.value.length)
 const overviewMastered = computed(() => pathMasteredIds.value.length)
 const overviewPct = computed(() => pathProgress.value.pct)
-const overviewFavIds = computed(() => favoriteCache[pathCourseId.value] || [])
+const overviewFavIds = computed(() => favoriteCache[ctxKey.value] || [])
 
 // 四态计数（互斥、求和 = 知识点总数，颜色仅辅助，字形 + 文本为主信号）
 const overviewStateCounts = computed(() => {
@@ -1418,10 +1515,9 @@ function overviewViewFocus(item) {
   if (node) locateKnowledgePoint(node)
 }
 function overviewViewFav(node) {
-  if (node) locateKnowledgePoint(node, pathCourseId.value)
+  if (node) locateKnowledgePoint(node)
 }
 function overviewGoFavorites() {
-  favCourseId.value = pathCourseId.value
   activeTab.value = 'favorites'
 }
 // AI 学习助手：带入问题进入现有 QA tab（复用 sendQuestion 同源 API）
@@ -1431,7 +1527,6 @@ function overviewAsk(q) {
     ElMessage.warning('请输入问题')
     return
   }
-  qaCourseId.value = pathCourseId.value
   question.value = text
   overviewQuestion.value = ''
   activeTab.value = 'qa'
@@ -2345,6 +2440,51 @@ function overviewAsk(q) {
 }
 .ov-ai-input .el-input {
   flex: 1;
+}
+
+/* ===== Phase 7 统一学习上下文条 ===== */
+.ctx-bar {
+  margin-bottom: 16px;
+}
+.ctx-bar :deep(.el-card__body) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ctx-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ctx-label {
+  color: #909399;
+  font-size: 13px;
+}
+.ctx-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ctx-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #909399;
+  font-size: 14px;
+}
+.qa-side-course {
+  font-size: 13px;
+  color: #303133;
+  font-weight: 600;
+  padding: 2px 0;
 }
 
 /* 响应式：窄屏 KPI 换行 */

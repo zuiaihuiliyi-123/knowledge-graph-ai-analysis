@@ -1,10 +1,11 @@
 """
 重建 course_id=5 的图谱数据（用新提示词重新抽取，验证 PRECEDES）
 
-流程：定位文档 -> 解析 PDF -> 重新抽取 -> 删除旧图 -> 写入新图 -> 验证 PRECEDES
+流程：定位文档 -> 解析 PDF -> 重新抽取 -> 删除该文档旧图 -> 写入新图 -> 验证 PRECEDES
 运行方式（backend 目录下）：python rebuild_course_5.py
 
 说明：只重建 Neo4j 图谱，不动 SQLite 的课程/文档记录（文档文件仍在、记录仍有效）。
+Phase 8A：图谱按文档隔离，本脚本只重建该课程的第一个文档（docs[0]）的图谱。
 """
 import sys
 import os
@@ -31,13 +32,15 @@ async def rebuild():
     if not docs:
         print(f"✗ course_id={COURSE_ID} 下没有文档记录")
         return
-    doc_path = docs[0].get("file_path")
+    doc = docs[0]
+    doc_id = doc["doc_id"]
+    doc_path = doc.get("file_path")
     if not os.path.exists(doc_path):
         doc_path = str(doc_path).replace("\\", "/")
         if not os.path.exists(doc_path):
             print(f"✗ 文档文件不存在: {doc_path}")
             return
-    print(f"[1] 文档: {doc_path}")
+    print(f"[1] 文档: doc_id={doc_id} {doc_path}")
 
     # 2. 解析 PDF -> 文本
     print("[2] 解析文档…")
@@ -55,22 +58,23 @@ async def rebuild():
         print(f"    ✗ 提取失败: {result['error']}")
         return
 
-    # 4. 删除旧图
-    print("[4] 删除旧图…")
-    nodes_deleted, edges_deleted = db.delete_course_graph(COURSE_ID)
+    # 4. 删除该文档旧图
+    print("[4] 删除该文档旧图…")
+    nodes_deleted, edges_deleted = db.delete_document_graph(COURSE_ID, doc_id)
     print(f"    删除 {nodes_deleted} 节点、{edges_deleted} 边")
 
     # 5. 写入新图（复用 kg_manager.build_graph，走统一的节点/关系 DAO）
     print("[5] 写入新图…")
-    stats = KnowledgeGraphManager.build_graph(COURSE_ID, entities, relations)
+    stats = KnowledgeGraphManager.build_graph(COURSE_ID, doc_id, entities, relations)
     print(f"    入图 {stats['node_count']} 节点、{stats['relation_count']} 边")
 
     # 6. 验证关系类型分布
     print("[6] 验证关系类型分布…")
     dist = db.query(
-        "MATCH (:KnowledgePoint {course_id: $cid})-[r]->(:KnowledgePoint {course_id: $cid}) "
+        "MATCH (:KnowledgePoint {course_id: $cid, document_id: $did})-[r]->"
+        "(:KnowledgePoint {course_id: $cid, document_id: $did}) "
         "RETURN type(r) AS t, count(r) AS cnt ORDER BY cnt DESC",
-        {"cid": COURSE_ID},
+        {"cid": COURSE_ID, "did": doc_id},
     )
     for r in dist:
         print(f"    {r['t']}: {r['cnt']}")
@@ -79,9 +83,10 @@ async def rebuild():
     if precedes_cnt > 0:
         print(f"\n✓ PRECEDES = {precedes_cnt}，路径推荐已可用")
         examples = db.query(
-            "MATCH (a:KnowledgePoint {course_id: $cid})-[r:PRECEDES]->(b:KnowledgePoint {course_id: $cid}) "
+            "MATCH (a:KnowledgePoint {course_id: $cid, document_id: $did})-[r:PRECEDES]->"
+            "(b:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "RETURN a.name AS source, b.name AS target LIMIT 10",
-            {"cid": COURSE_ID},
+            {"cid": COURSE_ID, "did": doc_id},
         )
         print("  示例前置关系:")
         for e in examples:

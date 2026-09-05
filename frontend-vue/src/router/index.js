@@ -47,8 +47,9 @@ router.beforeEach((to) => {
       ? { path: '/dashboard' }
       : { path: '/student', query: { tab: 'overview' } }
   }
-  // 学生访问全局「数据总览」→ 转「学习总览」驾驶舱（教师仍使用全局统计页）
-  if (to.name === 'dashboard' && role === 'student') {
+  // 学生访问教师专属页（数据总览 / 教师端课程管理）→ 转「学习总览」驾驶舱，
+  // 避免学生误入教师界面看到「新建课程」等按钮后触发「仅教师可操作」权限报错。
+  if (role === 'student' && (to.name === 'dashboard' || to.name === 'teacher')) {
     return { path: '/student', query: { tab: 'overview' } }
   }
 })

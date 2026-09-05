@@ -108,6 +108,7 @@ _SCHEMA_SQL = [
         record_id       INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id         INTEGER NOT NULL,
         course_id       INTEGER NOT NULL,
+        document_id     INTEGER,
         kp_id           TEXT NOT NULL,
         status          TEXT NOT NULL DEFAULT 'MASTERED'
                         CHECK (status IN ('MASTERED', 'LEARNING', 'RECOMMENDED')),
@@ -127,8 +128,9 @@ _SCHEMA_SQL = [
     # 4.2.5 知识点向量表（RAG 向量检索；embedding 存 JSON 数组文本）
     """
     CREATE TABLE IF NOT EXISTS t_kp_embedding (
-        course_id  INTEGER NOT NULL,
-        kp_id      TEXT NOT NULL,
+        course_id    INTEGER NOT NULL,
+        document_id  INTEGER,
+        kp_id        TEXT NOT NULL,
         embedding  TEXT NOT NULL,
         updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         PRIMARY KEY (course_id, kp_id)
@@ -138,10 +140,11 @@ _SCHEMA_SQL = [
     # 4.2.6 学生收藏表（收藏 = 学生个人知识点书签，独立于学习状态；kp_id 为逻辑外键指向 Neo4j）
     """
     CREATE TABLE IF NOT EXISTS t_student_favorite (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id    INTEGER NOT NULL,
-        course_id  INTEGER NOT NULL,
-        kp_id      TEXT NOT NULL,
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id     INTEGER NOT NULL,
+        course_id   INTEGER NOT NULL,
+        document_id INTEGER,
+        kp_id       TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         FOREIGN KEY (user_id) REFERENCES t_user(user_id),
         FOREIGN KEY (course_id) REFERENCES t_course(course_id),
@@ -173,6 +176,35 @@ class SQLDatabase:
         with self._connect() as conn:
             for stmt in _SCHEMA_SQL:
                 conn.execute(stmt)
+            conn.commit()
+        self._migrate()
+
+    def _migrate(self):
+        """幂等迁移：为旧库补齐 document_id 列并回填（文档作用域改造）。
+
+        第一阶段历史数据「一个课程 == 一个文档」，故每个 course_id 至多映射一个 doc_id，
+        可安全回填；仅回填 document_id IS NULL 的行，重复执行无副作用。
+        新库由 _SCHEMA_SQL 直接建出含 document_id 的表，本方法对空表无影响。
+
+        说明：document_id 列故意不设 NOT NULL，以保证「改列阶段」旧写入路径
+        （尚未传 document_id）不报错；Phase 5/8 后所有写入都会显式提供 document_id。
+        """
+        doc_scoped_tables = (
+            ("t_learning_record", "course_id"),
+            ("t_student_favorite", "course_id"),
+            ("t_kp_embedding", "course_id"),
+        )
+        with self._connect() as conn:
+            for table, fk in doc_scoped_tables:
+                columns = {row["name"] for row in
+                           conn.execute(f"PRAGMA table_info({table})").fetchall()}
+                if "document_id" not in columns:
+                    conn.execute(f"ALTER TABLE {table} ADD COLUMN document_id INTEGER")
+                conn.execute(
+                    f"UPDATE {table} SET document_id = ("
+                    f"SELECT d.doc_id FROM t_document d WHERE d.course_id = {table}.{fk} LIMIT 1"
+                    f") WHERE document_id IS NULL"
+                )
             conn.commit()
 
     def _execute(self, sql: str, params: tuple = ()) -> int:
@@ -297,9 +329,14 @@ class SQLDatabase:
         self._execute(f"UPDATE t_course SET {', '.join(sets)} WHERE course_id = ?", tuple(params))
 
     def delete_course(self, course_id: int) -> int:
-        """删除课程及其文档、学习记录、收藏（按子表->父表顺序满足外键），返回删除的文档数"""
+        """删除课程及其文档、学习记录、收藏、向量（按子表->父表顺序满足外键），返回删除的文档数。
+
+        Phase 9（技术债修复）：补充清理 t_kp_embedding——该表无外键、不参与级联，
+        历史实现整课删除会残留孤儿向量，故在此显式删除。
+        """
         doc_count = self.count_documents_by_course(course_id)
         with self._connect() as conn:
+            conn.execute("DELETE FROM t_kp_embedding WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_student_favorite WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_learning_record WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_document WHERE course_id = ?", (course_id,))
@@ -357,33 +394,51 @@ class SQLDatabase:
         rows = self._query("SELECT course_id, count(*) AS cnt FROM t_document GROUP BY course_id")
         return {r["course_id"]: r["cnt"] for r in rows}
 
+    def delete_document(self, doc_id: int) -> int:
+        """删除单个文档记录（仅删除 t_document 行；图谱/向量/学习/收藏清理由上层 Phase 8/9 完成）"""
+        with self._connect() as conn:
+            cur = conn.execute("DELETE FROM t_document WHERE doc_id = ?", (doc_id,))
+            conn.commit()
+            return cur.rowcount
+
     # ---------- 学习记录 ----------
 
-    def upsert_learning_record(self, user_id: int, course_id: int, kp_id: str,
+    def upsert_learning_record(self, user_id: int, course_id: int, document_id, kp_id: str,
                                status: str = "MASTERED", mastery_level: int = 100,
                                source: str = "MANUAL", last_learned_at: str = None) -> int:
         """
         写入学习记录；依赖 UNIQUE(user_id, course_id, kp_id) 冲突时更新，
         保证同一学生、同一课程、同一知识点仅一条记录。
-        注：ON CONFLICT DO UPDATE 为 SQLite 语法，迁 MySQL 时改为 ON DUPLICATE KEY UPDATE。
+
+        Phase 8B：document_id 作为业务作用域字段写入（kp_id 全局唯一，UNIQUE 无需改为四列；
+        具体见规划文档「数据库约束」）。注：ON CONFLICT DO UPDATE 为 SQLite 语法，
+        迁 MySQL 时改为 ON DUPLICATE KEY UPDATE。
         """
         now = _now()
         sql = """
         INSERT INTO t_learning_record
-            (user_id, course_id, kp_id, status, mastery_level, source, last_learned_at,
+            (user_id, course_id, document_id, kp_id, status, mastery_level, source, last_learned_at,
              created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id, course_id, kp_id) DO UPDATE SET
+            document_id = excluded.document_id,
             status = excluded.status,
             mastery_level = excluded.mastery_level,
             source = excluded.source,
             last_learned_at = excluded.last_learned_at,
             updated_at = excluded.updated_at
         """
-        return self._execute(sql, (user_id, course_id, kp_id, status, mastery_level,
+        return self._execute(sql, (user_id, course_id, document_id, kp_id, status, mastery_level,
                                    source, last_learned_at, now, now))
 
-    def list_records_by_user_course(self, user_id: int, course_id: int) -> list:
+    def list_records_by_user_course(self, user_id: int, course_id: int, document_id=None) -> list:
+        """查询某用户某文档的学习记录；document_id 为 None 时退化为课程级（教师监测汇总）"""
+        if document_id is not None:
+            return self._query(
+                "SELECT * FROM t_learning_record WHERE user_id = ? AND course_id = ? "
+                "AND document_id = ? ORDER BY record_id",
+                (user_id, course_id, document_id),
+            )
         return self._query(
             "SELECT * FROM t_learning_record WHERE user_id = ? AND course_id = ? "
             "ORDER BY record_id",
@@ -403,42 +458,52 @@ class SQLDatabase:
             (course_id,),
         )
 
-    def delete_learning_record(self, user_id: int, course_id: int, kp_id: str) -> int:
-        """删除某用户某课程某知识点的学习记录（用于取消掌握标记）"""
+    def delete_learning_record(self, user_id: int, course_id: int, document_id, kp_id: str) -> int:
+        """删除某用户某文档某知识点的学习记录（用于取消掌握标记）"""
         with self._connect() as conn:
             cur = conn.execute(
-                "DELETE FROM t_learning_record WHERE user_id = ? AND course_id = ? AND kp_id = ?",
-                (user_id, course_id, kp_id),
+                "DELETE FROM t_learning_record "
+                "WHERE user_id = ? AND course_id = ? AND document_id = ? AND kp_id = ?",
+                (user_id, course_id, document_id, kp_id),
             )
             conn.commit()
             return cur.rowcount
 
     # ---------- 学生收藏（收藏 = 个人知识点书签，独立于学习状态） ----------
 
-    def add_favorite(self, user_id: int, course_id: int, kp_id: str) -> bool:
-        """新增收藏（INSERT OR IGNORE 幂等）；返回是否新插入（True=新增，False=已存在未重复）"""
+    def add_favorite(self, user_id: int, course_id: int, document_id, kp_id: str) -> bool:
+        """新增收藏（INSERT OR IGNORE 幂等）；返回是否新插入（True=新增，False=已存在未重复）。
+
+        Phase 8B：document_id 作为业务作用域字段写入（kp_id 全局唯一，UNIQUE 无需改为四列）。
+        """
         with self._connect() as conn:
             cur = conn.execute(
-                "INSERT OR IGNORE INTO t_student_favorite (user_id, course_id, kp_id) "
-                "VALUES (?, ?, ?)",
-                (user_id, course_id, kp_id),
+                "INSERT OR IGNORE INTO t_student_favorite (user_id, course_id, document_id, kp_id) "
+                "VALUES (?, ?, ?, ?)",
+                (user_id, course_id, document_id, kp_id),
             )
             conn.commit()
             return cur.rowcount > 0
 
-    def remove_favorite(self, user_id: int, course_id: int, kp_id: str) -> int:
+    def remove_favorite(self, user_id: int, course_id: int, document_id, kp_id: str) -> int:
         """取消收藏，返回删除条数"""
         with self._connect() as conn:
             cur = conn.execute(
                 "DELETE FROM t_student_favorite "
-                "WHERE user_id = ? AND course_id = ? AND kp_id = ?",
-                (user_id, course_id, kp_id),
+                "WHERE user_id = ? AND course_id = ? AND document_id = ? AND kp_id = ?",
+                (user_id, course_id, document_id, kp_id),
             )
             conn.commit()
             return cur.rowcount
 
-    def list_favorites_by_user_course(self, user_id: int, course_id: int) -> list:
-        """查询某用户某课程的收藏（按收藏时间倒序）"""
+    def list_favorites_by_user_course(self, user_id: int, course_id: int, document_id=None) -> list:
+        """查询某用户某文档的收藏（按收藏时间倒序）；document_id 为 None 时退化为课程级"""
+        if document_id is not None:
+            return self._query(
+                "SELECT kp_id, course_id, document_id, created_at FROM t_student_favorite "
+                "WHERE user_id = ? AND course_id = ? AND document_id = ? ORDER BY id DESC",
+                (user_id, course_id, document_id),
+            )
         return self._query(
             "SELECT kp_id, course_id, created_at FROM t_student_favorite "
             "WHERE user_id = ? AND course_id = ? ORDER BY id DESC",
@@ -464,21 +529,22 @@ class SQLDatabase:
 
     # ---------- 知识点向量（RAG 向量检索） ----------
 
-    def upsert_kp_embedding(self, course_id: int, kp_id: str, embedding: list) -> int:
-        """写入/更新知识点向量（embedding 序列化为 JSON 文本）"""
+    def upsert_kp_embedding(self, course_id: int, document_id, kp_id: str, embedding: list) -> int:
+        """写入/更新知识点向量（embedding 序列化为 JSON 文本；Phase 8C 保存 document_id）"""
         return self._execute(
-            "INSERT INTO t_kp_embedding (course_id, kp_id, embedding, updated_at) "
-            "VALUES (?, ?, ?, ?) "
+            "INSERT INTO t_kp_embedding (course_id, document_id, kp_id, embedding, updated_at) "
+            "VALUES (?, ?, ?, ?, ?) "
             "ON CONFLICT(course_id, kp_id) DO UPDATE SET "
+            "document_id = excluded.document_id, "
             "embedding = excluded.embedding, updated_at = excluded.updated_at",
-            (course_id, kp_id, json.dumps(embedding), _now()),
+            (course_id, document_id, kp_id, json.dumps(embedding), _now()),
         )
 
-    def get_embeddings_by_course(self, course_id: int) -> list:
-        """返回课程全部知识点向量，[{kp_id, embedding(list[float])}]"""
+    def get_embeddings_by_document(self, course_id: int, document_id) -> list:
+        """返回文档全部知识点向量，[{kp_id, embedding(list[float])}]"""
         rows = self._query(
-            "SELECT kp_id, embedding FROM t_kp_embedding WHERE course_id = ?",
-            (course_id,),
+            "SELECT kp_id, embedding FROM t_kp_embedding WHERE course_id = ? AND document_id = ?",
+            (course_id, document_id),
         )
         result = []
         for r in rows:
@@ -489,10 +555,39 @@ class SQLDatabase:
             result.append({"kp_id": r["kp_id"], "embedding": vec})
         return result
 
-    def delete_embeddings_by_course(self, course_id: int) -> int:
-        """删除课程全部知识点向量，返回删除条数"""
+    def delete_embeddings_by_document(self, course_id: int, document_id) -> int:
+        """删除文档全部知识点向量，返回删除条数"""
         with self._connect() as conn:
-            cur = conn.execute("DELETE FROM t_kp_embedding WHERE course_id = ?", (course_id,))
+            cur = conn.execute(
+                "DELETE FROM t_kp_embedding WHERE course_id = ? AND document_id = ?",
+                (course_id, document_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def count_embeddings_by_course(self, course_id: int) -> int:
+        """某课程全部知识点向量数量（供整课删除前统计与报告）"""
+        return self._query_one(
+            "SELECT count(*) AS cnt FROM t_kp_embedding WHERE course_id = ?", (course_id,),
+        )["cnt"]
+
+    def delete_learning_records_by_document(self, course_id: int, document_id) -> int:
+        """删除文档全部学习记录，返回删除条数（Phase 8C 删除文档级清理）"""
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_learning_record WHERE course_id = ? AND document_id = ?",
+                (course_id, document_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def delete_favorites_by_document(self, course_id: int, document_id) -> int:
+        """删除文档全部收藏，返回删除条数（Phase 8C 删除文档级清理）"""
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_student_favorite WHERE course_id = ? AND document_id = ?",
+                (course_id, document_id),
+            )
             conn.commit()
             return cur.rowcount
 

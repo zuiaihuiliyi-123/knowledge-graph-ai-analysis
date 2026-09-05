@@ -52,22 +52,6 @@
             <el-icon><Notebook /></el-icon>
             <template #title>课程管理</template>
           </el-menu-item>
-          <el-menu-item index="/teacher?tab=monitor" class="menu-sub">
-            <el-icon><DataLine /></el-icon>
-            <template #title>教学监测</template>
-          </el-menu-item>
-          <el-menu-item index="/teacher?tab=upload">
-            <el-icon><Upload /></el-icon>
-            <template #title>文档上传</template>
-          </el-menu-item>
-          <el-menu-item index="/teacher?tab=preview" class="menu-sub">
-            <el-icon><Search /></el-icon>
-            <template #title>图谱预览</template>
-          </el-menu-item>
-          <el-menu-item index="/teacher?tab=edit" class="menu-sub">
-            <el-icon><EditPen /></el-icon>
-            <template #title>编辑图谱</template>
-          </el-menu-item>
         </template>
         <template v-else>
           <el-menu-item index="/student?tab=browse">
@@ -181,7 +165,7 @@ const collapsed = ref(false)
 // 注：courses 为课程管理默认 Tab，面包屑主级已是「课程管理」，故不再重复显示为第三级
 const TAB_LABELS = {
   overview: '学习总览',
-  upload: '文档上传',
+  documents: '课程文档',
   preview: '图谱预览',
   edit: '编辑图谱',
   monitor: '教学监测',

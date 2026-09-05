@@ -19,6 +19,14 @@ def _coerce_course_id(course_id: str) -> int:
         raise ValueError(f"course_id 必须为整数，收到: {course_id}")
 
 
+def _coerce_document_id(document_id: str) -> int:
+    """document_id 统一为整数；非法则抛 ValueError"""
+    try:
+        return int(document_id)
+    except (TypeError, ValueError):
+        raise ValueError(f"document_id 必须为整数，收到: {document_id}")
+
+
 # ---------------- 请求体模型 ----------------
 
 class NodeCreate(BaseModel):
@@ -44,17 +52,19 @@ class EdgeCreate(BaseModel):
 @router.get("/{course_id}")
 async def get_graph(
     course_id: str,
+    document_id: str = Query(..., description="文档 ID（图谱按文档隔离，必填）"),
     limit: int = Query(500, ge=1, le=2000, description="节点数量上限"),
     node_type: str = Query(None, description="按类别过滤：概念/定理/公式/方法"),
     current_user: dict = Depends(get_current_user),
 ):
-    """获取指定课程的知识图谱数据（节点 + 关系）"""
+    """获取指定文档的知识图谱数据（节点 + 关系）"""
     try:
         course_id_int = _coerce_course_id(course_id)
+        did = _coerce_document_id(document_id)
     except ValueError as e:
         return error(1001, str(e))
     try:
-        graph = KnowledgeGraphManager.get_graph_v1(course_id_int, limit=limit, node_type=node_type)
+        graph = KnowledgeGraphManager.get_graph_v1(course_id_int, did, limit=limit, node_type=node_type)
     except Exception as e:
         return error(3000, f"图谱查询失败: {str(e)}")
     return success(graph)
@@ -63,11 +73,14 @@ async def get_graph(
 # ---------------- 手动编辑：节点 ----------------
 
 @router.post("/{course_id}/nodes")
-async def create_node(course_id: str, body: NodeCreate, current_user: dict = Depends(require_teacher)):
+async def create_node(course_id: str, body: NodeCreate,
+                      document_id: str = Query(..., description="文档 ID（必填）"),
+                      current_user: dict = Depends(require_teacher)):
     """教师手动新增知识点（is_manual=True）"""
     try:
         cid = _coerce_course_id(course_id)
-        node = KnowledgeGraphManager.create_node(cid, body.name, body.category, body.description)
+        did = _coerce_document_id(document_id)
+        node = KnowledgeGraphManager.create_node(cid, did, body.name, body.category, body.description)
     except ValueError as e:
         return error(1001, str(e))
     return success(node)
@@ -75,12 +88,14 @@ async def create_node(course_id: str, body: NodeCreate, current_user: dict = Dep
 
 @router.put("/{course_id}/nodes/{node_id}")
 async def update_node(course_id: str, node_id: str, body: NodeUpdate,
+                      document_id: str = Query(..., description="文档 ID（必填）"),
                       current_user: dict = Depends(require_teacher)):
     """教师手动更新知识点（按 kp_id 定位）"""
     try:
         cid = _coerce_course_id(course_id)
+        did = _coerce_document_id(document_id)
         node = KnowledgeGraphManager.update_node(
-            cid, node_id, name=body.name, category=body.category, description=body.description,
+            cid, did, node_id, name=body.name, category=body.category, description=body.description,
         )
     except ValueError as e:
         return error(1001, str(e))
@@ -88,11 +103,14 @@ async def update_node(course_id: str, node_id: str, body: NodeUpdate,
 
 
 @router.delete("/{course_id}/nodes/{node_id}")
-async def delete_node(course_id: str, node_id: str, current_user: dict = Depends(require_teacher)):
+async def delete_node(course_id: str, node_id: str,
+                      document_id: str = Query(..., description="文档 ID（必填）"),
+                      current_user: dict = Depends(require_teacher)):
     """教师手动删除知识点及其关系（按 kp_id 定位）"""
     try:
         cid = _coerce_course_id(course_id)
-        result = KnowledgeGraphManager.delete_node(cid, node_id)
+        did = _coerce_document_id(document_id)
+        result = KnowledgeGraphManager.delete_node(cid, did, node_id)
     except ValueError as e:
         return error(1001, str(e))
     return success(result)
@@ -101,22 +119,28 @@ async def delete_node(course_id: str, node_id: str, current_user: dict = Depends
 # ---------------- 手动编辑：关系 ----------------
 
 @router.post("/{course_id}/edges")
-async def create_edge(course_id: str, body: EdgeCreate, current_user: dict = Depends(require_teacher)):
+async def create_edge(course_id: str, body: EdgeCreate,
+                      document_id: str = Query(..., description="文档 ID（必填）"),
+                      current_user: dict = Depends(require_teacher)):
     """教师手动新增关系（source/target 为 kp_id）"""
     try:
         cid = _coerce_course_id(course_id)
-        edge = KnowledgeGraphManager.create_relationship(cid, body.source, body.target, body.type)
+        did = _coerce_document_id(document_id)
+        edge = KnowledgeGraphManager.create_relationship(cid, did, body.source, body.target, body.type)
     except ValueError as e:
         return error(1001, str(e))
     return success(edge)
 
 
 @router.delete("/{course_id}/edges/{edge_id}")
-async def delete_edge(course_id: str, edge_id: str, current_user: dict = Depends(require_teacher)):
+async def delete_edge(course_id: str, edge_id: str,
+                      document_id: str = Query(..., description="文档 ID（必填）"),
+                      current_user: dict = Depends(require_teacher)):
     """教师手动删除关系（按 edge_id = elementId(r)）"""
     try:
         cid = _coerce_course_id(course_id)
-        result = KnowledgeGraphManager.delete_relationship(cid, edge_id)
+        did = _coerce_document_id(document_id)
+        result = KnowledgeGraphManager.delete_relationship(cid, did, edge_id)
     except ValueError as e:
         return error(1001, str(e))
     return success(result)

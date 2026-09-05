@@ -20,7 +20,9 @@ except Exception:
 
 from app.services.qa_service import QAService
 
+# Phase 9：文档作用域。course_id=5 仅一个文档 doc_id=4（第6章 面向对象程序设计.pdf）。
 COURSE_ID = "5"
+DOCUMENT_ID = "4"
 
 # 20 道测试题：覆盖概念定义 / 方法用法 / 对比辨析 / 关系前置 / 特殊方法与运算符 / 边界诚实性
 # expected：该题应命中的核心知识点（用于判定检索与回答是否切题）
@@ -63,13 +65,13 @@ async def main():
         print(f"\n[{i:2d}/{len(QUESTIONS)}] {question}")
 
         # 1. 向量检索 top3
-        contexts = qa.search_related_knowledge(question, COURSE_ID, top_k=3)
+        contexts = qa.search_related_knowledge(question, COURSE_ID, DOCUMENT_ID, top_k=3)
         print("    检索 top3:")
         for c in contexts:
             print(f"      - {c}")
 
         # 2. RAG 回答
-        answer = await qa.ask(question, COURSE_ID)
+        answer = await qa.ask(question, COURSE_ID, DOCUMENT_ID)
         print(f"    回答: {answer[:120]}{'…' if len(answer) > 120 else ''}")
 
         results.append({

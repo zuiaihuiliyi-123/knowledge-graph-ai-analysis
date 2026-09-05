@@ -1,10 +1,13 @@
 """
 知识图谱管理服务：构建、存储、查询、手动编辑
 """
+import logging
 from datetime import datetime, timezone
 from typing import List, Dict
 from ..core.database import db, VALID_RELATION_TYPES, RELATION_TYPE_LABELS
 from ..core.sql_database import sql_db
+
+_logger = logging.getLogger(__name__)
 
 
 def _now_iso() -> str:
@@ -24,9 +27,11 @@ class KnowledgeGraphManager:
     """知识图谱管理器"""
 
     @staticmethod
-    def build_graph(course_id: str, entities: List[dict], relations: List[dict]) -> dict:
+    def build_graph(course_id, document_id, entities: List[dict], relations: List[dict]) -> dict:
         """
-        根据提取的实体和关系构建知识图谱（对齐规划文档：KnowledgePoint 节点 + 英文关系类型）
+        根据提取的实体和关系构建文档级知识图谱（对齐规划文档：KnowledgePoint 节点 + 英文关系类型）。
+
+        Phase 8A：所有节点/关系都携带 document_id，同一课程不同文档的图谱互相隔离。
         """
         node_count = 0
         relation_count = 0
@@ -38,6 +43,7 @@ class KnowledgeGraphManager:
                 continue
             db.create_knowledge_node(
                 course_id=course_id,
+                document_id=document_id,
                 name=name,
                 category=entity.get("category", "概念"),
                 description=entity.get("description", ""),
@@ -67,6 +73,7 @@ class KnowledgeGraphManager:
             try:
                 db.create_relationship(
                     course_id=course_id,
+                    document_id=document_id,
                     source=source,
                     target=target,
                     rel_type=rel_type,
@@ -82,17 +89,18 @@ class KnowledgeGraphManager:
 
         return {
             "course_id": course_id,
+            "document_id": document_id,
             "node_count": node_count,
             "relation_count": relation_count
         }
 
     @staticmethod
-    def get_graph_data(course_id: str = None) -> dict:
+    def get_graph_data(course_id: str = None, document_id=None) -> dict:
         """
         获取知识图谱数据，转为 ECharts 格式
         返回 {"nodes": [...], "links": [...]}
         """
-        records = db.get_full_graph(course_id)
+        records = db.get_full_graph(course_id, document_id)
 
         nodes = {}
         links = []
@@ -137,26 +145,28 @@ class KnowledgeGraphManager:
         }
 
     @staticmethod
-    def get_graph_v1(course_id: str, limit: int = 500, node_type: str = None) -> dict:
+    def get_graph_v1(course_id: str, document_id, limit: int = 500, node_type: str = None) -> dict:
         """
-        获取课程图谱数据（对齐规划文档 6.3.2）
-        返回 {"nodes": [...], "edges": [...]}，节点以 kp_id 为 id
+        获取文档级图谱数据（对齐规划文档 6.3.2）
+        返回 {"nodes": [...], "edges": [...]}，节点以 kp_id 为 id。
+
+        Phase 8A：按 course_id + document_id 读取，不猜测 document。
         """
-        params = {"course_id": course_id, "limit": limit}
+        params = {"course_id": course_id, "document_id": document_id, "limit": limit}
 
         if node_type:
             cypher = """
-            MATCH (n:KnowledgePoint {course_id: $course_id, category: $node_type})
+            MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id, category: $node_type})
             WITH n ORDER BY n.name LIMIT $limit
-            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id})
+            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id, document_id: $document_id})
             RETURN n, r, m, elementId(r) AS edge_id
             """
             params["node_type"] = node_type
         else:
             cypher = """
-            MATCH (n:KnowledgePoint {course_id: $course_id})
+            MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id})
             WITH n ORDER BY n.name LIMIT $limit
-            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id})
+            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint {course_id: $course_id, document_id: $document_id})
             RETURN n, r, m, elementId(r) AS edge_id
             """
 
@@ -204,12 +214,27 @@ class KnowledgeGraphManager:
                     },
                 })
 
+        # 硬不变量：API 返回的每一条 edge，其 source/target 必须能在本次响应的 nodes 中找到对应 id。
+        # 正常数据下恒成立；若历史/并发写入产生悬挂引用（如节点被删但关系残留），
+        # 日志化丢弃而非让前端 G6 抛出 "Node not found for id: ..."。
+        node_ids = set(nodes.keys())
+        valid_edges = []
+        for e in edges:
+            if e["source"] in node_ids and e["target"] in node_ids:
+                valid_edges.append(e)
+            else:
+                _logger.warning(
+                    "get_graph_v1 丢弃悬挂边 course_id=%s document_id=%s source=%s target=%s type=%s",
+                    course_id, document_id, e["source"], e["target"], e["type"],
+                )
+        edges = valid_edges
+
         return {"nodes": list(nodes.values()), "edges": edges}
 
     # ---------- 教师手动编辑（按 kp_id / edge_id 定位，避免 name 跨课程重名误伤） ----------
 
     @staticmethod
-    def create_node(course_id: str, name: str, category: str = "概念",
+    def create_node(course_id: str, document_id, name: str, category: str = "概念",
                     description: str = "", is_manual: bool = True) -> dict:
         """手动新增知识点（is_manual=True），返回 {kp_id, name, category}"""
         name = (name or "").strip()
@@ -217,30 +242,31 @@ class KnowledgeGraphManager:
             raise ValueError("知识点名称不能为空")
         if category not in CATEGORY_TYPE_MAP:
             category = "概念"
-        # 同课程重名校验（MERGE 按 (course_id, name)，手动新增不应静默覆盖已有节点）
+        # 同文档重名校验（MERGE 按 (course_id, document_id, name)，手动新增不应静默覆盖已有节点）
         dup = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid, name: $name}) RETURN n.kp_id AS kp_id",
-            {"cid": course_id, "name": name},
+            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did, name: $name}) "
+            "RETURN n.kp_id AS kp_id",
+            {"cid": course_id, "did": document_id, "name": name},
         )
         if dup:
             raise ValueError(f"知识点「{name}」已存在")
         recs = db.create_knowledge_node(
-            course_id=course_id, name=name, category=category,
+            course_id=course_id, document_id=document_id, name=name, category=category,
             description=description,
             properties={"confidence": 1.0, "is_manual": bool(is_manual)},
         )
         kp_id = recs[0]["kp_id"] if recs else None
-        # 节点变更后使向量索引失效，下次问答时懒重建
-        sql_db.delete_embeddings_by_course(int(course_id))
+        # 节点变更后使向量索引失效，下次问答时懒重建（Phase 8C 起按文档失效）
+        sql_db.delete_embeddings_by_document(int(course_id), document_id)
         return {"kp_id": kp_id, "name": name, "category": category}
 
     @staticmethod
-    def update_node(course_id: str, kp_id: str, name: str = None,
+    def update_node(course_id: str, document_id, kp_id: str, name: str = None,
                     category: str = None, description: str = None) -> dict:
-        """按 kp_id 更新知识点属性；name 做同课程重名校验"""
+        """按 kp_id 更新知识点属性；name 做同文档重名校验"""
         recs = db.query(
-            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid}) RETURN n",
-            {"kp_id": kp_id, "cid": course_id},
+            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid, document_id: $did}) RETURN n",
+            {"kp_id": kp_id, "cid": course_id, "did": document_id},
         )
         if not recs:
             raise ValueError(f"知识点不存在: {kp_id}")
@@ -253,8 +279,8 @@ class KnowledgeGraphManager:
                 raise ValueError("知识点名称不能为空")
             if name != old.get("name"):
                 dup = db.query(
-                    "MATCH (n:KnowledgePoint {course_id: $cid, name: $name}) RETURN n",
-                    {"cid": course_id, "name": name},
+                    "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did, name: $name}) RETURN n",
+                    {"cid": course_id, "did": document_id, "name": name},
                 )
                 if dup:
                     raise ValueError(f"知识点「{name}」已存在")
@@ -270,29 +296,29 @@ class KnowledgeGraphManager:
         props["updated_at"] = _now_iso()
 
         db.query(
-            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid}) "
+            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid, document_id: $did}) "
             "SET n += $props RETURN n.name AS name, n.category AS category",
-            {"kp_id": kp_id, "cid": course_id, "props": props},
+            {"kp_id": kp_id, "cid": course_id, "did": document_id, "props": props},
         )
-        sql_db.delete_embeddings_by_course(int(course_id))
+        sql_db.delete_embeddings_by_document(int(course_id), document_id)
         return {"kp_id": kp_id, "updated": True, **props}
 
     @staticmethod
-    def delete_node(course_id: str, kp_id: str) -> dict:
-        """按 kp_id 删除节点及其所有关系"""
+    def delete_node(course_id: str, document_id, kp_id: str) -> dict:
+        """按 kp_id 删除节点及其所有关系（course_id + document_id 双重限定，防误删跨文档节点）"""
         recs = db.query(
-            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid}) "
+            "MATCH (n:KnowledgePoint {kp_id: $kp_id, course_id: $cid, document_id: $did}) "
             "DETACH DELETE n RETURN count(n) AS cnt",
-            {"kp_id": kp_id, "cid": course_id},
+            {"kp_id": kp_id, "cid": course_id, "did": document_id},
         )
         cnt = recs[0]["cnt"] if recs else 0
         if cnt == 0:
             raise ValueError(f"知识点不存在: {kp_id}")
-        sql_db.delete_embeddings_by_course(int(course_id))
+        sql_db.delete_embeddings_by_document(int(course_id), document_id)
         return {"kp_id": kp_id, "deleted": True}
 
     @staticmethod
-    def create_relationship(course_id: str, source: str, target: str,
+    def create_relationship(course_id: str, document_id, source: str, target: str,
                             rel_type: str = "RELATED_TO") -> dict:
         """按 kp_id 手动新增关系（source/target 为 kp_id），返回 {edge_id, type, ...}"""
         if rel_type not in VALID_RELATION_TYPES:
@@ -302,15 +328,16 @@ class KnowledgeGraphManager:
         label = RELATION_TYPE_LABELS[rel_type]
         # 关系类型经白名单校验后拼接；Neo4j 不支持参数化关系类型，禁止写 [r:$rel_type]
         cypher = f"""
-        MATCH (a:KnowledgePoint {{kp_id: $source, course_id: $cid}})
-        MATCH (b:KnowledgePoint {{kp_id: $target, course_id: $cid}})
+        MATCH (a:KnowledgePoint {{kp_id: $source, course_id: $cid, document_id: $did}})
+        MATCH (b:KnowledgePoint {{kp_id: $target, course_id: $cid, document_id: $did}})
         MERGE (a)-[r:{rel_type}]->(b)
         ON CREATE SET r.created_at = $now
-        SET r.relation_type = $label, r.course_id = $cid, r.updated_at = $now, r.is_manual = true
+        SET r.relation_type = $label, r.course_id = $cid, r.document_id = $did,
+            r.updated_at = $now, r.is_manual = true
         RETURN elementId(r) AS edge_id, type(r) AS type, a.name AS source_name, b.name AS target_name
         """
         recs = db.query(cypher, {
-            "source": source, "target": target, "cid": course_id,
+            "source": source, "target": target, "cid": course_id, "did": document_id,
             "label": label, "now": _now_iso(),
         })
         if not recs:
@@ -323,12 +350,13 @@ class KnowledgeGraphManager:
         }
 
     @staticmethod
-    def delete_relationship(course_id: str, edge_id: str) -> dict:
-        """按 edge_id（elementId）删除关系"""
+    def delete_relationship(course_id: str, document_id, edge_id: str) -> dict:
+        """按 edge_id（elementId）删除关系（course_id + document_id 双重限定）"""
         recs = db.query(
-            "MATCH (:KnowledgePoint {course_id: $cid})-[r]->(:KnowledgePoint {course_id: $cid}) "
+            "MATCH (:KnowledgePoint {course_id: $cid, document_id: $did})-[r]->"
+            "(:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "WHERE elementId(r) = $edge_id DELETE r RETURN count(r) AS cnt",
-            {"cid": course_id, "edge_id": edge_id},
+            {"cid": course_id, "did": document_id, "edge_id": edge_id},
         )
         cnt = recs[0]["cnt"] if recs else 0
         if cnt == 0:

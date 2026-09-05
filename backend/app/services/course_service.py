@@ -175,7 +175,8 @@ class CourseService:
         # 2. 删除 Neo4j 图谱节点与关系
         removed_nodes, removed_edges = db.delete_course_graph(course_id)
 
-        # 3. 删除 SQLite 记录（文档 + 学习记录 + 课程）
+        # 3. 删除 SQLite 记录（文档 + 学习记录 + 收藏 + 向量 + 课程；Phase 9 补向量清理）
+        removed_embeddings = sql_db.count_embeddings_by_course(course_id)
         removed_documents = sql_db.delete_course(course_id)
 
         return {"ok": True, "code": 0, "message": "success", "data": {
@@ -184,4 +185,5 @@ class CourseService:
             "removed_documents": removed_documents,
             "removed_nodes": removed_nodes,
             "removed_edges": removed_edges,
+            "removed_embeddings": removed_embeddings,
         }}

@@ -29,6 +29,13 @@ export const useAppStore = defineStore('app', {
     currentCourseId: '', // 当前选中的课程 ID（字符串）
     isLoading: false,
     coursesLoaded: false,
+    // 学生端统一学习上下文（Phase 7）：Course → Document 后建立，所有学习 Tab 共享
+    learningContext: {
+      currentCourseId: null, // 当前课程 ID（字符串）
+      currentDocumentId: null, // 当前文档 ID（字符串）
+      courseList: [], // 当前可选课程列表（与 courses 冗余，便于上下文聚合）
+      documentList: [], // 当前课程的文档列表
+    },
   }),
   getters: {
     isLoggedIn: (state) => !!state.token,
@@ -118,6 +125,28 @@ export const useAppStore = defineStore('app', {
       this.fetchCourses(true).catch(() => {})
       if (String(this.currentCourseId) === String(id)) this.currentCourseId = ''
       return data
+    },
+
+    // ---- 学习上下文（Phase 7：Course → Document 统一） ----
+    /** 建立 / 更新学习上下文（courseId/documentId 传 null 表示清空该层） */
+    setLearningContext({ courseId = null, documentId = null } = {}) {
+      if (courseId !== undefined) this.learningContext.currentCourseId = courseId ? String(courseId) : null
+      if (documentId !== undefined) this.learningContext.currentDocumentId = documentId ? String(documentId) : null
+    },
+    /** 切换课程时清空文档层（必须重新选文档，禁止沿用上一课程的文档） */
+    clearLearningDocument() {
+      this.learningContext.currentDocumentId = null
+      this.learningContext.documentList = []
+    },
+    /** 拉取某课程文档列表，写入 learningContext.documentList 并返回 */
+    async fetchDocuments(courseId) {
+      if (!courseId) {
+        this.learningContext.documentList = []
+        return []
+      }
+      const docs = await api.getDocuments(courseId)
+      this.learningContext.documentList = docs || []
+      return this.learningContext.documentList
     },
   },
 })

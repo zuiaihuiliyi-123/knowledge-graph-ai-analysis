@@ -5,8 +5,8 @@
 补全 PRECEDES 关系。补全的边带 is_inferred=True 标记，可识别、可回滚。
 
 用法（backend 目录下）：
-    python -m app.services.relation_completion 5              # 补全 course_id=5
-    python -m app.services.relation_completion 5 --rollback   # 回滚 course_id=5 的补全边
+    python -m app.services.relation_completion 5 4               # 补全 course_id=5 的 document_id=4
+    python -m app.services.relation_completion 5 4 --rollback    # 回滚该文档的补全边
 """
 import asyncio
 import json
@@ -52,6 +52,13 @@ def _coerce_course_id(course_id) -> int:
     return int(course_id)
 
 
+def _coerce_document_id(document_id) -> int:
+    """document_id 统一为整数（对齐 Neo4j 存储类型）"""
+    if document_id is None or document_id == "":
+        raise ValueError("document_id 不能为空")
+    return int(document_id)
+
+
 class RelationCompleter:
     """课程图谱 PRECEDES 关系补全器"""
 
@@ -62,18 +69,19 @@ class RelationCompleter:
         )
 
     # ---------- 主流程 ----------
-    async def complete(self, course_id) -> dict:
-        """读取课程节点 → LLM 批量补全 → 校验 → 写入（is_inferred=True）"""
+    async def complete(self, course_id, document_id) -> dict:
+        """读取文档节点 → LLM 批量补全 → 校验 → 写入（is_inferred=True）"""
         cid = _coerce_course_id(course_id)
+        did = _coerce_document_id(document_id)
 
         # 1. 读取节点清单
-        nodes = self._load_nodes(cid)
+        nodes = self._load_nodes(cid, did)
         if not nodes:
-            return {"course_id": cid, "ok": False, "message": "该课程下没有知识点"}
+            return {"course_id": cid, "document_id": did, "ok": False, "message": "该文档下没有知识点"}
         node_names = {n["name"] for n in nodes}
 
         # 2. 现有边（用于去重 / 不覆盖）
-        existing_pairs = self._load_existing_pairs(cid)
+        existing_pairs = self._load_existing_pairs(cid, did)
 
         # 3. LLM 批量补全
         node_list = "\n".join(
@@ -85,10 +93,11 @@ class RelationCompleter:
         relations = self._parse_relations(content)
 
         # 4. 校验 + 写入
-        added, skipped = self._apply(cid, relations, node_names, existing_pairs)
+        added, skipped = self._apply(cid, did, relations, node_names, existing_pairs)
 
         return {
             "course_id": cid,
+            "document_id": did,
             "ok": True,
             "node_count": len(nodes),
             "existing_edge_count": len(existing_pairs),
@@ -98,25 +107,27 @@ class RelationCompleter:
             "skipped": skipped,
         }
 
-    def rollback(self, course_id) -> dict:
-        """回滚：删除该课程所有 is_inferred=True 的 PRECEDES 边"""
+    def rollback(self, course_id, document_id) -> dict:
+        """回滚：删除该文档所有 is_inferred=True 的 PRECEDES 边"""
         cid = _coerce_course_id(course_id)
+        did = _coerce_document_id(document_id)
         recs = db.query(
-            "MATCH (:KnowledgePoint {course_id: $cid})-[r:PRECEDES]->(:KnowledgePoint {course_id: $cid}) "
+            "MATCH (:KnowledgePoint {course_id: $cid, document_id: $did})-[r:PRECEDES]->"
+            "(:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "WHERE r.is_inferred = true DELETE r RETURN count(r) AS cnt",
-            {"cid": cid},
+            {"cid": cid, "did": did},
         )
         cnt = recs[0]["cnt"] if recs else 0
-        return {"course_id": cid, "deleted_count": cnt}
+        return {"course_id": cid, "document_id": did, "deleted_count": cnt}
 
     # ---------- 数据读取 ----------
-    def _load_nodes(self, cid):
-        """读取课程全部知识点（name/category/description），按名称排序"""
+    def _load_nodes(self, cid, did):
+        """读取文档全部知识点（name/category/description），按名称排序"""
         recs = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid}) "
+            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "RETURN n.name AS name, n.category AS category, n.description AS description "
             "ORDER BY n.name",
-            {"cid": cid},
+            {"cid": cid, "did": did},
         )
         return [
             {
@@ -128,12 +139,13 @@ class RelationCompleter:
             if r.get("name")
         ]
 
-    def _load_existing_pairs(self, cid):
-        """读取课程全部现有边（任意类型），返回 (source, target) 集合"""
+    def _load_existing_pairs(self, cid, did):
+        """读取文档全部现有边（任意类型），返回 (source, target) 集合"""
         recs = db.query(
-            "MATCH (a:KnowledgePoint {course_id: $cid})-[r]->(b:KnowledgePoint {course_id: $cid}) "
+            "MATCH (a:KnowledgePoint {course_id: $cid, document_id: $did})-[r]->"
+            "(b:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "RETURN a.name AS s, b.name AS t",
-            {"cid": cid},
+            {"cid": cid, "did": did},
         )
         return {(r.get("s"), r.get("t")) for r in recs}
 
@@ -182,7 +194,7 @@ class RelationCompleter:
         return data.get("relations", [])
 
     # ---------- 校验与写入 ----------
-    def _apply(self, cid, relations, node_names, existing_pairs):
+    def _apply(self, cid, did, relations, node_names, existing_pairs):
         """
         校验候选 PRECEDES 关系并写入。
         规则：两端点存在、无自环、批内去重、不覆盖已有边（任意方向任意类型）。
@@ -216,7 +228,7 @@ class RelationCompleter:
                 continue
 
             db.create_relationship(
-                cid, source, target, "PRECEDES",
+                cid, did, source, target, "PRECEDES",
                 properties={"confidence": 0.85, "is_manual": False, "is_inferred": True},
             )
             added.append({"source": source, "target": target})
@@ -234,15 +246,16 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    parser = argparse.ArgumentParser(description="课程图谱 PRECEDES 关系补全")
+    parser = argparse.ArgumentParser(description="文档图谱 PRECEDES 关系补全")
     parser.add_argument("course_id", help="课程 ID（整数）")
+    parser.add_argument("document_id", help="文档 ID（整数）")
     parser.add_argument("--rollback", action="store_true",
-                        help="回滚：删除该课程所有 is_inferred=True 的 PRECEDES 边")
+                        help="回滚：删除该文档所有 is_inferred=True 的 PRECEDES 边")
     args = parser.parse_args()
 
     completer = RelationCompleter()
     if args.rollback:
-        result = completer.rollback(args.course_id)
+        result = completer.rollback(args.course_id, args.document_id)
     else:
-        result = asyncio.run(completer.complete(args.course_id))
+        result = asyncio.run(completer.complete(args.course_id, args.document_id))
     print(json.dumps(result, ensure_ascii=False, indent=2))
