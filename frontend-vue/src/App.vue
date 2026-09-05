@@ -52,6 +52,10 @@
             <el-icon><Notebook /></el-icon>
             <template #title>课程管理</template>
           </el-menu-item>
+          <el-menu-item index="/teacher?tab=monitor" class="menu-sub">
+            <el-icon><DataLine /></el-icon>
+            <template #title>教学监测</template>
+          </el-menu-item>
           <el-menu-item index="/teacher?tab=upload">
             <el-icon><Upload /></el-icon>
             <template #title>文档上传</template>
@@ -162,7 +166,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  Upload, Compass, DataAnalysis, Search, EditPen, ChatDotRound, Guide, Fold, Expand, Notebook, Close, StarFilled,
+  Upload, Compass, DataAnalysis, Search, EditPen, ChatDotRound, Guide, Fold, Expand, Notebook, Close, StarFilled, DataLine,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import statusImage from './phtotos/A10赛题项目理解(1).png'
@@ -174,12 +178,13 @@ const route = useRoute()
 const collapsed = ref(false)
 
 // Tab 子页面中文名（面包屑 + 侧边栏 active 一致）
+// 注：courses 为课程管理默认 Tab，面包屑主级已是「课程管理」，故不再重复显示为第三级
 const TAB_LABELS = {
   overview: '学习总览',
-  courses: '课程管理',
   upload: '文档上传',
   preview: '图谱预览',
   edit: '编辑图谱',
+  monitor: '教学监测',
   browse: '图谱浏览',
   qa: '智能问答',
   path: '学习路径推荐',

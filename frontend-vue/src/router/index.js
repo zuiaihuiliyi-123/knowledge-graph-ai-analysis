@@ -30,7 +30,7 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue'),
       meta: { title: '数据总览' },
     },
-    { path: '/teacher', name: 'teacher', component: TeacherView, meta: { title: '教师工作台' } },
+    { path: '/teacher', name: 'teacher', component: TeacherView, meta: { title: '课程管理' } },
     { path: '/student', name: 'student', component: StudentView, meta: { title: '学习空间' } },
   ],
 })

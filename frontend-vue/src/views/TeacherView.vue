@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="page-header">
-      <h2 class="page-title">教师工作台</h2>
-      <p class="page-desc">上传课程资料 → 自动生成知识图谱 → 审核与手动修正</p>
+      <h2 class="page-title">课程管理</h2>
+      <p class="page-desc">管理课程、构建知识图谱与教学监测</p>
     </div>
 
     <el-tabs v-model="activeTab">
@@ -54,7 +54,8 @@
               <div class="course-card-foot">
                 <span class="course-updated"><el-icon><Clock /></el-icon> 更新于 {{ fmtTime(c.updated_at) }}</span>
                 <div class="course-actions">
-                  <el-button size="small" type="primary" plain :icon="View" @click="viewCourse(c)">查看</el-button>
+                  <el-button size="small" type="primary" plain :icon="View" @click="viewCourse(c)">图谱预览</el-button>
+                  <el-button size="small" type="success" plain :icon="UserFilled" @click="monitorCourse(c)">教学监测</el-button>
                   <el-button size="small" type="warning" plain :icon="EditPen" @click="editCourse(c)">编辑</el-button>
                   <el-button size="small" type="danger" plain :icon="Delete" @click="deleteCourse(c)">删除</el-button>
                 </div>
@@ -326,6 +327,136 @@
           </el-col>
         </el-row>
       </el-tab-pane>
+      <!-- ===================== Tab 4：教学监测 ===================== -->
+      <el-tab-pane name="monitor">
+        <template #label><span class="tab-label"><el-icon><UserFilled /></el-icon>教学监测</span></template>
+
+        <!-- 当前课程选择 -->
+        <div class="monitor-course-row">
+          <span class="row-label">当前课程</span>
+          <CourseSelector v-model="monitorCourseId" @change="onMonitorCourseChange" />
+        </div>
+
+        <!-- 第一层：班级学习情况（真实学生数据） -->
+        <el-card v-if="monitorCourseId" class="page-card">
+          <div class="chart-title-line">
+            <el-icon><UserFilled /></el-icon> 班级学习情况
+            <span class="class-note">（无选课关系表，班级学生 = 在该课程有学习记录的学生）</span>
+          </div>
+
+          <div v-loading="monitorLoading" class="class-summary">
+            <div v-for="k in monitorKpis" :key="k.label" class="class-kpi">
+              <div class="class-kpi-value" :style="{ color: k.color }">{{ k.value }}</div>
+              <div class="class-kpi-label">{{ k.label }}</div>
+            </div>
+          </div>
+
+          <el-empty
+            v-if="!monitorLoading && monitorData && !monitorData.student_count"
+            description="暂无学生学习记录（尚未有学生开始学习该课程）"
+            :image-size="80"
+          />
+          <div v-else ref="progressDistRef" class="dist-chart"></div>
+        </el-card>
+
+        <!-- 第二层：学生学习情况表格 -->
+        <el-card v-if="monitorCourseId" class="page-card">
+          <div class="chart-title-line"><el-icon><User /></el-icon> 学生学习情况</div>
+
+          <div class="table-toolbar">
+            <el-input
+              v-model="monitorSearch"
+              placeholder="搜索学生姓名 / 用户名"
+              clearable
+              :prefix-icon="Search"
+              style="width: 240px"
+            />
+            <el-select v-model="monitorProgressFilter" placeholder="进度筛选" clearable style="width: 150px">
+              <el-option
+                v-for="b in progressBins"
+                :key="b.value"
+                :label="b.label"
+                :value="b.value"
+              />
+            </el-select>
+          </div>
+
+          <el-table
+            :data="pagedMonitorStudents"
+            v-loading="monitorLoading"
+            :default-sort="{ prop: 'progress', order: 'ascending' }"
+            @sort-change="onMonitorSortChange"
+          >
+            <el-table-column prop="student_name" label="学生" sortable="custom" min-width="140">
+              <template #default="{ row }">
+                <span class="student-cell">
+                  {{ row.student_name }}
+                  <span v-if="row.username && row.username !== row.student_name" class="student-username">
+                    @{{ row.username }}
+                  </span>
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="total_knowledge" label="知识点总数" width="110" align="center" />
+            <el-table-column prop="mastered_count" label="已掌握" width="90" align="center" />
+            <el-table-column prop="progress" label="学习进度" sortable="custom" min-width="150">
+              <template #default="{ row }">
+                <el-progress
+                  :percentage="row.progress"
+                  :color="progressColor(row.progress)"
+                  :stroke-width="10"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="当前学习" min-width="160">
+              <template #default="{ row }">
+                <span v-if="row.current_name" class="current-name">{{ row.current_name }}</span>
+                <span v-else class="cell-empty">—</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="推荐学习" min-width="180">
+              <template #default="{ row }">
+                <template v-if="row.recommended && row.recommended.length">
+                  <el-tag
+                    v-for="r in row.recommended.slice(0, 3)"
+                    :key="r.kp_id || r.name"
+                    size="small"
+                    class="rec-tag"
+                  >{{ r.name }}</el-tag>
+                </template>
+                <span v-else class="cell-empty">—</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="90" align="center">
+              <template #default="{ row }">
+                <el-tag :type="statusType(row.progress)" size="small" effect="plain">
+                  {{ statusText(row.progress) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" align="center" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" link @click="openMonitorStudentDetail(row)">
+                  查看
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty description="暂无学生学习记录" :image-size="80" />
+            </template>
+          </el-table>
+
+          <el-pagination
+            v-if="filteredMonitorStudents.length > monitorPageSize"
+            class="table-pagination"
+            v-model:current-page="monitorPage"
+            v-model:page-size="monitorPageSize"
+            :page-sizes="[10, 20, 50]"
+            :total="filteredMonitorStudents.length"
+            layout="total, sizes, prev, pager, next"
+          />
+        </el-card>
+      </el-tab-pane>
     </el-tabs>
 
     <!-- 预览 Tab 的节点详情抽屉（只读） -->
@@ -336,6 +467,51 @@
       @saved="afterNodeChanged"
       @deleted="afterNodeChanged"
     />
+
+    <!-- 教学监测：学生详情抽屉 -->
+    <el-drawer v-model="monitorDetailVisible" title="学生学习详情" direction="rtl" size="480px">
+      <template v-if="monitorDetailStudent">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="学生">
+            {{ monitorDetailStudent.student_name }}
+            <span
+              v-if="monitorDetailStudent.username && monitorDetailStudent.username !== monitorDetailStudent.student_name"
+              class="detail-username"
+            >@{{ monitorDetailStudent.username }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="当前课程">{{ monitorCourseName }}</el-descriptions-item>
+          <el-descriptions-item label="学习进度">
+            <el-progress
+              :percentage="monitorDetailStudent.progress"
+              :color="progressColor(monitorDetailStudent.progress)"
+              :stroke-width="10"
+            />
+          </el-descriptions-item>
+          <el-descriptions-item label="已掌握数量">
+            {{ monitorDetailStudent.mastered_count }} / {{ monitorDetailStudent.total_knowledge }}
+          </el-descriptions-item>
+          <el-descriptions-item label="未学习数量">{{ monitorDetailStudent.unmastered_count }}</el-descriptions-item>
+          <el-descriptions-item label="当前学习知识点">
+            {{ monitorDetailStudent.current_name || '—' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="收藏数量">{{ monitorDetailStudent.favorite_count }}</el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider content-position="left">推荐学习知识点</el-divider>
+        <ul v-if="monitorDetailStudent.recommended && monitorDetailStudent.recommended.length" class="rec-list">
+          <li v-for="r in monitorDetailStudent.recommended" :key="r.kp_id || r.name">
+            <el-tag size="small" effect="plain">{{ r.category || '知识点' }}</el-tag>
+            <span class="rec-name">{{ r.name }}</span>
+            <div class="rec-reason">{{ r.reason }}</div>
+          </li>
+        </ul>
+        <el-empty v-else description="暂无推荐" :image-size="60" />
+
+        <div class="drawer-actions">
+          <el-button type="primary" @click="goMonitorGraph">查看课程知识图谱</el-button>
+        </div>
+      </template>
+    </el-drawer>
 
     <!-- 新增知识点对话框 -->
     <el-dialog v-model="addNodeVisible" title="新增知识点" width="480px">
@@ -434,12 +610,13 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import * as echarts from 'echarts'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   UploadFilled, Upload, View, EditPen, Refresh, FullScreen, Plus, Connection, ArrowRight, Search, SuccessFilled,
-  Notebook, Document, Delete, DataAnalysis, Clock,
+  Notebook, Document, Delete, DataAnalysis, Clock, User, UserFilled,
 } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { useAppStore } from '../stores/app'
@@ -450,25 +627,25 @@ import { edgeTypeLabel, nodeTypeLabel, nodeColor } from '../utils/graphStyle'
 
 const store = useAppStore()
 const route = useRoute()
-const TEACHER_TABS = ['courses', 'upload', 'preview', 'edit']
+const TEACHER_TABS = ['courses', 'upload', 'preview', 'edit', 'monitor']
 const activeTab = ref(TEACHER_TABS.includes(route.query.tab) ? route.query.tab : 'courses')
 
-// 从侧边栏菜单带 tab 参数跳转时同步切换
-watch(
-  () => route.query.tab,
-  (tab) => {
-    if (TEACHER_TABS.includes(tab)) activeTab.value = tab
-  }
-)
+// 各 Tab 的课程选择状态（提前声明，供深链 watcher 使用，避免临时性死区）
+const monitorCourseId = ref('')
+const previewCourseId = ref('')
+const editCourseId = ref('')
 
-// 从教师端数据总览「查看知识图谱」深链进入时，预选课程并切到预览 Tab
+// 深链：/teacher?tab=xxx&course_id=yyy 预选课程并切换到对应 Tab（tab 与 course_id 联动）
 watch(
-  () => route.query.course_id,
-  (cid) => {
+  () => [route.query.tab, route.query.course_id],
+  ([tab, cid]) => {
     if (cid) {
-      previewCourseId.value = String(cid)
-      if (activeTab.value !== 'preview') activeTab.value = 'preview'
+      const cidStr = String(cid)
+      if (tab === 'monitor') monitorCourseId.value = cidStr
+      else if (tab === 'edit') editCourseId.value = cidStr
+      else previewCourseId.value = cidStr
     }
+    if (TEACHER_TABS.includes(tab)) activeTab.value = tab
   },
   { immediate: true }
 )
@@ -529,7 +706,6 @@ function goReview() {
 
 // ===================== 预览 =====================
 const previewGraphRef = ref(null)
-const previewCourseId = ref('')
 const previewSearch = ref('')
 const previewStats = ref(null)
 const drawerVisible = ref(false)
@@ -551,7 +727,6 @@ function onNodeClick(node) {
 
 // ===================== 编辑（三栏审核） =====================
 const editGraphRef = ref(null)
-const editCourseId = ref('')
 const editNodes = ref([])
 const nodeListSearch = ref('')
 const selectedNode = ref(null)
@@ -817,15 +992,215 @@ const createCourseVisible = ref(false)
 const createCourseForm = ref({ name: '', description: '' })
 const createCourseLoading = ref(false)
 
-// 进入课程管理 Tab 时强制刷新，保证节点/关系数最新
+// 进入课程管理 Tab 时强制刷新，保证节点/关系数最新；进入教学监测 Tab 时加载当前课程数据
 watch(activeTab, (tab) => {
   if (tab === 'courses') store.fetchCourses(true).catch(() => {})
+  if (tab === 'monitor' && monitorCourseId.value) loadMonitorData()
 })
 
 // 课程管理为默认 Tab（无 CourseSelector 触发加载），组件挂载时确保课程列表已加载
 onMounted(() => {
   store.fetchCourses(true).catch(() => {})
+  window.addEventListener('resize', handleMonitorResize)
+  // 深链直达 /teacher?tab=monitor&course_id=xxx 时，activeTab 初始即 monitor，watcher 不会触发，需在此补一次加载
+  if (activeTab.value === 'monitor' && monitorCourseId.value) loadMonitorData()
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleMonitorResize)
+  progressDistChart?.dispose()
+})
+
+// ===================== 教学监测 =====================
+const monitorData = ref(null)
+const monitorLoading = ref(false)
+const monitorSearch = ref('')
+const monitorProgressFilter = ref('')
+const monitorPage = ref(1)
+const monitorPageSize = ref(10)
+const monitorSort = ref({ prop: 'progress', order: 'ascending' })
+const monitorDetailVisible = ref(false)
+const monitorDetailStudent = ref(null)
+const progressDistRef = ref(null)
+let progressDistChart = null
+
+const progressBins = [
+  { value: '0', label: '0–20%' },
+  { value: '20', label: '20–40%' },
+  { value: '40', label: '40–60%' },
+  { value: '60', label: '60–80%' },
+  { value: '80', label: '80–100%' },
+]
+
+const monitorCourseName = computed(() => {
+  const c = store.courseById(monitorCourseId.value)
+  return c ? c.course_name : `课程 #${monitorCourseId.value}`
+})
+
+// 第一层：当前课程真实学习概况（口径与后端一致：已开始学习人数 / 平均进度 / 知识点总数）
+const monitorKpis = computed(() => {
+  const d = monitorData.value
+  return [
+    { label: '已开始学习人数', value: d?.student_count ?? 0, color: '#409eff' },
+    { label: '平均学习进度', value: (d?.avg_progress ?? 0) + '%', color: '#e6a23c' },
+    { label: '课程知识点总数', value: d?.total_knowledge ?? 0, color: '#67c23a' },
+  ]
+})
+
+const filteredMonitorStudents = computed(() => {
+  let list = monitorData.value?.students || []
+  const kw = monitorSearch.value.trim().toLowerCase()
+  if (kw) {
+    list = list.filter(
+      (s) =>
+        (s.student_name || '').toLowerCase().includes(kw) ||
+        (s.username || '').toLowerCase().includes(kw)
+    )
+  }
+  if (monitorProgressFilter.value !== '') {
+    const min = Number(monitorProgressFilter.value)
+    list = list.filter((s) =>
+      min === 80 ? s.progress >= 80 : s.progress >= min && s.progress < min + 20
+    )
+  }
+  const { prop, order } = monitorSort.value
+  const dir = order === 'descending' ? -1 : 1
+  return [...list].sort((a, b) => {
+    const av = prop === 'student_name' ? a.student_name : a[prop]
+    const bv = prop === 'student_name' ? b.student_name : b[prop]
+    if (av === bv) return 0
+    return (av > bv ? 1 : -1) * dir
+  })
+})
+
+const pagedMonitorStudents = computed(() => {
+  const start = (monitorPage.value - 1) * monitorPageSize.value
+  return filteredMonitorStudents.value.slice(start, start + monitorPageSize.value)
+})
+
+function onMonitorSortChange({ prop, order }) {
+  monitorSort.value = { prop: prop || 'progress', order: order || 'ascending' }
+}
+
+async function loadMonitorData() {
+  if (!monitorCourseId.value) {
+    monitorData.value = null
+    return
+  }
+  monitorLoading.value = true
+  try {
+    monitorData.value = await api.getTeacherStudentsProgress(monitorCourseId.value)
+    if (activeTab.value === 'monitor') {
+      await nextTick()
+      renderProgressDist()
+    }
+  } catch (e) {
+    ElMessage.warning(`班级学习情况加载失败：${e.message}`)
+    monitorData.value = null
+  } finally {
+    monitorLoading.value = false
+  }
+}
+
+function onMonitorCourseChange() {
+  monitorData.value = null
+  monitorSearch.value = ''
+  monitorProgressFilter.value = ''
+  monitorPage.value = 1
+  if (monitorCourseId.value) loadMonitorData()
+}
+
+function openMonitorStudentDetail(row) {
+  monitorDetailStudent.value = row
+  monitorDetailVisible.value = true
+}
+
+function goMonitorGraph() {
+  if (!monitorCourseId.value) return
+  previewCourseId.value = monitorCourseId.value
+  activeTab.value = 'preview'
+}
+
+function progressColor(p) {
+  if (p >= 80) return '#67c23a'
+  if (p >= 40) return '#e6a23c'
+  return '#f56c6c'
+}
+
+function statusText(p) {
+  if (p >= 100) return '已完成'
+  if (p > 0) return '进行中'
+  return '未开始'
+}
+
+function statusType(p) {
+  if (p >= 100) return 'success'
+  if (p > 0) return 'primary'
+  return 'info'
+}
+
+function renderProgressDist() {
+  if (!progressDistRef.value) {
+    progressDistChart?.dispose()
+    progressDistChart = null
+    return
+  }
+  // 课程切换后容器 div 会被重建，复用旧实例前先校验其绑定的 DOM 仍是当前容器
+  if (progressDistChart && progressDistChart.getDom() !== progressDistRef.value) {
+    progressDistChart.dispose()
+    progressDistChart = null
+  }
+  if (!progressDistChart) progressDistChart = echarts.init(progressDistRef.value)
+  const students = monitorData.value?.students || []
+  const labels = progressBins.map((b) => b.label)
+  const counts = progressBins.map((b) => {
+    const min = Number(b.value)
+    return students.filter((s) =>
+      min === 80 ? s.progress >= 80 : s.progress >= min && s.progress < min + 20
+    ).length
+  })
+  const option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '8%', top: '10%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      name: '学习进度',
+      nameTextStyle: { color: '#909399', fontSize: 11 },
+      axisLabel: { color: '#606266', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#dcdfe6' } },
+    },
+    yAxis: {
+      type: 'value',
+      name: '学生数',
+      nameTextStyle: { color: '#909399', fontSize: 11 },
+      minInterval: 1,
+      axisLabel: { color: '#909399' },
+      splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+    },
+    series: [{
+      type: 'bar',
+      barWidth: '50%',
+      itemStyle: {
+        borderRadius: [6, 6, 0, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: '#409eff' },
+          { offset: 1, color: '#79bbff' },
+        ]),
+      },
+      data: counts,
+    }],
+  }
+  if (counts.every((v) => v === 0)) option.graphic = {
+    type: 'text', left: 'center', top: 'middle',
+    style: { text: '暂无数据', fill: '#909399', fontSize: 14 },
+  }
+  progressDistChart.setOption(option)
+}
+
+function handleMonitorResize() {
+  progressDistChart?.resize()
+}
 
 function openCreateCourse() {
   createCourseForm.value = { name: '', description: '' }
@@ -858,6 +1233,11 @@ function viewCourse(c) {
 function editCourse(c) {
   editCourseId.value = String(c.course_id)
   activeTab.value = 'edit'
+}
+
+function monitorCourse(c) {
+  monitorCourseId.value = String(c.course_id)
+  activeTab.value = 'monitor'
 }
 
 async function deleteCourse(c) {
@@ -1139,5 +1519,114 @@ function fmtTime(t) {
 .course-actions {
   display: flex;
   gap: 4px;
+}
+
+/* ===== 教学监测 ===== */
+.monitor-course-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.row-label {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 600;
+}
+.chart-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+}
+.class-note {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: #c0c4cc;
+}
+.class-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.class-kpi {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fafbfc;
+  border: 1px solid #f0f2f5;
+}
+.class-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'DIN Alternate', 'Helvetica Neue', sans-serif;
+}
+.class-kpi-label {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+.dist-chart {
+  height: 220px;
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.student-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.student-username {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 400;
+}
+.current-name {
+  color: #409eff;
+}
+.cell-empty {
+  color: #c0c4cc;
+}
+.rec-tag {
+  margin: 2px 4px 2px 0;
+}
+.table-pagination {
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+.detail-username {
+  font-size: 12px;
+  color: #909399;
+  margin-left: 6px;
+}
+.rec-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.rec-list li {
+  padding: 8px 0;
+  border-bottom: 1px dashed #e4e7ed;
+}
+.rec-name {
+  font-weight: 600;
+  margin-left: 8px;
+}
+.rec-reason {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.drawer-actions {
+  margin-top: 16px;
 }
 </style>
