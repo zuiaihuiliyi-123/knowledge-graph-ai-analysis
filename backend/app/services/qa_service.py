@@ -3,7 +3,12 @@
 
 检索链路：问题 embedding → 与课程知识点向量做余弦相似度 → top_k 上下文 → LLM 生成。
 未配置 embedding key 或向量检索失败时，自动退回关键词检索（保证功能可用）。
+
+阶段 G（async 修复）：本模块的检索与 LLM 调用都是**同步阻塞**的
+（openai 同步客户端 / Neo4j 同步驱动 / SQLite），故 `ask()` 把整段逻辑放进
+`asyncio.to_thread` 执行，避免阻塞事件循环（见 `ask()` 的说明）。
 """
+import asyncio
 import logging
 import math
 from typing import List
@@ -13,6 +18,7 @@ from openai import OpenAI
 from ..core.config import settings
 from ..core.database import db
 from .embedding import EmbeddingClient, KnowledgeEmbedder
+from .vector_index import vector_index
 
 _logger = logging.getLogger(__name__)
 
@@ -105,10 +111,7 @@ class QAService:
         if cid is None or did is None:
             return []  # 缺少文档作用域，退回关键词
         try:
-            # ensure_index 判定新鲜后直接返回向量，故此处不再另查一次
-            rows = self.indexer.ensure_index(cid, did)
-            if not rows:
-                return []
+            self.indexer.ensure_index(cid, did)
             q_vec = self.embedder.embed([question])[0]
         except Exception as e:
             # embedding 不可用（未配置 key / 网络异常等）退回关键词检索。
@@ -117,11 +120,14 @@ class QAService:
             _logger.warning("向量检索不可用，本次退回关键词检索: %s", e, exc_info=True)
             return []
 
-        q_norm = math.sqrt(sum(x * x for x in q_vec))
-        ranked = sorted(rows, key=lambda r: -_cosine(q_vec, r["embedding"], q_norm))[:top_k]
+        # L2 阶段 E：检索改走 VectorIndex（numpy 矩阵 + 进程内缓存），
+        # 不再每次「全量读库 + 逐条纯 Python 余弦」；无向量时返回空 → 上层退回关键词检索
+        ranked = vector_index.kp_search(cid, did, q_vec, top_k)
+        if not ranked:
+            return []
 
         # 按 kp_id 回查节点元数据，拼接上下文（限定文档）
-        kp_ids = [r["kp_id"] for r in ranked]
+        kp_ids = [kp_id for kp_id, _ in ranked]
         nodes = {}
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
@@ -133,7 +139,7 @@ class QAService:
             if n:
                 nodes[n.get("kp_id")] = n
 
-        return [self._node_dict(nodes[r["kp_id"]]) for r in ranked if r["kp_id"] in nodes]
+        return [self._node_dict(nodes[kp_id]) for kp_id, _ in ranked if kp_id in nodes]
 
     # ---------- 关键词检索（兜底） ----------
 
@@ -226,19 +232,32 @@ class QAService:
         return [_format_node(n) for n in self.search_related_nodes(
             question, course_id, document_id, top_k, allowed_ids)]
 
-    async def ask_with_sources(self, question: str, course_id=None, document_id=None,
-                               allowed_ids: List[int] = None) -> dict:
-        """回答问题（RAG 模式），返回 {answer, sources}。
+    async def ask(self, question: str, course_id=None, document_id=None,
+                  allowed_ids: List[int] = None) -> str:
+        """回答问题（RAG 模式）。
 
-        检索只跑一次，sources 就是本次真正喂给 LLM 的上下文——两者必然一致。
-        需要引用来源时必须用这个方法，而不是 ask() 之后再自行检索一遍：那会让同一次
-        提问把整条检索链路跑两遍（含两次外部 embedding 调用），且第二遍的结果可能
-        与喂给 LLM 的上下文不同（例如期间索引被重建）。
+        阶段 G（async 修复）——**为什么必须放线程池**：
+
+        这条链路整段都是同步阻塞的：
+          · `search_related_knowledge` → embedder 的 HTTP 调用、`VectorIndex` 的 SQLite 读、
+            Neo4j 同步驱动查询；
+          · `client.chat.completions.create` 是 **openai 同步客户端**，`QA_TIMEOUT` 量级是秒。
+        在 `async def` 里直接跑会**占住整个事件循环**：一个学生提问期间，
+        同进程内**所有**其他请求（包括别人的提问）都只能排队 —— 并发下体验直接塌掉。
+
+        故把整段同步逻辑交给 `asyncio.to_thread`。这与项目内既有做法一致
+        （`knowledge_extractor._extract_single` / `relation_completion._call_llm` 都这样处理），
+        且**不改动任何业务逻辑与异常处理**（原 try/except 原样保留在同步实现里）。
         """
-        # 1. 检索相关知识（向量优先，文档作用域）；结构化节点既作上下文也作引用来源
-        sources = self.search_related_nodes(question, course_id, document_id,
-                                            allowed_ids=allowed_ids)
-        contexts = [_format_node(n) for n in sources]
+        return await asyncio.to_thread(self._ask_blocking, question, course_id,
+                                       document_id, allowed_ids)
+
+    def _ask_blocking(self, question: str, course_id=None, document_id=None,
+                      allowed_ids: List[int] = None) -> str:
+        """`ask()` 的同步实现体。**运行在线程池中，禁止在此使用 asyncio API。**"""
+        # 1. 检索相关知识（向量优先，文档作用域）
+        contexts = self.search_related_knowledge(question, course_id, document_id,
+                                                 allowed_ids=allowed_ids)
         context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
 
         # 2. 调用 LLM 生成回答

@@ -1,0 +1,402 @@
+{
+  "params": {
+    "top_k": 5,
+    "weights": {
+      "lexical": 0.45,
+      "vector": 0.45,
+      "graph": 0.1
+    },
+    "vec_floor": 0.35,
+    "min_score": 0.3,
+    "graph_min_score": 0.01,
+    "lex_base": 0.65,
+    "lex_min_name_len": 2,
+    "option_weight": 0.7,
+    "graph_decay": 0.45,
+    "apply_min_score": 0.6
+  },
+  "metrics": {
+    "total": 120,
+    "hit@1": 0.7,
+    "hit@3": 0.8833,
+    "hit@5": 0.9083,
+    "mrr": 0.7883,
+    "mode": "leave-one-out(real questions)",
+    "course_id": 65,
+    "document_id": 101,
+    "catalog_size": 40,
+    "catalog_source": "cache",
+    "graph_available": false,
+    "vector_enabled": true,
+    "kp_vector_count": 40,
+    "question_vector_count": 120,
+    "hit_layer_breakdown": {
+      "lexical": 109,
+      "vector": 109,
+      "graph": 0
+    },
+    "questions_without_candidates": 0,
+    "elapsed_sec": 0.216,
+    "reason": "图库不可用：ServiceUnavailable",
+    "ab_without_vector": {
+      "hit@1": 0.4667,
+      "hit@3": 0.8,
+      "hit@5": 0.9917,
+      "mrr": 0.6549,
+      "questions_without_candidates": 0
+    }
+  },
+  "samples": [
+    {
+      "question_id": 174,
+      "kp_id": "kp_65_e43c56c1",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 2,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 173,
+      "kp_id": "kp_65_e43c56c1",
+      "stem": "知识点「中断屏蔽字」的描述是：用于控制各中断源是否被屏蔽的寄存器内容，可动态调整中断优先级。",
+      "rank": 1,
+      "top": "kp_65_e43c56c1"
+    },
+    {
+      "question_id": 172,
+      "kp_id": "kp_65_e43c56c1",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「用于控制各中断源是否被屏蔽的寄存器内容，可动态调整中断优先级。」",
+      "rank": 1,
+      "top": "kp_65_e43c56c1"
+    },
+    {
+      "question_id": 171,
+      "kp_id": "kp_65_ced7b8f9",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_ced7b8f9"
+    },
+    {
+      "question_id": 170,
+      "kp_id": "kp_65_ced7b8f9",
+      "stem": "知识点「相对寻址」的描述是：操作数地址由程序计数器PC的内容加上指令中的位移量得到，支持程序浮动。",
+      "rank": 1,
+      "top": "kp_65_ced7b8f9"
+    },
+    {
+      "question_id": 169,
+      "kp_id": "kp_65_ced7b8f9",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「操作数地址由程序计数器PC的内容加上指令中的位移量得到，支持程序浮动。」",
+      "rank": 1,
+      "top": "kp_65_ced7b8f9"
+    },
+    {
+      "question_id": 168,
+      "kp_id": "kp_65_cbe0283a",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_cbe0283a"
+    },
+    {
+      "question_id": 167,
+      "kp_id": "kp_65_cbe0283a",
+      "stem": "知识点「硬件向量法」的描述是：由硬件产生中断向量地址，引导CPU转入中断服务程序的方法。",
+      "rank": 1,
+      "top": "kp_65_cbe0283a"
+    },
+    {
+      "question_id": 166,
+      "kp_id": "kp_65_cbe0283a",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「由硬件产生中断向量地址，引导CPU转入中断服务程序的方法。」",
+      "rank": 2,
+      "top": "kp_65_a4a74767"
+    },
+    {
+      "question_id": 165,
+      "kp_id": "kp_65_c9ec1665",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 3,
+      "top": "kp_65_177d15c3"
+    },
+    {
+      "question_id": 164,
+      "kp_id": "kp_65_c9ec1665",
+      "stem": "知识点「移码」的描述是：将微操作控制信号以微指令形式存储在控制存储器中，通过执行微程序实现控制。",
+      "rank": 1,
+      "top": "kp_65_c9ec1665"
+    },
+    {
+      "question_id": 163,
+      "kp_id": "kp_65_c9ec1665",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「一种机器数表示方法，通常用于表示浮点数的阶码，其值为补码的符号位取反。」",
+      "rank": 3,
+      "top": "kp_65_42a56399"
+    },
+    {
+      "question_id": 162,
+      "kp_id": "kp_65_c119ceb7",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_c119ceb7"
+    },
+    {
+      "question_id": 161,
+      "kp_id": "kp_65_c119ceb7",
+      "stem": "知识点「DMA方式」的描述是：直接存储器存取方式，由DMA控制器直接控制主存与I/O设备之间的数据传送，无需CPU干预。",
+      "rank": 1,
+      "top": "kp_65_c119ceb7"
+    },
+    {
+      "question_id": 160,
+      "kp_id": "kp_65_c119ceb7",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「直接存储器存取方式，由DMA控制器直接控制主存与I/O设备之间的数据传送，无需C",
+      "rank": 1,
+      "top": "kp_65_c119ceb7"
+    },
+    {
+      "question_id": 159,
+      "kp_id": "kp_65_bda94dd6",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_bda94dd6"
+    },
+    {
+      "question_id": 158,
+      "kp_id": "kp_65_bda94dd6",
+      "stem": "知识点「二地址指令」的描述是：指令中包含两个地址码字段，用于指明源操作数和目的操作数地址。",
+      "rank": 1,
+      "top": "kp_65_bda94dd6"
+    },
+    {
+      "question_id": 157,
+      "kp_id": "kp_65_bda94dd6",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「指令中包含两个地址码字段，用于指明源操作数和目的操作数地址。」",
+      "rank": 1,
+      "top": "kp_65_bda94dd6"
+    },
+    {
+      "question_id": 156,
+      "kp_id": "kp_65_ba541577",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 3,
+      "top": "kp_65_177d15c3"
+    },
+    {
+      "question_id": 155,
+      "kp_id": "kp_65_ba541577",
+      "stem": "知识点「变形补码」的描述是：精简指令集计算机，指令系统简化，通常采用流水线技术。",
+      "rank": 1,
+      "top": "kp_65_ba541577"
+    },
+    {
+      "question_id": 154,
+      "kp_id": "kp_65_ba541577",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「采用双符号位的补码表示，用于检测运算溢出。」",
+      "rank": 1,
+      "top": "kp_65_ba541577"
+    },
+    {
+      "question_id": 153,
+      "kp_id": "kp_65_b876a9aa",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_b876a9aa"
+    },
+    {
+      "question_id": 152,
+      "kp_id": "kp_65_b876a9aa",
+      "stem": "知识点「主存」的描述是：一种快速进位方法，将加法器分成小组和大组，组内并行进位，组间跳跃进位。",
+      "rank": 1,
+      "top": "kp_65_b876a9aa"
+    },
+    {
+      "question_id": 151,
+      "kp_id": "kp_65_b876a9aa",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「主存储器，用于存放当前运行的程序和数据。」",
+      "rank": 1,
+      "top": "kp_65_b876a9aa"
+    },
+    {
+      "question_id": 150,
+      "kp_id": "kp_65_b5c8b187",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": null,
+      "top": "kp_65_611d99ed"
+    },
+    {
+      "question_id": 149,
+      "kp_id": "kp_65_b5c8b187",
+      "stem": "知识点「片选逻辑」的描述是：微指令的控制字段中每一位直接对应一个微操作命令，无需译码。",
+      "rank": 1,
+      "top": "kp_65_b5c8b187"
+    },
+    {
+      "question_id": 148,
+      "kp_id": "kp_65_b5c8b187",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「根据地址信号产生存储器芯片片选信号的逻辑电路。」",
+      "rank": 1,
+      "top": "kp_65_b5c8b187"
+    },
+    {
+      "question_id": 147,
+      "kp_id": "kp_65_b5372d7e",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 3,
+      "top": "kp_65_611d99ed"
+    },
+    {
+      "question_id": 146,
+      "kp_id": "kp_65_b5372d7e",
+      "stem": "知识点「周期窃取」的描述是：DMA控制器在CPU不访问主存时占用一个存取周期进行数据传送，或强行占用一个存取周期。",
+      "rank": 1,
+      "top": "kp_65_b5372d7e"
+    },
+    {
+      "question_id": 145,
+      "kp_id": "kp_65_b5372d7e",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「DMA控制器在CPU不访问主存时占用一个存取周期进行数据传送，或强行占用一个存取",
+      "rank": 1,
+      "top": "kp_65_b5372d7e"
+    },
+    {
+      "question_id": 144,
+      "kp_id": "kp_65_a4a74767",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_a4a74767"
+    },
+    {
+      "question_id": 143,
+      "kp_id": "kp_65_a4a74767",
+      "stem": "知识点「向量地址」的描述是：通过缩短流水线周期，使每个时钟周期内可以启动多条指令的技术。",
+      "rank": 1,
+      "top": "kp_65_a4a74767"
+    },
+    {
+      "question_id": 142,
+      "kp_id": "kp_65_a4a74767",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「在中断响应时，由中断接口电路通过数据线送至CPU的地址，用于指向中断服务程序的入",
+      "rank": 2,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 141,
+      "kp_id": "kp_65_9af56d86",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_9af56d86"
+    },
+    {
+      "question_id": 140,
+      "kp_id": "kp_65_9af56d86",
+      "stem": "知识点「主机框图」的描述是：微程序控制器中，下一条微指令的地址由微指令地址计数器加1产生的方法。",
+      "rank": 1,
+      "top": "kp_65_9af56d86"
+    },
+    {
+      "question_id": 139,
+      "kp_id": "kp_65_9af56d86",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「展示计算机主机内部各功能部件及其连接关系的示意图。」",
+      "rank": 1,
+      "top": "kp_65_9af56d86"
+    },
+    {
+      "question_id": 138,
+      "kp_id": "kp_65_9582b77e",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 1,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 137,
+      "kp_id": "kp_65_9582b77e",
+      "stem": "知识点「中断接口电路」的描述是：在中断响应时，由中断接口电路通过数据线送至CPU的地址，用于指向中断服务程序的入口。",
+      "rank": 1,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 136,
+      "kp_id": "kp_65_9582b77e",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「连接CPU与I/O设备，用于处理中断请求、优先级判决和向量地址传送的硬件电路。」",
+      "rank": 1,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 135,
+      "kp_id": "kp_65_9107f3c0",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": null,
+      "top": "kp_65_cbe0283a"
+    },
+    {
+      "question_id": 134,
+      "kp_id": "kp_65_9107f3c0",
+      "stem": "知识点「超流水线技术」的描述是：将微操作控制信号以微指令形式存储在控制存储器中，通过执行微程序实现控制。",
+      "rank": 1,
+      "top": "kp_65_9107f3c0"
+    },
+    {
+      "question_id": 133,
+      "kp_id": "kp_65_9107f3c0",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「通过缩短流水线周期，使每个时钟周期内可以启动多条指令的技术。」",
+      "rank": 1,
+      "top": "kp_65_9107f3c0"
+    },
+    {
+      "question_id": 132,
+      "kp_id": "kp_65_8f4eb899",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": 2,
+      "top": "kp_65_56c2eac7"
+    },
+    {
+      "question_id": 131,
+      "kp_id": "kp_65_8f4eb899",
+      "stem": "知识点「寻址方式」的描述是：在一个存储周期内可并行读出多个字的存储器，用于提高访存速度。",
+      "rank": 1,
+      "top": "kp_65_8f4eb899"
+    },
+    {
+      "question_id": 130,
+      "kp_id": "kp_65_8f4eb899",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「指令中用于确定操作数地址的方式，如立即、直接、间接、变址、相对等。」",
+      "rank": 1,
+      "top": "kp_65_8f4eb899"
+    },
+    {
+      "question_id": 129,
+      "kp_id": "kp_65_897c48d2",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": null,
+      "top": "kp_65_59c54395"
+    },
+    {
+      "question_id": 128,
+      "kp_id": "kp_65_897c48d2",
+      "stem": "知识点「立即寻址」的描述是：操作数直接包含在指令中，不需要访问主存。",
+      "rank": 1,
+      "top": "kp_65_897c48d2"
+    },
+    {
+      "question_id": 127,
+      "kp_id": "kp_65_897c48d2",
+      "stem": "下列知识点中，哪一项对应下面的描述？\n「操作数直接包含在指令中，不需要访问主存。」",
+      "rank": 1,
+      "top": "kp_65_897c48d2"
+    },
+    {
+      "question_id": 126,
+      "kp_id": "kp_65_8739967c",
+      "stem": "下列「知识点：描述」配对中，哪些是正确的？（多选）",
+      "rank": null,
+      "top": "kp_65_9582b77e"
+    },
+    {
+      "question_id": 125,
+      "kp_id": "kp_65_8739967c",
+      "stem": "知识点「浮点数规格化」的描述是：通过调整阶码和尾数，使尾数的绝对值满足一定范围，以提高精度。",
+      "rank": 1,
+      "top": "kp_65_8739967c"
+    }
+  ],
+  "command": "eval_kp_labeling.py --course-id 65 --document-id 101 --out eval_data/eval_report_kp_labeling_c65.json"
+}

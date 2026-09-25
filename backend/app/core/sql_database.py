@@ -13,6 +13,7 @@ SQLite 关系型数据库访问层（对齐规划文档 4.2 节：t_user / t_cou
     ON UPDATE CURRENT_TIMESTAMP  -> 应用层在 UPDATE 时显式写入 updated_at（见 _update 相关方法）
 """
 import os
+import array
 import json
 import sqlite3
 import uuid
@@ -21,6 +22,19 @@ from datetime import datetime
 from .config import settings
 from .security import hash_password
 from .codes import gen_join_code
+
+# ---------- 阶段 G：SQLite 并发 pragma ----------
+# `journal_mode=WAL`：读不阻塞写、写不阻塞读（只有写-写串行）。
+#   为什么需要：本项目部署形态是「一个 uvicorn 进程 + 若干 CLI 脚本/评测」共同写
+#   同一个 `app.db`（`_uvicorn.log` 长期有进程在写就是证据）。rollback journal 模式下
+#   写者持**全库排它锁**，两进程同时写极易撞上 `database is locked`。
+#   WAL 是**持久属性**（写进库文件头），故只需在 init_tables 末端设置一次。
+# `busy_timeout`：写者互斥时**等待**而非立刻报错。`sqlite3.connect` 的默认 timeout=5s
+#   不够——L2 引入的批量写入（121 条向量 / 全量替换关联行 / ≤5000 行 BLOB 回填）
+#   单次持锁就会超过它。该属性**每连接**生效，故在 `_connect()` 里设置。
+# 回退开关：`SQLITE_JOURNAL_MODE=delete` 回到旧行为；`SQLITE_BUSY_TIMEOUT=0` 关闭等待。
+JOURNAL_MODE = (os.getenv("SQLITE_JOURNAL_MODE", "WAL") or "").strip().upper()
+BUSY_TIMEOUT_MS = int(os.getenv("SQLITE_BUSY_TIMEOUT", "15000"))
 
 # 枚举取值（与规划文档表格 8/9/10/11 的 ENUM 定义一致，供应用层校验）
 USER_ROLES = ("teacher", "student")
@@ -49,6 +63,21 @@ ANSWER_GRADE_SOURCE = ("AUTO", "LLM", "TEACHER")
 
 # 默认教师账号初始密码（仅用于演示/初始开发；生产环境应删除默认账号或改为环境变量注入）
 DEFAULT_TEACHER_PASSWORD = "admin123"
+
+
+def _vec_to_blob(vec) -> bytes:
+    """向量 → **float32 小端 BLOB**（与 numpy `np.frombuffer(blob, "<f4")` 对齐）。
+
+    用标准库 `array` 而不是 numpy：core 层不引入重依赖（与 embedding.py 的既有取舍一致）。
+    """
+    return array.array("f", [float(x) for x in vec]).tobytes()
+
+
+def _blob_to_vec(blob) -> list:
+    """BLOB → list[float]（float32 精度）。用于无 numpy 环境的回落路径与自检。"""
+    a = array.array("f")
+    a.frombytes(bytes(blob))
+    return list(a)
 
 
 def _now() -> str:
@@ -389,6 +418,29 @@ _SCHEMA_SQL = [
     )
     """,
     "CREATE INDEX IF NOT EXISTS idx_import_batch_course ON t_question_import_batch(course_id, document_id);",
+
+    # ---------- L2：一题多知识点（召回层与多标签诊断的数据基础） ----------
+    # 4.2.16 题目-知识点关联表：一题可挂 N 个知识点，复合主键 (question_id, kp_id) 天然幂等。
+    # is_primary 为「权威」定义：t_question.kp_id 是它的冗余投影（兼容期双写），
+    # 「一题最多一个主知识点」由 uq_qkp_primary 部分唯一索引在 DB 层保证，而非应用层自觉。
+    # 与 t_answer_record / t_question_favorite 同一先例：question_id 设物理外键。
+    """
+    CREATE TABLE IF NOT EXISTS t_question_kp (
+        question_id INTEGER NOT NULL,
+        kp_id       TEXT NOT NULL,
+        score       REAL,                                              -- 标注置信度（kp_labeler 产物）
+        source      TEXT NOT NULL DEFAULT 'MANUAL'
+                    CHECK (source IN ('MANUAL', 'AI', 'IMPORT')),      -- 与 QUESTION_SOURCE 同口径
+        is_primary  INTEGER NOT NULL DEFAULT 0 CHECK (is_primary IN (0, 1)),
+        created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        PRIMARY KEY (question_id, kp_id),
+        FOREIGN KEY (question_id) REFERENCES t_question(question_id)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_qkp_kp ON t_question_kp(kp_id);",
+    # 部分唯一索引（SQLite 自 3.8.0 起支持）：只对 is_primary=1 的行做 (question_id) 唯一约束
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_qkp_primary "
+    "ON t_question_kp(question_id) WHERE is_primary = 1;",
 ]
 
 
@@ -402,11 +454,99 @@ class SQLDatabase:
         os.makedirs(parent, exist_ok=True)
 
     def _connect(self) -> sqlite3.Connection:
-        """新建连接：开启外键约束 + 行字典工厂"""
+        """新建连接：外键约束 + 行字典工厂 + 阶段 G 的 `busy_timeout`"""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
+        if BUSY_TIMEOUT_MS > 0:
+            # 写者互斥时等待而不是立刻抛 "database is locked"。该 pragma 是**连接级**的，
+            # 每连接都要设（journal_mode 则是库级持久属性，见 _apply_journal_mode）。
+            conn.execute(f"PRAGMA busy_timeout = {BUSY_TIMEOUT_MS}")
         return conn
+
+    def _apply_journal_mode(self) -> dict:
+        """设置库级持久 pragma `journal_mode`（阶段 G），返回**事实**供启动自查/验收。
+
+        设计要点：
+        - **只在 init_tables 末端调用一次**：WAL 是持久属性，无需每连接设置；
+          且它要求「当前没有其他写事务」，放在建表/迁移之后最容易一次成功。
+        - **失败不抛异常**：某些文件系统（网络盘）不支持 WAL，或并发下正有写事务。
+          退回 rollback journal 只是并发能力差一些，**不影响正确性**，
+          故记录状态后继续 —— 但状态会被保留（`pragma_status()`），不静默丢弃。
+        """
+        state = {"requested": JOURNAL_MODE, "actual": None, "error": None}
+        if not JOURNAL_MODE:
+            return state
+        conn = self._connect()
+        try:
+            row = conn.execute(f"PRAGMA journal_mode = {JOURNAL_MODE}").fetchone()
+            state["actual"] = row[0] if row else None
+        except Exception as e:
+            state["error"] = f"{type(e).__name__}: {e}"
+        finally:
+            conn.close()
+        return state
+
+    def pragma_status(self) -> dict:
+        """当前连接 pragma 事实（阶段 G 自查用）：journal_mode 的请求值/实际值 + busy_timeout。"""
+        state = dict(getattr(self, "journal_state", {}) or {})
+        state.setdefault("requested", JOURNAL_MODE)
+        state["busy_timeout_ms"] = BUSY_TIMEOUT_MS
+        return state
+
+    def backup_to(self, dst_path) -> dict:
+        """**WAL 安全的**在线快照备份（用 SQLite 官方 backup API），返回备份事实。
+
+        为什么不能用 `shutil.copy2(app.db)`（阶段 G 之前 `scripts/backup_migration.py`
+        就是这么做的，本方法替换它）——**这是启用 WAL 的前置条件**：
+
+        - WAL 模式下**最近提交可能还留在 `app.db-wal`** 里，只拷主文件会得到
+          「**静默少数据**」的备份：不报错、事后才发现；
+        - 若拷贝恰逢 checkpoint 进行中，还可能拿到**内部不一致**的快照。
+
+        而文档承诺的回滚方式正是「恢复 `backend/backup/*.bak`」——
+        备份静默失效等于**回滚路径静默失效**，所以这件事必须与 WAL 同时落地。
+
+        `sqlite3.Connection.backup()` 由 SQLite 保证「在写事务边界上取一致快照」，
+        且**不阻塞写者**（无需停服）。备份文件会把 journal_mode 复位为 DELETE，
+        使其**单文件自包含**（不必连 `-wal` 一起拷）。
+
+        返回 `{path, bytes, tables, rows, source_journal_mode, journal_reset}`，
+        `tables` 是逐表行数 —— 便于把备份与线上逐表核对（本次改动就据此核对）。
+        """
+        dst_path = str(dst_path)
+        os.makedirs(os.path.dirname(os.path.abspath(dst_path)), exist_ok=True)
+        tables, journal_reset = {}, False
+        src = sqlite3.connect(self.db_path)
+        try:
+            dst = sqlite3.connect(dst_path)
+            try:
+                src.backup(dst)                      # 一致快照；WAL 内容一并落进目标文件
+                names = [r[0] for r in dst.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name"
+                ).fetchall()]
+                for name in names:
+                    tables[name] = dst.execute(f"SELECT count(*) FROM {name}").fetchone()[0]
+                try:
+                    # 复位为 rollback journal → 备份文件自包含（不留 -wal 边车）
+                    dst.execute("PRAGMA journal_mode = DELETE")
+                    dst.commit()
+                    journal_reset = True
+                except Exception:
+                    dst.rollback()
+            finally:
+                dst.close()
+        finally:
+            src.close()
+        conn = sqlite3.connect(self.db_path)          # 源库当前 journal 模式（写入事实便于核对）
+        try:
+            row = conn.execute("PRAGMA journal_mode").fetchone()
+            source_mode = row[0] if row else None
+        finally:
+            conn.close()
+        return {"path": dst_path, "bytes": os.path.getsize(dst_path), "tables": tables,
+                "rows": sum(tables.values()), "source_journal_mode": source_mode,
+                "journal_reset": journal_reset}
 
     def init_tables(self):
         """初始化表结构（幂等，可重复调用）"""
@@ -418,6 +558,9 @@ class SQLDatabase:
         # Scope B 题型扩展：t_question 的 q_type CHECK 需重建表（SQLite 不能改 CHECK）。
         # 该步骤要用「关闭外键的独立连接」执行，故放在 _migrate（共用连接）之外。
         self._migrate_question_types()
+        # 阶段 G：最后切 journal_mode —— 此时库文件已存在且非空（空文件无法设 WAL），
+        # 且上面所有迁移写事务都已结束，最容易一次成功。
+        self.journal_state = self._apply_journal_mode()
 
     def _migrate(self):
         """幂等迁移：为旧库补齐 document_id 列并回填（文档作用域改造）。
@@ -456,6 +599,8 @@ class SQLDatabase:
                 "ON t_kp_embedding(course_id, document_id)"
             )
             self._migrate_question_bank(conn)
+            self._migrate_question_kp(conn)
+            self._migrate_embeddings_blob(conn)
             self._migrate_course_center(conn)
             conn.commit()
 
@@ -559,6 +704,87 @@ class SQLDatabase:
         for name, decl in self._QUESTION_NEW_COLUMNS:
             if name not in qcols:
                 conn.execute(f"ALTER TABLE t_question ADD COLUMN {name} {decl}")
+
+    def _migrate_question_kp(self, conn: sqlite3.Connection) -> int:
+        """幂等迁移：把 t_question.kp_id 回填为 t_question_kp 的「主知识点」行。返回本次回填条数。
+
+        表结构由 _SCHEMA_SQL 的 CREATE TABLE IF NOT EXISTS 建出（含 uq_qkp_primary 部分唯一索引），
+        本方法只负责补历史数据。
+
+        **只回填「关联表中无任何行」的题**，这一点是必须的：
+        若某题已有 is_primary=1 的关联行（教师后续编辑产生），再按 t_question.kp_id 插一行
+        is_primary=1 会**同时触碰 uq_qkp_primary**，导致后端每次启动即崩。
+        因此判据是 `NOT EXISTS (SELECT 1 FROM t_question_kp ...)` 而不是 `INSERT OR IGNORE` 单打独斗。
+
+        `set_question_kps()` 是兼容期内唯一的关联表写入方，它负责同步 t_question.kp_id（冗余投影），
+        因此稳态下两者不会漂移；漂移检测见 scripts/scan_consistency.py 的口径。
+        """
+        cur = conn.execute(
+            "INSERT OR IGNORE INTO t_question_kp (question_id, kp_id, source, is_primary) "
+            "SELECT q.question_id, q.kp_id, 'MANUAL', 1 FROM t_question q "
+            "WHERE q.kp_id IS NOT NULL AND q.kp_id <> '' "
+            "  AND NOT EXISTS (SELECT 1 FROM t_question_kp k WHERE k.question_id = q.question_id)"
+        )
+        return cur.rowcount
+
+    # ---------- L2 阶段 E：向量改存 float32 BLOB ----------
+    # 与「新增列只写 _migrate()、不写 _SCHEMA_SQL」的纪律一致，否则新建库与迁移库结构分叉。
+    _EMB_NEW_COLUMNS = (("embedding_blob", "BLOB"),)
+    # 回填时的定位键（必须是各表的唯一键；用键而非 rowid，保持 MySQL 可移植）
+    _BLOB_KEY_COLUMNS = {
+        "t_kp_embedding": ("course_id", "kp_id"),
+        "t_question_embedding": ("question_id",),
+    }
+    # 单次启动最多回填多少行：把 JSON 解析成本摊到多次启动，避免启动时间绑在向量总量上
+    # （实测 5 万条 JSON 全量解析约 18 秒）。重复启动继续推进，全程幂等。
+    _EMB_BACKFILL_LIMIT = 5000
+
+    def _migrate_embeddings_blob(self, conn: sqlite3.Connection) -> int:
+        """幂等迁移：给两张向量表补 `embedding_blob` 并**限量**回填，返回本次回填行数。
+
+        旧 `embedding` TEXT 列**保留**（兼容期双写）；读取优先 BLOB，缺失时回落解析 JSON，
+        因此未回填完的历史行也能正常读。`backfill_embedding_blobs()` 可由脚本显式全量调用。
+        """
+        total = 0
+        for table in self._BLOB_KEY_COLUMNS:
+            cols = {row["name"] for row in
+                    conn.execute(f"PRAGMA table_info({table})").fetchall()}
+            for name, decl in self._EMB_NEW_COLUMNS:
+                if name not in cols:
+                    conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+            total += self._backfill_blob_rows(conn, table, self._EMB_BACKFILL_LIMIT)
+        return total
+
+    def _backfill_blob_rows(self, conn: sqlite3.Connection, table: str, limit: int) -> int:
+        """把 table 中 embedding_blob 为空的行由 embedding(JSON) 转成 float32 BLOB（限量）。"""
+        keys = self._BLOB_KEY_COLUMNS[table]
+        rows = conn.execute(
+            f"SELECT {', '.join(keys)}, embedding FROM {table} "
+            f"WHERE embedding_blob IS NULL AND embedding IS NOT NULL AND embedding <> '' "
+            f"LIMIT ?", (int(limit),)
+        ).fetchall()
+        where = " AND ".join(f"{k} = ?" for k in keys)
+        done = 0
+        for r in rows:
+            try:
+                vec = json.loads(r["embedding"])
+            except (ValueError, TypeError):
+                continue                       # 脏行跳过（不阻塞其他行）
+            if not isinstance(vec, list) or not vec:
+                continue
+            conn.execute(f"UPDATE {table} SET embedding_blob = ? WHERE {where}",
+                         (_vec_to_blob(vec), *[r[k] for k in keys]))
+            done += 1
+        return done
+
+    def backfill_embedding_blobs(self, limit=None) -> int:
+        """显式回填（脚本/运维用；不限量则一次做全）。返回回填行数。"""
+        total = 0
+        with self._connect() as conn:
+            for table in self._BLOB_KEY_COLUMNS:
+                total += self._backfill_blob_rows(conn, table, limit or 10 ** 9)
+            conn.commit()
+        return total
 
     # 重建 t_question 时保留的列（显式列名 INSERT…SELECT，避免历史列序差异）
     _QUESTION_COLUMNS = (
@@ -859,10 +1085,9 @@ class SQLDatabase:
         with self._connect() as conn:
             conn.execute("DELETE FROM t_kp_embedding WHERE course_id = ?", (course_id,))
             # Scope C：题目向量与知识点文本缓存同样无外键，需显式清理（否则留孤儿）
-            conn.execute(
-                "DELETE FROM t_question_embedding WHERE question_id IN "
-                "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
-            )
+            # 按 course_id **直删**（而非「题号子查询」）：题号子查询漏掉孤儿行
+            # （题目已被删、向量还在），而向量行自带 course_id，按它删能顺带清掉孤儿。
+            conn.execute("DELETE FROM t_question_embedding WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_question_import_batch WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_kp_text WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_student_favorite WHERE course_id = ?", (course_id,))
@@ -876,6 +1101,11 @@ class SQLDatabase:
             )
             conn.execute(
                 "DELETE FROM t_answer_record WHERE question_id IN "
+                "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
+            )
+            # L2：知识点关联（t_question_kp）有物理外键指向 t_question，必须先删
+            conn.execute(
+                "DELETE FROM t_question_kp WHERE question_id IN "
                 "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
             )
             conn.execute("DELETE FROM t_question WHERE course_id = ?", (course_id,))
@@ -1109,14 +1339,20 @@ class SQLDatabase:
     # ---------- 知识点向量（RAG 向量检索） ----------
 
     def upsert_kp_embedding(self, course_id: int, document_id, kp_id: str, embedding: list) -> int:
-        """写入/更新知识点向量（embedding 序列化为 JSON 文本；Phase 8C 保存 document_id）"""
+        """写入/更新知识点向量（**双写**：`embedding` JSON 兼容 + `embedding_blob` float32 快读）
+
+        L2 阶段 E：blob 列用于检索（体积 5.2×↓、免 JSON 解析）；JSON 列保留以兼容旧读取方。
+        """
         return self._execute(
-            "INSERT INTO t_kp_embedding (course_id, document_id, kp_id, embedding, updated_at) "
-            "VALUES (?, ?, ?, ?, ?) "
+            "INSERT INTO t_kp_embedding "
+            "(course_id, document_id, kp_id, embedding, embedding_blob, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(course_id, kp_id) DO UPDATE SET "
             "document_id = excluded.document_id, "
-            "embedding = excluded.embedding, updated_at = excluded.updated_at",
-            (course_id, document_id, kp_id, json.dumps(embedding), _now()),
+            "embedding = excluded.embedding, embedding_blob = excluded.embedding_blob, "
+            "updated_at = excluded.updated_at",
+            (course_id, document_id, kp_id, json.dumps(embedding),
+             _vec_to_blob(embedding), _now()),
         )
 
     def get_embeddings_by_document(self, course_id: int, document_id) -> list:
@@ -1166,6 +1402,58 @@ class SQLDatabase:
         for r in rows:
             r["embedding"] = self._loads_json(r["embedding"])
         return rows
+
+    # ---------- L2 阶段 E：向量的 BLOB 快读通道（检索层用，免 JSON 解析） ----------
+
+    def get_kp_embedding_blobs(self, course_id: int, document_id=None) -> list:
+        """取知识点向量的 **float32 原始字节**：`[{kp_id, document_id, blob}]`。
+
+        优先读 `embedding_blob`；该列为空（历史行尚未回填）时回落解析 `embedding`(JSON)，
+        保证**回填进度不影响读取正确性**。检索层直接 `np.frombuffer` 成矩阵，零解析开销。
+        """
+        where, params = ["course_id = ?"], [course_id]
+        if document_id is not None:
+            where.append("document_id = ?")
+            params.append(document_id)
+        rows = self._query(
+            f"SELECT kp_id, document_id, embedding_blob, embedding FROM t_kp_embedding "
+            f"WHERE {' AND '.join(where)}", tuple(params))
+        return self._blob_rows(rows, key="kp_id", extra="document_id")
+
+    def get_question_embedding_blobs(self, course_id: int, document_id=None,
+                                     question_ids=None) -> list:
+        """取题目向量的 float32 原始字节：`[{question_id, blob}]`（口径同 t_question_embedding）。
+
+        `question_ids` 传入时只取这些题——召回 R5 只需「学生最近错题的向量」。
+        """
+        where, params = ["course_id = ?"], [course_id]
+        if document_id is not None:
+            where.append("document_id = ?")
+            params.append(document_id)
+        ids = [int(q) for q in (question_ids or []) if q is not None]
+        if ids:
+            where.append(f"question_id IN ({', '.join('?' for _ in ids)})")
+            params.extend(ids)
+        rows = self._query(
+            f"SELECT question_id, embedding_blob, embedding FROM t_question_embedding "
+            f"WHERE {' AND '.join(where)}", tuple(params))
+        return self._blob_rows(rows, key="question_id")
+
+    def _blob_rows(self, rows: list, key: str, extra: str = None) -> list:
+        """含 embedding_blob/embedding 的行 → `[{key, [extra], blob}]`；blob 缺失时回落 JSON。"""
+        out = []
+        for r in rows:
+            blob = r["embedding_blob"]
+            if blob is None:
+                vec = self._loads_json(r["embedding"])
+                if not vec:
+                    continue
+                blob = _vec_to_blob(vec)
+            item = {key: r[key], "blob": blob}
+            if extra:
+                item[extra] = r[extra]
+            out.append(item)
+        return out
 
     def count_embeddings_by_course(self, course_id: int) -> int:
         """某课程全部知识点向量数量（供整课删除前统计与报告）"""
@@ -1317,18 +1605,18 @@ class SQLDatabase:
 
     def upsert_question_embedding(self, question_id: int, course_id: int, document_id,
                                   text_hash: str, embedding: list) -> int:
-        """写入/更新题目向量（embedding 序列化为 JSON 文本）"""
+        """写入/更新题目向量（**双写**：`embedding` JSON 兼容 + `embedding_blob` float32 快读）"""
         with self._connect() as conn:
             conn.execute(
                 "INSERT INTO t_question_embedding "
-                "(question_id, course_id, document_id, text_hash, embedding, updated_at) "
-                "VALUES (?, ?, ?, ?, ?, ?) "
+                "(question_id, course_id, document_id, text_hash, embedding, embedding_blob, "
+                " updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(question_id) DO UPDATE SET "
                 "course_id = excluded.course_id, document_id = excluded.document_id, "
                 "text_hash = excluded.text_hash, embedding = excluded.embedding, "
-                "updated_at = excluded.updated_at",
+                "embedding_blob = excluded.embedding_blob, updated_at = excluded.updated_at",
                 (question_id, course_id, document_id, text_hash,
-                 self._json_text(embedding), _now()),
+                 self._json_text(embedding), _vec_to_blob(embedding), _now()),
             )
             conn.commit()
         return 1
@@ -1446,13 +1734,18 @@ class SQLDatabase:
                         difficulty: int = 3, created_by: int = None,
                         source: str = "MANUAL", is_active: int = 1,
                         import_batch_id: str = None,
-                        import_status: str = None) -> int:
+                        import_status: str = None,
+                        kp_ids=None, kp_primary=None, kp_scores=None) -> int:
         """新增题目，返回 question_id（options/answer 自动序列化为 JSON 文本）。
 
         Scope D：导入的题目一律 is_active=0 进「暂存区」，并带上 import_batch_id /
         import_status（READY / NEEDS_REVIEW / ANSWER_MISSING），教师复核后才启用。
+
+        L2 一题多 KP：`kp_ids` 是该题的完整知识点列表（`kp_id` 保留为「主知识点」兼容参数）。
+        未传 kp_ids 时退回单值 kp_id，既有调用方行为不变；两种写法都会经 set_question_kps
+        写关联表并把主知识点投影回 t_question.kp_id（投影与关联表必须一致）。
         """
-        return self._execute(
+        qid = self._execute(
             "INSERT INTO t_question "
             "(course_id, document_id, kp_id, q_type, stem, options, answer, analysis, "
             " difficulty, source, created_by, is_active, import_batch_id, import_status) "
@@ -1462,13 +1755,39 @@ class SQLDatabase:
              analysis, difficulty, source, created_by, 1 if is_active else 0,
              import_batch_id, import_status or "READY"),
         )
+        # 只要给了 kp_ids（含空列表）或 kp_id，就走统一写入口——空列表也要走，
+        # 否则「显式传 kp_ids=[] 但同时传了 kp_id」会留下投影与关联表不一致的行。
+        if kp_ids is not None or kp_id:
+            linked = list(kp_ids) if kp_ids is not None else [kp_id]
+            self.set_question_kps(qid, linked, primary=kp_primary or kp_id,
+                                  source=source, scores=kp_scores)
+        return qid
 
     def get_question(self, question_id: int) -> dict:
         return self._query_one("SELECT * FROM t_question WHERE question_id = ?", (question_id,))
 
     def update_question(self, question_id: int, **fields) -> None:
-        """更新题目字段（白名单，None 跳过表示不修改；options/answer 自动序列化），刷新 updated_at"""
-        allowed = {"document_id", "kp_id", "q_type", "stem", "options", "answer",
+        """更新题目字段（白名单，None 跳过表示不修改；options/answer 自动序列化），刷新 updated_at
+
+        L2 一题多 KP：`kp_id` **不再**直接写列，而是转交 set_question_kps()——关联表是权威、
+        `t_question.kp_id` 是其冗余投影，两者必须同事务更新。这样既有调用方（教师端编辑、
+        kp_labeler 自动标注）无需改动即自动保持一致。
+
+        知识点字段两种写法（互斥，`kp_ids` 优先）：
+        - `kp_ids=[...]`（+ 可选 `kp_primary` / `kp_scores` / `kp_source`）：**全量替换**为该组知识点；
+        - `kp_id="kp_x"`：单值语义，等价于 `kp_ids=["kp_x"]`；`kp_id=""` 表示解除全部关联。
+
+        两者都不传 = 该题知识点**完全不动**。这点很关键：教师只改难度/解析时若误传 kp_id，
+        会把多 KP 题塌缩成单 KP（question_service 已按此口径收口，只在 payload 显式含 kp 键时才传）。
+        """
+        # 知识点字段先摘出来，避免混进下面的白名单 UPDATE
+        kp_ids = fields.pop("kp_ids", None)
+        kp_primary = fields.pop("kp_primary", None)
+        kp_scores = fields.pop("kp_scores", None)
+        kp_source = fields.pop("kp_source", None)
+        kp_single = fields.pop("kp_id", None)
+
+        allowed = {"document_id", "q_type", "stem", "options", "answer",
                    "analysis", "difficulty", "source", "is_active"}
         sets, params = [], []
         for key, val in fields.items():
@@ -1478,12 +1797,20 @@ class SQLDatabase:
                 val = self._json_text(val)
             sets.append(f"{key} = ?")
             params.append(val)
-        if not sets:
-            return
-        sets.append("updated_at = ?")
-        params.append(_now())
-        params.append(question_id)
-        self._execute(f"UPDATE t_question SET {', '.join(sets)} WHERE question_id = ?", tuple(params))
+        if sets:
+            sets.append("updated_at = ?")
+            params.append(_now())
+            params.append(question_id)
+            self._execute(f"UPDATE t_question SET {', '.join(sets)} WHERE question_id = ?", tuple(params))
+
+        # 知识点关联：关联表为权威，t_question.kp_id 由其投影（见 set_question_kps）
+        if kp_ids is not None:
+            self.set_question_kps(question_id, kp_ids, primary=kp_primary,
+                                  source=kp_source or "MANUAL", scores=kp_scores)
+        elif kp_single is not None:
+            single = str(kp_single).strip()
+            self.set_question_kps(question_id, [single] if single else [],
+                                  primary=single, source=kp_source or "MANUAL")
 
     def set_question_document(self, question_id: int, document_id) -> int:
         """把题目挂到指定文档（document_id=None 表示改为「课程通用题」）。
@@ -1498,6 +1825,106 @@ class SQLDatabase:
             )
             conn.commit()
             return cur.rowcount
+
+    # ---------- L2：一题多知识点（关联表为权威，t_question.kp_id 为冗余投影） ----------
+
+    def set_question_kps(self, question_id: int, kp_ids, primary=None,
+                         source: str = "MANUAL", scores: dict = None,
+                         sources: dict = None) -> int:
+        """全量替换某题的「知识点关联」，并把主知识点同步投影到 t_question.kp_id。
+
+        这是 L2 一题多 KP 的**唯一写入口**：`t_question_kp` 是权威数据，
+        `t_question.kp_id` 只是它的冗余投影——两者由本方法**同事务**更新，
+        因此既有读侧（`question["kp_id"]`、前端展示、统计口径）行为完全不变。
+
+        参数：
+        - `kp_ids`：知识点列表；空列表 / None 表示「解除全部关联」；
+        - `primary`：主知识点，必须是 kp_ids 之一；None 或不属于列表时取首项；
+        - `source`：MANUAL / AI / IMPORT（非法值回退 MANUAL，与 QUESTION_SOURCE 同口径）；
+        - `scores`：`{kp_id: score}` 可选，写入关联表（kp_labeler 的标注置信度）；
+        - `sources`：`{kp_id: source}` 可选，**按 kp 覆盖**来源标记。用途：合并式写入时
+          保留既有行的原始来源（如教师手工挂的仍是 MANUAL），只把新增行标记为 AI；
+          缺省则整批使用 `source`。非法值回退到 `source`。
+
+        返回：写入的关联行数。
+
+        为什么单独一个方法、而不是塞进 update_question：
+        1) update_question 对 None 的语义是「不修改」，无法表达「清空全部知识点」；
+        2) 「一题最多一个主知识点」是跨两张表的约束（由 uq_qkp_primary 在 DB 层兜底），
+           必须在一个事务里完成「删除旧关联 + 重建新关联 + 同步投影」；
+        3) 教师端穿梭框提交的就是**完整集合**，全量替换语义最清晰，无需做增量 diff。
+
+        注意：本方法对「多 KP 题」是全量覆盖。调用方若只想改别的字段（如难度），
+        **不要**传 kp 参数——否则会把多 KP 塌缩成单个（question_service 已按此口径收口）。
+        """
+        # 归一化：去空、去重、保序（保序让 primary 缺省取首项时符合教师排列意图）
+        cleaned, seen = [], set()
+        for kp in (kp_ids or []):
+            kp = str(kp).strip() if kp is not None else ""
+            if kp and kp not in seen:
+                seen.add(kp)
+                cleaned.append(kp)
+        prim = str(primary).strip() if primary else ""
+        if prim not in seen:
+            prim = cleaned[0] if cleaned else ""
+        if source not in QUESTION_SOURCE:
+            source = "MANUAL"
+        scores = scores or {}
+        sources = sources or {}
+
+        with self._connect() as conn:
+            conn.execute("DELETE FROM t_question_kp WHERE question_id = ?", (question_id,))
+            for kp in cleaned:
+                # 来源标记支持按 kp 覆盖：合并式写入时用于保留既有行的原始来源
+                row_source = sources.get(kp) or source
+                if row_source not in QUESTION_SOURCE:
+                    row_source = source
+                conn.execute(
+                    "INSERT INTO t_question_kp "
+                    "(question_id, kp_id, score, source, is_primary) VALUES (?, ?, ?, ?, ?)",
+                    (question_id, kp, scores.get(kp), row_source, 1 if kp == prim else 0),
+                )
+            # 冗余投影：空值统一落 NULL（与 create_question 既有口径一致；
+            # 全库「未挂知识点」只有 NULL 一种形态，见 question_id=373 的历史行）
+            conn.execute(
+                "UPDATE t_question SET kp_id = ?, updated_at = ? WHERE question_id = ?",
+                (prim or None, _now(), question_id),
+            )
+            conn.commit()
+            return len(cleaned)
+
+    def get_question_kps(self, question_id: int) -> list:
+        """取某题的全部知识点关联，主知识点排首位：`[{kp_id, score, source, is_primary}]`"""
+        return self._query(
+            "SELECT kp_id, score, source, is_primary FROM t_question_kp "
+            "WHERE question_id = ? ORDER BY is_primary DESC, kp_id",
+            (question_id,),
+        )
+
+    def get_question_kps_map(self, question_ids) -> dict:
+        """批量取多题的知识点关联：`{question_id: [kp_id, ...]}`（主知识点排首位）。
+
+        批量版存在的意义：掌握度归因（决策 1a）需要按题展开多个 kp，
+        逐题查询会退化成 N+1 次 SQL（大批量标注/评测时尤其明显）。
+        """
+        ids = [q for q in (question_ids or []) if q is not None]
+        if not ids:
+            return {}
+        marks = ", ".join("?" for _ in ids)
+        rows = self._query(
+            f"SELECT question_id, kp_id FROM t_question_kp "
+            f"WHERE question_id IN ({marks}) ORDER BY question_id, is_primary DESC, kp_id",
+            tuple(ids),
+        )
+        out = {}
+        for r in rows:
+            out.setdefault(r["question_id"], []).append(r["kp_id"])
+        return out
+
+    # 说明：按 kp 分组统计与「未挂知识点」计数统一走 count_questions_grouped_by_kp（关联表口径），
+    # 不再另设 count_questions_grouped_by_kps / count_unlinked_questions 两个近似方法——
+    # 一题多 kp 的明细由 get_question_kps_map() 提供，避免同一语义有多个入口。
+
 
     def list_members(self, course_id: int, status: str = None, role: str = None,
                      keyword: str = None, page: int = 1, page_size: int = 20):
@@ -1558,17 +1985,53 @@ class SQLDatabase:
             return cur.rowcount
 
     def delete_question(self, question_id: int) -> int:
-        """物理删除题目及其全部收藏/答题记录（先删子表再删主表，满足外键顺序）"""
+        """物理删除题目及其知识点关联/向量/收藏/答题记录（先删子表再删主表，满足外键顺序）"""
         with self._connect() as conn:
             conn.execute("DELETE FROM t_question_favorite WHERE question_id = ?", (question_id,))
             conn.execute("DELETE FROM t_answer_record WHERE question_id = ?", (question_id,))
+            # L2：t_question_kp 对 t_question 有物理外键，且 _connect() 已开启 foreign_keys=ON，
+            # 不先删关联行会导致紧接着的删题语句直接抛 FK 约束错误。
+            conn.execute("DELETE FROM t_question_kp WHERE question_id = ?", (question_id,))
+            # L2 阶段 E：题目向量**无外键** → 不删也不报错，只会静默留下孤儿向量
+            # （表现为向量索引能检索到已删除的题号）。必须显式清理。
+            conn.execute("DELETE FROM t_question_embedding WHERE question_id = ?", (question_id,))
             cur = conn.execute("DELETE FROM t_question WHERE question_id = ?", (question_id,))
             conn.commit()
             return cur.rowcount
 
     # ---------- 题库：题目查询（管理列表 / 出题池） ----------
 
+    @staticmethod
+    def _kp_filter(where: list, params: list, kp_id=None, kp_ids=None,
+                   qualifier: str = "q") -> bool:
+        """把「按知识点过滤」统一编译为 EXISTS 子查询（关联表口径），追加到 where / params。
+
+        语义：**「该题涉及该知识点」**——既命中主知识点，也命中次要知识点。
+        单值 `kp_id` 与多值 `kp_ids` 等价（kp_ids 优先）；返回是否真的追加了条件。
+
+        为什么统一走 t_question_kp 而不是 t_question.kp_id：
+        - 旧口径只认主知识点，一题多挂后「次要知识点上的题」会被整批漏掉；
+        - 存量数据当前 126/126 题为单知识点，故本次切换在现有数据上**无可观测差异**。
+        集中成一个 helper 的原因：这条语义有 4 个调用点（题库列表 / 出题池 / 批改台列表 /
+        批改台计数），抄 4 遍必然漂移。
+        """
+        ids = [str(k).strip() for k in (kp_ids or []) if k and str(k).strip()]
+        if not ids and kp_id:
+            single = str(kp_id).strip()
+            if single:
+                ids = [single]
+        if not ids:
+            return False
+        marks = ", ".join("?" for _ in ids)
+        where.append(
+            f"EXISTS (SELECT 1 FROM t_question_kp qk "
+            f"WHERE qk.question_id = {qualifier}.question_id AND qk.kp_id IN ({marks}))"
+        )
+        params.extend(ids)
+        return True
+
     def list_questions(self, course_id: int, document_id=None, kp_id: str = None,
+                       kp_ids=None,
                        q_type: str = None, keyword: str = None, is_active=None,
                        page: int = 1, page_size: int = 10,
                        include_course_level: bool = True,
@@ -1592,9 +2055,8 @@ class SQLDatabase:
             else:
                 where.append("q.document_id = ?")
             params.append(document_id)
-        if kp_id:
-            where.append("q.kp_id = ?")
-            params.append(kp_id)
+        # 知识点过滤（关联表口径，见 _kp_filter）
+        self._kp_filter(where, params, kp_id, kp_ids)
         if q_type:
             where.append("q.q_type = ?")
             params.append(q_type)
@@ -1794,6 +2256,7 @@ class SQLDatabase:
     def count_user_profiles(self) -> int:
         return self._query_one("SELECT count(*) AS cnt FROM t_user_profile")["cnt"]
     def list_practice_questions(self, course_id: int, document_id=None, kp_id: str = None,
+                                kp_ids=None,
                                 q_type: str = None, limit: int = 10,
                                 exclude_ids=None, auto_grade_only: bool = True) -> list:
         """出题查询：仅取启用题目，随机排序；document_id 传入时含「该文档题 + 课程通用题」。
@@ -1805,9 +2268,8 @@ class SQLDatabase:
         if document_id is not None:
             where.append("(document_id = ? OR document_id IS NULL)")
             params.append(document_id)
-        if kp_id:
-            where.append("kp_id = ?")
-            params.append(kp_id)
+        # 知识点过滤（关联表口径；本查询 FROM 无别名，qualifier 传表名）
+        self._kp_filter(where, params, kp_id, kp_ids, qualifier="t_question")
         if q_type:
             where.append("q_type = ?")
             params.append(q_type)
@@ -1843,33 +2305,38 @@ class SQLDatabase:
                                       only_active: bool = False):
         """按知识点统计题目数，返回 (grouped, unlinked)。
 
-        - grouped：{kp_id: 题目数}，只含**挂了知识点**的题；
-        - unlinked：kp_id 为空（未挂知识点）的题目数。
+        - grouped：{kp_id: 题目数}。**决策 2a：一题多挂时每个 kp 各计 1 题**——
+          某 kp 的计数既含「以它为主知识点」的题，也含「仅作为次要知识点」的题
+          （旧口径只数 t_question.kp_id，会漏掉次要知识点上的题数）；
+        - unlinked：**关联表中无任何行**的题目数（口径由「kp_id 为空」改为关联表口径）。
 
+        L2 改造点：数据源从 t_question.kp_id 单列改为 t_question_kp 关联表。
         作用域口径与 list_questions 一致：document_id 传入时默认含课程通用题
         （document_id IS NULL）；only_active=True 时只数启用中的题（覆盖率报表用）。
         """
-        where, params = ["course_id = ?"], [course_id]
+        where, params = ["q.course_id = ?"], [course_id]
         if document_id is not None:
             if include_course_level:
-                where.append("(document_id = ? OR document_id IS NULL)")
+                where.append("(q.document_id = ? OR q.document_id IS NULL)")
             else:
-                where.append("document_id = ?")
+                where.append("q.document_id = ?")
             params.append(document_id)
         if only_active:
-            where.append("is_active = 1")
+            where.append("q.is_active = 1")
+        where_sql = " AND ".join(where)
 
         rows = self._query(
-            f"SELECT kp_id, count(*) AS c FROM t_question WHERE {' AND '.join(where)} "
-            f"GROUP BY kp_id",
+            f"SELECT qk.kp_id AS kp_id, count(*) AS c "
+            f"FROM t_question_kp qk JOIN t_question q ON q.question_id = qk.question_id "
+            f"WHERE {where_sql} GROUP BY qk.kp_id",
             tuple(params),
         )
-        grouped, unlinked = {}, 0
-        for r in rows:
-            if r["kp_id"]:
-                grouped[r["kp_id"]] = r["c"]
-            else:
-                unlinked = r["c"]              # 唯一一行：kp_id IS NULL
+        grouped = {r["kp_id"]: r["c"] for r in rows if r["kp_id"]}
+        unlinked = self._query_one(
+            f"SELECT count(*) AS cnt FROM t_question q WHERE {where_sql} "
+            f"AND NOT EXISTS (SELECT 1 FROM t_question_kp k WHERE k.question_id = q.question_id)",
+            tuple(params),
+        )["cnt"]
         return grouped, unlinked
 
     def question_answer_stats(self, course_id: int, graded_only: bool = True) -> dict:
@@ -1995,6 +2462,7 @@ class SQLDatabase:
             return cur.rowcount
 
     def list_pending_answer_records(self, course_id: int, document_id=None, kp_id: str = None,
+                                    kp_ids=None,
                                     student_id: int = None, limit: int = 50,
                                     offset: int = 0, status: str = "PENDING") -> list:
         """批改台列表（教师视角，联表带出题面 / 参考答案 / 学生信息）。
@@ -2018,9 +2486,7 @@ class SQLDatabase:
         if document_id is not None:
             where.append("(r.document_id = ? OR r.document_id IS NULL)")
             params.append(document_id)
-        if kp_id:
-            where.append("q.kp_id = ?")
-            params.append(kp_id)
+        self._kp_filter(where, params, kp_id, kp_ids)
         if student_id is not None:
             where.append("r.user_id = ?")
             params.append(student_id)
@@ -2045,6 +2511,7 @@ class SQLDatabase:
         )
 
     def count_pending_answer_records(self, course_id: int, document_id=None, kp_id: str = None,
+                                     kp_ids=None,
                                      student_id: int = None, status: str = "PENDING") -> int:
         """批改台条数（与 list_pending_answer_records 同一口径，含 status 筛选）"""
         where, params = ["r.course_id = ?"], [course_id]
@@ -2059,9 +2526,7 @@ class SQLDatabase:
         if document_id is not None:
             where.append("(r.document_id = ? OR r.document_id IS NULL)")
             params.append(document_id)
-        if kp_id:
-            where.append("q.kp_id = ?")
-            params.append(kp_id)
+        self._kp_filter(where, params, kp_id, kp_ids)
         if student_id is not None:
             where.append("r.user_id = ?")
             params.append(student_id)
@@ -2193,6 +2658,16 @@ class SQLDatabase:
                 "DELETE FROM t_answer_record WHERE question_id IN "
                 "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
             )
+            # L2：知识点关联有物理外键指向 t_question，必须先删（否则删题会撞 FK 约束）
+            conn.execute(
+                "DELETE FROM t_question_kp WHERE question_id IN "
+                "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
+            )
+            # L2 阶段 E：题目向量无外键 → 不删会静默留下孤儿向量
+            conn.execute(
+                "DELETE FROM t_question_embedding WHERE question_id IN "
+                "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
+            )
             conn.execute("DELETE FROM t_question WHERE course_id = ?", (course_id,))
             conn.commit()
             return count
@@ -2219,6 +2694,13 @@ class SQLDatabase:
                 "(SELECT question_id FROM t_question WHERE course_id = ? AND document_id = ?)",
                 (course_id, document_id),
             )
+            # L2：知识点关联同理（物理外键指向 t_question）
+            conn.execute(
+                "DELETE FROM t_question_kp WHERE question_id IN "
+                "(SELECT question_id FROM t_question WHERE course_id = ? AND document_id = ?)",
+                (course_id, document_id),
+            )
+            # L2 阶段 E：题目向量同理（无外键 → 不删会静默留孤儿）
             conn.execute(
                 "DELETE FROM t_question_embedding WHERE question_id IN "
                 "(SELECT question_id FROM t_question WHERE course_id = ? AND document_id = ?)",

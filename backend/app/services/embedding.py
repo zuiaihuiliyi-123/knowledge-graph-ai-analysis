@@ -10,6 +10,7 @@ from openai import OpenAI
 from ..core.config import settings
 from ..core.database import db
 from ..core.sql_database import sql_db
+from .vector_index import vector_index
 
 # 单次 embedding 调用的最大条数（避免超出服务端单请求限制）
 _EMBED_BATCH_SIZE = 32
@@ -83,15 +84,16 @@ class KnowledgeEmbedder:
         return sql_db.get_embeddings_by_document(course_id, document_id)
 
     def build_index(self, course_id, document_id) -> int:
-        """为文档全部知识点生成并持久化 embedding；无 key 或无节点时返回 0"""
+        """为文档全部知识点生成并持久化 embedding；无 key 或无知识点时返回 0。
+
+        L2 阶段 E：知识点清单**优先取图谱**；图谱不可用、或该文档在图中查不到节点时
+        **回落 `t_kp_text` 缓存**（缓存在每次图谱读取成功时覆盖写入，字段同源）。
+        这让「图库宕机 + 已缓存过知识点」的环境仍能建立向量索引——此前该函数在图库不可用时
+        **永远返回 0**，向量路整体失效（这正是本机 course 65 一条 kp 向量都没有的原因）。
+        """
         if not self.embedding.available:
             return 0
-        recs = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
-            "RETURN n.kp_id AS kp_id, n.name AS name, n.category AS category, "
-            "n.description AS description",
-            {"cid": course_id, "did": document_id},
-        )
+        recs = self._load_kp_records(course_id, document_id)
         # 重建前先清空该文档的旧向量：kp_id 已变的过期行若留着，
         # 上面的 kp_id 集合比对会永远判定「不一致」，每次提问都重复重建
         sql_db.delete_embeddings_by_document(course_id, document_id)
@@ -104,4 +106,29 @@ class KnowledgeEmbedder:
         vecs = self.embedding.embed(texts)
         for r, vec in zip(recs, vecs):
             sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
+        # L2 阶段 E：写完失效检索层缓存（同进程立即生效；跨进程由 VECTOR_CACHE_TTL 收敛）
+        vector_index.invalidate(kind="kp", course_id=course_id)
         return len(recs)
+
+    @staticmethod
+    def _load_kp_records(course_id, document_id) -> list:
+        """知识点清单：图谱优先 → 回落 `t_kp_text` 缓存（含 name / category / description）"""
+        doc_filter = ", document_id: $did" if document_id is not None else ""
+        params = {"cid": course_id}
+        if document_id is not None:
+            params["did"] = document_id
+        try:
+            recs = db.query(
+                "MATCH (n:KnowledgePoint {course_id: $cid" + doc_filter + "}) "
+                "RETURN n.kp_id AS kp_id, n.name AS name, n.category AS category, "
+                "n.description AS description", params)
+            if recs:
+                return recs
+        except Exception:
+            pass                                   # 图库不可用 → 静默回落缓存
+        try:
+            rows = sql_db.list_kp_text(course_id, document_id=document_id)
+        except Exception:
+            return []
+        return [{"kp_id": r["kp_id"], "name": r.get("name"), "category": r.get("category"),
+                 "description": r.get("description")} for r in rows]
