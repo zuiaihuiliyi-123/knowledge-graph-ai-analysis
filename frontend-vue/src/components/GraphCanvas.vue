@@ -602,10 +602,28 @@ function buildGraphData() {
   const edgesInput = isTree
     ? visibleEdges.value.filter((e) => e.type === 'CONTAINS' || e.type === 'PRECEDES')
     : visibleEdges.value
+  // 平行边（同一对节点之间的多条关系）分配曲线偏移，避免完全重叠导致连线与关系标签看不清
+  const pairTotal = {}
+  for (const pe of edgesInput) {
+    const pa = String(pe.source)
+    const pb = String(pe.target)
+    const pkey = pa < pb ? `${pa}|${pb}` : `${pb}|${pa}`
+    pairTotal[pkey] = (pairTotal[pkey] || 0) + 1
+  }
+  const pairSeen = {}
   const gEdges = edgesInput.map((e) => {
     const src = String(e.source)
     const tgt = String(e.target)
     const inPath = pathEdgeSet.has(`${src}-${tgt}`)
+    const pairKey = src < tgt ? `${src}|${tgt}` : `${tgt}|${src}`
+    const pIdx = pairSeen[pairKey] || 0
+    pairSeen[pairKey] = pIdx + 1
+    const pTotal = pairTotal[pairKey] || 1
+    // 聚焦相关边高亮、其余压暗；无论是否聚焦都显式写入 opacity，
+    // 避免 updateEdgeData 浅合并残留旧的压暗值（否则取消聚焦后关系仍显示灰暗）
+    const incident =
+      !focusId || src === focusId || tgt === focusId || (fNbr.has(src) && fNbr.has(tgt))
+    const curveOffset = pTotal > 1 ? (pIdx - (pTotal - 1) / 2) * 36 : 0
     const style = isTree
       ? {
           // 树图：连线取子节点色，无文字标签，直角水平贝塞尔
@@ -613,19 +631,17 @@ function buildGraphData() {
           stroke: inPath ? '#e6a23c' : nodeFill[tgt] || edgeColor(e.type),
           lineWidth: inPath ? 3 : 1.5,
           endArrow: true,
+          opacity: incident ? 1 : 0.08,
         }
       : {
           labelText: edgeTypeLabel(e.type, e.label),
           stroke: inPath ? '#e6a23c' : edgeColor(e.type),
           lineWidth: inPath ? 3 : 1.5,
+          curveOffset,
+          opacity: incident ? 1 : 0.08,
         }
-    if (focusId) {
-      const incident =
-        src === focusId || tgt === focusId || (fNbr.has(src) && fNbr.has(tgt))
-      style.opacity = incident ? 1 : 0.08
-    }
     return {
-      id: String(e.id || `${src}-${tgt}`),
+      id: String(e.id || `${src}-${tgt}-${e.type}`),
       source: src,
       target: tgt,
       type: edgeTypeName,
@@ -708,24 +724,34 @@ function toggleExpand(id) {
 function neighborInfo(id) {
   const sid = String(id)
   const nodeById = (nid) => rawNodes.find((n) => String(n.id) === nid) || null
-  const predecessors = []
-  const successors = []
-  const related = []
+  // 用 Set 汇总邻居：同一知识点之间可能存在多条不同类型的关系（如 PRECEDES + RELATED_TO），
+  // 若不去重会出现重复项，且同一节点会同时落入「前置/后继」与「相关」，导致关系显示异常。
+  const predecessorIds = new Set()
+  const successorIds = new Set()
+  const relatedIds = new Set()
   for (const e of rawEdges) {
     const s = String(e.source)
     const t = String(e.target)
     if (e.type === 'PRECEDES') {
-      if (t === sid) predecessors.push(nodeById(s))
-      else if (s === sid) successors.push(nodeById(t))
+      if (t === sid) predecessorIds.add(s)
+      else if (s === sid) successorIds.add(t)
     } else {
-      if (s === sid) related.push(nodeById(t))
-      else if (t === sid) related.push(nodeById(s))
+      if (s === sid) relatedIds.add(t)
+      else if (t === sid) relatedIds.add(s)
     }
   }
+  // 前置/后继优先：已作为前置或后继出现的节点，不再计入「相关知识」，避免重复与归类冲突
+  for (const x of predecessorIds) relatedIds.delete(x)
+  for (const x of successorIds) relatedIds.delete(x)
+  // 过滤自环
+  predecessorIds.delete(sid)
+  successorIds.delete(sid)
+  relatedIds.delete(sid)
+  const map = (set) => [...set].map(nodeById).filter(Boolean)
   return {
-    predecessors: predecessors.filter(Boolean),
-    successors: successors.filter(Boolean),
-    related: related.filter(Boolean),
+    predecessors: map(predecessorIds),
+    successors: map(successorIds),
+    related: map(relatedIds),
     expanded: isExpanded(sid),
   }
 }

@@ -64,9 +64,9 @@ class TransferCourse(BaseModel):
 
 
 @router.get("/dashboard")
-async def admin_dashboard(admin: dict = Depends(require_admin)):
+async def admin_dashboard(days: int = 14, admin: dict = Depends(require_admin)):
     """管理员工作台总览：平台计数、角色分布、治理概览、系统状态摘要、最近活动"""
-    return _reply(AdminService.dashboard())
+    return _reply(AdminService.dashboard(days=days))
 
 
 @router.get("/options")

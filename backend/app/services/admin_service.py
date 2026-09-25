@@ -99,7 +99,7 @@ class AdminService:
     # ---------- 工作台 ----------
 
     @staticmethod
-    def dashboard() -> dict:
+    def dashboard(days: int = 14) -> dict:
         """管理员工作台总览：平台计数 + 角色分布 + 治理概览 + 系统状态 + 最近活动。
 
         平台图数据（知识点 / 关系）复用 DashboardService.get_stats(None)——
@@ -142,7 +142,7 @@ class AdminService:
             "category_distribution": graph_stats.get("category_distribution", {}),
             "relation_distribution": graph_stats.get("relation_distribution", {}),
             # 平台趋势：按天真实聚合各表 created_at（有几天数据就显示几天，不做外推）
-            "trend": sql_db.admin_platform_trend(14),
+            "trend": sql_db.admin_platform_trend(days),
             "recent_users": sql_db.list_recent_users(8),
             "recent_courses": sql_db.list_recent_courses(8),
             "recent_documents": sql_db.list_recent_documents(8),

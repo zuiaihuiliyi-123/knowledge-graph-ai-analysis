@@ -90,6 +90,7 @@ const form = reactive({ username: '', password: '', role: 'student' })
 const demos = [
   { role: 'teacher', label: '教师 demo_teacher', username: 'demo_teacher', password: 'demo123456' },
   { role: 'student', label: '学生 demo_student', username: 'demo_student', password: 'demo123456' },
+  { role: 'admin', label: '管理员 demo_admin', username: 'demo_admin', password: 'demo123456' },
 ]
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],

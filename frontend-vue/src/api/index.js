@@ -268,7 +268,7 @@ export const api = {
 
   // ---- 管理员端（对齐后端 /api/v1/admin/*；后端每个端点都挂 require_admin） ----
   /** 工作台总览：平台计数 / 角色分布 / 治理概览 / 最近活动 */
-  adminDashboard: () => request.get('/api/v1/admin/dashboard'),
+  adminDashboard: (params = {}) => request.get('/api/v1/admin/dashboard', { params }),
   /** 筛选下拉可选项（教师列表 + 全平台课程） */
   adminOptions: () => request.get('/api/v1/admin/options'),
 

@@ -6,31 +6,18 @@
       </template>
     </PageHeader>
 
-    <!-- 平台规模 -->
-    <el-row :gutter="14" class="tile-row">
-      <el-col v-for="t in tiles" :key="t.label" :xs="12" :sm="12" :md="8" :lg="6">
-        <MetricTile
-          :label="t.label"
-          :value="t.value"
-          :icon="t.icon"
-          :tone="t.tone"
-          :hint="t.hint"
-        />
-      </el-col>
-    </el-row>
-
     <!-- 用户概览 + 治理概览 -->
     <el-row :gutter="14" class="block-row">
-      <el-col :xs="24" :lg="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="page-card" shadow="never">
           <template #header>
             <div class="card-head">
-              <span>用户概览</span>
+              <span>用户概览</span><span class="head-actions">
               <span class="stats-text">
                 共 {{ fmt(counts.user_count) }} 人 · 启用 {{ fmt(counts.active_user_count) }} ·
                 禁用 {{ fmt(counts.disabled_user_count) }}
               </span>
-            </div>
+            <el-button class="head-jump" text type="primary" @click="router.push('/admin/users')">用户管理<el-icon><ArrowRight /></el-icon></el-button></span></div>
           </template>
           <div class="role-list">
             <div v-for="r in roles" :key="r.role" class="role-item">
@@ -53,13 +40,13 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :lg="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="page-card" shadow="never">
           <template #header>
             <div class="card-head">
-              <span>课程与治理概览</span>
-              <span class="stats-text">共 {{ fmt(counts.course_count) }} 门</span>
-            </div>
+              <span>课程与治理概览</span><span class="head-actions">
+              <span class="stats-text">共 {{ fmt(counts.course_count) }} 门 · 在读成员 {{ fmt(counts.member_count) }} 人</span>
+            <el-button class="head-jump" text type="primary" @click="router.push('/admin/courses')">课程管理<el-icon><ArrowRight /></el-icon></el-button><el-button class="head-jump" text type="primary" @click="router.push('/admin/governance')">课程治理<el-icon><ArrowRight /></el-icon></el-button></span></div>
           </template>
           <div class="gov-grid">
             <div class="gov-item">
@@ -88,10 +75,6 @@
               <div class="gov-value">{{ fmt(courseStatus.visible) }}</div>
               <div class="gov-label">学生可见</div>
             </div>
-            <div class="gov-item">
-              <div class="gov-value">{{ fmt(counts.member_count) }}</div>
-              <div class="gov-label">在读成员</div>
-            </div>
           </div>
           <el-divider content-position="left">最近创建课程</el-divider>
           <div v-if="recentCourses.length" class="mini-list">
@@ -111,20 +94,24 @@
 
     <!-- 平台趋势（真实 created_at 聚合）+ 资源状态 -->
     <el-row :gutter="14" class="block-row">
-      <el-col :xs="24" :lg="14">
-        <el-card class="page-card" shadow="never">
+      <el-col :xs="24" :sm="24" :md="12">
+        <el-card class="page-card trend-card" shadow="never">
           <template #header>
             <div class="card-head">
-              <span>平台趋势</span>
-              <span class="stats-text">近 14 天新增（按创建时间真实统计）</span>
-            </div>
+              <span>平台趋势</span><span class="head-actions">
+              <span class="stats-text">近 14 天</span>
+              <el-radio-group v-model="trendView" size="small">
+                <el-radio-button value="chart">图表</el-radio-button>
+                <el-radio-button value="list">列表</el-radio-button>
+              </el-radio-group>
+              <el-button class="head-jump" text type="primary" @click="router.push('/admin/audit-logs')">审计日志<el-icon><ArrowRight /></el-icon></el-button></span></div>
           </template>
           <div class="trend-legend">
             <span class="lg-dot users" />新增用户
             <span class="lg-dot courses" />新增课程
             <span class="lg-dot documents" />新增文档
           </div>
-          <div class="trend-chart">
+          <div v-if="trendView === 'chart'" class="trend-chart">
             <div v-for="d in trend" :key="d.date" class="trend-col" :title="trendTip(d)">
               <div class="trend-bars">
                 <i class="bar users" :style="{ height: barHeight(d.users) }" />
@@ -134,19 +121,32 @@
               <div class="trend-day">{{ d.date.slice(5) }}</div>
             </div>
           </div>
+          <el-table
+            v-else
+            :data="trend"
+            size="small"
+            max-height="360"
+            class="trend-table"
+            :default-sort="{ prop: 'date', order: 'descending' }"
+          >
+            <el-table-column prop="date" label="日期" width="130" sortable />
+            <el-table-column prop="users" label="新增用户" align="center" sortable />
+            <el-table-column prop="courses" label="新增课程" align="center" sortable />
+            <el-table-column prop="documents" label="新增文档" align="center" sortable />
+          </el-table>
           <div v-if="trendTotal === 0" class="empty-line">
             近 14 天没有新增用户 / 课程 / 文档（这 14 天确实是 0，不是统计失败）
           </div>
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :lg="10">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card class="page-card" shadow="never">
           <template #header>
             <div class="card-head">
-              <span>资源与抽取</span>
+              <span>资源 · 图谱 · 题库</span><span class="head-actions">
               <span class="stats-text">文档 {{ fmt(counts.document_count) }} 份</span>
-            </div>
+            <el-button class="head-jump" text type="primary" @click="router.push('/admin/resources')">资源管理<el-icon><ArrowRight /></el-icon></el-button></span></div>
           </template>
           <div class="extract-grid">
             <div class="extract-item">
@@ -160,6 +160,21 @@
             <div class="extract-item">
               <div class="gov-value red">{{ fmt(extraction.failed) }}</div>
               <div class="gov-label">抽取失败</div>
+            </div>
+          </div>
+          <el-divider content-position="left">知识图谱 · 题库</el-divider>
+          <div class="extract-grid">
+            <div class="extract-item">
+              <div class="gov-value green">{{ graphAvailable ? fmt(counts.node_count) : '—' }}</div>
+              <div class="gov-label">知识节点</div>
+            </div>
+            <div class="extract-item">
+              <div class="gov-value green">{{ graphAvailable ? fmt(counts.edge_count) : '—' }}</div>
+              <div class="gov-label">知识关系</div>
+            </div>
+            <div class="extract-item">
+              <div class="gov-value">{{ fmt(counts.question_count) }}</div>
+              <div class="gov-label">题目总数</div>
             </div>
           </div>
           <el-divider content-position="left">最近上传文档</el-divider>
@@ -215,14 +230,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  User, UserFilled, Reading, Document, Share, DataAnalysis, Notebook,
+  ArrowRight,
 } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
-import MetricTile from '../../components/admin/MetricTile.vue'
 import { api } from '../../api'
 
 const router = useRouter()
@@ -235,6 +249,8 @@ const EMPTY = {
 }
 const data = ref({ ...EMPTY })
 const components = ref([])
+const trendView = ref(localStorage.getItem('admin-trend-view') || 'chart')
+watch(trendView, (v) => localStorage.setItem('admin-trend-view', v))
 
 const counts = computed(() => data.value.counts || {})
 const roles = computed(() => data.value.role_distribution || [])
@@ -255,30 +271,6 @@ function roleTagType(r) {
 }
 
 const graphAvailable = computed(() => !!data.value.graph_available)
-
-const tiles = computed(() => [
-  { label: '用户总数', value: counts.value.user_count, icon: User, tone: 'blue' },
-  { label: '教师', value: counts.value.teacher_count, icon: UserFilled, tone: 'amber' },
-  { label: '学生', value: counts.value.student_count, icon: User, tone: 'green' },
-  { label: '管理员', value: counts.value.admin_count, icon: UserFilled, tone: 'violet' },
-  { label: '课程总数', value: counts.value.course_count, icon: Reading, tone: 'blue' },
-  { label: '文档总数', value: counts.value.document_count, icon: Document, tone: 'violet' },
-  {
-    label: '知识节点数',
-    value: graphAvailable.value ? counts.value.node_count : null,
-    icon: Share,
-    tone: 'green',
-    hint: graphAvailable.value ? '' : 'Neo4j 不可用，无法统计',
-  },
-  {
-    label: '知识关系数',
-    value: graphAvailable.value ? counts.value.edge_count : null,
-    icon: DataAnalysis,
-    tone: 'amber',
-    hint: graphAvailable.value ? '' : 'Neo4j 不可用，无法统计',
-  },
-  { label: '题目总数', value: counts.value.question_count, icon: Notebook, tone: 'slate' },
-])
 
 const maxRole = computed(() => Math.max(1, ...roles.value.map((r) => r.count || 0)))
 function roleWidth(n) {
@@ -349,16 +341,84 @@ onMounted(load)
 </script>
 
 <style scoped>
-.tile-row { margin-bottom: 14px; }
-.tile-row .el-col { margin-bottom: 14px; }
-.block-row .el-col { margin-bottom: 16px; }
+.tile-row { margin-bottom: 0; }
+.tile-row .el-col { margin-bottom: 14px; display: flex; }
+.tile-row .el-col > * { width: 100%; }
+.block-row { margin-bottom: 0; }
+.block-row .el-col { margin-bottom: 16px; display: flex; }
+.block-row .el-col > .page-card { width: 100%; height: 100%; margin-bottom: 0; box-sizing: border-box; }
 
 .card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   font-weight: 600;
+  flex-wrap: nowrap;
+  min-width: 0;
+  min-height: 22px;
+}
+
+.card-head > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.page-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-text {
+  white-space: nowrap;
+}
+.head-jump {
+  height: auto;
+  padding: 0 !important;
+  font-weight: 500;
+}
+.head-jump .el-icon {
+  margin-left: 2px;
+}
+
+.ov-section {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 2px 0 12px;
+}
+.ov-section-title {
+  position: relative;
+  padding-left: 11px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.ov-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 15px;
+  border-radius: 2px;
+  transform: translateY(-50%);
+  background: var(--gradient-brand);
+}
+.ov-section-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 /* ---- 角色分布 ---- */
@@ -458,6 +518,9 @@ onMounted(load)
 }
 
 /* ---- 趋势 ---- */
+.trend-card { display: flex; flex-direction: column; }
+.trend-card :deep(.el-card__body) { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.trend-table { flex: 1; }
 .trend-legend {
   display: flex;
   align-items: center;
@@ -476,7 +539,8 @@ onMounted(load)
   display: flex;
   align-items: flex-end;
   gap: 4px;
-  height: 132px;
+  flex: none;
+  height: 180px;
   padding-top: 6px;
 }
 .trend-col {
@@ -496,17 +560,18 @@ onMounted(load)
   gap: 2px;
 }
 .bar {
-  width: 4px;
-  border-radius: 2px 2px 0 0;
+  flex: 1 1 0;
+  max-width: 14px;
+  border-radius: 4px 4px 0 0;
   transition: height .4s cubic-bezier(.22,.8,.36,1);
   min-height: 0;
 }
 .trend-day {
   margin-top: 6px;
-  font-size: 10px;
-  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
   white-space: nowrap;
-  transform: scale(.92);
 }
 
 /* ---- 系统状态 ---- */

@@ -39,6 +39,14 @@
               <div class="ov-title">学习总览</div>
               <div class="ov-sub">欢迎回来，{{ store.displayName }}，继续你的学习</div>
             </div>
+            <div v-if="ctxKey" class="ov-hero-actions">
+              <el-button type="primary" round class="ov-cta" @click="overviewContinue">
+                <el-icon><Reading /></el-icon><span>继续学习</span>
+              </el-button>
+              <el-button round class="ov-cta" @click="overviewGoPath">
+                <el-icon><Guide /></el-icon><span>学习路径</span>
+              </el-button>
+            </div>
           </div>
         </el-card>
 
@@ -46,7 +54,7 @@
         <el-card v-if="!ctxKey" class="page-card welcome-card">
           <div class="welcome-head">
             <div class="welcome-title">欢迎回来，{{ store.displayName }}</div>
-            <div class="welcome-sub">选择课程和学习资料，立即生成你的学习驾驶舱：掌握情况、继续学习、建议重点一目了然</div>
+            <div class="welcome-sub">选择课程和学习资料，即可查看掌握情况、继续学习与建议重点，一目了然</div>
           </div>
           <CourseDocumentSelector
             :initial-course-id="currentCourseId"
@@ -132,55 +140,6 @@
                   description="暂无当前学习内容，标记已掌握知识点后将生成推荐"
                   :image-size="60"
                 />
-              </el-card>
-            </el-col>
-          </el-row>
-
-          <!-- 第三层：建议重点学习 + 我的收藏 -->
-          <el-row :gutter="16" class="ov-row">
-            <el-col :xs="24" :md="12">
-              <el-card class="page-card ov-card">
-                <template #header>
-                  <div class="ov-card-title"><el-icon><Aim /></el-icon>建议重点学习</div>
-                </template>
-                <div v-if="overviewFocusList.length" class="ov-focus-list">
-                  <div
-                    v-for="f in overviewFocusList"
-                    :key="f.kpId || f.name"
-                    class="ov-focus-item"
-                    @click="overviewViewFocus(f)"
-                  >
-                    <div class="ov-focus-head">
-                      <span class="ov-focus-name">{{ f.name }}</span>
-                      <el-tag size="small" effect="plain" :type="categoryTagType(f.category)">{{ f.category || '知识点' }}</el-tag>
-                      <el-button size="small" text type="primary" class="ov-focus-view" @click.stop="overviewViewFocus(f)">查看</el-button>
-                    </div>
-                    <div v-if="f.reason" class="ov-focus-reason">{{ f.reason }}</div>
-                  </div>
-                </div>
-                <el-empty v-else description="暂无推荐，请先在课程中标记已掌握知识点" :image-size="60" />
-              </el-card>
-            </el-col>
-            <el-col :xs="24" :md="12">
-              <el-card class="page-card ov-card">
-                <template #header>
-                  <div class="ov-card-title">
-                    <el-icon><StarFilled /></el-icon>我的收藏
-                    <span class="ov-card-count">{{ overviewFavIds.length }}</span>
-                  </div>
-                </template>
-                <div v-if="overviewRecentFavs.length" class="ov-fav-list">
-                  <div v-for="n in overviewRecentFavs" :key="n.id" class="ov-fav-item" @click="overviewViewFav(n)">
-                    <el-icon class="ov-fav-star"><StarFilled /></el-icon>
-                    <span class="ov-fav-name">{{ n.label }}</span>
-                    <el-tag size="small" effect="plain" :type="categoryTagType(n.properties?.category)">{{ n.properties?.category || '知识点' }}</el-tag>
-                    <el-icon class="ov-next-jump"><Right /></el-icon>
-                  </div>
-                </div>
-                <el-empty v-else description="还没有收藏知识点" :image-size="60" />
-                <div class="ov-actions">
-                  <el-button @click="overviewGoFavorites">查看收藏夹</el-button>
-                </div>
               </el-card>
             </el-col>
           </el-row>
@@ -520,6 +479,29 @@
           </template>
         </el-card>
 
+        <!-- 建议重点学习：由「学习总览」迁移至此，与学习路径/推荐同归学习空间 -->
+        <el-card class="page-card ov-card">
+                        <template #header>
+                          <div class="ov-card-title"><el-icon><Aim /></el-icon>建议重点学习</div>
+                        </template>
+                        <div v-if="overviewFocusList.length" class="ov-focus-list">
+                          <div
+                            v-for="f in overviewFocusList"
+                            :key="f.kpId || f.name"
+                            class="ov-focus-item"
+                            @click="overviewViewFocus(f)"
+                          >
+                            <div class="ov-focus-head">
+                              <span class="ov-focus-name">{{ f.name }}</span>
+                              <el-tag size="small" effect="plain" :type="categoryTagType(f.category)">{{ f.category || '知识点' }}</el-tag>
+                              <el-button size="small" text type="primary" class="ov-focus-view" @click.stop="overviewViewFocus(f)">查看</el-button>
+                            </div>
+                            <div v-if="f.reason" class="ov-focus-reason">{{ f.reason }}</div>
+                          </div>
+                        </div>
+                        <el-empty v-else description="暂无推荐，请先在课程中标记已掌握知识点" :image-size="60" />
+                      </el-card>
+
         <el-row :gutter="16">
           <!-- 推荐下一步 -->
           <el-col :xs="24" :sm="12">
@@ -661,6 +643,10 @@
               <el-option label="公式" value="公式" />
               <el-option label="方法" value="方法" />
             </el-select>
+            <div class="fav-view-toggle">
+              <button type="button" class="fav-view-btn" :class="{ active: favView === 'grid' }" @click="favView = 'grid'">卡片</button>
+              <button type="button" class="fav-view-btn" :class="{ active: favView === 'list' }" @click="favView = 'list'">列表</button>
+            </div>
           </div>
 
           <div v-if="ctxKey" class="fav-count">
@@ -688,6 +674,20 @@
               description="没有符合条件的收藏"
               :image-size="80"
             />
+            <div v-else-if="favoriteList.length && favView === 'list'" class="fav-rows">
+              <div v-for="node in favoriteList" :key="node.id" class="fav-row">
+                <el-icon class="fav-star"><StarFilled /></el-icon>
+                <span class="fav-row-name">{{ node.label }}</span>
+                <el-tag size="small" effect="plain" :type="categoryTagType(node.properties?.category)">
+                  {{ node.properties?.category || '知识点' }}
+                </el-tag>
+                <span class="fav-row-desc">{{ node.description || '暂无描述' }}</span>
+                <div class="fav-row-actions">
+                  <el-button size="small" type="primary" plain @click="viewFavorite(node)">查看</el-button>
+                  <el-button size="small" type="danger" plain @click="toggleFavoriteSafe(node.id)">取消收藏</el-button>
+                </div>
+              </div>
+            </div>
             <div v-else-if="favoriteList.length" class="fav-grid">
               <div v-for="node in favoriteList" :key="node.id" class="fav-card">
                 <div class="fav-card-head">
@@ -1564,6 +1564,8 @@ function jumpToKp(kp) {
 // ===================== 收藏夹 Tab（学生个人知识点书签） =====================
 const favSearch = ref('')
 const favCategory = ref('')
+const favView = ref(localStorage.getItem('fav-view') || 'grid')
+watch(favView, (v) => { try { localStorage.setItem('fav-view', v) } catch (e) { /* ignore */ } })
 const favNodes = ref([])
 const favLoading = ref(false)
 const favLoaded = ref(false)
@@ -2304,24 +2306,31 @@ function locateKnowledgePoint(node) {
 function neighborsOf(nodeId) {
   const id = String(nodeId)
   const byId = new Map(pathGraphNodes.value.map((n) => [String(n.id), n]))
-  const predecessors = []
-  const successors = []
-  const related = []
+  // 与 GraphCanvas.neighborInfo 保持一致的去重口径：前置/后继优先，跨类不重复
+  const predecessorIds = new Set()
+  const successorIds = new Set()
+  const relatedIds = new Set()
   for (const e of pathGraphEdges.value) {
     const s = String(e.source)
     const t = String(e.target)
     if (e.type === 'PRECEDES') {
-      if (t === id) predecessors.push(byId.get(s))
-      else if (s === id) successors.push(byId.get(t))
+      if (t === id) predecessorIds.add(s)
+      else if (s === id) successorIds.add(t)
     } else {
-      if (s === id) related.push(byId.get(t))
-      else if (t === id) related.push(byId.get(s))
+      if (s === id) relatedIds.add(t)
+      else if (t === id) relatedIds.add(s)
     }
   }
+  for (const x of predecessorIds) relatedIds.delete(x)
+  for (const x of successorIds) relatedIds.delete(x)
+  predecessorIds.delete(id)
+  successorIds.delete(id)
+  relatedIds.delete(id)
+  const map = (set) => [...set].map((nid) => byId.get(nid)).filter(Boolean)
   return {
-    predecessors: predecessors.filter(Boolean),
-    successors: successors.filter(Boolean),
-    related: related.filter(Boolean),
+    predecessors: map(predecessorIds),
+    successors: map(successorIds),
+    related: map(relatedIds),
   }
 }
 
@@ -2425,6 +2434,12 @@ function overviewViewFav(node) {
 function overviewGoFavorites() {
   activeTab.value = 'favorites'
 }
+
+// 页内按钮/操作切换 Tab 时把 Tab 写回 URL，使左侧导航高亮同步跟随。
+// 左侧菜单仍以 URL 为准（路由 watcher）；此处仅在 URL 尚未反映当前 Tab 时补写，避免回声。
+watch(activeTab, (t) => {
+  if (route.query.tab !== t) syncUrlToContext()
+})
 </script>
 
 <style scoped>
@@ -3017,6 +3032,62 @@ function overviewGoFavorites() {
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
+.fav-view-toggle {
+  display: inline-flex;
+  margin-left: auto;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.fav-view-btn {
+  border: none;
+  background: transparent;
+  padding: 7px 16px;
+  font-size: var(--font-size-label);
+  color: var(--color-text-regular);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.fav-view-btn + .fav-view-btn { border-left: 1px solid var(--color-border-light); }
+.fav-view-btn.active { background: var(--color-primary); color: #fff; }
+.fav-view-btn:hover:not(.active) { background: rgba(91, 141, 239, .08); }
+.fav-rows {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+}
+.fav-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background .18s ease;
+}
+.fav-row:last-child { border-bottom: none; }
+.fav-row:hover { background: rgba(91, 141, 239, .05); }
+.fav-row-name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  min-width: 140px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fav-row-desc {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-label);
+  color: var(--color-text-regular);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fav-row-actions { display: flex; gap: var(--space-2); flex-shrink: 0; }
 .fav-empty-title {
   margin: 0 0 var(--space-1);
   font-weight: var(--font-weight-semibold);
@@ -3259,7 +3330,7 @@ function overviewGoFavorites() {
   flex-wrap: wrap;
 }
 
-/* 第三层：重点学习 + 收藏 */
+/* 迁移后的卡片样式：建议重点学习（路径Tab）/ 我的收藏（收藏夹Tab） */
 .ov-focus-list,
 .ov-fav-list {
   display: flex;
@@ -3927,5 +3998,16 @@ function overviewGoFavorites() {
   color: var(--color-text-secondary, #8590a8);
   margin-top: 4px;
   line-height: 1.6;
+}
+/* ---- 学习总览页头：信息横幅化 ---- */
+.ov-hero { align-items: center; gap: 20px; padding: 4px 2px; }
+.ov-hero-left { min-width: 0; }
+.ov-hero-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.ov-hero-actions .ov-cta { height: 40px; padding: 0 18px; font-weight: 600; gap: 5px; }
+.ov-hero-actions .ov-cta .el-icon { margin-right: 2px; }
+@media (max-width: 640px) {
+  .ov-hero { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .ov-hero-actions { width: 100%; }
+  .ov-hero-actions .ov-cta { flex: 1; }
 }
 </style>

@@ -159,7 +159,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
   HomeFilled, DataAnalysis, Reading, User, UserFilled, EditPen, Notebook, Compass, Fold, Expand, SwitchButton, Share,
-  Picture, Lock, CircleClose, Folder, Monitor, Document,
+  Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import AIChatWidget from './components/AIChatWidget.vue'
@@ -202,6 +202,8 @@ const studentMenu = [
     children: [
       { path: '/student?tab=documents', title: '课程文档', icon: Reading },
       { path: '/student?tab=browse', title: '图谱浏览', icon: Compass },
+      { path: '/student?tab=path', title: '学习路径推荐', icon: Guide },
+      { path: '/student?tab=favorites', title: '收藏夹', icon: Star },
       { path: '/student?tab=practice', title: '做题练习', icon: Notebook },
     ],
   },
@@ -249,7 +251,10 @@ const activeMenu = computed(() => {
     return '/teacher'
   }
   if (route.path === '/student') {
-    const map = { documents: '/student?tab=documents', browse: '/student?tab=browse', practice: '/student?tab=practice' }
+    const map = {
+      documents: '/student?tab=documents', browse: '/student?tab=browse', qa: '/student?tab=qa',
+      path: '/student?tab=path', favorites: '/student?tab=favorites', practice: '/student?tab=practice',
+    }
     return map[route.query.tab] || '/student'
   }
   if (route.path === '/profile') {
@@ -509,20 +514,72 @@ onMounted(() => {
   background: rgba(255,255,255,.07);
   color: #fff;
 }
+/* 分组展开态：标题渐变高亮 */
+.sidebar-menu :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
+  background: linear-gradient(90deg, rgba(91,141,239,.18), rgba(106,92,246,.10));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(143,176,255,.14);
+}
 .sidebar-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
   color: #fff;
 }
-.sidebar-menu :deep(.el-sub-menu .el-menu) {
-  background: rgba(255,255,255,.04);
-  border-radius: 11px;
-  padding: 4px 0;
-  margin-bottom: 6px;
+/* 展开箭头：平滑旋转 + 配色 */
+.sidebar-menu :deep(.el-sub-menu__icon-arrow) {
+  right: 14px;
+  width: 13px;
+  height: 13px;
+  color: #8a93b8;
+  transition: transform .25s ease, color .25s ease;
 }
+.sidebar-menu :deep(.el-sub-menu.is-opened > .el-sub-menu__title .el-sub-menu__icon-arrow) {
+  color: #cdd6ff;
+}
+/* 分组内联面板：磨砂底 + 左侧渐变引导线 */
+.sidebar-menu :deep(.el-sub-menu .el-menu) {
+  position: relative;
+  background: rgba(255,255,255,.05);
+  border-radius: 11px;
+  padding: 6px;
+  margin: 0 0 8px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.sidebar-menu :deep(.el-sub-menu .el-menu::before) {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 13px;
+  bottom: 13px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(91,141,239,.55), rgba(106,92,246,.16));
+  pointer-events: none;
+}
+/* 分组子项：内嵌胶囊 */
 .sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item) {
-  padding-left: 40px !important;
+  padding-left: 30px !important;
   height: 38px;
   line-height: 38px;
   font-size: 13px;
+  border-radius: 9px;
+  color: #9aa4c8;
+  margin: 2px 0;
+}
+.sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item .el-icon) {
+  font-size: 15px;
+}
+.sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item:hover) {
+  background: rgba(255,255,255,.09);
+  color: #fff;
+}
+/* 激活子项：渐变胶囊（覆盖全局外溢强调条，避免错位） */
+.sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item.is-active) {
+  background: linear-gradient(90deg, rgba(91,141,239,.95), rgba(106,92,246,.85));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 14px -8px rgba(91,141,239,.85), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item.is-active::before) {
+  display: none;
 }
 .sidebar-menu :deep(.el-menu-item.is-active) {
   color: #fff;
