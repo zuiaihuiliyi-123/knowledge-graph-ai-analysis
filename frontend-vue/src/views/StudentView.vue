@@ -352,7 +352,8 @@
                       <span>AI 服务暂时不可用，请稍后重试</span>
                     </div>
                     <template v-else>
-                      <div class="msg-text">{{ m.content }}</div>
+                      <div v-if="m.role === 'ai'" class="msg-text msg-md" v-html="renderMarkdown(m.content)"></div>
+                      <div v-else class="msg-text">{{ m.content }}</div>
                       <!-- 证据链：回答正文 → 引用来源 → 相关知识点（点击可定位图谱，始终按 kp_id 对齐） -->
                       <div v-if="m.role === 'ai'" class="msg-sources">
                         <div class="sources-title">
@@ -1063,6 +1064,7 @@ import GraphCanvas from '../components/GraphCanvas.vue'
 import CourseDocumentSelector from '../components/CourseDocumentSelector.vue'
 import NodeDetailDrawer from '../components/NodeDetailDrawer.vue'
 import { useAppStore } from '../stores/app'
+import { renderMarkdown } from '../utils/markdown'
 
 const route = useRoute()
 const router = useRouter()
@@ -2514,6 +2516,29 @@ function overviewGoFavorites() {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
 }
+/* AI 回答 Markdown 渲染样式（v-html 注入内容，scoped 下需 :deep） */
+.msg-md {
+  white-space: normal;
+}
+.msg-md :deep(p) { margin: 0 0 8px; }
+.msg-md :deep(p:last-child) { margin-bottom: 0; }
+.msg-md :deep(h1),
+.msg-md :deep(h2),
+.msg-md :deep(h3),
+.msg-md :deep(h4) { margin: 12px 0 6px; font-weight: 600; line-height: 1.4; }
+.msg-md :deep(h1) { font-size: 18px; }
+.msg-md :deep(h2) { font-size: 16px; }
+.msg-md :deep(h3) { font-size: 15px; }
+.msg-md :deep(h4) { font-size: 14px; }
+.msg-md :deep(ul),
+.msg-md :deep(ol) { margin: 6px 0 8px; padding-left: 22px; }
+.msg-md :deep(li) { margin: 2px 0; }
+.msg-md :deep(code) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: #f0f1f5; padding: 1px 5px; border-radius: 4px; }
+.msg-md :deep(pre) { margin: 8px 0; padding: 10px 12px; background: #f5f6fa; border: 1px solid #eceef3; border-radius: 8px; overflow-x: auto; }
+.msg-md :deep(pre code) { background: none; padding: 0; white-space: pre; }
+.msg-md :deep(blockquote) { margin: 8px 0; padding: 4px 10px; border-left: 3px solid var(--color-primary, #7c6cf0); color: #555; }
+.msg-md :deep(a) { color: var(--color-primary, #5b8bf4); text-decoration: underline; }
+.msg-md :deep(hr) { border: none; border-top: 1px solid #e5e5e5; margin: 10px 0; }
 .msg-error {
   display: flex;
   align-items: center;

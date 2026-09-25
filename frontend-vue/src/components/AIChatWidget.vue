@@ -34,7 +34,28 @@
   </div>
 
   <transition name="ai-panel">
-    <div v-show="open" class="ai-widget-panel" :style="panelStyle">
+    <div
+      v-show="open"
+      class="ai-widget-panel"
+      :class="{ 'is-resizing': resizing }"
+      :style="panelStyle"
+    >
+      <!-- 三边缩放手柄：左边缘调宽度 / 上边缘调高度 / 左上角同时调整 -->
+      <div
+        class="ai-resize-edge ai-resize-left"
+        title="拖动调整宽度"
+        @pointerdown="onResizePointerDown($event, 'x')"
+      ></div>
+      <div
+        class="ai-resize-edge ai-resize-top"
+        title="拖动调整高度"
+        @pointerdown="onResizePointerDown($event, 'y')"
+      ></div>
+      <div
+        class="ai-resize-corner"
+        title="拖动调整大小"
+        @pointerdown="onResizePointerDown($event, 'xy')"
+      ></div>
       <!-- 头部：助教身份 + 问候 + 课程上下文 -->
       <div class="ai-panel-header">
         <div class="ai-header-row">
@@ -75,7 +96,8 @@
             <div class="ai-bubble">
               <div v-if="m.error" class="ai-error">⚠️ AI 服务暂时不可用，请稍后重试</div>
               <template v-else>
-                <div class="ai-msg-text">{{ m.content }}</div>
+                <div v-if="m.role === 'ai'" class="ai-msg-text ai-md" v-html="renderMarkdown(m.content)"></div>
+                <div v-else class="ai-msg-text">{{ m.content }}</div>
                 <div v-if="m.role === 'ai' && m.sources && m.sources.length" class="ai-sources">
                   <div class="ai-sources-title">参考来源 · 课程知识库</div>
                   <div v-for="(s, j) in m.sources" :key="s.kp_id || s.name || j" class="ai-source-item">
@@ -118,6 +140,7 @@ import { ref, nextTick, computed } from 'vue'
 import { Close, Top } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { useAppStore } from '../stores/app'
+import { renderMarkdown } from '../utils/markdown'
 
 const store = useAppStore()
 
@@ -176,11 +199,15 @@ const fabStyle = computed(() =>
 )
 /* 面板跟随悬浮球：优先在悬浮球上方展开，横向按悬浮球所在半屏对齐，并钳制在视口内 */
 const panelStyle = computed(() => {
-  if (!fabPos.value) return {}
+  // 拖拽调整尺寸期间：使用临时矩形（保持右下角固定）
+  if (resizeStyle.value) return resizeStyle.value
+  // 用户调整过尺寸则覆盖样式表默认宽高（380 x min(600px, 72vh)）
+  const sizeStyle = panelSize.value ? { width: panelSize.value.w + 'px', height: panelSize.value.h + 'px' } : {}
+  if (!fabPos.value) return sizeStyle
   const w = window.innerWidth
   const h = window.innerHeight
-  const pw = Math.min(380, w - 32)
-  const ph = Math.min(600, Math.round(h * 0.72))
+  const pw = panelSize.value ? panelSize.value.w : Math.min(380, w - 32)
+  const ph = panelSize.value ? panelSize.value.h : Math.min(600, Math.round(h * 0.72))
   const f = fabPos.value
   const left = f.x + FAB_SIZE / 2 < w / 2 ? f.x : f.x + FAB_SIZE - pw
   const top = f.y >= ph + FAB_MARGIN * 2 ? f.y - 10 - ph : f.y + FAB_SIZE + 10
@@ -189,8 +216,78 @@ const panelStyle = computed(() => {
     top: Math.min(Math.max(top, FAB_MARGIN), Math.max(h - ph - FAB_MARGIN, FAB_MARGIN)) + 'px',
     right: 'auto',
     bottom: 'auto',
+    ...sizeStyle,
   }
 })
+
+/* ===== 面板尺寸调整（三边：左 / 上 / 左上角） =====
+ * 左边缘拖宽度、上边缘拖高度、左上角同时拖宽高；向左/上拖放大，向右/下拖缩小，
+ * 过程中保持面板右下角固定；尺寸钳制在 [最小值, 视口-32] 之间并写入 localStorage，刷新后保持。 */
+const SIZE_KEY = 'ai-panel-size'
+const PANEL_MIN_W = 300
+const PANEL_MIN_H = 360
+const panelSize = ref(loadPanelSize())
+const resizing = ref(false)
+const resizeStyle = ref(null)
+let resizeStart = null
+let resizeLastSize = null
+
+function loadPanelSize() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SIZE_KEY) || 'null')
+    if (s && Number.isFinite(s.w) && Number.isFinite(s.h)) return clampPanelSize(s.w, s.h)
+  } catch (e) { /* 忽略损坏的缓存 */ }
+  return null
+}
+function clampPanelSize(w, h) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  return {
+    w: Math.round(Math.min(Math.max(w, PANEL_MIN_W), Math.max(vw - 32, PANEL_MIN_W))),
+    h: Math.round(Math.min(Math.max(h, PANEL_MIN_H), Math.max(vh - 32, PANEL_MIN_H))),
+  }
+}
+function onResizePointerDown(e, dir) {
+  if (e.button !== undefined && e.button !== 0) return
+  e.preventDefault()
+  e.stopPropagation()
+  const panel = e.currentTarget.closest('.ai-widget-panel')
+  if (!panel) return
+  const rect = panel.getBoundingClientRect()
+  resizing.value = true
+  resizeStart = { px: e.clientX, py: e.clientY, w: rect.width, h: rect.height, left: rect.left, top: rect.top, dir: dir || 'xy' }
+  resizeLastSize = null
+  window.addEventListener('pointermove', onResizePointerMove)
+  window.addEventListener('pointerup', onResizePointerUp, { once: true })
+}
+function onResizePointerMove(e) {
+  if (!resizing.value || !resizeStart) return
+  const dir = resizeStart.dir || 'xy'
+  const dw = dir.indexOf('x') !== -1 ? resizeStart.px - e.clientX : 0
+  const dh = dir.indexOf('y') !== -1 ? resizeStart.py - e.clientY : 0
+  const next = clampPanelSize(resizeStart.w + dw, resizeStart.h + dh)
+  resizeLastSize = next
+  resizeStyle.value = {
+    left: resizeStart.left + (resizeStart.w - next.w) + 'px',
+    top: resizeStart.top + (resizeStart.h - next.h) + 'px',
+    width: next.w + 'px',
+    height: next.h + 'px',
+    right: 'auto',
+    bottom: 'auto',
+  }
+}
+function onResizePointerUp() {
+  window.removeEventListener('pointermove', onResizePointerMove)
+  resizing.value = false
+  if (resizeLastSize) {
+    panelSize.value = resizeLastSize
+    try { localStorage.setItem(SIZE_KEY, JSON.stringify(resizeLastSize)) } catch (e) { /* 忽略 */ }
+  }
+  resizeStyle.value = null
+  resizeStart = null
+  resizeLastSize = null
+}
+
 function onFabPointerDown(e) {
   if (e.button !== undefined && e.button !== 0) return
   dragging.value = true
@@ -525,6 +622,29 @@ function scrollToBottom() {
 .ai-msg-text {
   white-space: pre-wrap;
 }
+/* AI 回答 Markdown 渲染样式（v-html 注入内容，scoped 下需 :deep） */
+.ai-md {
+  white-space: normal;
+}
+.ai-md :deep(p) { margin: 0 0 8px; }
+.ai-md :deep(p:last-child) { margin-bottom: 0; }
+.ai-md :deep(h1),
+.ai-md :deep(h2),
+.ai-md :deep(h3),
+.ai-md :deep(h4) { margin: 12px 0 6px; font-weight: 600; line-height: 1.4; }
+.ai-md :deep(h1) { font-size: 17px; }
+.ai-md :deep(h2) { font-size: 16px; }
+.ai-md :deep(h3) { font-size: 15px; }
+.ai-md :deep(h4) { font-size: 14px; }
+.ai-md :deep(ul),
+.ai-md :deep(ol) { margin: 6px 0 8px; padding-left: 20px; }
+.ai-md :deep(li) { margin: 2px 0; }
+.ai-md :deep(code) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; background: rgba(255, 255, 255, 0.12); padding: 1px 5px; border-radius: 4px; }
+.ai-md :deep(pre) { margin: 8px 0; padding: 10px 12px; background: rgba(0, 0, 0, 0.25); border-radius: 8px; overflow-x: auto; }
+.ai-md :deep(pre code) { background: none; padding: 0; white-space: pre; }
+.ai-md :deep(blockquote) { margin: 8px 0; padding: 4px 10px; border-left: 3px solid rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.85); }
+.ai-md :deep(a) { color: #8ab4ff; text-decoration: underline; }
+.ai-md :deep(hr) { border: none; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 10px 0; }
 .ai-error {
   color: #f0b8c4;
 }
@@ -632,6 +752,62 @@ function scrollToBottom() {
 .ai-send:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* ===== 三边缩放手柄（左 / 上 / 左上角） ===== */
+.ai-resize-edge {
+  position: absolute;
+  z-index: 5;
+  touch-action: none;
+}
+.ai-resize-left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.ai-resize-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+/* 边缘悬停给出高亮提示条 */
+.ai-resize-left:hover { box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.45); }
+.ai-resize-top:hover { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45); }
+.ai-resize-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 6;
+  touch-action: none;
+}
+.ai-resize-corner::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-left-radius: 3px;
+  transition: border-color 0.15s ease;
+}
+.ai-resize-corner:hover::before {
+  border-color: rgba(255, 255, 255, 0.8);
+}
+/* 拖拽调整期间禁止选中文字 / 滚动消息，避免干扰跟手性 */
+.ai-widget-panel.is-resizing {
+  user-select: none;
+}
+.ai-widget-panel.is-resizing .ai-messages {
+  pointer-events: none;
 }
 
 /* 小屏适配 */
