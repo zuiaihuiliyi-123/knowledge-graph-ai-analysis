@@ -5,7 +5,7 @@
       <div class="hero-content">
         <div class="hero-left">
           <div class="hero-eyebrow">Knowledge Graph · 教学数据驾驶舱</div>
-          <h2 class="hero-title">{{ greeting }}，{{ store.realName || store.username }}</h2>
+          <h2 class="hero-title">{{ greeting }}，{{ store.displayName }}</h2>
           <p class="hero-sub">{{ todayText }} · 课程建设、知识图谱与教学进展，一屏尽览</p>
         </div>
         <div class="hero-metrics">

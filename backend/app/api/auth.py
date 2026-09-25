@@ -8,7 +8,7 @@
 import datetime
 
 import jwt
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from ..core.config import settings
@@ -16,6 +16,7 @@ from ..core.dependencies import get_current_user
 from ..core.response import success, error
 from ..core.security import hash_password, verify_password
 from ..core.sql_database import sql_db
+from ..services.admin_service import AdminService
 from ..services.profile_service import ProfileService
 
 router = APIRouter(prefix="/api/auth", tags=["用户认证"])
@@ -79,11 +80,20 @@ def register(user: UserRegister):
 
 
 @router.post("/login")
-def login(user: UserLogin):
+def login(user: UserLogin, request: Request):
     """用户登录，成功返回 JWT"""
     username = (user.username or "").strip()
     db_user = sql_db.get_user_by_username(username)
     if not db_user or not verify_password(user.password, db_user["password_hash"]):
+        # 管理员账号的失败登录是审计关注点（暴力破解/异常来源），记一条失败记录。
+        # 只对「用户名确实存在且是管理员」的情况记录：否则任何随机用户名都能往审计表里灌数据。
+        # 注意不能记录密码，也不回显"该用户名存在"这类信息（响应与原来完全一致）。
+        if db_user and db_user.get("role") == "admin":
+            AdminService.write_audit(
+                {"user_id": db_user["user_id"], "username": db_user["username"], "role": "admin"},
+                "admin.login", "user", db_user["user_id"], result="failure",
+                detail="管理员登录失败：用户名或密码错误", request=request,
+            )
         return error(2002, "用户名或密码错误")
     # 已注销（软停用）账号禁止登录
     if not db_user.get("is_active", 1):
@@ -94,6 +104,15 @@ def login(user: UserLogin):
     # 纯新增字段：JWT 载荷本身不变（老 token 继续可用），前端按 key 读取，
     # 新增键不会影响既有逻辑（kg_user 的消费方见 utils/userRole.js 等）。
     profile = sql_db.get_user_profile(db_user["user_id"]) or {}
+
+    # 管理员登录写入审计日志（纯旁路：写失败不影响登录，见 AdminService.write_audit）
+    if db_user.get("role") == "admin":
+        AdminService.write_audit(
+            {"user_id": db_user["user_id"], "username": db_user["username"], "role": "admin"},
+            "admin.login", "user", db_user["user_id"],
+            detail="管理员登录成功", request=request,
+        )
+
     return success({
         "access_token": _issue_token(db_user),
         "token_type": "bearer",
@@ -106,6 +125,10 @@ def login(user: UserLogin):
             "real_name": profile.get("real_name"),
             "avatar_url": ProfileService.avatar_url_for(
                 db_user["user_id"], profile.get("avatar_url")),
+            # 首次登录必须改密（引导账号的随机密码 / 管理员重置过的密码）：
+            # 前端守卫据此把人挡在改密页，未改密前进不了任何业务页面。
+            # 需要重新登录才生效的字段，故意不放进 JWT 载荷，避免 token 与库中状态不一致。
+            "must_change_password": int(db_user.get("must_change_password") or 0),
         },
     })
 
@@ -129,6 +152,9 @@ def change_password(body: ChangePassword, current_user: dict = Depends(get_curre
         return error(1001, "新密码不能与原密码相同")
 
     sql_db.update_password(current_user["user_id"], hash_password(new_password))
+    # 用户自己完成了改密：清掉「首次登录必须改密」标记，此后可以正常进入各业务页面。
+    # 只有此处（用户本人持旧密码主动修改）能清除；管理员重置密码时会重新置 1。
+    sql_db.set_must_change_password(current_user["user_id"], False)
     return success({"user_id": current_user["user_id"]})
 
 

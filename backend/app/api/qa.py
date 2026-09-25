@@ -42,15 +42,18 @@ async def ask_question(request: QuestionRequest, current_user: dict = Depends(ge
         if not perm["ok"]:
             return error(perm["code"], perm["message"])
 
-    answer = await qa_service.ask(request.question, request.course_id, request.document_id,
-                                  allowed_ids=allowed_ids)
-
-    # 获取引用来源（结构化：kp_id/name/category/description，供前端"证据链"展示）
-    sources = qa_service.search_related_nodes(request.question, request.course_id,
-                                              request.document_id, allowed_ids=allowed_ids)
+    # 一次调用同时拿到答案与引用来源：检索在 ask_with_sources 内部只跑一次。
+    # 旧写法先 ask() 再单独 search_related_nodes()，同一次提问检索两遍
+    # （外部 embedding 调用、Neo4j 查询、向量反序列化全部翻倍），
+    # 且 sources 来自第二遍，可能与喂给 LLM 的上下文不一致。
+    # 阶段 G（async 修复）：该方法的同步体已在 qa_service 内部走 asyncio.to_thread，
+    # 故此处 await 它就等于把 embedding + SQLite + Neo4j + LLM 全部移出事件循环。
+    result = await qa_service.ask_with_sources(request.question, request.course_id,
+                                               request.document_id, allowed_ids=allowed_ids)
 
     return success({
         "question": request.question,
-        "answer": answer,
-        "sources": sources,
+        "answer": result["answer"],
+        # 结构化引用来源（kp_id/name/category/description），供前端"证据链"展示
+        "sources": result["sources"],
     })

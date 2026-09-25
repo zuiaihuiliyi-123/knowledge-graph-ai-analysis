@@ -3,7 +3,12 @@
 
 检索链路：问题 embedding → 与课程知识点向量做余弦相似度 → top_k 上下文 → LLM 生成。
 未配置 embedding key 或向量检索失败时，自动退回关键词检索（保证功能可用）。
+
+阶段 G（async 修复）：本模块的检索与 LLM 调用都是**同步阻塞**的
+（openai 同步客户端 / Neo4j 同步驱动 / SQLite），故 `ask()` 把整段逻辑放进
+`asyncio.to_thread` 执行，避免阻塞事件循环（见 `ask()` 的说明）。
 """
+import asyncio
 import logging
 import math
 from typing import List
@@ -12,8 +17,9 @@ from openai import OpenAI
 
 from ..core.config import settings
 from ..core.database import db
-from ..core.sql_database import sql_db
+from ..core.metrics import track_llm_call
 from .embedding import EmbeddingClient, KnowledgeEmbedder
+from .vector_index import vector_index
 
 _logger = logging.getLogger(__name__)
 
@@ -52,12 +58,16 @@ def _coerce_document_id(document_id):
         return None
 
 
-def _cosine(a: List[float], b: List[float]) -> float:
-    """余弦相似度（纯 Python 实现，避免引入 numpy 重依赖）"""
+def _cosine(a: List[float], b: List[float], norm_a: float = None) -> float:
+    """余弦相似度（纯 Python 实现，避免引入 numpy 重依赖）
+
+    norm_a：a 的 L2 范数。批量比较（如对一个查询向量排序整个索引）时 a 固定不变，
+    传入可省掉每次都重算 a 的范数——1024 维下这是相当可观的一笔重复计算。
+    """
     if not a or not b or len(a) != len(b):
         return 0.0
     dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a))
+    na = math.sqrt(sum(x * x for x in a)) if norm_a is None else norm_a
     nb = math.sqrt(sum(y * y for y in b))
     if na == 0.0 or nb == 0.0:
         return 0.0
@@ -103,9 +113,6 @@ class QAService:
             return []  # 缺少文档作用域，退回关键词
         try:
             self.indexer.ensure_index(cid, did)
-            rows = sql_db.get_embeddings_by_document(cid, did)
-            if not rows:
-                return []
             q_vec = self.embedder.embed([question])[0]
         except Exception as e:
             # embedding 不可用（未配置 key / 网络异常等）退回关键词检索。
@@ -114,10 +121,14 @@ class QAService:
             _logger.warning("向量检索不可用，本次退回关键词检索: %s", e, exc_info=True)
             return []
 
-        ranked = sorted(rows, key=lambda r: -_cosine(q_vec, r["embedding"]))[:top_k]
+        # L2 阶段 E：检索改走 VectorIndex（numpy 矩阵 + 进程内缓存），
+        # 不再每次「全量读库 + 逐条纯 Python 余弦」；无向量时返回空 → 上层退回关键词检索
+        ranked = vector_index.kp_search(cid, did, q_vec, top_k)
+        if not ranked:
+            return []
 
         # 按 kp_id 回查节点元数据，拼接上下文（限定文档）
-        kp_ids = [r["kp_id"] for r in ranked]
+        kp_ids = [kp_id for kp_id, _ in ranked]
         nodes = {}
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
@@ -129,7 +140,7 @@ class QAService:
             if n:
                 nodes[n.get("kp_id")] = n
 
-        return [self._node_dict(nodes[r["kp_id"]]) for r in ranked if r["kp_id"] in nodes]
+        return [self._node_dict(nodes[kp_id]) for kp_id, _ in ranked if kp_id in nodes]
 
     # ---------- 关键词检索（兜底） ----------
 
@@ -222,26 +233,61 @@ class QAService:
         return [_format_node(n) for n in self.search_related_nodes(
             question, course_id, document_id, top_k, allowed_ids)]
 
-    async def ask(self, question: str, course_id=None, document_id=None,
-                  allowed_ids: List[int] = None) -> str:
-        """回答问题（RAG 模式）"""
+    async def ask_with_sources(self, question: str, course_id=None, document_id=None,
+                               allowed_ids: List[int] = None) -> dict:
+        """回答问题（RAG 模式），返回 {answer, sources}。
+
+        检索只跑一次，sources 就是本次真正喂给 LLM 的上下文——两者必然一致。
+        需要引用来源时必须用这个方法，而不是 ask() 之后再自行检索一遍：那会让同一次
+        提问把整条检索链路跑两遍（含两次外部 embedding 调用），且第二遍的结果可能
+        与喂给 LLM 的上下文不同（例如期间索引被重建）。
+
+        阶段 G（async 修复）——**为什么必须放线程池**：
+
+        这条链路整段都是同步阻塞的：
+          · `search_related_knowledge` → embedder 的 HTTP 调用、`VectorIndex` 的 SQLite 读、
+            Neo4j 同步驱动查询；
+          · `client.chat.completions.create` 是 **openai 同步客户端**，`QA_TIMEOUT` 量级是秒。
+        在 `async def` 里直接跑会**占住整个事件循环**：一个学生提问期间，
+        同进程内**所有**其他请求（包括别人的提问）都只能排队 —— 并发下体验直接塌掉。
+
+        故把整段同步逻辑交给 `asyncio.to_thread`。这与项目内既有做法一致
+        （`knowledge_extractor._extract_single` / `relation_completion._call_llm` 都这样处理），
+        且**不改动任何业务逻辑与异常处理**（原 try/except 原样保留在同步实现里）。
+        """
+        return await asyncio.to_thread(self._ask_blocking, question, course_id,
+                                       document_id, allowed_ids)
+
+    def _ask_blocking(self, question: str, course_id=None, document_id=None,
+                      allowed_ids: List[int] = None) -> dict:
+        """`ask_with_sources()` 的同步实现体。**运行在线程池中，禁止在此使用 asyncio API。**"""
         # 1. 检索相关知识（向量优先，文档作用域）
-        contexts = self.search_related_knowledge(question, course_id, document_id,
-                                                 allowed_ids=allowed_ids)
+        # 结构化节点既作喂给 LLM 的上下文，也作返回前端的引用来源——同一份数据，必然一致
+        sources = self.search_related_nodes(question, course_id, document_id,
+                                            allowed_ids=allowed_ids)
+        contexts = [_format_node(n) for n in sources]
         context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
 
         # 2. 调用 LLM 生成回答
         try:
-            response = self.client.chat.completions.create(
-                model=settings.LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": QA_SYSTEM_PROMPT.format(context=context_text)},
-                    {"role": "user", "content": question},
-                ],
-                temperature=0.3,
-                max_tokens=1024,
-                timeout=settings.QA_TIMEOUT,
-            )
-            return response.choices[0].message.content.strip()
+            with track_llm_call("qa"):
+                response = self.client.chat.completions.create(
+                    model=settings.LLM_MODEL,
+                    messages=[
+                        {"role": "system", "content": QA_SYSTEM_PROMPT.format(context=context_text)},
+                        {"role": "user", "content": question},
+                    ],
+                    temperature=0.3,
+                    max_tokens=1024,
+                    timeout=settings.QA_TIMEOUT,
+                )
+            answer = response.choices[0].message.content.strip()
         except Exception as e:
-            return f"抱歉，问答服务暂时不可用：{str(e)}"
+            answer = f"抱歉，问答服务暂时不可用：{str(e)}"
+        return {"answer": answer, "sources": sources}
+
+    async def ask(self, question: str, course_id=None, document_id=None,
+                  allowed_ids: List[int] = None) -> str:
+        """回答问题（RAG 模式），仅返回答案文本；需要引用来源请用 ask_with_sources"""
+        result = await self.ask_with_sources(question, course_id, document_id, allowed_ids)
+        return result["answer"]

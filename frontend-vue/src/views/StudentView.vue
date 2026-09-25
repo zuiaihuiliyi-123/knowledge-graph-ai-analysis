@@ -37,7 +37,7 @@
           <div class="ov-hero">
             <div class="ov-hero-left">
               <div class="ov-title">学习总览</div>
-              <div class="ov-sub">欢迎回来，{{ store.username }}，继续你的学习</div>
+              <div class="ov-sub">欢迎回来，{{ store.displayName }}，继续你的学习</div>
             </div>
           </div>
         </el-card>
@@ -45,7 +45,7 @@
         <!-- 未选择课程：内联课程/资料选择面板，减少空白 -->
         <el-card v-if="!ctxKey" class="page-card welcome-card">
           <div class="welcome-head">
-            <div class="welcome-title">欢迎回来，{{ store.realName || store.username }}</div>
+            <div class="welcome-title">欢迎回来，{{ store.displayName }}</div>
             <div class="welcome-sub">选择课程和学习资料，立即生成你的学习驾驶舱：掌握情况、继续学习、建议重点一目了然</div>
           </div>
           <CourseDocumentSelector

@@ -74,13 +74,17 @@ test('学生：上传头像 → 侧边栏显示头像图片', async ({ page }) =
 
   await page.goto(`${BASE}/profile`)
   await dismissBackendStatus(page)
-  await expect(page.locator('.user-avatar-img')).toBeVisible({ timeout: 15000 })
+  // 侧栏有两个头像位（展开态 / 折叠态，后者 v-show 隐藏），顶栏还有一个，
+  // 因此必须收窄到侧栏再取第一个，否则命中多个元素触发 strict mode 报错
+  await expect(page.locator('.app-sidebar .user-avatar-img').first()).toBeVisible({ timeout: 15000 })
 })
 
 test('回归：侧边栏「退出」按钮仍然可用', async ({ page }) => {
   await registerAndLogin(page, `e2e_prof_s_${RUN}`, 'student')
 
+  // 退出前会弹 ElMessageBox 确认框（handleLogout），必须点「确定」才会真正登出
   await page.getByRole('button', { name: '退出' }).click()
+  await page.locator('.el-message-box').getByRole('button', { name: '确定' }).click()
   await page.waitForURL(/\/login/, { timeout: 20000 })
   const token = await page.evaluate(() => localStorage.getItem('kg_token'))
   expect(token, '退出后应清除 token').toBeFalsy()

@@ -25,6 +25,7 @@ except Exception:
 
 from app.core.database import db
 from app.core.sql_database import sql_db
+from app.services import question_recommender as qr
 from app.services.question_service import PracticeService
 
 COURSE_ID = int(sys.argv[1]) if len(sys.argv) > 1 else 65
@@ -69,7 +70,11 @@ def main():
           all(it.get("reason") and it.get("bucket_label") for it in items))
     check("meta 完整（weights/kp_quota/candidates/graph_available）",
           all(k in meta for k in ("weights", "kp_quota", "candidates", "graph_available")))
-    check("meta.weights 与打分器常量一致（need=0.35）", meta["weights"]["need"] == 0.35,
+    check("meta.weights 与打分器常量逐个一致（含第 7 信号 semantic）",
+          meta["weights"] == {"need": qr.W_NEED, "due": qr.W_DUE, "diff_fit": qr.W_DIFF,
+                              "novelty": qr.W_NOVELTY, "wrong": qr.W_WRONG,
+                              "importance": qr.W_IMPORTANCE, "semantic": qr.W_SEMANTIC}
+          and abs(sum(meta["weights"].values()) - 1.0) < 1e-9,
           str(meta["weights"]))
     check("题目按推荐分数降序",
           all(items[i]["score"] >= items[i + 1]["score"] for i in range(len(items) - 1)))

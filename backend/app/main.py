@@ -1,22 +1,27 @@
 """
 FastAPI 应用入口
 """
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
+from .core import metrics
 from .core.sql_database import sql_db
 from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, documents,
                   learning, dashboard, favorites, teacher,
-                  course_members, invites, profile, questions, practice, grading)
+                  course_members, invites, profile, questions, practice, grading,
+                  admin)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 启动时初始化关系型数据库表结构（SQLite，幂等），并确保存在默认教师账号
+    # 启动时初始化关系型数据库表结构（SQLite，幂等），并确保存在默认教师/管理员账号。
+    # 两者都是「不存在才创建」，重复启动不会覆盖已有账号的密码或角色。
     sql_db.init_tables()
     sql_db.ensure_default_teacher()
+    sql_db.ensure_default_admin()
     yield
 
 
@@ -26,6 +31,26 @@ app = FastAPI(
     description="基于AIGC的课程知识图谱智能构建与学习系统",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def collect_request_metrics(request: Request, call_next):
+    """采集真实请求量与响应耗时（供管理员端「系统监控」展示）。
+
+    只做内存计数，不写库、不落日志：监控数据本身不应该成为新的故障点或性能负担。
+    计数在响应返回后追加，异常路径也计入（errors），故 5xx 不会被漏掉。
+    """
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        metrics.record_request(request.url.path, 500,
+                               (time.perf_counter() - started) * 1000)
+        raise
+    metrics.record_request(request.url.path, response.status_code,
+                           (time.perf_counter() - started) * 1000)
+    return response
+
 
 # CORS 配置（允许前端跨域访问）
 app.add_middleware(
@@ -57,6 +82,8 @@ app.include_router(questions.router)
 app.include_router(practice.router)
 # 题库 Scope B：主观题（填空/解答）教师批改
 app.include_router(grading.router)
+# 管理员端：平台治理 / 用户管理 / 课程治理 / 资源管理 / 系统监控 / 审计日志
+app.include_router(admin.router)
 
 
 @app.get("/")

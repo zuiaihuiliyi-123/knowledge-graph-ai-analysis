@@ -46,6 +46,20 @@ def table_counts(db):
     return {t: db._query_one(f"SELECT count(*) AS c FROM {t}")["c"] for t in PROTECTED_TABLES}
 
 
+def teacher_member_stats(db):
+    """approved 教师成员统计，返回 (总行数, 去重后的课程数)。
+
+    「一门课恰好一名教师」是旧假设——「协作教师可管理题库」上线后，一门课允许有
+    多名 approved 教师（本机 course 63/64/66/67 各有一名协作教师，user=109），
+    此时行数必然大于课程数。故「回填是否覆盖全部课程」只能用去重课程数来断言。
+    """
+    where = "WHERE role = 'teacher' AND status = 'approved'"
+    total = db._query_one(f"SELECT count(*) AS c FROM t_course_member {where}")["c"]
+    courses = db._query_one(
+        f"SELECT count(DISTINCT course_id) AS c FROM t_course_member {where}")["c"]
+    return total, courses
+
+
 def main():
     live = settings.SQLITE_DB_PATH
     live_md5_before = md5(live)
@@ -79,6 +93,8 @@ def main():
     print("Step 1: 连续执行 init_tables() 三次（第 2、3 次是幂等性测试）")
     dbo.init_tables()
     after_first = table_counts(dbo)
+    # 第一次迁移后的教师成员行数：Step 4 的幂等断言以它为基准（后两次不得再插入）
+    teachers_after_first = teacher_member_stats(dbo)[0]
     dbo.init_tables()
     dbo.init_tables()
     after_third = table_counts(dbo)
@@ -100,11 +116,10 @@ def main():
 
     print("\nStep 3: 老课程回填结果")
     course_cnt = dbo._query_one("SELECT count(*) AS c FROM t_course")["c"]
-    teacher_members = dbo._query_one(
-        "SELECT count(*) AS c FROM t_course_member WHERE role='teacher' AND status='approved'"
-    )["c"]
-    check("每个课程都有 approved teacher 成员", teacher_members == course_cnt,
-          f"{teacher_members}/{course_cnt}")
+    # 断言的意图是「没有课程漏掉教师回填」，故比的是被覆盖的课程数，不是成员行数
+    teacher_total, teacher_covered = teacher_member_stats(dbo)
+    check("每个课程都有 approved teacher 成员", teacher_covered == course_cnt,
+          f"覆盖 {teacher_covered}/{course_cnt} 门课；教师成员共 {teacher_total} 行")
 
     null_codes = dbo._query_one(
         "SELECT count(*) AS c FROM t_course WHERE join_code IS NULL")["c"]
@@ -139,12 +154,13 @@ def main():
     check("t_document.file_path 未被重写（文档未重新关联）", doc_paths_before == doc_paths_after)
 
     # 三次迁移后 t_course_member 不应增长（证明 INSERT OR IGNORE 真正幂等）。
-    # 只统计 role='teacher' 的行：成员表里还会有学生的加入/申请记录（以及历史遗留的
-    # status='removed' 行），拿「成员总行数」跟课程数比较会误判。
-    m1 = dbo._query_one(
-        "SELECT count(*) AS c FROM t_course_member "
-        "WHERE role = 'teacher' AND status = 'approved'")["c"]
-    check("三次迁移后教师成员无重复插入", m1 == course_cnt, f"教师成员 {m1}, 课程 {course_cnt}")
+    # 幂等要证的是「第 2、3 次迁移没有再插入」，故以第 1 次迁移后的行数为基准比较，
+    # 而不是跟课程数比——一门课允许有多名教师（协作教师），两者本就不相等。
+    # 同时只统计 role='teacher'：成员表里还会有学生的加入/申请记录
+    # （以及历史遗留的 status='removed' 行），混进来会误判。
+    m1, _ = teacher_member_stats(dbo)
+    check("三次迁移后教师成员无重复插入", m1 == teachers_after_first,
+          f"第 1 次 {teachers_after_first} 行 -> 第 3 次 {m1} 行")
 
     print("\nStep 5: 线上库必须原封不动")
     live_members_after = (sd.sql_db._query_one(

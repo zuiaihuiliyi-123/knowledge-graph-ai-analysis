@@ -23,6 +23,7 @@ except Exception:
     pass
 
 import app.services.kp_labeler as labeler
+from app.core.config import settings
 from app.core.security import hash_password
 from app.core.sql_database import sql_db
 from app.services.kp_labeler import (
@@ -204,12 +205,18 @@ def main():
 
     original_db = labeler.db
     labeler.db = _BrokenGraph                              # 图谱不可用 → 走缓存
-    dry = label_questions(course_id, document_id=doc_id, only_missing=True, apply=False, top_k=3)
+    # 显式注入「不可用 embedder」：让本脚本**完全离线且与环境无关**——否则配置了
+    # EMBEDDING_API_KEY 的机器会真的去打 embedding 接口（既慢又要花钱），
+    # 且 `embedding_configured` 的取值会随环境漂移（真实向量路由 eval_kp_labeling.py 覆盖）。
+    dry = label_questions(course_id, document_id=doc_id, only_missing=True, apply=False, top_k=3,
+                          embedder=_FakeEmbedder({}, available=False))
     # 断言「dry-run 不写库」必须在 apply 之前取快照（顺序敏感）
     kp_a_after_dry = sql_db.get_question(q_a)["kp_id"]
     applied = label_questions(course_id, document_id=doc_id, only_missing=True,
-                              apply=True, apply_threshold=0.6, top_k=3)
-    allq = label_questions(course_id, document_id=doc_id, only_missing=False, top_k=3)
+                              apply=True, apply_threshold=0.6, top_k=3,
+                              embedder=_FakeEmbedder({}, available=False))
+    allq = label_questions(course_id, document_id=doc_id, only_missing=False, top_k=3,
+                           embedder=_FakeEmbedder({}, available=False))
     labeler.db = original_db
 
     check("批量标注：图谱不可用时降级到本地缓存",
@@ -222,7 +229,9 @@ def main():
           f"kp_a_after_dry={kp_a_after_dry} applied={dry['data']['applied']}")
     check("批量标注：meta 暴露权重与降级标记",
           "weights" in dry["data"]["meta"]
-          and dry["data"]["meta"]["embedding_configured"] is False
+          # 不再硬编码 False：本机若配了 EMBEDDING_API_KEY，向量路本就该是配置好的。
+          # 该断言的原意是「如实暴露降级状态」，故改为与环境实际配置比对。
+          and dry["data"]["meta"]["embedding_configured"] is bool(settings.EMBEDDING_API_KEY)
           and dry["data"]["meta"]["graph_available"] is False, str(dry["data"]["meta"]))
     check("批量标注：无候选的题如实返回空候选",
           any(it["question_id"] == q_b and not it["candidates"] for it in dry["data"]["items"]),
@@ -240,9 +249,59 @@ def main():
     check("文档不存在被拒（2002）",
           QuestionService.auto_label(teacher, course_id, document_id=999999)["code"] == 2002)
 
-    # ---------- 8. 题目向量缓存与清理 ----------
+    # ---------- 8. L2：apply 的多知识点「合并」语义 ----------
+    # 前置：q_a 已由上一段 apply 写入 kp_linear；q_c 手工挂 kp_stack（题干含「线性表」→ 有 kp_linear 候选）
+    labeler.db = _BrokenGraph
+    merged = label_questions(course_id, document_id=doc_id, only_missing=False,
+                             apply=True, apply_threshold=0.6, top_k=3)
+    merged_again = label_questions(course_id, document_id=doc_id, only_missing=False,
+                                   apply=True, apply_threshold=0.6, top_k=3)
+    labeler.db = original_db
+
+    qc_rows = {r["kp_id"]: r for r in sql_db.get_question_kps(q_c)}
+    qc_kps = list(qc_rows)
+    check("L2：apply 把新候选**并入**已有知识点（q_c 得到 kp_linear）",
+          "kp_linear" in qc_rows, str(qc_kps))
+    check("L2：合并保留教师已挂的知识点（kp_stack 仍在）", "kp_stack" in qc_rows, str(qc_kps))
+    check("L2：合并不夺走主知识点（仍为手工指定的 kp_stack）",
+          next((k for k, v in qc_rows.items() if v["is_primary"]), None) == "kp_stack",
+          str({k: v["is_primary"] for k, v in qc_rows.items()}))
+    check("L2：q_c 变成一题多挂（2 个知识点）", len(qc_rows) == 2, str(qc_kps))
+    check("L2：响应返回本次新增的 applied_kp_ids",
+          any(it["question_id"] == q_c and it.get("applied_kp_ids") == ["kp_linear"]
+              for it in merged["data"]["items"]),
+          str([(it["question_id"], it.get("applied_kp_ids"))
+               for it in merged["data"]["items"]])[:200])
+    check("L2：apply_mode=merge，且 applied_kp_count 与实际新增一致",
+          merged["data"].get("apply_mode") == "merge"
+          and merged["data"].get("applied_kp_count") == 1
+          and merged["data"]["applied"] == 1,
+          f"mode={merged['data'].get('apply_mode')} "
+          f"kp_count={merged['data'].get('applied_kp_count')} applied={merged['data']['applied']}")
+    check("L2：来源保真——手工挂的仍为 MANUAL，AI 新增的标为 AI",
+          qc_rows.get("kp_stack", {}).get("source") == "MANUAL"
+          and qc_rows.get("kp_linear", {}).get("source") == "AI",
+          str({k: v.get("source") for k, v in qc_rows.items()}))
+    check("L2：重复 apply 幂等（第二次 0 新增、不产生重复行）",
+          merged_again["data"]["applied"] == 0
+          and merged_again["data"]["applied_kp_count"] == 0
+          and len(sql_db.get_question_kps(q_c)) == 2,
+          f"applied={merged_again['data']['applied']} "
+          f"kp_count={merged_again['data']['applied_kp_count']} "
+          f"rows={len(sql_db.get_question_kps(q_c))}")
+    check("L2：已挂的 q_a 不被重复写入（仍为 1 行）",
+          len(sql_db.get_question_kps(q_a)) == 1, str(sql_db.get_question_kps(q_a)))
+
+    # ---------- 9. 题目向量缓存与清理 ----------
+    # 先清掉可能残留的向量：配置 EMBEDDING_API_KEY 后，上面的批量标注可能已用**真 embedder**
+    # 写过 q_a 的向量；那样下面 fake2 的「首次写入」会因指纹未变而被跳过，断言随环境漂移。
+    sql_db._execute("DELETE FROM t_question_embedding WHERE question_id = ?", (q_a,))
     q_row = sql_db.get_question(q_a)
     fake2 = _FakeEmbedder({question_text(q_row): [0.5, 0.5]})
+    # 上面批次标注的 label_questions 会用自己的 embedder 顺手写下题目向量——
+    # 本机配了 EMBEDDING_API_KEY 时是真写库。要断言「首次写入」，须先清掉缓存，
+    # 否则这里命中缓存返回 0（缓存命中本身由下一条 check 覆盖）。
+    sql_db._execute("DELETE FROM t_question_embedding WHERE question_id = ?", (q_a,))
     check("题目向量写入成功",
           ensure_question_vectors([q_row], course_id, fake2) == 1
           and sql_db.get_question_embedding(q_a) is not None)

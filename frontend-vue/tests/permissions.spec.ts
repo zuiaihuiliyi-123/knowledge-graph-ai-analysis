@@ -9,14 +9,36 @@ import { BASE, RUN, registerAndLogin, login, api } from './helpers'
  * - 未登录一律 401
  * 同时验证前端守卫不会把学生困在「连环 4003」里，而是引导去课程中心加入。
  *
- * 既有数据：课程 5 属于 admin（含 doc 4 与 69 个知识点的真实图谱），
+ * 既有数据：课程 5 属于 admin（含真实文档与 69 个知识点的真实图谱），
  *           课程 9 属于另一位教师 teacher_demo。
  * 本 spec 只读，不修改既有课程数据。
+ *
+ * 【2026-09 修订】原先硬编码 ADMIN_DOC = 4，但库经历过重建，doc_id 已变化
+ * （课程 5 现在只有 doc 100，doc 4 根本不存在）——于是「学生访问他人文档」
+ * 拿到的是 2002「文档不存在」而不是期望的 4003「无权限」。
+ * 这属**测试夹具过时**，不是权限功能损坏；改为运行时动态解析文档 id。
  */
 
 const OTHER_TEACHERS_COURSE = 9   // teacher_demo 的课程
 const ADMIN_COURSE = 5            // admin 的课程（含真实文档与图谱）
-const ADMIN_DOC = 4
+
+/**
+ * 解析课程 5 的第一份文档 id（避免硬编码随库重建失效）。
+ *
+ * 刻意**只走接口**取管理员 token，不用 helper 的 login()——后者会导航浏览器到
+ * /login，而调用方此时往往已用学生身份登录，守卫会立刻把人送回课程中心，
+ * 于是「等登录表单出现」永远等不到（这正是本用例上一版失败的原因）。
+ */
+async function resolveAdminDoc(page: any): Promise<number> {
+  const loginResp = await api(page, 'post', '/api/auth/login', undefined,
+    { username: 'admin', password: 'admin123' })
+  const adminToken = (await loginResp.json()).data.access_token
+  const r = await api(page, 'get', `/api/v1/documents?course_id=${ADMIN_COURSE}`, adminToken)
+  const body = await r.json()
+  const items = Array.isArray(body.data) ? body.data : (body.data?.items || [])
+  expect(items.length, `课程 ${ADMIN_COURSE} 应当有文档`).toBeGreaterThan(0)
+  return items[0].doc_id
+}
 
 test('未登录：受保护页面跳登录，接口返回 401', async ({ page }) => {
   await page.goto(`${BASE}/course-center`)
@@ -46,12 +68,13 @@ test('学生：URL 指向未加入的课程 → 被拦下并引导去课程中�
 
 test('学生：接口层对未加入课程一律拒绝', async ({ page }) => {
   const token = await registerAndLogin(page, `e2e_perm_s_${RUN}`, 'student')
+  const adminDoc = await resolveAdminDoc(page)
 
   // 课程内容接口 → 业务码 4003
   const cases: Array<[string, string, string, any]> = [
     ['get', `/api/v1/documents?course_id=${ADMIN_COURSE}`, '文档列表', undefined],
-    ['get', `/api/v1/documents/${ADMIN_DOC}`, '文档详情', undefined],
-    ['get', `/api/v1/graph/${ADMIN_COURSE}?document_id=${ADMIN_DOC}`, '知识图谱', undefined],
+    ['get', `/api/v1/documents/${adminDoc}`, '文档详情', undefined],
+    ['get', `/api/v1/graph/${ADMIN_COURSE}?document_id=${adminDoc}`, '知识图谱', undefined],
     ['get', `/api/v1/courses/${ADMIN_COURSE}/members`, '成员列表', undefined],
     ['post', '/api/v1/qa/ask', '智能问答',
       { question: '这道题怎么做', course_id: String(ADMIN_COURSE) }],
@@ -65,7 +88,7 @@ test('学生：接口层对未加入课程一律拒绝', async ({ page }) => {
   }
 
   // 文档内容接口是二进制流：必须返回真正的 HTTP 403（阅读器靠它显示「无权限」）
-  const content = await api(page, 'get', `/api/v1/documents/${ADMIN_DOC}/content`, token)
+  const content = await api(page, 'get', `/api/v1/documents/${adminDoc}/content`, token)
   expect(content.status(), '文档内容应返回 403').toBe(403)
 
   // 课程详情：非公开课连元数据都不可读
@@ -102,6 +125,7 @@ test('教师：访问其他教师的课程一律拒绝', async ({ page }) => {
 
 test('教师：自己的课程全部放行（正向回归）', async ({ page }) => {
   const token = await login(page, 'admin', 'admin123')
+  const adminDoc = await resolveAdminDoc(page)
 
   const docs = await api(page, 'get', `/api/v1/documents?course_id=${ADMIN_COURSE}`, token)
   const docsBody = await docs.json()
@@ -109,7 +133,7 @@ test('教师：自己的课程全部放行（正向回归）', async ({ page }) 
   expect(docsBody.data.length).toBeGreaterThan(0)
 
   // 真实图谱没有被权限改造破坏
-  const graph = await api(page, 'get', `/api/v1/graph/${ADMIN_COURSE}?document_id=${ADMIN_DOC}`, token)
+  const graph = await api(page, 'get', `/api/v1/graph/${ADMIN_COURSE}?document_id=${adminDoc}`, token)
   const graphBody = await graph.json()
   expect(graphBody.code).toBe(0)
   expect(graphBody.data.nodes.length).toBeGreaterThan(0)

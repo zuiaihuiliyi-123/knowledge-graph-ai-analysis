@@ -265,6 +265,57 @@ export const api = {
     request.post('/api/v1/practice/favorites', { course_id: courseId, question_id: questionId }),
   unfavoriteQuestion: (courseId, questionId) =>
     request.delete(`/api/v1/practice/favorites/${questionId}`, { params: { course_id: courseId } }),
+
+  // ---- 管理员端（对齐后端 /api/v1/admin/*；后端每个端点都挂 require_admin） ----
+  /** 工作台总览：平台计数 / 角色分布 / 治理概览 / 最近活动 */
+  adminDashboard: () => request.get('/api/v1/admin/dashboard'),
+  /** 筛选下拉可选项（教师列表 + 全平台课程） */
+  adminOptions: () => request.get('/api/v1/admin/options'),
+
+  /** 用户列表（keyword/role/status + 分页 + 排序） */
+  adminListUsers: (params = {}) => request.get('/api/v1/admin/users', { params }),
+  /** 用户详情（资料 + 统计 + 所在课程 + 相关操作记录；不含密码哈希） */
+  adminGetUser: (userId) => request.get(`/api/v1/admin/users/${userId}`),
+  /** 编辑用户资料（不含角色与状态） */
+  adminUpdateUser: (userId, data) => request.put(`/api/v1/admin/users/${userId}`, data),
+  adminEnableUser: (userId) => request.post(`/api/v1/admin/users/${userId}/enable`),
+  adminDisableUser: (userId) => request.post(`/api/v1/admin/users/${userId}/disable`),
+  adminSetUserRole: (userId, role) =>
+    request.put(`/api/v1/admin/users/${userId}/role`, { role }),
+  /** 重置密码：newPassword 省略时由后端生成随机初始密码，仅在响应里返回一次 */
+  adminResetPassword: (userId, newPassword = null) =>
+    request.post(`/api/v1/admin/users/${userId}/reset-password`,
+      { new_password: newPassword }),
+  adminDeleteUser: (userId) => request.delete(`/api/v1/admin/users/${userId}`),
+
+  /** 全平台课程列表 */
+  adminListCourses: (params = {}) => request.get('/api/v1/admin/courses', { params }),
+  /** 课程详情（只读）：概览 + 成员 + 文档 + 图谱统计 */
+  adminGetCourse: (courseId) => request.get(`/api/v1/admin/courses/${courseId}`),
+  /** 课程治理：action = hide/restore/archive/unarchive/close/reopen */
+  adminCourseGovernance: (courseId, action, note = null) =>
+    request.post(`/api/v1/admin/courses/${courseId}/governance`, { action, note }),
+  /** 转移课程负责人 */
+  adminTransferCourse: (courseId, teacherId) =>
+    request.post(`/api/v1/admin/courses/${courseId}/transfer`, { teacher_id: teacherId }),
+  /** 删除课程（必须显式 confirm=true） */
+  adminDeleteCourse: (courseId) =>
+    request.delete(`/api/v1/admin/courses/${courseId}`, { params: { confirm: true } }),
+  /** 课程治理工作台：需要管理员介入的课程分组 */
+  adminGovernance: () => request.get('/api/v1/admin/governance'),
+
+  /** 全平台文档资源列表 */
+  adminListDocuments: (params = {}) => request.get('/api/v1/admin/resources/documents', { params }),
+  /** 删除文档资源（与教师端同一套完整性清理） */
+  adminDeleteDocument: (docId) => request.delete(`/api/v1/admin/resources/documents/${docId}`),
+  /** 知识抽取任务监控 */
+  adminExtractionTasks: (params = {}) =>
+    request.get('/api/v1/admin/resources/extraction-tasks', { params }),
+
+  /** 系统监控：组件真实状态 + 运行指标 + 库表行数 */
+  adminSystem: () => request.get('/api/v1/admin/system'),
+  /** 审计日志查询 */
+  adminAuditLogs: (params = {}) => request.get('/api/v1/admin/audit-logs', { params }),
 }
 
 /**

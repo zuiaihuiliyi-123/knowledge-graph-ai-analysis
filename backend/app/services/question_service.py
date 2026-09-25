@@ -39,6 +39,10 @@ MAX_ANSWER_LEN = 4000
 
 MAX_STEM_LEN = 1000
 MAX_ANALYSIS_LEN = 1000
+# L2 一题多知识点：单题挂载知识点数量上限。
+# 作用有二：① 防误传超大数组；② 组卷采取「任一命中即占用配额槽」后，
+# 单题挂太多知识点会一次吃掉多个 kp 的配额（见 docs/题库与推荐系统设计.md §12.1 决策 4）。
+MAX_KP_PER_QUESTION = 10
 
 # 判断题答案同义归一（"对/正确/是/T/Y/1" 一律视为 true）
 _JUDGE_TRUE = {"true", "t", "y", "yes", "1", "对", "正确", "是"}
@@ -351,6 +355,25 @@ def validate_question_payload(payload: dict) -> tuple:
     normalized["analysis"] = analysis
     normalized["difficulty"] = difficulty
     normalized["kp_id"] = (payload.get("kp_id") or "").strip() or None
+    # L2 一题多知识点：显式传 kp_ids（且非 None）时以**数组为权威**，kp_id 退化为「主知识点」投影。
+    # kp_ids=None 视为「本次不改知识点」，继续沿用单值 kp_id 语义（数组清空必须显式传 []）。
+    if payload.get("kp_ids") is not None:
+        raw_ids = payload.get("kp_ids")
+        if not isinstance(raw_ids, (list, tuple, set)):
+            return False, "kp_ids 必须为知识点 id 数组", None
+        ids, seen = [], set()
+        for kp in raw_ids:
+            kp = str(kp).strip() if kp is not None else ""
+            if kp and kp not in seen:
+                seen.add(kp)
+                ids.append(kp)
+        if len(ids) > MAX_KP_PER_QUESTION:
+            return False, f"单题知识点过多（最多 {MAX_KP_PER_QUESTION} 个）", None
+        primary = str(payload.get("kp_primary") or "").strip()
+        normalized["kp_ids"] = ids
+        normalized["kp_primary"] = primary if primary in seen else (ids[0] if ids else None)
+        # 投影口径：读侧（前端列表 / 统计 / 兼容期调用方）仍只看 kp_id，必须与数组主知识点一致
+        normalized["kp_id"] = normalized["kp_primary"]
     if "document_id" in payload:
         normalized["document_id"] = payload.get("document_id")
     return True, "success", normalized
@@ -434,6 +457,36 @@ def _check_kp_exists(course_id: int, kp_id: str) -> tuple:
     return True, None, True
 
 
+def _check_kps_exist(course_id: int, kp_ids) -> tuple:
+    """批量校验知识点是否存在于该课程图谱，返回 (ok, error_dict, checked)。
+
+    与 _check_kp_exists 同一策略（图谱可用但查无此点 → 4002；图谱不可用 → 放行并 checked=False），
+    区别是用**一次** Cypher 的 `IN` 查询代替 N 次单点查询——一题多 KP 后这点很关键：
+    逐点校验会让「一题挂 6 个知识点」的保存动作打 6 次图库往返。
+    """
+    ids = [str(k).strip() for k in (kp_ids or []) if k and str(k).strip()]
+    if not ids:
+        return True, None, True
+    try:
+        recs = db.query(
+            "MATCH (n:KnowledgePoint {course_id: $cid}) WHERE n.kp_id IN $ids "
+            "RETURN n.kp_id AS kp_id",
+            {"cid": course_id, "ids": ids},
+        )
+    except Exception:
+        return True, None, False
+
+    found = {r.get("kp_id") for r in recs}
+    missing = [k for k in ids if k not in found]
+    if missing:
+        return False, {
+            "ok": False, "code": 4002,
+            "message": (f"知识点不存在：course_id={course_id}, kp_id={'、'.join(missing)}"
+                        "（请从「关联知识点」下拉中选择本课程图谱中的知识点）"),
+        }, True
+    return True, None, True
+
+
 def _teacher_view(question: dict, stats: dict = None, favorite_count: int = 0) -> dict:
     """教师视角：在库行基础上补充解析后的 options/answer 与作答统计（学生接口绝不复用本函数）。
 
@@ -480,13 +533,19 @@ class QuestionService:
         if err:
             return err
 
-        # kp_id 完整性校验（图谱可用时拦住悬空知识点；图库不可用时放行并标记 kp_checked=False）
-        ok_kp, kp_err, kp_checked = _check_kp_exists(course_id, normalized["kp_id"])
+        # 知识点完整性校验（图谱可用时拦住悬空知识点；图库不可用时放行并标记 kp_checked=False）
+        # L2：一题多 KP 走批量校验（一次图库往返）；单值退回原点查，两者口径一致
+        kp_ids = normalized.get("kp_ids") if "kp_ids" in normalized else None
+        if kp_ids is not None:
+            ok_kp, kp_err, kp_checked = _check_kps_exist(course_id, kp_ids)
+        else:
+            ok_kp, kp_err, kp_checked = _check_kp_exists(course_id, normalized["kp_id"])
         if not ok_kp:
             return kp_err
 
         question_id = sql_db.create_question(
             course_id=course_id, document_id=did, kp_id=normalized["kp_id"],
+            kp_ids=kp_ids, kp_primary=normalized.get("kp_primary"),
             q_type=normalized["q_type"], stem=normalized["stem"],
             options=normalized["options"], answer=normalized["answer"],
             analysis=normalized["analysis"], difficulty=normalized["difficulty"],
@@ -527,6 +586,11 @@ class QuestionService:
             # kp_id 可空：只有「传了该键」才改（含显式 null = 清空关联）
             "kp_id": payload.get("kp_id") if "kp_id" in payload else question.get("kp_id"),
         }
+        # L2：显式传 kp_ids 时把它带进校验（数组为权威，kp_id 退化为主知识点投影）
+        if "kp_ids" in payload:
+            merged["kp_ids"] = payload.get("kp_ids")
+            if "kp_primary" in payload:
+                merged["kp_primary"] = payload.get("kp_primary")
         if "document_id" in payload:
             merged["document_id"] = payload.get("document_id")
 
@@ -542,25 +606,37 @@ class QuestionService:
             # document_id 的「清空」语义用独立方法表达（update_question 对 None = 不修改）
             sql_db.set_question_document(question_id, did)
 
-        # kp_id 完整性校验：只在校验「本次显式传入 kp_id」时执行——
+        # 知识点完整性校验：只在「本次显式传入知识点」时执行——
         # 历史数据里可能已有悬空 kp_id，教师仅改解析/难度时不应被拦住；
-        # 显式传 null（清空关联）也不校验。
+        # 显式传 null / 空数组（清空关联）也不校验。
         kp_checked = True
-        if payload.get("kp_id") is not None:
+        if "kp_ids" in payload:
+            ok_kp, kp_err, kp_checked = _check_kps_exist(question["course_id"],
+                                                         normalized.get("kp_ids"))
+            if not ok_kp:
+                return kp_err
+        elif payload.get("kp_id") is not None:
             ok_kp, kp_err, kp_checked = _check_kp_exists(question["course_id"], normalized["kp_id"])
             if not ok_kp:
                 return kp_err
 
-        sql_db.update_question(
-            question_id,
+        # L2 关键：**只有本次真的改了知识点，才传 kp 字段**。
+        # 旧实现无条件传 kp_id，会让「教师只改难度/解析」把多 KP 题塌缩成单 KP
+        # （sql_db.update_question 对 kp 字段的语义是「全量替换」）。
+        update_fields = dict(
             q_type=normalized["q_type"],
             stem=normalized["stem"],
             options=normalized["options"],
             answer=normalized["answer"],
             analysis=normalized["analysis"] or "",
             difficulty=normalized["difficulty"],
-            kp_id=normalized["kp_id"] or "",
         )
+        if "kp_ids" in payload:
+            update_fields["kp_ids"] = normalized.get("kp_ids") or []
+            update_fields["kp_primary"] = normalized.get("kp_primary")
+        elif "kp_id" in payload:
+            update_fields["kp_id"] = normalized["kp_id"] or ""
+        sql_db.update_question(question_id, **update_fields)
         return {"ok": True, "code": 0, "message": "success", "data": {
             "question_id": question_id,
             "updated": True,
@@ -896,6 +972,11 @@ class QuestionService:
                 "analysis": raw.get("analysis") or "", "difficulty": raw.get("difficulty") or 3,
                 "kp_id": raw.get("kp_id"),
             }
+            # L2：导入条目可携带多知识点（导入解析器/复核阶段回填），仅当确为数组时才带入校验
+            if isinstance(raw.get("kp_ids"), (list, tuple)):
+                payload["kp_ids"] = raw.get("kp_ids")
+                if raw.get("kp_primary"):
+                    payload["kp_primary"] = raw.get("kp_primary")
             ok, message, normalized = validate_question_payload(payload)
             if not ok:
                 skipped.append({"index": idx, "number": raw.get("number"), "reason": message})
@@ -907,6 +988,8 @@ class QuestionService:
                 needs_review += 1
             sql_db.create_question(
                 course_id=course_id, document_id=did, kp_id=normalized["kp_id"],
+                kp_ids=normalized.get("kp_ids") if "kp_ids" in normalized else None,
+                kp_primary=normalized.get("kp_primary"),
                 q_type=normalized["q_type"], stem=normalized["stem"],
                 options=normalized["options"], answer=normalized["answer"],
                 analysis=normalized["analysis"], difficulty=normalized["difficulty"],

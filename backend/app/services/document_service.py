@@ -3,6 +3,7 @@
 
 流程：校验课程归属(整数 course_id) -> 存文件 -> 建文档记录 -> 解析 -> 抽取 -> 入图 -> 回填状态
 """
+import logging
 import os
 import hashlib
 
@@ -14,6 +15,8 @@ from ..core.storage import resolve_document_path
 from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
 from .kg_manager import KnowledgeGraphManager
+
+_logger = logging.getLogger(__name__)
 
 # 扩展名 -> 文档类型（对齐规划文档表格 10 的 file_type ENUM）
 EXT_TO_FILE_TYPE = {".pdf": "PDF", ".txt": "TXT", ".docx": "DOCX", ".md": "MD"}
@@ -235,18 +238,56 @@ class DocumentService:
 
     @staticmethod
     def delete_document(doc_id: int, teacher_id: int) -> dict:
-        """删除文档及其全部文档级资源（校验课程归属）。
+        """删除文档及其全部文档级资源（**教师入口**：校验课程归属）。
 
-        Phase 8C：按顺序清理 Neo4j 图谱 → SQLite 向量 → 学习记录 → 收藏 → 本地文件 → 文档记录。
-        每步幂等可重试；任一步失败返回明确错误，不假装全部删除成功。
-        绝不误删同课程其他文档的图谱/向量/学习记录/收藏（均按 course_id + document_id 限定）。
+        仅该课程教师（创建者 / 已通过的协作教师）可调用：权限判定走
+        Permissions.require_document_manage，学生与课程外的人一律 4003。
+        管理员走独立的 delete_document_by_admin（见下），本函数不提供任何
+        「跳过校验」的参数——普通业务调用方无法通过构造参数取得管理员权限。
         """
         perm = Permissions.require_document_manage(
             doc_id, {"user_id": teacher_id, "role": "teacher"})
         if not perm["ok"]:
             return {"ok": False, "code": perm["code"], "message": perm["message"]}
-        doc = perm["data"]["document"]
+        return DocumentService._delete_document_cascade(perm["data"]["document"])
 
+    @staticmethod
+    def delete_document_by_admin(doc_id: int, admin: dict) -> dict:
+        """删除文档（**管理员入口**：平台资源治理）。
+
+        与教师入口共用同一条 _delete_document_cascade 级联清理，
+        差别只在授权方式：
+
+        - 不接受布尔开关。参数是**已认证的主体**（要求 role == 'admin'），
+          且本函数自己再断言一次角色——不能靠「传个 True」就获得管理员权限；
+        - 调用链固定为 Admin API -> require_admin -> AdminService -> 本函数，
+          api/documents.py 与任何教师/学生业务都不经过这里。
+
+        为什么管理员需要独立入口而不是复用 require_document_manage：
+        管理员不属于任何课程的成员（can_manage 恒为 False），复用会被一律拒绝。
+
+        注意：这里只放宽「谁是调用者」的判定，**级联清理的顺序与完整性约束
+        与教师入口逐字节相同**——不为管理员方便而留下孤立文件或 Neo4j 残留。
+        """
+        if not admin or admin.get("role") != "admin":
+            return {"ok": False, "code": 4003,
+                    "message": "无权限：仅管理员可执行平台资源治理"}
+        doc = sql_db.get_document(int(doc_id)) if str(doc_id).lstrip("-").isdigit() else None
+        if doc is None:
+            return {"ok": False, "code": 2002, "message": f"文档不存在: doc_id={doc_id}"}
+        _logger.info("管理员 %s 删除文档: doc_id=%s", admin.get("username"), doc_id)
+        return DocumentService._delete_document_cascade(doc)
+
+    @staticmethod
+    def _delete_document_cascade(doc: dict) -> dict:
+        """文档级级联清理的**唯一实现**（教师入口与管理员入口共用）。
+
+        Phase 8C：按顺序清理 Neo4j 图谱 → SQLite 向量 → 学习记录 → 收藏 →
+        题库 → 本地文件 → 文档记录。每步幂等可重试；任一步失败返回明确错误，
+        不假装全部删除成功。绝不误删同课程其他文档的图谱/向量/学习记录/收藏
+        （均按 course_id + document_id 限定）。
+        """
+        doc_id = doc["doc_id"]
         cid = doc["course_id"]
 
         # 1. Neo4j 图谱（节点 + 关系；仅当前文档）

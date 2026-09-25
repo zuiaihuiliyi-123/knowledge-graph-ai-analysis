@@ -24,7 +24,7 @@ documents.py 的 _CONTENT_ERROR_STATUS 已把 4003 映射为 HTTP 403，因此�
     公开课程（教师）                  ❌        ❌      ❌
     无关系                            ❌        ❌      ❌
 """
-from .sql_database import sql_db
+from .sql_database import course_is_visible, sql_db
 
 # 用户与课程的关系（由 resolve 推导，供路由与前端展示）
 REL_OWNER = "OWNER"                    # 课程创建者（teacher_id 本人）
@@ -65,7 +65,10 @@ class Permissions:
                 return REL_REJECTED
             if status == "removed":
                 return REL_REMOVED
-        if course.get("is_public") == 1 and course.get("status") == 1:
+        # 公开课可见性 = is_public + 业务状态开放 + 治理状态正常（见 course_is_visible）。
+        # 加上治理维度后，被平台下架/归档的课程不再对非成员学生暴露元数据，
+        # 「下架」因此无需再去改写课程的业务状态 status。
+        if course.get("is_public") == 1 and course_is_visible(course):
             return REL_PUBLIC
         return REL_NONE
 

@@ -12,8 +12,8 @@
       :width="store.sidebarCollapsed ? '64px' : '232px'"
       class="app-sidebar"
     >
-      <!-- 品牌区 -->
-      <div class="brand" @click="router.push('/course-center')">
+      <!-- 品牌区（点击回到当前角色的首页：管理员→工作台，其余→课程中心） -->
+      <div class="brand" @click="router.push(homePath)">
         <div class="brand-logo"><BrandMark :size="30" /></div>
         <div v-show="!store.sidebarCollapsed" class="brand-text">
           <div class="brand-name">智育数据</div>
@@ -34,7 +34,7 @@
           <template v-else>{{ avatarText }}</template>
         </div>
         <div class="user-meta">
-          <div class="user-name" :title="store.username">{{ store.username }}</div>
+          <div class="user-name" :title="store.displayName">{{ store.displayName }}</div>
           <div class="user-role" :class="store.role">{{ roleText }}</div>
         </div>
         <el-button
@@ -116,14 +116,14 @@
       <el-header class="app-header kg-glass" height="58px">
         <div class="header-left">
           <el-breadcrumb separator="/" class="app-breadcrumb">
-            <el-breadcrumb-item :to="{ path: '/course-center' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: homePath }">{{ homeLabel }}</el-breadcrumb-item>
             <el-breadcrumb-item v-for="(c, i) in breadcrumbs" :key="i">{{ c }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
         <div class="header-right">
           <span class="header-greet">
             <span class="greet-hi">{{ greetText }}</span>
-            <b>{{ store.username }}</b>
+            <b>{{ store.displayName }}</b>
           </span>
           <div class="header-avatar user-avatar" :class="store.role" @click="router.push('/profile')">
             <img
@@ -159,7 +159,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
   HomeFilled, DataAnalysis, Reading, User, UserFilled, EditPen, Notebook, Compass, Fold, Expand, SwitchButton, Share,
-  Picture, Lock, CircleClose,
+  Picture, Lock, CircleClose, Folder, Monitor, Document,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import AIChatWidget from './components/AIChatWidget.vue'
@@ -216,7 +216,31 @@ const studentMenu = [
     ],
   },
 ]
-const menuItems = computed(() => (store.role === 'teacher' ? teacherMenu : studentMenu))
+// 管理员导航：平台治理 / 用户管理 / 课程管理 / 资源管理 / 课程治理 / 系统监控 / 审计日志
+// 刻意不含「课程中心」——管理员不参与教学，其课程视图是 /admin/courses（全平台课程）
+const adminMenu = [
+  { path: '/admin', title: '工作台', icon: HomeFilled },
+  { path: '/admin/users', title: '用户管理', icon: UserFilled },
+  { path: '/admin/courses', title: '课程管理', icon: Reading },
+  { path: '/admin/resources', title: '资源管理', icon: Folder },
+  { path: '/admin/governance', title: '课程治理', icon: Compass },
+  { path: '/admin/system', title: '系统监控', icon: Monitor },
+  { path: '/admin/audit-logs', title: '审计日志', icon: Document },
+  {
+    path: '/profile',
+    title: '个人中心',
+    icon: User,
+    children: [
+      { path: '/profile?tab=basic', title: '基本资料', icon: UserFilled },
+      { path: '/profile?tab=password', title: '密码管理', icon: Lock },
+      { path: '/profile?tab=deactivate', title: '注销账号', icon: CircleClose },
+    ],
+  },
+]
+const menuItems = computed(() => {
+  if (store.role === 'admin') return adminMenu
+  return store.role === 'teacher' ? teacherMenu : studentMenu
+})
 
 const activeMenu = computed(() => {
   if (route.path === '/teacher') {
@@ -229,11 +253,15 @@ const activeMenu = computed(() => {
     return map[route.query.tab] || '/student'
   }
   if (route.path === '/profile') {
-    const profileMap = { basic: '/profile?tab=basic', password: '/profile?tab=password', deactivate: '/profile?tab=deactivate' }
-    return profileMap[route.query.tab] || '/profile?tab=basic'
+    const map = { basic: '/profile?tab=basic', password: '/profile?tab=password', deactivate: '/profile?tab=deactivate' }
+    return map[route.query.tab] || '/profile?tab=basic'
   }
   return route.path
 })
+
+// 面包屑与品牌区/首页链接的目标都随角色变化：管理员的"首页"是 /admin 而不是课程中心
+const homePath = computed(() => (store.role === 'admin' ? '/admin' : '/course-center'))
+const homeLabel = computed(() => (store.role === 'admin' ? '工作台' : '首页'))
 
 const breadcrumbs = computed(() => {
   const map = {
@@ -243,6 +271,14 @@ const breadcrumbs = computed(() => {
     '/course-center': ['课程中心'],
     '/profile': ['个人中心'],
     '/reader': ['文档阅读'],
+    '/403': ['无权限'],
+    '/admin': ['管理工作台'],
+    '/admin/users': ['用户管理'],
+    '/admin/courses': ['课程管理'],
+    '/admin/resources': ['资源管理'],
+    '/admin/governance': ['课程治理'],
+    '/admin/system': ['系统监控'],
+    '/admin/audit-logs': ['审计日志'],
   }
   return map[route.path] || []
 })
@@ -253,13 +289,15 @@ function studentTabTitle(t) {
   return { overview: '学习总览', documents: '课程文档', browse: '图谱浏览', qa: '智能问答', path: '学习路径推荐', favorites: '收藏夹', practice: '做题练习' }[t] || ''
 }
 
-const avatarText = computed(() => (store.user?.real_name || store.username || 'U').slice(0, 1).toUpperCase())
+// 无头像时回退的首字母：取自侧栏展示的同一个名字（昵称 > 真实姓名 > 用户名），
+// 与 ProfileView 的 initial 保持一致，避免「显示小智、字母却是 E」的错位
+const avatarText = computed(() => (store.displayName || 'U').slice(0, 1).toUpperCase())
 // 真实头像优先，无头像或图片加载失败时回退到上面的首字母色块
 const avatarFailed = ref(false)
 const showAvatar = computed(() => !!store.avatarUrl && !avatarFailed.value)
 // 更换头像后 avatarUrl 会带新的版本号（?v=时间戳），此时重置失败标记再试一次
 watch(() => store.avatarUrl, () => { avatarFailed.value = false })
-const roleText = computed(() => (store.role === 'teacher' ? '教师' : '学生'))
+const roleText = computed(() => ({ teacher: '教师', student: '学生', admin: '管理员' }[store.role] || '学生'))
 const greetText = computed(() => {
   const h = new Date().getHours()
   if (h < 6) return '夜深了'
@@ -394,6 +432,8 @@ onMounted(() => {
 /* 真实头像图片：铺满色块并跟随圆角，非正方形图用 cover 裁切不变形 */
 .user-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .user-avatar.teacher { background: linear-gradient(135deg, #f5a623, #f4794d); box-shadow: 0 4px 10px -3px rgba(245,166,35,.55); }
+/* 管理员：沿用品牌紫，与教师橙 / 学生蓝在同一套色系里区分开 */
+.user-avatar.admin { background: linear-gradient(135deg, #8b5cf6, #5b8def); box-shadow: 0 4px 10px -3px rgba(139,92,246,.6); }
 .user-meta { flex: 1; min-width: 0; }
 .user-name {
   color: #e8ecfb;
@@ -415,6 +455,7 @@ onMounted(() => {
   color: #4fe0ac;
 }
 .user-role.teacher { background: rgba(245,166,35,.18); color: #ffc266; }
+.user-role.admin { background: rgba(139,92,246,.2); color: #c4b0ff; }
 .user-logout {
   color: rgba(200,208,238,.6) !important;
   padding: 4px;

@@ -67,6 +67,19 @@ export async function login(page: Page, username: string, password: string) {
   return tokenOrFail(page)
 }
 
+/**
+ * 管理员登录：与 login() 的唯一差别是落地页。
+ * 管理员的首页是 /admin（不是课程中心），因此不能用 login() 那样等 /course-center。
+ */
+export async function loginAdmin(page: Page, username = 'sysadmin', password = 'admin123') {
+  await page.goto(`${BASE}/login`)
+  await page.getByPlaceholder('请输入用户名').fill(username)
+  await page.getByPlaceholder('请输入密码').fill(password)
+  await page.getByRole('button', { name: '登 录' }).click()
+  await page.waitForURL(/\/admin$/, { timeout: 25000 })
+  return tokenOrFail(page)
+}
+
 /** 带 token 直接调后端（走 vite 代理），用于权限断言 */
 export async function api(page: Page, method: 'get' | 'post' | 'put' | 'delete', path: string, token?: string, data?: any) {
   const headers: Record<string, string> = {}

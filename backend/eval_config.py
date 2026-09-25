@@ -22,7 +22,7 @@ from app.services.knowledge_extractor import (
 )
 
 # Prompt 版本号：每次修改 EXTRACTION_PROMPT 时递增，便于把评测结果对应到 Prompt 版本
-PROMPT_VERSION = "v1.2"
+PROMPT_VERSION = "v1.5"
 
 
 def make_config(temperature: float = 0, overlap_tokens: int = _OVERLAP_TOKENS) -> dict:

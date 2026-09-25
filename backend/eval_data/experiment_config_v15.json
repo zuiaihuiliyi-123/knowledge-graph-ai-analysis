@@ -1,0 +1,15 @@
+{
+  "prompt_version": "v1.5",
+  "model": "deepseek-chat",
+  "temperature": 0,
+  "chunk_tokens": 6000,
+  "overlap_tokens": 400,
+  "max_output_tokens": 8192,
+  "default_relation_confidence": 0.8,
+  "thresholds": {
+    "PRECEDES": 0.6,
+    "CONTAINS": 0.5,
+    "APPLIES_TO": 0.5,
+    "RELATED_TO": 0.6
+  }
+}

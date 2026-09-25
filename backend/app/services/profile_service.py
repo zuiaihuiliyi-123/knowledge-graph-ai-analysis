@@ -39,7 +39,12 @@ class ProfileService:
     def editable_fields(role: str) -> set:
         """该角色可编辑的字段集合（白名单即权限边界）"""
         fields = set(SHARED_FIELDS)
-        fields |= STUDENT_FIELDS if role == "student" else TEACHER_FIELDS
+        if role == "student":
+            fields |= STUDENT_FIELDS
+        elif role == "teacher":
+            fields |= TEACHER_FIELDS
+        # admin 只保留共享字段：管理员没有学籍，也不该有「职称 / 研究方向」这类教师属性。
+        # 这里刻意写成显式分支而不是 else，避免将来新增角色时被默默当成教师。
         return fields
 
     @staticmethod

@@ -5,6 +5,7 @@ const TOKEN_KEY = 'kg_token'
 const USER_KEY = 'kg_user'
 const STATUS_DISMISS_KEY = 'kg_backend_status_dismissed'
 const LEARNING_CTX_KEY = 'kg_learning_context'
+const SIDEBAR_KEY = 'kg_sidebar_collapsed'
 
 function readLearningContext() {
   try {
@@ -41,6 +42,10 @@ export const useAppStore = defineStore('app', {
     user: readUser(),
     backendOnline: false,
     healthChecked: false,
+    // 健康检查进行中（App.vue 侧栏底部的状态点：检测中显示黄色脉冲）
+    healthChecking: false,
+    // 侧栏折叠状态（App.vue 的收起/展开按钮；跨刷新保留，避免每次进页面都要重新收起）
+    sidebarCollapsed: localStorage.getItem(SIDEBAR_KEY) === '1',
     // 右下角后端服务状态浮窗是否已被用户关闭（会话级，下次登录重新显示）
     backendStatusDismissed: sessionStorage.getItem(STATUS_DISMISS_KEY) === '1',
     courses: [], // [{course_id, course_name, node_count, ...}] 后端课程列表（= 我可访问的课程）
@@ -62,6 +67,8 @@ export const useAppStore = defineStore('app', {
     // 角色由登录用户决定；未登录时默认 student（仅兜底，受路由守卫保护不会真正用到）
     role: (state) => state.user?.role || 'student',
     isTeacher: (state) => (state.user?.role || 'student') === 'teacher',
+    /** 管理员：平台治理角色，与教师/学生是并列的三档之一 */
+    isAdmin: (state) => (state.user?.role || 'student') === 'admin',
     username: (state) => state.user?.username || '',
     /** 展示名：昵称 > 真实姓名 > 登录响应里的 display_name > 用户名 */
     displayName: (state) =>
@@ -106,6 +113,17 @@ export const useAppStore = defineStore('app', {
     async register(payload) {
       return api.register(payload)
     },
+    /**
+     * 清除「首次登录必须改密」标记（本人改密成功后调用）。
+     *
+     * 后端已把 t_user.must_change_password 置 0，这里同步本地副本 ——
+     * 否则路由守卫仍按 localStorage 里的旧标记把人一直挡在改密页。
+     */
+    clearMustChangePassword() {
+      if (!this.user) return
+      this.user = { ...this.user, must_change_password: 0 }
+      localStorage.setItem(USER_KEY, JSON.stringify(this.user))
+    },
     logout() {
       this.token = ''
       this.user = null
@@ -128,6 +146,7 @@ export const useAppStore = defineStore('app', {
 
     // ---- 健康检查 ----
     async checkHealth() {
+      this.healthChecking = true
       try {
         const resp = await fetch('/health', { signal: AbortSignal.timeout(3000) })
         this.backendOnline = resp.ok
@@ -135,7 +154,16 @@ export const useAppStore = defineStore('app', {
         this.backendOnline = false
       } finally {
         this.healthChecked = true
+        this.healthChecking = false
       }
+    },
+
+    /** 收起 / 展开侧栏（持久化到 localStorage） */
+    toggleSidebar() {
+      this.sidebarCollapsed = !this.sidebarCollapsed
+      try {
+        localStorage.setItem(SIDEBAR_KEY, this.sidebarCollapsed ? '1' : '0')
+      } catch { /* 存储不可用时仅本次会话生效 */ }
     },
 
     /** 关闭右下角后端服务状态浮窗：本次登录会话内不再显示，下次登录重新出现 */

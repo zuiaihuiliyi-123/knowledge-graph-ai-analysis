@@ -24,6 +24,11 @@ chromadb==0.5.23
 tiktoken==0.8.0
 jieba==0.42.1
 
+# 向量检索（L2 阶段 E：VectorIndex 的 numpy 矩阵后端）
+# 未安装时 `services/vector_index.py` 会自动回落纯 Python 余弦（功能可用，但慢 100×+），
+# 所以这里是**显式声明**而非隐性依赖——此前 numpy 只被离线脚本 eval_*.py 用到，requirements 未声明。
+numpy==1.26.4
+
 # 工具
 pydantic==2.10.4
 python-dotenv==1.0.1

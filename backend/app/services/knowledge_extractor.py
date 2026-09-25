@@ -9,17 +9,21 @@ from typing import List, Tuple
 from openai import OpenAI
 from ..core.config import settings
 from ..core.database import VALID_RELATION_TYPES
+from ..core.metrics import track_llm_call
 from ..utils.text_processor import chunk_text_for_llm
 
 _logger = logging.getLogger(__name__)
 
 
 # 知识提取的 Prompt 模板（决策树式关系判定，强化学习依赖与文本顺序的区分）
+# v1.3：对齐人工标注口径（gold_第7章_树）。收紧 CONTAINS（删整体-部分）、重写
+# APPLIES_TO 与 RELATED_TO 的方向规则、PRECEDES 增加反例、实体增加类别总称要求。
 EXTRACTION_PROMPT = """你是高校课程知识图谱构建专家。请从给定课程文本中抽取「可用于知识图谱与学习路径推荐」的知识点实体，并识别实体之间明确存在的语义关系。
 
 ## 核心原则
 宁可少抽取，也不要臆造关系。禁止仅凭文本先后顺序、常识或名称相似性推断关系。
 若对某条关系证据不足，直接不输出该关系。
+每输出一条关系前自问：「换一个领域专家，只看 evidence 原文，会不会认同这条关系的类型与方向？」不确定就删除。
 
 ## 一、实体要求
 每个实体包含：
@@ -27,10 +31,22 @@ EXTRACTION_PROMPT = """你是高校课程知识图谱构建专家。请从给定
 - category：只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
 - description：一句话描述该知识点在课程中的含义
 
+category 判定（易错区，务必注意）：
+- 具体的遍历方式、算法步骤、操作、表示法 → 「方法」。例如：前序遍历、中序遍历、后序遍历、层序遍历、广度优先遍历、深度优先遍历、旋转、插入节点、数组表示，全部属于「方法」，不得标为「概念」。
+- 「遍历」「旋转」这类类别性总称 → 「概念」。
+- 数据结构、术语定义、性质名词 → 「概念」。例如：二叉树、队列、平衡因子、高度。
+
 实体粒度：
 - 一个实体应是一个「独立可学习的知识点」，不要过度拆分，也不要堆砌冗余修饰。
 - 同义词、英文缩写与中文全称属于同一知识点时，只保留一个规范名称。例如 CNN 与「卷积神经网络」合并为「卷积神经网络」。
+- 名称不要带「算法」「方法」「结构」等冗余后缀，除非该词是固定术语本身（如「二分查找」不要写成「二分查找算法」）。
+- 名称不要用裸动词（如「插入」「删除」「查找」），必须带操作对象（如「插入节点」「删除节点」）。
 - 不要抽取：人名、学校、公司、页码、章节标题本身、「本节」「上述方法」等指代词、普通名词、单纯例子名。
+- 不要抽取代码示例中的函数名、变量名、运算符、类名、关键字等程序符号（如 ==、equals()、BUILD_TREE()、public、private），它们不是课程知识点。
+- 不要抽取代码注释/代码清单里出现的操作描述短语（如「初始化二叉树」「构建二叉搜索树」），它们只是某段代码的用途说明，不是独立知识点。
+- 注意抽取文中明确出现的「类别性总称」：当文本说「前序、中序、后序遍历统称/属于遍历」时，「遍历」这类上位总称本身也是一个实体，必须单独抽取（它是关系链的上位节点，漏抽会连带漏掉一批关系）。同理「右旋与左旋统称旋转」中的「旋转」。
+- 注意抽取定义句中的上位类别词：如「树是一种非线性数据结构」中的「非线性数据结构」、「红黑树是一种平衡二叉搜索树」中的「平衡二叉搜索树」，这类总称同样是关系链的上位节点。
+- 文中明确提出的方法论/思想（如「分治」）若作为方法讲解，应抽取为「方法」。
 
 ## 二、关系类型（仅限 4 种，英文大写，方向严格）
 PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
@@ -38,10 +54,10 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 ## 三、关系判定必须按下述顺序（决策树）
 对任意两个知识点，按顺序判断：
 
-1. 上下位 / 整体-部分 / 类别-成员？ → CONTAINS（source 是 target 的上位概念/整体/类别，方向 source→target）
+1. 「X 是 Y 的一种/子类/特殊形式/变体/属于 Y」或「X 是 Y 的典型操作」？ → CONTAINS（source 是上位概念 Y，方向 source→target，详见第五节）
 2. 否则，文本明确表达「学习 source 是理解 target 的必要前提」？ → PRECEDES（方向 source→target）
-3. 否则，source 是方法/算法/技术，且文本明确说明其用于解决 target 代表的问题/对象？ → APPLIES_TO（方向 source→target，判定边界见第六节）
-4. 否则，文本明确说明二者存在密切关联？ → RELATED_TO
+3. 否则，source 是方法/算法/技术，且文本明确说明其用于实现/解决/完成 target 代表的问题/任务？ → APPLIES_TO（方向 source→target，判定边界见第六节）
+4. 否则，文本明确说明二者存在密切关联（工具-主体、并列类似）？ → RELATED_TO（方向约定见第七节）
 5. 以上均不满足或证据不足 → 不输出关系
 
 ## 四、PRECEDES 只表示「学习依赖」，不表示「文本顺序」
@@ -52,29 +68,86 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 - 「本章首先介绍线性表，然后介绍栈」→ 这是叙述顺序，不是学习依赖，不得输出「线性表 PRECEDES 栈」。
 - 「卷积神经网络是神经网络的一种」→ 是包含关系，必须用「神经网络 CONTAINS 卷积神经网络」，不得用 PRECEDES。
 - 「算法运行后生成结果」→ 时间先后，不是 PRECEDES。
+- 「X 是理解 Y 的关键」「通过 X 判断 Y」「X 是 Y 的重要指标」→ 这只是"X 有助于理解 Y"，不等于"必须掌握 X 才能学 Y"，不得输出 X PRECEDES Y。
+- 「回顾 X 的定义，下面介绍 Y」「上一节介绍了 X」→ 章节引用/复习指令，不是学习依赖声明。
 
-## 五、CONTAINS 与 PRECEDES 的关键区分
-- 「X 是 Y 的一种 / 特殊形式 / 变体 / 属于 Y」「Y 包含 X」→ Y CONTAINS X（绝不 PRECEDES）
+## 五、CONTAINS 的方向与边界（最高频错误区，务必逐条核对）
+### 5.1 方向规则（source 是上位概念，target 是下位概念）
+- 「X 是 Y 的一种 / 特殊形式 / 变体 / 属于 Y」「Y 包含 X」「Y 包括 X」「Y 的常见类型有 X」→ **Y CONTAINS X**（上位概念在前，绝不反向）
   例：「栈是一种操作受限的线性表」→ 线性表 CONTAINS 栈
-- 「要学习 X，必须先掌握 Y」→ Y PRECEDES X
+  例：「AVL 树是二叉搜索树的一种」→ 二叉搜索树 CONTAINS AVL 树
+  例：「前序遍历是深度优先遍历的一种」→ 深度优先遍历 CONTAINS 前序遍历
+  例：「完美二叉树也是一棵完全二叉树」→ 完全二叉树 CONTAINS 完美二叉树
+- 「X 是 Y 的操作」（句式如「Y 的 X 操作」「Y 支持 X 操作」）→ **Y CONTAINS X**
+  仅当 X 是直接对 Y 执行的基本操作（插入、删除、查找、遍历等，句式以 Y 为操作对象）。
+  例：「二叉搜索树支持插入节点、查找节点、删除节点操作」→ 二叉搜索树 CONTAINS 插入节点、二叉搜索树 CONTAINS 查找节点、二叉搜索树 CONTAINS 删除节点
+  反例：「AVL 树通过旋转保持平衡」——旋转是维护平衡的手段、不是对 AVL 树执行的增删查操作，不得输出 AVL 树 CONTAINS 旋转。
+
+### 5.1 附：历史上反复出错的输出（逐条核对，严禁出现）
+- 严禁输出「AVL 树 CONTAINS 二叉搜索树」——正确为 二叉搜索树 CONTAINS AVL 树
+- 严禁输出「AVL 树 CONTAINS 平衡二叉树」——正确为 平衡二叉树 CONTAINS AVL 树
+- 严禁输出「完美二叉树 CONTAINS 完全二叉树」——正确为 完全二叉树 CONTAINS 完美二叉树
+
+### 5.2 输出前方向自检（每条 CONTAINS 必做）
+把关系读成「target 是 source 的一种/子类/典型操作」，若语义不通，而读成「source 是 target 的一种」才通，
+说明方向写反了，必须翻转 source 与 target。翻转后仍不确定就删除该关系。
+
+### 5.3 不是 CONTAINS 的情况（严禁）
+- 整体-部分结构（「二叉树由根节点、叶节点组成」「链表由节点构成」）：部分只是结构的组成单元、而非"X 是 Y 的一种"类型关系时，不得输出 CONTAINS。只有当"X 是 Y 的一种/子类"（如「完全二叉树是二叉树的一种」）才成立。
+  点名禁止（这些是"组成/属性"而非"类型包含"，一律不建立任何关系）：
+  - 二叉树 与 节点/根节点/叶节点/左子节点/右子节点/边/层/度/高度/深度 之间
+  - 节点 与 左子节点/右子节点 之间
+  - 操作关系中的主体必须是正文明确的对应结构（如「二叉搜索树的插入操作」→ 二叉搜索树 CONTAINS 插入节点），不得把操作挂到泛化主体上（「二叉树 CONTAINS 插入节点」不成立）
+- 「X 具有属性/特征/指标 Y」（如「二叉树具有高度」「AVL 树用平衡因子衡量平衡」）：Y 是 X 的属性而非 X 的一种，不得输出 X CONTAINS Y。
+- 「X 通过 Y 机制维持性质」（如「AVL 树通过旋转保持平衡」）：Y 是维护机制而非 X 的类型，不得输出 X CONTAINS Y（但「右旋、左旋是旋转的两种基本操作」→ 旋转 CONTAINS 右旋 成立）。
+- 「X 使用公式/函数 Y 进行表示或计算」（如「数组表示使用映射公式」）：Y 是 X 的计算工具，不得输出 X CONTAINS Y。
+- 「要学习 X，必须先掌握 Y」→ Y PRECEDES X，不是 CONTAINS
   例：「要学习多态，必须先掌握继承」→ 继承 PRECEDES 多态
 
-## 六、APPLIES_TO 与「实现 / 构成」关系的区分
-只有当 source 被用于解决、处理、计算、优化或完成 target 所代表的问题/任务时，才能使用 APPLIES_TO。
+## 六、APPLIES_TO 的判定（含「实现机制」的正确映射）
+只有当 source 是方法/算法/技术类知识点、且文本明确说明其被用于实现、解决、完成 target 代表的问题/任务时，才能使用 APPLIES_TO（方向 source→target）。
 
-以下表达不得自动视为 APPLIES_TO：
-- 「X 通过 Y 实现」「X 由 Y 实现」「X 使用 Y 构成」「X 建立在 Y 之上」「X 包含 Y」「X 可以利用 Y 实现」
+「X 基于 Y 实现」「X 通过 Y 实现」「X 借助 Y 实现」「X 用 Y 实现」句式：
+- Y 是方法/算法/技术 → **Y APPLIES_TO X**
+  例：「深度优先遍历通常基于递归实现」→ 递归 APPLIES_TO 深度优先遍历（严禁输出反向）
+  例：「前序遍历基于递归实现」→ 递归 APPLIES_TO 前序遍历
+- Y 是数据结构等非方法类概念 → 降级为 RELATED_TO（见第七节）；证据不足则不输出
+  例：「广度优先遍历借助队列实现」→ 队列 RELATED_TO 广度优先遍历，**严禁 APPLIES_TO**
 
-若文本表达的是「Y 是 X 的实现机制、组成部分或实现方式」，而当前关系集合中没有专门的 IMPLEMENTED_BY 关系：
-- 不要强行转换成 APPLIES_TO；
-- 根据上下文判断是否为 CONTAINS；
-- 若无法确定，则不输出关系。
+「X 可用于实现 Y」（X 是技术/结构，Y 是应用对象）→ X APPLIES_TO Y
+  例：「二叉搜索树可用于实现多级索引」→ 二叉搜索树 APPLIES_TO 多级索引
+
+方法论思想贯穿某对象的设计（如「二叉树体现分治思想」「分治思想应用于二叉树」）→ 方法 APPLIES_TO 对象
+  例：「二叉树体现一分为二的分治逻辑」→ 分治 APPLIES_TO 二叉树
+
+严禁的输出：
+- 「X 用于表示 Y」「X 是 Y 的存储方式/表示法」（如「数组表示用于存储完全二叉树」）：表示法与被表示对象的关系不是 APPLIES_TO，若证据不足则不输出。
+
+严禁的输出（违反方向）：
+- 深度优先遍历 APPLIES_TO 递归、广度优先遍历 APPLIES_TO 队列、中序遍历 APPLIES_TO 深度优先遍历（这些方向全部颠倒；「X 是 Y 的一种」走 CONTAINS，不是 APPLIES_TO）
 
 不要为了覆盖所有语义而强行映射到现有四类关系；证据不足时宁可不输出。
 
-## 七、RELATED_TO 严格限制
+## 七、RELATED_TO 的方向约定（从严输出）
 仅用于「明确密切相关、但既非上下位、也非学习前置、也非应用」的情况，且文本有明确关联表述。
-不要仅因两个概念出现在同一段就输出 RELATED_TO。
+方向约定：
+- 工具/支撑方为 source，主体/被支撑方为 target：
+  例：「广度优先遍历借助队列实现」→ 队列 RELATED_TO 广度优先遍历
+  例：「二叉树可用链表表示」→ 链表 RELATED_TO 二叉树
+- 并列类似关系（「与…类似」「工作原理一致」「互为镜像」「互为对称」）时，source 取正文中先出现的一方：
+  例：「红黑树与 AVL 树类似」→ AVL 树 RELATED_TO 红黑树
+  例：「右旋与左旋互为镜像对称」→ 右旋 RELATED_TO 左旋
+- 主体与其思想来源（「X 的查找思想源于二分查找」）→ X RELATED_TO 思想来源
+  例：「二叉搜索树的查找思路与二分查找一致」→ 二叉搜索树 RELATED_TO 二分查找
+- 方向无法确定时宁可不输出。
+
+严禁的输出：
+- 仅因两个概念出现在同一段就输出 RELATED_TO。
+- 「X 与 X 序列」这类名称派生关系（如 中序遍历 与 中序遍历序列）不构成 RELATED_TO 证据。
+- 「X 的时间复杂度」「X 的性能」等属性关联不得输出。
+- 两个知识点仅通过第三方间接联系（如完美二叉树与广度优先遍历仅都关联层序遍历）→ 不输出直接关系。
+- 「X 与其维护机制/属性/表示工具」（如 AVL 树与旋转、完美二叉树与高度、数组表示与映射公式）不建 RELATED_TO。
+- 仅共享词根不构成关联证据（如「二分查找」与「查找节点」都含"查找"二字，不代表二者存在 RELATED_TO 关系）。
 
 ## 八、每条关系必须携带证据与置信度
 - evidence：支持该关系的原文短句（必须来自输入文本，不得编造）
@@ -84,6 +157,12 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 - source 与 target 必须都出现在 entities 中，且 source ≠ target
 - 不重复输出相同 (source, type, target)；文本中因分块出现的重复段落，同一知识点/关系只输出一次
 - type 只能是 PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
+- 关系密度控制：参考密度为每 1000 字符正文 2~4 条关系。若本次输出明显超出该密度，说明混入了证据不足的关系，请删减到最明确、最有价值的子集。
+- 输出前对每条关系自检：
+  ① CONTAINS：target 是 source 的一种/子类/典型操作？（读反则翻转 source 与 target）
+  ② PRECEDES：文本有明确的「学习 target 前必须掌握 source」表述？
+  ③ APPLIES_TO：source 是方法/技术，target 是它实现/解决的问题或任务？
+  ④ RELATED_TO：source 是工具/支撑方或正文先出现方？
 - 严格只输出 JSON，不要 Markdown 代码块，不要解释文字
 
 ## 十、输出格式
@@ -137,6 +216,31 @@ _MAX_DROPPED_RECORDED = 500
 # 示例：{"cnn": "卷积神经网络", "bp网络": "反向传播神经网络"}
 # 注意：不同课程语境下缩写含义可能不同，默认留空，避免误伤。
 _SYNONYM_MAP = {}
+
+# 代码程序符号的黑名单：Java/C++ 等语言关键字。模型会偶发把代码示例里的
+# 符号误抽为实体（如 public、private），在合并阶段统一兜底过滤，不依赖 LLM。
+_CODE_KEYWORDS = {
+    "PUBLIC", "PRIVATE", "PROTECTED", "CLASS", "VOID", "STATIC",
+    "FINAL", "NEW", "RETURN", "INT", "DOUBLE", "FLOAT", "BOOLEAN",
+    "STRING", "NULL", "TRUE", "FALSE", "THIS", "CONST",
+}
+
+
+def _is_code_symbol(name: str) -> bool:
+    """判断实体名是否为程序符号（函数调用、运算符、关键字），而非课程知识点。"""
+    if not name:
+        return True
+    if "(" in name or ")" in name:  # 函数调用风格：BUILD_TREE()、equals()
+        return True
+    if re.fullmatch(r"[=+\-*/%<>!&|^~]+", name):  # 纯运算符：== 等
+        return True
+    compact = name.replace(" ", "")
+    if compact.isupper() and compact.isascii() and "_" in compact:
+        # 全大写下划线标识符：UPDATE_HEIGHT 等
+        return True
+    if compact in _CODE_KEYWORDS:
+        return True
+    return False
 
 
 def _fullwidth_to_halfwidth(text: str) -> str:
@@ -228,16 +332,18 @@ class KnowledgeExtractor:
     def _extract_single(self, text: str) -> dict:
         """对单个文本块执行提取（同步；由 extract 通过线程池并发调用）"""
         try:
-            response = self.client.chat.completions.create(
-                model=settings.LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
-                    {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
-                ],
-                temperature=self.temperature,
-                max_tokens=_MAX_OUTPUT_TOKENS,
-                timeout=settings.EXTRACTION_TIMEOUT
-            )
+            # 只包住「发起请求」这一行：解析失败仍算本次 LLM 调用成功（见 core/metrics 说明）
+            with track_llm_call("extraction"):
+                response = self.client.chat.completions.create(
+                    model=settings.LLM_MODEL,
+                    messages=[
+                        {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
+                        {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
+                    ],
+                    temperature=self.temperature,
+                    max_tokens=_MAX_OUTPUT_TOKENS,
+                    timeout=settings.EXTRACTION_TIMEOUT
+                )
 
             content = response.choices[0].message.content.strip()
             return self._parse_json(content)
@@ -302,6 +408,10 @@ class KnowledgeExtractor:
             for entity in result.get("entities", []):
                 name = _normalize_entity_name(entity.get("name", ""))
                 if not name:
+                    dropped_entity_count += 1
+                    continue
+                # 代码程序符号兜底过滤（Prompt 已要求不抽，这里是数据完整性兜底）
+                if _is_code_symbol(name):
                     dropped_entity_count += 1
                     continue
                 if name not in merged_entities:

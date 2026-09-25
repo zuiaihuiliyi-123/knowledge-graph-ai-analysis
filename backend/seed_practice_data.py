@@ -242,9 +242,12 @@ def fetch_knowledge_points(course_id: int, document_id, limit: int, offline: boo
             print(f"  ⚠ Neo4j 不可用（{type(e).__name__}），退化为 SQLite 已有 kp_id")
 
     known, seen = [], set()
+    # L2：知识点关联以 t_question_kp 为准——一题多挂时 t_question.kp_id 只有主知识点，
+    # 直接读它会把「仅作为次要知识点」的 kp 漏掉。
     for r in sql_db._query(
-        "SELECT kp_id FROM t_question "
-        "WHERE course_id = ? AND kp_id IS NOT NULL AND kp_id <> ''",
+        "SELECT DISTINCT qk.kp_id AS kp_id FROM t_question_kp qk "
+        "JOIN t_question q ON q.question_id = qk.question_id "
+        "WHERE q.course_id = ?",
         (course_id,),
     ):
         if r["kp_id"] not in seen:
@@ -286,6 +289,12 @@ def clean_previous_seed(course_id: int) -> dict:
                 tuple(question_ids),
             )
             removed["favorites"] = cur.rowcount
+            # L2：知识点关联（t_question_kp）有物理外键指向 t_question 且连接已开 foreign_keys=ON，
+            # 必须先删关联行，否则下面的删题语句直接抛 FOREIGN KEY constraint failed。
+            conn.execute(
+                f"DELETE FROM t_question_kp WHERE question_id IN ({placeholders})",
+                tuple(question_ids),
+            )
             cur = conn.execute(
                 f"DELETE FROM t_question WHERE question_id IN ({placeholders})",
                 tuple(question_ids),
@@ -690,14 +699,15 @@ def print_overview(course_id: int):
         "SELECT count(*) AS cnt FROM t_answer_record WHERE course_id = ?", (course_id,),
     )["cnt"]
     kp_with_q = sql_db._query_one(
-        "SELECT count(DISTINCT kp_id) AS cnt FROM t_question "
-        "WHERE course_id = ? AND kp_id IS NOT NULL AND kp_id <> ''",
+        "SELECT count(DISTINCT qk.kp_id) AS cnt FROM t_question_kp qk "
+        "JOIN t_question q ON q.question_id = qk.question_id "
+        "WHERE q.course_id = ?",
         (course_id,),
     )["cnt"]
     covered_kp = sql_db._query_one(
-        "SELECT count(DISTINCT q.kp_id) AS cnt FROM t_answer_record a "
-        "JOIN t_question q ON q.question_id = a.question_id "
-        "WHERE a.course_id = ? AND q.kp_id IS NOT NULL",
+        "SELECT count(DISTINCT qk.kp_id) AS cnt FROM t_answer_record a "
+        "JOIN t_question_kp qk ON qk.question_id = a.question_id "
+        "WHERE a.course_id = ?",
         (course_id,),
     )["cnt"]
     manual_lr = sql_db._query_one(

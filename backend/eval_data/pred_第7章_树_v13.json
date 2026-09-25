@@ -1,0 +1,1949 @@
+[
+  {
+    "text_id": "Hello算法_第7章_树",
+    "runs": [
+      {
+        "entities": [
+          {
+            "name": "二叉树",
+            "category": "概念",
+            "description": "一种非线性数据结构，每个节点最多有两个子节点，体现分治逻辑。"
+          },
+          {
+            "name": "节点",
+            "category": "概念",
+            "description": "二叉树的基本单元，包含值、左子节点引用和右子节点引用。"
+          },
+          {
+            "name": "父节点",
+            "category": "概念",
+            "description": "拥有子节点的节点，其引用指向左子节点和右子节点。"
+          },
+          {
+            "name": "左子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于左侧。"
+          },
+          {
+            "name": "右子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于右侧。"
+          },
+          {
+            "name": "左子树",
+            "category": "概念",
+            "description": "以某节点的左子节点为根节点的子树。"
+          },
+          {
+            "name": "右子树",
+            "category": "概念",
+            "description": "以某节点的右子节点为根节点的子树。"
+          },
+          {
+            "name": "根节点",
+            "category": "概念",
+            "description": "位于二叉树顶层的节点，没有父节点。"
+          },
+          {
+            "name": "叶节点",
+            "category": "概念",
+            "description": "没有子节点的节点，其两个指针均指向None。"
+          },
+          {
+            "name": "边",
+            "category": "概念",
+            "description": "连接两个节点的线段，即节点引用（指针）。"
+          },
+          {
+            "name": "层",
+            "category": "概念",
+            "description": "节点所在的层级，从顶至底递增，根节点所在层为1。"
+          },
+          {
+            "name": "度",
+            "category": "概念",
+            "description": "节点的子节点的数量，在二叉树中取值范围是0、1、2。"
+          },
+          {
+            "name": "高度",
+            "category": "概念",
+            "description": "从根节点到最远叶节点所经过的边的数量。"
+          },
+          {
+            "name": "深度",
+            "category": "概念",
+            "description": "从根节点到该节点所经过的边的数量。"
+          },
+          {
+            "name": "完美二叉树",
+            "category": "概念",
+            "description": "所有层的节点都被完全填满的二叉树，叶节点度为0，其余节点度为2。"
+          },
+          {
+            "name": "完全二叉树",
+            "category": "概念",
+            "description": "仅允许最底层的节点不完全填满，且最底层的节点必须从左至右依次连续填充的二叉树。"
+          },
+          {
+            "name": "完满二叉树",
+            "category": "概念",
+            "description": "除了叶节点之外，其余所有节点都有两个子节点的二叉树。"
+          },
+          {
+            "name": "平衡二叉树",
+            "category": "概念",
+            "description": "任意节点的左子树和右子树的高度之差的绝对值不超过1的二叉树。"
+          },
+          {
+            "name": "遍历",
+            "category": "概念",
+            "description": "按照某种顺序访问树中所有节点的操作。"
+          },
+          {
+            "name": "层序遍历",
+            "category": "概念",
+            "description": "从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。"
+          },
+          {
+            "name": "广度优先遍历",
+            "category": "概念",
+            "description": "一种逐层向外扩展的遍历方式，也称广度优先搜索（BFS）。"
+          },
+          {
+            "name": "前序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“根-左-右”的顺序访问节点。"
+          },
+          {
+            "name": "中序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-根-右”的顺序访问节点。"
+          },
+          {
+            "name": "后序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-右-根”的顺序访问节点。"
+          },
+          {
+            "name": "深度优先遍历",
+            "category": "概念",
+            "description": "一种先走到尽头再回溯的遍历方式，也称深度优先搜索（DFS）。"
+          },
+          {
+            "name": "递归",
+            "category": "方法",
+            "description": "一种通过函数调用自身来解决问题的方法。"
+          },
+          {
+            "name": "队列",
+            "category": "概念",
+            "description": "一种遵循先进先出规则的数据结构。"
+          },
+          {
+            "name": "二叉搜索树",
+            "category": "概念",
+            "description": "满足左子树所有节点值 < 根节点值 < 右子树所有节点值的二叉树。"
+          },
+          {
+            "name": "查找节点",
+            "category": "方法",
+            "description": "在二叉搜索树中根据目标值查找节点的操作。"
+          },
+          {
+            "name": "插入节点",
+            "category": "方法",
+            "description": "在二叉搜索树中插入新节点并保持其性质的操作。"
+          },
+          {
+            "name": "删除节点",
+            "category": "方法",
+            "description": "在二叉搜索树中删除指定节点并保持其性质的操作。"
+          },
+          {
+            "name": "二分查找算法",
+            "category": "方法",
+            "description": "一种在有序数组中每轮排除一半元素的查找算法。"
+          },
+          {
+            "name": "AVL树",
+            "category": "概念",
+            "description": "一种平衡二叉搜索树，通过旋转操作保持平衡，确保操作时间复杂度为O(log n)。"
+          },
+          {
+            "name": "平衡因子",
+            "category": "概念",
+            "description": "节点左子树的高度减去右子树的高度，用于判断AVL树是否平衡。"
+          },
+          {
+            "name": "旋转",
+            "category": "方法",
+            "description": "AVL树中用于恢复平衡的操作，包括右旋、左旋等。"
+          },
+          {
+            "name": "右旋",
+            "category": "方法",
+            "description": "一种旋转操作，将失衡节点的左子节点提升为新的子树根节点。"
+          },
+          {
+            "name": "左旋",
+            "category": "方法",
+            "description": "一种旋转操作，将失衡节点的右子节点提升为新的子树根节点。"
+          },
+          {
+            "name": "先左旋后右旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点左旋，再对失衡节点右旋。"
+          },
+          {
+            "name": "先右旋后左旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点右旋，再对失衡节点左旋。"
+          },
+          {
+            "name": "数组表示",
+            "category": "概念",
+            "description": "使用数组存储二叉树节点，通过索引映射关系表示父子节点。"
+          },
+          {
+            "name": "映射公式",
+            "category": "公式",
+            "description": "若节点索引为i，则左子节点索引为2i+1，右子节点索引为2i+2。"
+          },
+          {
+            "name": "多级索引",
+            "category": "概念",
+            "description": "二叉搜索树的一种应用，用于实现高效的查找、插入、删除操作。"
+          },
+          {
+            "name": "红黑树",
+            "category": "概念",
+            "description": "一种常见的平衡二叉搜索树，平衡条件较AVL树更宽松。"
+          },
+          {
+            "name": "PRIVATE",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员仅在类内部可见"
+          },
+          {
+            "name": "PUBLIC",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员可在类外部访问"
+          },
+          {
+            "name": "UPDATEHEIGHT()",
+            "category": "方法",
+            "description": "更新节点高度的私有方法，是插入、删除操作中的一步"
+          },
+          {
+            "name": "HEIGHT()",
+            "category": "方法",
+            "description": "访问节点高度的公有方法，类似于 vector.size()"
+          },
+          {
+            "name": "BUILD_TREE()",
+            "category": "方法",
+            "description": "从一组输入数据构建二叉搜索树的方法"
+          },
+          {
+            "name": "平衡性",
+            "category": "概念",
+            "description": "二叉搜索树左右子树高度接近的程度，影响操作效率"
+          },
+          {
+            "name": "EQUALS()",
+            "category": "方法",
+            "description": "Java 中用于比较两个对象值是否相等的方法"
+          },
+          {
+            "name": "==",
+            "category": "概念",
+            "description": "Java 中用于比较基本数据类型值或引用类型对象地址的运算符"
+          },
+          {
+            "name": "字符串常量池",
+            "category": "概念",
+            "description": "Java 中存储字符串字面量的内存区域，相同字面量指向同一对象"
+          },
+          {
+            "name": "满二叉树",
+            "category": "概念",
+            "description": "每一层的节点数都达到最大值的二叉树"
+          }
+        ],
+        "relations": [
+          {
+            "source": "二叉树",
+            "target": "节点",
+            "type": "CONTAINS",
+            "evidence": "二叉树的基本单元是节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "左子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "右子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点（root node）：位于二叉树顶层的节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "叶节点",
+            "type": "CONTAINS",
+            "evidence": "叶节点（leaf node）：没有子节点的节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "边",
+            "type": "CONTAINS",
+            "evidence": "边（edge）：连接两个节点的线段",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "层",
+            "type": "CONTAINS",
+            "evidence": "节点所在的层（level）：从顶至底递增",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "度",
+            "type": "CONTAINS",
+            "evidence": "节点的度（degree）：节点的子节点的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "高度",
+            "type": "CONTAINS",
+            "evidence": "二叉树的高度（height）：从根节点到最远叶节点所经过的边的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "深度",
+            "type": "CONTAINS",
+            "evidence": "节点的深度（depth）：从根节点到该节点所经过的边的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树（perfect binary tree）所有层的节点都被完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完全二叉树",
+            "type": "CONTAINS",
+            "evidence": "完全二叉树（complete binary tree）仅允许最底层的节点不完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完满二叉树",
+            "type": "CONTAINS",
+            "evidence": "完满二叉树（full binary tree）除了叶节点之外，其余所有节点都有两个子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "平衡二叉树",
+            "type": "CONTAINS",
+            "evidence": "平衡二叉树（balanced binary tree）中任意节点的左子树和右子树的高度之差的绝对值不超过1",
+            "confidence": 0.95
+          },
+          {
+            "source": "完全二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树也是一棵完全二叉树",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "广度优先遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "层序遍历本质上属于广度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "递归",
+            "target": "深度优先遍历",
+            "type": "APPLIES_TO",
+            "evidence": "深度优先搜索通常基于递归实现",
+            "confidence": 0.95
+          },
+          {
+            "source": "队列",
+            "target": "广度优先遍历",
+            "type": "RELATED_TO",
+            "evidence": "广度优先遍历通常借助“队列”来实现",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "查找节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：查找节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "插入节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：插入节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "删除节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：删除节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "二分查找算法",
+            "type": "RELATED_TO",
+            "evidence": "二叉搜索树的查找操作与二分查找算法的工作原理一致",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "多级索引",
+            "type": "APPLIES_TO",
+            "evidence": "用作系统中的多级索引，实现高效的查找、插入、删除操作",
+            "confidence": 0.9
+          },
+          {
+            "source": "AVL树",
+            "target": "二叉搜索树",
+            "type": "CONTAINS",
+            "evidence": "AVL 树既是二叉搜索树",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡二叉树",
+            "type": "CONTAINS",
+            "evidence": "AVL 树也是平衡二叉树",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡因子",
+            "type": "CONTAINS",
+            "evidence": "节点的平衡因子（balance factor）定义为节点左子树的高度减去右子树的高度",
+            "confidence": 0.9
+          },
+          {
+            "source": "AVL树",
+            "target": "旋转",
+            "type": "CONTAINS",
+            "evidence": "AVL 树的特点在于“旋转”操作",
+            "confidence": 0.9
+          },
+          {
+            "source": "旋转",
+            "target": "右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先左旋后右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先右旋后左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "数组表示",
+            "target": "映射公式",
+            "type": "CONTAINS",
+            "evidence": "根据层序遍历的特性，我们可以推导出父节点索引与子节点索引之间的“映射公式”",
+            "confidence": 0.9
+          },
+          {
+            "source": "红黑树",
+            "target": "AVL树",
+            "type": "RELATED_TO",
+            "evidence": "红黑树也是一种常见的平衡二叉搜索树。相较于 AVL 树，红黑树的平衡条件更宽松",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "BUILD_TREE()",
+            "type": "CONTAINS",
+            "evidence": "构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点的选择是不是很重要？是的，构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.9
+          },
+          {
+            "source": "满二叉树",
+            "target": "广度优先遍历",
+            "type": "RELATED_TO",
+            "evidence": "例如高度 $h = 2$ 的满二叉树，其节点总数 $n = 7$ ，则底层节点数量 $4 = 2^h = (n + 1) / 2$",
+            "confidence": 0.8
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 44,
+        "dropped_counts": {
+          "duplicate": 1
+        },
+        "dropped_relations": [
+          {
+            "source": "队列",
+            "type": "RELATED_TO",
+            "target": "广度优先遍历",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "二叉树",
+            "category": "概念",
+            "description": "一种非线性数据结构，每个节点最多有两个子节点，体现分治逻辑。"
+          },
+          {
+            "name": "节点",
+            "category": "概念",
+            "description": "二叉树的基本单元，包含值、左子节点引用和右子节点引用。"
+          },
+          {
+            "name": "父节点",
+            "category": "概念",
+            "description": "拥有子节点的节点，其子节点由指针指向。"
+          },
+          {
+            "name": "左子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于左侧。"
+          },
+          {
+            "name": "右子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于右侧。"
+          },
+          {
+            "name": "左子树",
+            "category": "概念",
+            "description": "以某节点的左子节点为根节点的子树。"
+          },
+          {
+            "name": "右子树",
+            "category": "概念",
+            "description": "以某节点的右子节点为根节点的子树。"
+          },
+          {
+            "name": "根节点",
+            "category": "概念",
+            "description": "位于二叉树顶层的节点，没有父节点。"
+          },
+          {
+            "name": "叶节点",
+            "category": "概念",
+            "description": "没有子节点的节点，其两个指针均指向None。"
+          },
+          {
+            "name": "边",
+            "category": "概念",
+            "description": "连接两个节点的线段，即节点引用（指针）。"
+          },
+          {
+            "name": "层",
+            "category": "概念",
+            "description": "节点所在的层级，从顶至底递增，根节点所在层为1。"
+          },
+          {
+            "name": "度",
+            "category": "概念",
+            "description": "节点的子节点的数量，在二叉树中取值范围是0、1、2。"
+          },
+          {
+            "name": "高度",
+            "category": "概念",
+            "description": "从根节点到最远叶节点所经过的边的数量。"
+          },
+          {
+            "name": "深度",
+            "category": "概念",
+            "description": "从根节点到该节点所经过的边的数量。"
+          },
+          {
+            "name": "完美二叉树",
+            "category": "概念",
+            "description": "所有层的节点都被完全填满的二叉树。"
+          },
+          {
+            "name": "完全二叉树",
+            "category": "概念",
+            "description": "仅允许最底层的节点不完全填满，且最底层的节点必须从左至右依次连续填充的二叉树。"
+          },
+          {
+            "name": "完满二叉树",
+            "category": "概念",
+            "description": "除了叶节点之外，其余所有节点都有两个子节点的二叉树。"
+          },
+          {
+            "name": "平衡二叉树",
+            "category": "概念",
+            "description": "任意节点的左子树和右子树的高度之差的绝对值不超过1的二叉树。"
+          },
+          {
+            "name": "遍历",
+            "category": "概念",
+            "description": "按照某种顺序访问树中所有节点的操作。"
+          },
+          {
+            "name": "层序遍历",
+            "category": "概念",
+            "description": "从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。"
+          },
+          {
+            "name": "广度优先遍历",
+            "category": "概念",
+            "description": "一种逐层向外扩展的遍历方式，也称广度优先搜索（BFS）。"
+          },
+          {
+            "name": "前序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“根-左-右”的顺序访问节点。"
+          },
+          {
+            "name": "中序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-根-右”的顺序访问节点。"
+          },
+          {
+            "name": "后序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-右-根”的顺序访问节点。"
+          },
+          {
+            "name": "深度优先遍历",
+            "category": "概念",
+            "description": "一种先走到尽头再回溯的遍历方式，也称深度优先搜索（DFS）。"
+          },
+          {
+            "name": "递归",
+            "category": "方法",
+            "description": "一种通过函数调用自身来解决问题的方法。"
+          },
+          {
+            "name": "队列",
+            "category": "概念",
+            "description": "一种遵循先进先出规则的数据结构。"
+          },
+          {
+            "name": "二叉搜索树",
+            "category": "概念",
+            "description": "满足左子树所有节点值小于根节点值小于右子树所有节点值的二叉树。"
+          },
+          {
+            "name": "查找节点",
+            "category": "方法",
+            "description": "在二叉搜索树中根据目标值查找节点的操作。"
+          },
+          {
+            "name": "插入节点",
+            "category": "方法",
+            "description": "在二叉搜索树中插入新节点并保持其性质的操作。"
+          },
+          {
+            "name": "删除节点",
+            "category": "方法",
+            "description": "在二叉搜索树中删除指定节点并保持其性质的操作。"
+          },
+          {
+            "name": "二分查找算法",
+            "category": "方法",
+            "description": "一种在有序数组中每轮排除一半元素的查找算法。"
+          },
+          {
+            "name": "中序遍历序列",
+            "category": "概念",
+            "description": "对二叉搜索树进行中序遍历得到的节点值序列，是升序的。"
+          },
+          {
+            "name": "AVL树",
+            "category": "概念",
+            "description": "一种平衡二叉搜索树，通过旋转操作保持平衡。"
+          },
+          {
+            "name": "平衡二叉搜索树",
+            "category": "概念",
+            "description": "既是二叉搜索树又是平衡二叉树的树。"
+          },
+          {
+            "name": "节点高度",
+            "category": "概念",
+            "description": "从该节点到它的最远叶节点的距离，即所经过的边的数量。"
+          },
+          {
+            "name": "平衡因子",
+            "category": "概念",
+            "description": "节点左子树的高度减去右子树的高度，用于判断平衡状态。"
+          },
+          {
+            "name": "旋转",
+            "category": "方法",
+            "description": "AVL树中用于恢复平衡的操作，包括右旋、左旋等。"
+          },
+          {
+            "name": "右旋",
+            "category": "方法",
+            "description": "一种旋转操作，用于处理左偏失衡。"
+          },
+          {
+            "name": "左旋",
+            "category": "方法",
+            "description": "一种旋转操作，用于处理右偏失衡。"
+          },
+          {
+            "name": "先左旋后右旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点左旋，再对失衡节点右旋。"
+          },
+          {
+            "name": "先右旋后左旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点右旋，再对失衡节点左旋。"
+          },
+          {
+            "name": "数组表示",
+            "category": "概念",
+            "description": "使用数组存储二叉树节点，通过索引映射关系表示父子关系。"
+          },
+          {
+            "name": "映射公式",
+            "category": "公式",
+            "description": "若节点索引为i，则左子节点索引为2i+1，右子节点索引为2i+2。"
+          },
+          {
+            "name": "多级索引",
+            "category": "概念",
+            "description": "二叉搜索树的一种应用，用于实现高效的查找、插入、删除操作。"
+          },
+          {
+            "name": "红黑树",
+            "category": "概念",
+            "description": "一种常见的平衡二叉搜索树，平衡条件较AVL树更宽松。"
+          },
+          {
+            "name": "PRIVATE",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员仅在类内部可见。"
+          },
+          {
+            "name": "PUBLIC",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员可在类外部访问。"
+          },
+          {
+            "name": "UPDATEHEIGHT()",
+            "category": "方法",
+            "description": "更新节点高度的私有方法，是插入、删除操作中的一步。"
+          },
+          {
+            "name": "HEIGHT()",
+            "category": "方法",
+            "description": "访问节点高度的公有方法，类似于 vector.size()。"
+          },
+          {
+            "name": "BUILD_TREE()",
+            "category": "方法",
+            "description": "从一组输入数据构建二叉搜索树的方法。"
+          },
+          {
+            "name": "平衡性",
+            "category": "概念",
+            "description": "二叉搜索树左右子树高度接近的性质，影响操作效率。"
+          },
+          {
+            "name": "JAVA",
+            "category": "概念",
+            "description": "一种面向对象的编程语言。"
+          },
+          {
+            "name": "字符串",
+            "category": "概念",
+            "description": "Java 中的引用类型，表示字符序列。"
+          },
+          {
+            "name": "EQUALS()",
+            "category": "方法",
+            "description": "Java 中用于比较两个对象值是否相等的方法。"
+          },
+          {
+            "name": "==",
+            "category": "概念",
+            "description": "Java 中的运算符，用于比较基本数据类型的值或引用类型的对象引用。"
+          },
+          {
+            "name": "基本数据类型",
+            "category": "概念",
+            "description": "Java 中直接存储值的类型，如 int、char 等。"
+          },
+          {
+            "name": "引用类型",
+            "category": "概念",
+            "description": "Java 中存储对象引用的类型，如 String、数组等。"
+          },
+          {
+            "name": "字符串常量池",
+            "category": "概念",
+            "description": "Java 中存储字符串字面量的内存区域，相同字面量指向同一对象。"
+          },
+          {
+            "name": "满二叉树",
+            "category": "概念",
+            "description": "每一层的节点数都达到最大值的二叉树。"
+          },
+          {
+            "name": "节点数量",
+            "category": "概念",
+            "description": "树中节点的总数。"
+          },
+          {
+            "name": "底层节点数量",
+            "category": "概念",
+            "description": "树最底层的节点个数。"
+          }
+        ],
+        "relations": [
+          {
+            "source": "二叉树",
+            "target": "节点",
+            "type": "CONTAINS",
+            "evidence": "二叉树的基本单元是节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "左子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "右子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点（root node）：位于二叉树顶层的节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "叶节点",
+            "type": "CONTAINS",
+            "evidence": "叶节点（leaf node）：没有子节点的节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "边",
+            "type": "CONTAINS",
+            "evidence": "边（edge）：连接两个节点的线段",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "层",
+            "type": "CONTAINS",
+            "evidence": "节点所在的层（level）：从顶至底递增",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "度",
+            "type": "CONTAINS",
+            "evidence": "节点的度（degree）：节点的子节点的数量",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "高度",
+            "type": "CONTAINS",
+            "evidence": "二叉树的高度（height）：从根节点到最远叶节点所经过的边的数量",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "深度",
+            "type": "CONTAINS",
+            "evidence": "节点的深度（depth）：从根节点到该节点所经过的边的数量",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树（perfect binary tree）所有层的节点都被完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完全二叉树",
+            "type": "CONTAINS",
+            "evidence": "完全二叉树（complete binary tree）仅允许最底层的节点不完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完满二叉树",
+            "type": "CONTAINS",
+            "evidence": "完满二叉树（full binary tree）除了叶节点之外，其余所有节点都有两个子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "平衡二叉树",
+            "type": "CONTAINS",
+            "evidence": "平衡二叉树（balanced binary tree）中任意节点的左子树和右子树的高度之差的绝对值不超过1",
+            "confidence": 0.95
+          },
+          {
+            "source": "完全二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树也是一棵完全二叉树",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "广度优先遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "层序遍历本质上属于广度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "递归",
+            "target": "深度优先遍历",
+            "type": "APPLIES_TO",
+            "evidence": "深度优先搜索通常基于递归实现",
+            "confidence": 0.95
+          },
+          {
+            "source": "队列",
+            "target": "广度优先遍历",
+            "type": "RELATED_TO",
+            "evidence": "广度优先遍历通常借助“队列”来实现",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "查找节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：查找节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "插入节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：插入节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "删除节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：删除节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "中序遍历序列",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的中序遍历序列是升序的",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "多级索引",
+            "type": "APPLIES_TO",
+            "evidence": "用作系统中的多级索引",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡二叉搜索树",
+            "type": "CONTAINS",
+            "evidence": "AVL 树既是二叉搜索树，也是平衡二叉树，同时满足这两类二叉树的所有性质，因此是一种平衡二叉搜索树",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "节点高度",
+            "type": "CONTAINS",
+            "evidence": "由于 AVL 树的相关操作需要获取节点高度",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡因子",
+            "type": "CONTAINS",
+            "evidence": "节点的平衡因子（balance factor）定义为节点左子树的高度减去右子树的高度",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "旋转",
+            "type": "CONTAINS",
+            "evidence": "AVL 树的特点在于“旋转”操作",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先左旋后右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先右旋后左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "数组表示",
+            "target": "映射公式",
+            "type": "CONTAINS",
+            "evidence": "根据层序遍历的特性，我们可以推导出父节点索引与子节点索引之间的“映射公式”",
+            "confidence": 0.95
+          },
+          {
+            "source": "红黑树",
+            "target": "平衡二叉搜索树",
+            "type": "CONTAINS",
+            "evidence": "红黑树也是一种常见的平衡二叉搜索树",
+            "confidence": 0.95
+          },
+          {
+            "source": "红黑树",
+            "target": "AVL树",
+            "type": "RELATED_TO",
+            "evidence": "相较于 AVL 树，红黑树的平衡条件更宽松",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "BUILD_TREE()",
+            "type": "CONTAINS",
+            "evidence": "构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点的选择是不是很重要？是的，构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.9
+          },
+          {
+            "source": "递归",
+            "target": "BUILD_TREE()",
+            "type": "APPLIES_TO",
+            "evidence": "再递归地构建左右子树",
+            "confidence": 0.9
+          },
+          {
+            "source": "满二叉树",
+            "target": "底层节点数量",
+            "type": "CONTAINS",
+            "evidence": "高度 $h = 2$ 的满二叉树，其节点总数 $n = 7$ ，则底层节点数量 $4 = 2^h = (n + 1) / 2$",
+            "confidence": 0.85
+          },
+          {
+            "source": "满二叉树",
+            "target": "节点数量",
+            "type": "CONTAINS",
+            "evidence": "高度 $h = 2$ 的满二叉树，其节点总数 $n = 7$",
+            "confidence": 0.85
+          },
+          {
+            "source": "满二叉树",
+            "target": "高度",
+            "type": "CONTAINS",
+            "evidence": "高度 $h = 2$ 的满二叉树",
+            "confidence": 0.85
+          },
+          {
+            "source": "字符串",
+            "target": "字符串常量池",
+            "type": "RELATED_TO",
+            "evidence": "通过 String a = \"hi\"; String b = \"hi\"; 初始化的字符串都存储在字符串常量池中",
+            "confidence": 0.9
+          },
+          {
+            "source": "EQUALS()",
+            "target": "字符串",
+            "type": "APPLIES_TO",
+            "evidence": "如果要对比值，我们应该使用 equals()",
+            "confidence": 0.9
+          },
+          {
+            "source": "==",
+            "target": "基本数据类型",
+            "type": "APPLIES_TO",
+            "evidence": "对于基本数据类型，== 用于对比两个变量的值是否相等",
+            "confidence": 0.9
+          },
+          {
+            "source": "==",
+            "target": "引用类型",
+            "type": "APPLIES_TO",
+            "evidence": "对于引用类型，两种符号的工作原理是不同的",
+            "confidence": 0.9
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 52,
+        "dropped_counts": {
+          "duplicate": 1
+        },
+        "dropped_relations": [
+          {
+            "source": "队列",
+            "type": "RELATED_TO",
+            "target": "广度优先遍历",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "二叉树",
+            "category": "概念",
+            "description": "一种非线性数据结构，每个节点最多有两个子节点，体现分治逻辑。"
+          },
+          {
+            "name": "节点",
+            "category": "概念",
+            "description": "二叉树的基本单元，包含值、左子节点引用和右子节点引用。"
+          },
+          {
+            "name": "父节点",
+            "category": "概念",
+            "description": "拥有子节点的节点，其子节点由指针指向。"
+          },
+          {
+            "name": "左子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于左侧。"
+          },
+          {
+            "name": "右子节点",
+            "category": "概念",
+            "description": "节点的一个子节点，位于右侧。"
+          },
+          {
+            "name": "左子树",
+            "category": "概念",
+            "description": "以某节点的左子节点为根的子树。"
+          },
+          {
+            "name": "右子树",
+            "category": "概念",
+            "description": "以某节点的右子节点为根的子树。"
+          },
+          {
+            "name": "根节点",
+            "category": "概念",
+            "description": "位于二叉树顶层的节点，没有父节点。"
+          },
+          {
+            "name": "叶节点",
+            "category": "概念",
+            "description": "没有子节点的节点，其两个指针均指向None。"
+          },
+          {
+            "name": "边",
+            "category": "概念",
+            "description": "连接两个节点的线段，即节点引用（指针）。"
+          },
+          {
+            "name": "层",
+            "category": "概念",
+            "description": "节点所在的层级，从顶至底递增，根节点所在层为1。"
+          },
+          {
+            "name": "度",
+            "category": "概念",
+            "description": "节点的子节点的数量，在二叉树中取值范围是0、1、2。"
+          },
+          {
+            "name": "高度",
+            "category": "概念",
+            "description": "从根节点到最远叶节点所经过的边的数量。"
+          },
+          {
+            "name": "深度",
+            "category": "概念",
+            "description": "从根节点到该节点所经过的边的数量。"
+          },
+          {
+            "name": "完美二叉树",
+            "category": "概念",
+            "description": "所有层的节点都被完全填满的二叉树，叶节点度为0，其余节点度为2。"
+          },
+          {
+            "name": "完全二叉树",
+            "category": "概念",
+            "description": "仅允许最底层的节点不完全填满，且最底层的节点必须从左至右依次连续填充的二叉树。"
+          },
+          {
+            "name": "完满二叉树",
+            "category": "概念",
+            "description": "除了叶节点之外，其余所有节点都有两个子节点的二叉树。"
+          },
+          {
+            "name": "平衡二叉树",
+            "category": "概念",
+            "description": "任意节点的左子树和右子树的高度之差的绝对值不超过1的二叉树。"
+          },
+          {
+            "name": "遍历",
+            "category": "概念",
+            "description": "按照某种顺序访问树中所有节点的操作。"
+          },
+          {
+            "name": "层序遍历",
+            "category": "概念",
+            "description": "从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。"
+          },
+          {
+            "name": "前序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“根-左-右”的顺序访问节点。"
+          },
+          {
+            "name": "中序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-根-右”的顺序访问节点。"
+          },
+          {
+            "name": "后序遍历",
+            "category": "概念",
+            "description": "深度优先遍历的一种，按照“左-右-根”的顺序访问节点。"
+          },
+          {
+            "name": "广度优先遍历",
+            "category": "概念",
+            "description": "一种逐层遍历的方式，也称广度优先搜索（BFS）。"
+          },
+          {
+            "name": "深度优先遍历",
+            "category": "概念",
+            "description": "一种先走到尽头再回溯的遍历方式，也称深度优先搜索（DFS）。"
+          },
+          {
+            "name": "队列",
+            "category": "概念",
+            "description": "一种遵循先进先出规则的数据结构。"
+          },
+          {
+            "name": "递归",
+            "category": "方法",
+            "description": "一种通过函数调用自身来解决问题的方法。"
+          },
+          {
+            "name": "二叉搜索树",
+            "category": "概念",
+            "description": "满足左子树所有节点值 < 根节点值 < 右子树所有节点值的二叉树。"
+          },
+          {
+            "name": "查找节点",
+            "category": "方法",
+            "description": "在二叉搜索树中根据目标值查找节点的操作。"
+          },
+          {
+            "name": "插入节点",
+            "category": "方法",
+            "description": "在二叉搜索树中插入新节点并保持其性质的操作。"
+          },
+          {
+            "name": "删除节点",
+            "category": "方法",
+            "description": "在二叉搜索树中删除指定节点并保持其性质的操作。"
+          },
+          {
+            "name": "二分查找算法",
+            "category": "方法",
+            "description": "一种在有序数组中每轮排除一半元素的查找算法。"
+          },
+          {
+            "name": "AVL树",
+            "category": "概念",
+            "description": "一种平衡二叉搜索树，通过旋转操作保持平衡。"
+          },
+          {
+            "name": "平衡因子",
+            "category": "概念",
+            "description": "节点左子树的高度减去右子树的高度，用于判断平衡状态。"
+          },
+          {
+            "name": "旋转",
+            "category": "方法",
+            "description": "AVL树中用于恢复平衡的操作，包括右旋、左旋等。"
+          },
+          {
+            "name": "右旋",
+            "category": "方法",
+            "description": "一种旋转操作，用于处理左偏失衡。"
+          },
+          {
+            "name": "左旋",
+            "category": "方法",
+            "description": "一种旋转操作，用于处理右偏失衡。"
+          },
+          {
+            "name": "先左旋后右旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点左旋，再对失衡节点右旋。"
+          },
+          {
+            "name": "先右旋后左旋",
+            "category": "方法",
+            "description": "一种旋转操作，先对子节点右旋，再对失衡节点左旋。"
+          },
+          {
+            "name": "数组表示",
+            "category": "概念",
+            "description": "使用数组存储二叉树节点，通过索引映射关系表示父子关系。"
+          },
+          {
+            "name": "映射公式",
+            "category": "公式",
+            "description": "若节点索引为i，则左子节点索引为2i+1，右子节点索引为2i+2。"
+          },
+          {
+            "name": "多级索引",
+            "category": "概念",
+            "description": "二叉搜索树的一种应用，用于实现高效的查找、插入、删除操作。"
+          },
+          {
+            "name": "红黑树",
+            "category": "概念",
+            "description": "一种常见的平衡二叉搜索树，平衡条件较AVL树更宽松。"
+          },
+          {
+            "name": "PRIVATE",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员仅在类内部可见"
+          },
+          {
+            "name": "PUBLIC",
+            "category": "概念",
+            "description": "类成员访问修饰符，表示成员可在类外部访问"
+          },
+          {
+            "name": "UPDATEHEIGHT()",
+            "category": "方法",
+            "description": "更新节点高度的私有方法，是插入、删除操作中的一步"
+          },
+          {
+            "name": "HEIGHT()",
+            "category": "方法",
+            "description": "访问节点高度的公有方法，类似于 vector.size()"
+          },
+          {
+            "name": "BUILD_TREE()",
+            "category": "方法",
+            "description": "从一组输入数据构建二叉搜索树的方法"
+          },
+          {
+            "name": "平衡性",
+            "category": "概念",
+            "description": "二叉搜索树左右子树高度接近的程度，影响操作效率"
+          },
+          {
+            "name": "JAVA",
+            "category": "概念",
+            "description": "一种面向对象的编程语言"
+          },
+          {
+            "name": "字符串对比",
+            "category": "概念",
+            "description": "比较两个字符串内容或引用是否相等"
+          },
+          {
+            "name": "EQUALS()",
+            "category": "方法",
+            "description": "Java 中用于比较两个对象值是否相等的方法"
+          },
+          {
+            "name": "==",
+            "category": "概念",
+            "description": "Java 中用于比较基本数据类型的值或引用类型的内存地址是否相等的运算符"
+          },
+          {
+            "name": "基本数据类型",
+            "category": "概念",
+            "description": "Java 中直接存储值的数据类型，如 int、char 等"
+          },
+          {
+            "name": "引用类型",
+            "category": "概念",
+            "description": "Java 中存储对象引用的数据类型，如 String、数组等"
+          },
+          {
+            "name": "字符串常量池",
+            "category": "概念",
+            "description": "Java 中存储字符串字面量的内存区域，相同字面量指向同一对象"
+          },
+          {
+            "name": "满二叉树",
+            "category": "概念",
+            "description": "每一层的节点数都达到最大值的二叉树"
+          }
+        ],
+        "relations": [
+          {
+            "source": "二叉树",
+            "target": "节点",
+            "type": "CONTAINS",
+            "evidence": "二叉树的基本单元是节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "左子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "节点",
+            "target": "右子节点",
+            "type": "CONTAINS",
+            "evidence": "每个节点都有两个引用（指针），分别指向左子节点和右子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点（root node）：位于二叉树顶层的节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "叶节点",
+            "type": "CONTAINS",
+            "evidence": "叶节点（leaf node）：没有子节点的节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "边",
+            "type": "CONTAINS",
+            "evidence": "边（edge）：连接两个节点的线段",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "层",
+            "type": "CONTAINS",
+            "evidence": "节点所在的层（level）：从顶至底递增",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "度",
+            "type": "CONTAINS",
+            "evidence": "节点的度（degree）：节点的子节点的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "高度",
+            "type": "CONTAINS",
+            "evidence": "二叉树的高度（height）：从根节点到最远叶节点所经过的边的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "深度",
+            "type": "CONTAINS",
+            "evidence": "节点的深度（depth）：从根节点到该节点所经过的边的数量",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树（perfect binary tree）所有层的节点都被完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完全二叉树",
+            "type": "CONTAINS",
+            "evidence": "完全二叉树（complete binary tree）仅允许最底层的节点不完全填满",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "完满二叉树",
+            "type": "CONTAINS",
+            "evidence": "完满二叉树（full binary tree）除了叶节点之外，其余所有节点都有两个子节点",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉树",
+            "target": "平衡二叉树",
+            "type": "CONTAINS",
+            "evidence": "平衡二叉树（balanced binary tree）中任意节点的左子树和右子树的高度之差的绝对值不超过1",
+            "confidence": 0.95
+          },
+          {
+            "source": "完全二叉树",
+            "target": "完美二叉树",
+            "type": "CONTAINS",
+            "evidence": "完美二叉树也是一棵完全二叉树",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "二叉树常见的遍历方式包括层序遍历、前序遍历、中序遍历和后序遍历等",
+            "confidence": 0.95
+          },
+          {
+            "source": "广度优先遍历",
+            "target": "层序遍历",
+            "type": "CONTAINS",
+            "evidence": "层序遍历本质上属于广度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "前序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "中序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "深度优先遍历",
+            "target": "后序遍历",
+            "type": "CONTAINS",
+            "evidence": "前序、中序和后序遍历都属于深度优先遍历",
+            "confidence": 0.95
+          },
+          {
+            "source": "队列",
+            "target": "广度优先遍历",
+            "type": "RELATED_TO",
+            "evidence": "广度优先遍历通常借助“队列”来实现",
+            "confidence": 0.9
+          },
+          {
+            "source": "递归",
+            "target": "深度优先遍历",
+            "type": "APPLIES_TO",
+            "evidence": "深度优先搜索通常基于递归实现",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "查找节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：查找节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "插入节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：插入节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "删除节点",
+            "type": "CONTAINS",
+            "evidence": "二叉搜索树的操作：删除节点",
+            "confidence": 0.9
+          },
+          {
+            "source": "二分查找算法",
+            "target": "查找节点",
+            "type": "RELATED_TO",
+            "evidence": "二叉搜索树的查找操作与二分查找算法的工作原理一致",
+            "confidence": 0.85
+          },
+          {
+            "source": "AVL树",
+            "target": "二叉搜索树",
+            "type": "CONTAINS",
+            "evidence": "AVL 树既是二叉搜索树",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡二叉树",
+            "type": "CONTAINS",
+            "evidence": "AVL 树也是平衡二叉树",
+            "confidence": 0.95
+          },
+          {
+            "source": "AVL树",
+            "target": "平衡因子",
+            "type": "CONTAINS",
+            "evidence": "节点的平衡因子（balance factor）定义为节点左子树的高度减去右子树的高度",
+            "confidence": 0.9
+          },
+          {
+            "source": "AVL树",
+            "target": "旋转",
+            "type": "CONTAINS",
+            "evidence": "AVL 树的特点在于“旋转”操作",
+            "confidence": 0.9
+          },
+          {
+            "source": "旋转",
+            "target": "右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先左旋后右旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "旋转",
+            "target": "先右旋后左旋",
+            "type": "CONTAINS",
+            "evidence": "旋转操作分为四种：右旋、左旋、先右旋后左旋、先左旋后右旋",
+            "confidence": 0.95
+          },
+          {
+            "source": "数组表示",
+            "target": "映射公式",
+            "type": "CONTAINS",
+            "evidence": "根据层序遍历的特性，我们可以推导出父节点索引与子节点索引之间的“映射公式”",
+            "confidence": 0.9
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "多级索引",
+            "type": "APPLIES_TO",
+            "evidence": "用作系统中的多级索引，实现高效的查找、插入、删除操作",
+            "confidence": 0.9
+          },
+          {
+            "source": "红黑树",
+            "target": "AVL树",
+            "type": "RELATED_TO",
+            "evidence": "红黑树也是一种常见的平衡二叉搜索树。相较于 AVL 树，红黑树的平衡条件更宽松",
+            "confidence": 0.85
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "BUILD_TREE()",
+            "type": "CONTAINS",
+            "evidence": "构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.95
+          },
+          {
+            "source": "二叉搜索树",
+            "target": "根节点",
+            "type": "CONTAINS",
+            "evidence": "根节点的选择是不是很重要？是的，构建树的方法已在二叉搜索树代码中的 build_tree() 方法中给出",
+            "confidence": 0.9
+          },
+          {
+            "source": "满二叉树",
+            "target": "高度",
+            "type": "RELATED_TO",
+            "evidence": "高度 $h = 2$ 的满二叉树，其节点总数 $n = 7$",
+            "confidence": 0.85
+          },
+          {
+            "source": "满二叉树",
+            "target": "广度优先遍历",
+            "type": "RELATED_TO",
+            "evidence": "广度优先遍历到最底层之前，队列中的节点数量是 $2^h$ 吗？是的，例如高度 $h = 2$ 的满二叉树",
+            "confidence": 0.8
+          },
+          {
+            "source": "EQUALS()",
+            "target": "字符串对比",
+            "type": "APPLIES_TO",
+            "evidence": "如果要对比值，我们应该使用 equals()",
+            "confidence": 0.95
+          },
+          {
+            "source": "==",
+            "target": "字符串对比",
+            "type": "APPLIES_TO",
+            "evidence": "也可以用 a == b 来比较两个字符串的内容",
+            "confidence": 0.9
+          },
+          {
+            "source": "字符串常量池",
+            "target": "字符串对比",
+            "type": "RELATED_TO",
+            "evidence": "通过 String a = \"hi\"; String b = \"hi\"; 初始化的字符串都存储在字符串常量池中，它们指向同一个对象，因此也可以用 a == b 来比较两个字符串的内容",
+            "confidence": 0.85
+          },
+          {
+            "source": "基本数据类型",
+            "target": "==",
+            "type": "RELATED_TO",
+            "evidence": "对于基本数据类型，== 用于对比两个变量的值是否相等",
+            "confidence": 0.9
+          },
+          {
+            "source": "引用类型",
+            "target": "==",
+            "type": "RELATED_TO",
+            "evidence": "对于引用类型，两种符号的工作原理是不同的",
+            "confidence": 0.85
+          },
+          {
+            "source": "引用类型",
+            "target": "EQUALS()",
+            "type": "RELATED_TO",
+            "evidence": "对于引用类型，两种符号的工作原理是不同的",
+            "confidence": 0.85
+          },
+          {
+            "source": "PRIVATE",
+            "target": "UPDATEHEIGHT()",
+            "type": "RELATED_TO",
+            "evidence": "如果方法只在类内部使用，那么就设计为 private 。例如，用户单独调用 updateHeight() 是没有意义的",
+            "confidence": 0.9
+          },
+          {
+            "source": "PUBLIC",
+            "target": "HEIGHT()",
+            "type": "RELATED_TO",
+            "evidence": "height() 是访问节点高度，类似于 vector.size() ，因此设置成 public 以便使用",
+            "confidence": 0.9
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 53,
+        "dropped_counts": {
+          "duplicate": 1
+        },
+        "dropped_relations": [
+          {
+            "source": "队列",
+            "type": "RELATED_TO",
+            "target": "广度优先遍历",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      }
+    ]
+  }
+]
