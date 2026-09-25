@@ -1230,7 +1230,9 @@ class SQLDatabase:
             role="teacher", display_name="默认教师",
         )
         if generated:
-            self._print_bootstrap_credentials(DEFAULT_TEACHER_USERNAME, password, "演示教师")
+            self._print_bootstrap_credentials(
+                DEFAULT_TEACHER_USERNAME, password, "演示教师",
+                "DEFAULT_TEACHER_PASSWORD（演示教师的用户名固定为 admin，不可配）")
         return user_id
 
     def ensure_default_admin(self) -> int:
@@ -1257,7 +1259,9 @@ class SQLDatabase:
         if generated:
             # 随机密码是打印在日志里的，日志可能被留存/转发，故首次登录强制改密。
             self.set_must_change_password(user_id, True)
-            self._print_bootstrap_credentials(DEFAULT_ADMIN_USERNAME, password, "管理员")
+            self._print_bootstrap_credentials(
+                DEFAULT_ADMIN_USERNAME, password, "管理员",
+                "DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_PASSWORD")
         return user_id
 
     @staticmethod
@@ -1273,15 +1277,22 @@ class SQLDatabase:
         return generate_bootstrap_password(), True
 
     @staticmethod
-    def _print_bootstrap_credentials(username: str, password: str, label: str) -> None:
-        """把随机生成的引导凭据打印到启动日志（仅此一次，之后无法再查）。"""
+    def _print_bootstrap_credentials(username: str, password: str, label: str,
+                                     env_hint: str) -> None:
+        """把随机生成的引导凭据打印到启动日志（仅此一次，之后无法再查）。
+
+        env_hint 必须与调用方**真正读取**的环境变量一致：演示教师的用户名是写死的
+        "admin"（不读环境变量），只有口令可配——若一律提示 DEFAULT_ADMIN_*，
+        使用者会给一个不生效的变量白忙一场。
+        """
         banner = "=" * 68
         print(f"\n{banner}\n"
-              f"  已创建{label}引导账号（随机密码，仅本次显示，请立即记录并在首次登录后修改）\n"
+              f"  已创建{label}引导账号（随机密码，仅本次显示，请立即记录）\n"
               f"    用户名：{username}\n"
               f"    密  码：{password}\n"
+              f"  该口令只在本次启动日志里出现，首次登录后系统会要求修改密码。\n"
               f"  如需自行指定，请在启动前设置环境变量：\n"
-              f"    DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_PASSWORD\n"
+              f"    {env_hint}\n"
               f"{banner}\n", flush=True)
 
     @staticmethod
