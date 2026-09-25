@@ -1,0 +1,1031 @@
+{
+  "course_id": 65,
+  "k": 30,
+  "seed": 2026,
+  "target": 0.95,
+  "recall_at_k_mean": 1.0,
+  "recall_at_k_min": 1.0,
+  "below_target": 0,
+  "detail": [
+    {
+      "user_id": 110,
+      "mode": "weak",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 110,
+      "mode": "review",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 110,
+      "mode": "new",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 110,
+      "mode": "advanced",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 110,
+      "mode": "mixed",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 110,
+      "mode": "random",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 17,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 1
+        },
+        "wrong": {
+          "kps": 16,
+          "picked_kps": 15
+        },
+        "semantic": {
+          "kps": 17,
+          "picked_kps": 2
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "weak",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "review",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "new",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "advanced",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "mixed",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 111,
+      "mode": "random",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 20
+        },
+        "weak": {
+          "kps": 6,
+          "picked_kps": 3
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 11
+        },
+        "semantic": {
+          "kps": 14,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "weak",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "review",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "new",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "advanced",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "mixed",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 112,
+      "mode": "random",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 35,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 19,
+          "picked_kps": 9
+        },
+        "wrong": {
+          "kps": 20,
+          "picked_kps": 3
+        },
+        "semantic": {
+          "kps": 18,
+          "picked_kps": 6
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "weak",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "review",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "new",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "advanced",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "mixed",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 113,
+      "mode": "random",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 32,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 40,
+          "picked_kps": 24
+        },
+        "weak": {
+          "kps": 1,
+          "picked_kps": 0
+        },
+        "wrong": {
+          "kps": 9,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 20,
+          "picked_kps": 4
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "weak",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "review",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "new",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "advanced",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "mixed",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    },
+    {
+      "user_id": 114,
+      "mode": "random",
+      "k_eff": 30,
+      "hit": 30,
+      "recall_at_k": 1.0,
+      "cand_off": 120,
+      "cand_on": 120,
+      "drop_pct": 0.0,
+      "fallback_used": false,
+      "kp_recalled": 37,
+      "by_channel": {
+        "outer": {
+          "kps": 0,
+          "picked_kps": 0
+        },
+        "due": {
+          "kps": 39,
+          "picked_kps": 17
+        },
+        "weak": {
+          "kps": 25,
+          "picked_kps": 15
+        },
+        "wrong": {
+          "kps": 23,
+          "picked_kps": 4
+        },
+        "semantic": {
+          "kps": 11,
+          "picked_kps": 1
+        }
+      }
+    }
+  ]
+}

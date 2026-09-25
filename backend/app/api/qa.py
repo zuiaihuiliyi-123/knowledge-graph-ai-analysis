@@ -46,6 +46,8 @@ async def ask_question(request: QuestionRequest, current_user: dict = Depends(ge
     # 旧写法先 ask() 再单独 search_related_nodes()，同一次提问检索两遍
     # （外部 embedding 调用、Neo4j 查询、向量反序列化全部翻倍），
     # 且 sources 来自第二遍，可能与喂给 LLM 的上下文不一致。
+    # 阶段 G（async 修复）：该方法的同步体已在 qa_service 内部走 asyncio.to_thread，
+    # 故此处 await 它就等于把 embedding + SQLite + Neo4j + LLM 全部移出事件循环。
     result = await qa_service.ask_with_sources(request.question, request.course_id,
                                                request.document_id, allowed_ids=allowed_ids)
 

@@ -1,0 +1,879 @@
+{
+  "tag": "bias",
+  "course_id": 65,
+  "seed": 2026,
+  "count": 10,
+  "students": 5,
+  "aggregate_by_mode": {
+    "weak": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 7.4,
+      "filled": 2.6,
+      "quota_relaxed": 0,
+      "mastery_avg": 54.99,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    },
+    "review": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 8.2,
+      "filled": 0.8,
+      "quota_relaxed": 0,
+      "mastery_avg": 54.0,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    },
+    "new": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 7.8,
+      "filled": 10,
+      "quota_relaxed": 0,
+      "mastery_avg": 52.59,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    },
+    "advanced": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 8,
+      "filled": 0,
+      "quota_relaxed": 0,
+      "mastery_avg": 78.06,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    },
+    "mixed": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 6.6,
+      "filled": 2.6,
+      "quota_relaxed": 0,
+      "mastery_avg": 51.09,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    },
+    "random": {
+      "picked": 10,
+      "candidates": 120,
+      "distinct_kp": 9.2,
+      "filled": 0,
+      "quota_relaxed": 0,
+      "mastery_avg": 77.65,
+      "global_mastery_avg": 78.42,
+      "below_weak_avg": 10.8
+    }
+  },
+  "detail": [
+    {
+      "user_id": 110,
+      "mode": "weak",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 5,
+        "filled": 5
+      },
+      "filled": 5,
+      "quota_relaxed": 0,
+      "fill_rate": 0.5,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 6,
+      "mastery_avg": 74.91,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 110,
+      "mode": "review",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "review": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 10,
+      "mastery_avg": 84.6,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 110,
+      "mode": "new",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "new": 0,
+        "filled": 10
+      },
+      "filled": 10,
+      "quota_relaxed": 0,
+      "fill_rate": 1.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 77.56,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 110,
+      "mode": "advanced",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "advanced": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 85.37,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 110,
+      "mode": "mixed",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 5,
+        "review": 2,
+        "new": 0,
+        "advanced": 1,
+        "filled": 2
+      },
+      "filled": 2,
+      "quota_relaxed": 0,
+      "fill_rate": 0.2,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 6,
+      "mastery_avg": 73.01,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 110,
+      "mode": "random",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "random": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 93.97,
+        "min": 56.5,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 94.84,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "weak",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 50.04,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "review",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "review": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 53.23,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "new",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "new": 0,
+        "filled": 10
+      },
+      "filled": 10,
+      "quota_relaxed": 0,
+      "fill_rate": 1.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 53.23,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "advanced",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "advanced": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 79.35,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "mixed",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 5,
+        "review": 2,
+        "new": 0,
+        "advanced": 1,
+        "filled": 2
+      },
+      "filled": 2,
+      "quota_relaxed": 0,
+      "fill_rate": 0.2,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 5,
+      "mastery_avg": 46.53,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 111,
+      "mode": "random",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "random": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 83.72,
+        "min": 32.5,
+        "max": 100.0,
+        "below_weak": 7
+      },
+      "distinct_kp": 10,
+      "mastery_avg": 80.47,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "weak",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 48.39,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "review",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "review": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 39.97,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "new",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "new": 0,
+        "filled": 10
+      },
+      "filled": 10,
+      "quota_relaxed": 0,
+      "fill_rate": 1.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 9,
+      "mastery_avg": 39.97,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "advanced",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "advanced": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 80.3,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "mixed",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 5,
+        "review": 2,
+        "new": 0,
+        "advanced": 1,
+        "filled": 2
+      },
+      "filled": 2,
+      "quota_relaxed": 0,
+      "fill_rate": 0.2,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 40.59,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 112,
+      "mode": "random",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "random": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 67.24,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 20
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 66.48,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "weak",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 2,
+        "filled": 8
+      },
+      "filled": 8,
+      "quota_relaxed": 0,
+      "fill_rate": 0.8,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 61.91,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "review",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "review": 6,
+        "filled": 4
+      },
+      "filled": 4,
+      "quota_relaxed": 0,
+      "fill_rate": 0.4,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 65.77,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "new",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "new": 0,
+        "filled": 10
+      },
+      "filled": 10,
+      "quota_relaxed": 0,
+      "fill_rate": 1.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 65.77,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "advanced",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "advanced": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 78.83,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "mixed",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 2,
+        "review": 2,
+        "new": 0,
+        "advanced": 1,
+        "filled": 5
+      },
+      "filled": 5,
+      "quota_relaxed": 0,
+      "fill_rate": 0.5,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 61.91,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 113,
+      "mode": "random",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "random": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 40,
+        "with_evidence": 40,
+        "avg": 92.65,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 1
+      },
+      "distinct_kp": 10,
+      "mastery_avg": 96.61,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "weak",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 39.71,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "review",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "review": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 6,
+      "mastery_avg": 26.41,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "new",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "new": 0,
+        "filled": 10
+      },
+      "filled": 10,
+      "quota_relaxed": 0,
+      "fill_rate": 1.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 6,
+      "mastery_avg": 26.41,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "advanced",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "advanced": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 8,
+      "mastery_avg": 66.45,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "mixed",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "weak": 5,
+        "review": 2,
+        "new": 0,
+        "advanced": 1,
+        "filled": 2
+      },
+      "filled": 2,
+      "quota_relaxed": 0,
+      "fill_rate": 0.2,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 7,
+      "mastery_avg": 33.4,
+      "kp_quota": 4,
+      "graph_available": false
+    },
+    {
+      "user_id": 114,
+      "mode": "random",
+      "picked": 10,
+      "candidates": 120,
+      "buckets": {
+        "random": 10
+      },
+      "filled": 0,
+      "quota_relaxed": 0,
+      "fill_rate": 0.0,
+      "kp_attr_mode": "all",
+      "kp_quota_mode": "any_hit",
+      "mastery_stats": {
+        "kps": 39,
+        "with_evidence": 39,
+        "avg": 54.51,
+        "min": 25.0,
+        "max": 100.0,
+        "below_weak": 25
+      },
+      "distinct_kp": 10,
+      "mastery_avg": 49.86,
+      "kp_quota": 4,
+      "graph_available": false
+    }
+  ]
+}

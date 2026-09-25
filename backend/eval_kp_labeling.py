@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.core.sql_database import sql_db
 from app.services import kp_labeler
+from app.services.embedding import EmbeddingClient
 from app.services.kp_labeler import (
     GRAPH_MIN_SCORE, MIN_SCORE, TOP_K, VEC_FLOOR, W_GRAPH, W_LEX, W_VEC,
     KpCatalog, label_question,
@@ -144,20 +145,38 @@ def eval_synthetic(items: list, relations: dict, top_k: int = TOP_K,
     return {"metrics": metrics, "rows": rows}
 
 
-def eval_course(course_id: int, document_id, top_k: int = TOP_K) -> dict:
-    """模式 A：真实题库留一评估（隐藏题目已挂 kp_id，用标注器预测）"""
+def eval_course(course_id: int, document_id, top_k: int = TOP_K,
+                use_vector: bool = False) -> dict:
+    """模式 A：真实题库留一评估（隐藏题目已挂 kp_id，用标注器预测）
+
+    `use_vector=True` 时启用**向量路**（需 `EMBEDDING_API_KEY` + 两张向量表有数据）。
+    题目向量与知识点向量都从库里**批量读回**（BLOB 快读）→ **评测本身不产生 embedding API 调用**。
+    该参数是 L2 阶段 E 新增：此前本函数不传 embedder/kp_vectors，向量路恒为关闭，
+    所以历史报告（hit@1 0.102）只反映「字面 + 图谱」两层。
+    """
     catalog = KpCatalog(course_id, document_id).load()
+    embedder = EmbeddingClient() if use_vector else None
+    if embedder is not None and not embedder.available:
+        embedder = None                                   # 无 key → 自动回落，不报错
+    kp_vectors = kp_labeler._load_kp_vectors(course_id, document_id) if embedder else {}
     _, questions = sql_db.list_questions(course_id, document_id=document_id,
                                           page=1, page_size=100000)
     labeled = [q for q in questions if (q.get("kp_id") or "").strip()]
-    rows, no_cand = [], 0
+    q_vectors = (kp_labeler._load_question_vectors(labeled, course_id)
+                 if kp_vectors else {})
+    rows, no_cand, layer = [], 0, {"lexical": 0, "vector": 0, "graph": 0}
     t0 = time.time()
     for q in labeled:
-        res = label_question(q, catalog, top_k=top_k)
+        res = label_question(q, catalog, embedder=embedder, kp_vectors=kp_vectors,
+                             top_k=top_k, q_vec=q_vectors.get(q["question_id"]))
         rank = None
         for i, c in enumerate(res["candidates"], start=1):
             if c["kp_id"] == q["kp_id"]:
                 rank = i
+                # 命中项带哪些证据层（用于判断「向量路贡献了多少命中」）
+                for name, val in (c.get("sources") or {}).items():
+                    if val:
+                        layer[name] = layer.get(name, 0) + 1
                 break
         if not res["candidates"]:
             no_cand += 1
@@ -172,6 +191,10 @@ def eval_course(course_id: int, document_id, top_k: int = TOP_K) -> dict:
         "catalog_size": len(catalog.items),
         "catalog_source": catalog.source,
         "graph_available": bool(catalog.graph_available),
+        "vector_enabled": bool(kp_vectors),
+        "kp_vector_count": len(kp_vectors),
+        "question_vector_count": len(q_vectors),
+        "hit_layer_breakdown": layer,
         "questions_without_candidates": no_cand,
         "elapsed_sec": round(time.time() - t0, 3),
         "reason": catalog.reason,
@@ -203,6 +226,8 @@ def main():
     ap.add_argument("--synthetic", action="store_true",
                     help="与 --snapshot 搭配：用知识点描述做自洽评估")
     ap.add_argument("--top-k", type=int, default=TOP_K)
+    ap.add_argument("--no-vector", action="store_true",
+                    help="关闭向量路（默认开启；无 EMBEDDING_API_KEY 时自动回落）")
     ap.add_argument("--out", default=os.path.join("eval_data", "eval_report_kp_labeling.json"))
     args = ap.parse_args()
 
@@ -219,12 +244,31 @@ def main():
             print("✗ 请给出 --course-id（真实留一评估）或 --snapshot + --synthetic（离线自洽评估）")
             return False
         sql_db.init_tables()
-        result = eval_course(args.course_id, args.document_id, top_k=args.top_k)
+        result = eval_course(args.course_id, args.document_id, top_k=args.top_k,
+                             use_vector=not args.no_vector)
+        # A/B：有向量数据时同时跑一次「关向量」作对照，量化向量路到底带来多少增益
+        if not args.no_vector and result["metrics"].get("vector_enabled"):
+            bm = eval_course(args.course_id, args.document_id, top_k=args.top_k,
+                             use_vector=False)["metrics"]
+            cur = result["metrics"]
+            result["metrics"]["ab_without_vector"] = {
+                k: bm[k] for k in ("hit@1", "hit@3", "hit@5", "mrr",
+                                   "questions_without_candidates")}
+            print("\n向量路 A/B（同一题库、同一参数、同一评分口径）：")
+            print(f"  {'指标':<26}{'关向量':>10s}{'开向量':>10s}{'增益':>12s}")
+            print("  " + "-" * 58)
+            for k in ("hit@1", "hit@3", "hit@5", "mrr"):
+                print(f"  {k:<26}{bm[k]:>10.4f}{cur[k]:>10.4f}{cur[k] - bm[k]:>+12.4f}")
+            print(f"  {'无候选的题数':<24}{bm['questions_without_candidates']:>10d}"
+                  f"{cur['questions_without_candidates']:>10d}"
+                  f"{cur['questions_without_candidates'] - bm['questions_without_candidates']:>+12d}")
 
     m = result["metrics"]
     print("\n指标：")
     for key in ("mode", "total", "hit@1", "hit@3", "hit@5", "mrr", "catalog_size",
-                "catalog_source", "graph_available", "graph_only_hits", "layer_hits",
+                "catalog_source", "graph_available", "vector_enabled",
+                "kp_vector_count", "question_vector_count", "hit_layer_breakdown",
+                "graph_only_hits", "layer_hits",
                 "skipped_no_description", "questions_without_candidates",
                 "elapsed_sec", "reason"):
         if key in m:

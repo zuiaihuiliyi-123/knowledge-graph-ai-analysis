@@ -17,10 +17,12 @@
 """
 
 import hashlib
+import json
 
 from ..core.database import db
-from ..core.sql_database import sql_db
+from ..core.sql_database import _blob_to_vec, sql_db
 from .embedding import EmbeddingClient
+from .vector_index import vector_index, cosine_pairs
 
 # ---------- 调参与阈值（集中在此，便于实验与参数冻结） ----------
 
@@ -163,13 +165,17 @@ def _lexical_scores(question: dict, items: list) -> dict:
 
 
 def _vector_scores(q_vec, kp_vectors: dict) -> dict:
-    """② 向量召回：题目向量与知识点向量的余弦相似度，线性拉伸到 [0,1]（低于 VEC_FLOOR 记 0）"""
-    from .qa_service import _cosine                  # 复用既有纯 Python 余弦实现
+    """② 向量召回：题目向量与知识点向量的余弦相似度，线性拉伸到 [0,1]（低于 VEC_FLOOR 记 0）
+
+    L2 阶段 E：余弦计算改走 `vector_index.cosine_pairs`——numpy 可用时向量化
+    （实测 N=5,000 由 259.8ms 降到 0.42ms），numpy 不可用或维度异常时自动回落纯 Python。
+    """
     scores = {}
-    if not q_vec:
+    if not q_vec or not kp_vectors:
         return scores
-    for kp_id, vec in (kp_vectors or {}).items():
-        cos = _cosine(q_vec, vec)
+    ids = list(kp_vectors.keys())
+    vecs = [kp_vectors[k] for k in ids]
+    for kp_id, cos in cosine_pairs(q_vec, ids, vecs):
         if cos <= VEC_FLOOR:
             continue
         scores[kp_id] = round(min(1.0, (cos - VEC_FLOOR) / (1.0 - VEC_FLOOR)), 4)
@@ -275,21 +281,53 @@ def ensure_question_vectors(questions: list, course_id: int, embedder) -> int:
                 written += 1
             except Exception:
                 pass
+    if written:
+        # L2 阶段 E：写完失效检索层缓存（同进程立即生效；跨进程由 VECTOR_CACHE_TTL 收敛）
+        vector_index.invalidate(kind="question", course_id=course_id)
     return written
 
 
+def _load_question_vectors(questions: list, course_id: int) -> dict:
+    """从库里读回题目向量（BLOB 快读）→ `{question_id: vec}`。
+
+    用途：批量标注 / 离线评测**复用已入库的向量**，避免 `label_question` 逐题重算——
+    L2 阶段 E 修复：此前批量标注在 `ensure_question_vectors` 之后仍会对每题再调一次
+    embedding API（121 题 = 121 次多余调用），实测标注耗时 22.5s 中大部分由此产生。
+    """
+    ids = [q.get("question_id") for q in (questions or []) if q.get("question_id") is not None]
+    if not ids:
+        return {}
+    try:
+        rows = sql_db.get_question_embedding_blobs(course_id, question_ids=ids)
+    except Exception:
+        return {}
+    out = {}
+    for r in rows:
+        if r.get("blob"):
+            out[r["question_id"]] = _blob_to_vec(r["blob"])
+    return out
+
+
 def label_question(question: dict, catalog, embedder=None, kp_vectors=None,
-                   top_k: int = TOP_K, min_score: float = MIN_SCORE) -> dict:
-    """对单题产出候选知识点（三层证据 + 融合），返回 {candidates, meta}"""
+                   top_k: int = TOP_K, min_score: float = MIN_SCORE,
+                   q_vec=None) -> dict:
+    """对单题产出候选知识点（三层证据 + 融合），返回 {candidates, meta}
+
+    `q_vec`：调用方**预给的题目向量**（可省一次 embedding API 调用）。批量路径与离线评测
+    都应走它——向量已由 `ensure_question_vectors` 批量算好并入库，逐题重算是纯浪费。
+    """
     items = catalog.items or []
     names = catalog.by_id()
 
     lexical = _lexical_scores(question, items)
 
     vector, vector_available = {}, False
-    if embedder is not None and getattr(embedder, "available", False) and kp_vectors:
+    if kp_vectors and (q_vec is not None or (embedder is not None
+                                             and getattr(embedder, "available", False))):
         try:
-            q_vec = embedder.embed([question_text(question)])[0]
+            # `q_vec` 由调用方预给（批量标注/评测已批量算好并入库）→ 避免逐题重复调用 embedding API
+            if q_vec is None:
+                q_vec = embedder.embed([question_text(question)])[0]
             vector = _vector_scores(q_vec, kp_vectors)
             vector_available = True
         except Exception:
@@ -321,18 +359,19 @@ def label_question(question: dict, catalog, embedder=None, kp_vectors=None,
 
 
 def _load_kp_vectors(course_id: int, document_id) -> dict:
-    """知识点向量：优先文档级，其次课程内全部文档（kp_id → 向量）"""
+    """知识点向量：优先文档级，其次课程内全部文档（kp_id → 向量）
+
+    L2 阶段 E：改走 **BLOB 快读通道**（`_blob_to_vec` 免 JSON 解析）——
+    实测 5,000 条 JSON 解析需 1,707ms，BLOB 为 0.02ms 量级；N=50,000 时差距达 18 秒。
+    """
     try:
-        rows = (sql_db.get_embeddings_by_document(course_id, document_id)
-                if document_id is not None
-                else sql_db.get_embeddings_by_course(course_id))
+        rows = sql_db.get_kp_embedding_blobs(course_id, document_id)
     except Exception:
         rows = []
     vectors = {}
     for r in rows:
-        kp_id, vec = r.get("kp_id"), r.get("embedding")
-        if kp_id and vec:
-            vectors[kp_id] = vec
+        if r.get("kp_id") and r.get("blob"):
+            vectors[r["kp_id"]] = _blob_to_vec(r["blob"])
     return vectors
 
 
@@ -345,10 +384,12 @@ def label_one(question: dict, top_k: int = TOP_K, embedder=None, catalog=None) -
     ensure_question_vectors([question], course_id, embedder)
     kp_vectors = _load_kp_vectors(course_id, document_id) \
         if getattr(embedder, "available", False) else {}
+    # 同样复用刚入库的向量（单题路径也省一次 API 调用）
+    q_vectors = _load_question_vectors([question], course_id) if kp_vectors else {}
     if catalog is None:
         catalog = KpCatalog(course_id, document_id).load()
     res = label_question(question, catalog, embedder=embedder, kp_vectors=kp_vectors,
-                         top_k=top_k)
+                         top_k=top_k, q_vec=q_vectors.get(question.get("question_id")))
     res["meta"]["embedding_configured"] = bool(getattr(embedder, "available", False))
     res["meta"]["kp_vector_count"] = len(kp_vectors)
     return res
@@ -358,12 +399,20 @@ def label_questions(course_id: int, document_id=None, question_ids=None, only_mi
                     apply: bool = False, top_k: int = 3,
                     apply_threshold: float = APPLY_MIN_SCORE, min_score: float = MIN_SCORE,
                     catalog=None, embedder=None) -> dict:
-    """批量标注：默认**只产出建议**（apply=False）；apply=True 时仅写达到阈值且候选在清单内的题。
+    """批量标注：默认**只产出建议**（apply=False）；apply=True 时把达阈值候选**并入**该题的知识点。
 
     安全策略（与需求一致：宁可少标，不可错标）：
     1. 默认只处理「尚未挂知识点」的题（only_missing=True）；
     2. 写库阈值 APPLY_MIN_SCORE=0.60 高于入候选阈值 MIN_SCORE=0.30；
-    3. 候选必须存在于知识点清单（in_catalog）才允许写库，避免写出悬空 kp_id（4002 同口径）。
+    3. 候选必须存在于知识点清单（in_catalog）才允许写库，避免写出悬空 kp_id（4002 同口径）；
+    4. 候选不得是纯图谱推断（graph_only=False）——低置信建议一律不落库；
+    5. 单题最多并入 `top_k` 个候选，且合并后总数不超过 MAX_KP_PER_QUESTION。
+
+    **L2 变更（2026-09-22）**：写库由「只写最高分的 1 个 kp」改为「并入 top_k 个达阈值候选」
+    （落 `t_question_kp` 关联表，即论文 2.4.3 的一题多知识点口径）。
+    语义是**合并（merge）而非覆盖**：该题已有的知识点与其主知识点**一律保留**，只新增
+    尚不存在的候选——避免自动标注毁掉教师手工维护的多知识点集合，也避免夺走主知识点。
+    在默认 `only_missing=True` 路径下题目本就没有知识点，合并与覆盖**等价，行为不变**。
     """
     _, rows = sql_db.list_questions(course_id, document_id=document_id,
                                     page=1, page_size=100000)
@@ -382,16 +431,21 @@ def label_questions(course_id: int, document_id=None, question_ids=None, only_mi
     vectors_written = ensure_question_vectors(questions, course_id, embedder)
     kp_vectors = _load_kp_vectors(course_id, document_id) \
         if getattr(embedder, "available", False) else {}
+    # 复用刚入库的题目向量：避免 label_question 里逐题重算（每题一次 embedding API）
+    q_vectors = _load_question_vectors(questions, course_id) if kp_vectors else {}
     if catalog is None:
         catalog = KpCatalog(course_id, document_id).load()
     names = catalog.by_id()
 
-    items, with_candidates, applied_count = [], 0, 0
+    # 延迟导入：question_service 反向依赖本模块，模块级导入会成环（同 path_recommender 的既有做法）
+    from .question_service import MAX_KP_PER_QUESTION
+
+    items, with_candidates, applied_count, applied_kp_count = [], 0, 0, 0
     for q in questions:
         res = label_question(q, catalog, embedder=embedder, kp_vectors=kp_vectors,
-                             top_k=top_k, min_score=min_score)
+                             top_k=top_k, min_score=min_score,
+                             q_vec=q_vectors.get(q["question_id"]))
         candidates = res["candidates"]
-        best = candidates[0] if candidates else None
         if candidates:
             with_candidates += 1
         entry = {
@@ -402,15 +456,44 @@ def label_questions(course_id: int, document_id=None, question_ids=None, only_mi
             "current_kp_name": (names.get(q.get("kp_id")) or {}).get("name") or "",
             "candidates": candidates,
             "applied": False,
-            "applied_kp_id": None,
+            "applied_kp_id": None,      # 兼容字段：本次新增的第一个知识点
+            "applied_kp_ids": [],       # L2：本次实际新增的全部知识点
         }
-        if apply and best and best.get("in_catalog") and not best.get("graph_only") \
-                and best["score"] >= apply_threshold:
+        # 达标候选：必须在知识点清单内 + 非纯图谱推断 + 分数达写库阈值；最多 top_k 个
+        accepted = [c for c in candidates
+                    if c.get("in_catalog") and not c.get("graph_only")
+                    and c["score"] >= apply_threshold][:top_k]
+        if apply and accepted:
+            qid = q["question_id"]
             try:
-                sql_db.update_question(q["question_id"], kp_id=best["kp_id"])
-                entry["applied"] = True
-                entry["applied_kp_id"] = best["kp_id"]
-                applied_count += 1
+                existing = sql_db.get_question_kps(qid)
+                existing_ids = [r["kp_id"] for r in existing]
+                # 主知识点：已有则沿用（不夺权），否则取分数最高的新候选
+                existing_primary = next((r["kp_id"] for r in existing if r["is_primary"]), None)
+                scores = {r["kp_id"]: r["score"] for r in existing
+                          if r["score"] is not None}
+                # 来源保真：既有行沿用其原 source（教师手工挂的仍是 MANUAL），只给新增行打 AI
+                sources = {r["kp_id"]: r["source"] for r in existing}
+                new_ids = [c["kp_id"] for c in accepted if c["kp_id"] not in existing_ids]
+                # 合并后再按上限截断（existing 在前，保证教师既有标注优先保留）
+                merged = existing_ids + new_ids
+                if len(merged) > MAX_KP_PER_QUESTION:
+                    merged = merged[:MAX_KP_PER_QUESTION]
+                    new_ids = [k for k in new_ids if k in merged]
+                if new_ids:
+                    for c in accepted:
+                        if c["kp_id"] in new_ids:
+                            scores[c["kp_id"]] = c["score"]
+                            sources[c["kp_id"]] = "AI"
+                    sql_db.set_question_kps(
+                        qid, merged, primary=existing_primary or new_ids[0],
+                        source="AI", scores=scores, sources=sources,
+                    )
+                    entry["applied"] = True
+                    entry["applied_kp_ids"] = new_ids
+                    entry["applied_kp_id"] = new_ids[0]
+                    applied_count += 1
+                    applied_kp_count += len(new_ids)
             except Exception as e:
                 entry["apply_error"] = str(e)
         items.append(entry)
@@ -420,8 +503,10 @@ def label_questions(course_id: int, document_id=None, question_ids=None, only_mi
         "document_id": document_id,
         "scanned": len(questions),
         "with_candidates": with_candidates,
-        "applied": applied_count,
+        "applied": applied_count,                  # 实际有新增关联的**题数**
+        "applied_kp_count": applied_kp_count,      # 实际新增的**关联行数**（一题可多挂）
         "apply": bool(apply),
+        "apply_mode": "merge",                     # 合并语义：不覆盖已有知识点，也不夺走主知识点
         "items": items,
         "meta": {
             "catalog_size": len(catalog.items),
@@ -430,7 +515,7 @@ def label_questions(course_id: int, document_id=None, question_ids=None, only_mi
             "embedding_configured": bool(getattr(embedder, "available", False)),
             "vectors_written": vectors_written,
             "kp_vector_count": len(kp_vectors),
-            "top_k": top_k,
+            "top_k": top_k,                        # 同时是写库时「单题最多并入知识点数」的上限
             "min_score": min_score,
             "apply_threshold": apply_threshold,
             "weights": {"lexical": W_LEX, "vector": W_VEC, "graph": W_GRAPH},
@@ -443,9 +528,22 @@ def question_text(question: dict) -> str:
     """题目文本 = 题干 + 选项/空位（用于向量化与字面匹配）。
 
     填空题把每空 label/hint 也算进去（提示词常含关键概念，如「单位 kg」）。
+
+    ⚠️ `options` 必须兼容**两种形态**：解析好的 `list`（服务层/测试传入）与
+    **DB 原始行的 JSON 字符串**（`sql_db.list_questions()` 直接返回的行）。
+    历史实现只处理 `list`，于是批量标注路径下**选项被完全忽略**，造成三个后果：
+    ① 字面层的「选项命中」从未生效（`OPTION_WEIGHT=0.7` 形同虚设）；
+    ② 向量只嵌入题干 → **题干相同的题向量完全相同**（语义信号无法区分它们）；
+    ③ `text_hash` 不含选项 → **改选项不触发重算向量**。
+    已在函数入口统一解析，两种形态行为一致。
     """
     parts = [question.get("stem") or ""]
     raw = question.get("options")
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except (ValueError, TypeError):
+            raw = []
     options = raw if isinstance(raw, list) else []
     for item in options:
         if isinstance(item, dict):

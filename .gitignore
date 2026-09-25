@@ -21,7 +21,8 @@ env/
 # 上传文件（含 avatars/ 头像；上传目录里的 PDF/图片都是运行时产物，不随仓库流转）
 # 注意：gitignore 里带「/」但不以「/」开头的模式是**锚定到本文件所在目录**的，
 # 因此 `data/uploads/` 只能匹配根目录的 data/uploads，匹配不到 backend/data/uploads/——
-# 这正是历史上那 30 个上传文件被提交进来的原因。两处都必须显式写。
+# 这正是历史上那 30 个上传文件被提交进来的原因。两处都必须显式写（缺 backend/ 前缀
+# 就会让用户上传的原始文档被误提交进版本库）。
 data/uploads/
 backend/data/uploads/
 
@@ -58,6 +59,18 @@ data.legacy-root-*/
 
 # Neo4j
 neo4j/data/
+
+# SQLite WAL 边车文件（阶段 G 启用 journal_mode=WAL 后产生）
+# 注意：这些是**运行期**文件，不属于版本库；而恢复备份需要的是完整快照，
+# 故备份一律走 sql_db.backup_to()（官方 backup API）而非裸拷 .db。
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# 运行期数据库快照与日志（体积大且可再生成，不入库；
+# 恢复流程需要的中间快照请留在本地 backup/ 目录，或走 sql_db.backup_to() 现场生成）
+backend/backup/*.bak
+backend/backup/sqlite_*.db
+backend/_uvicorn*.log
 
 # Streamlit
 .streamlit/
