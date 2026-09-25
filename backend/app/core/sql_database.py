@@ -14,16 +14,23 @@ SQLite 关系型数据库访问层（对齐规划文档 4.2 节：t_user / t_cou
 """
 import os
 import json
+import logging
+import secrets
 import sqlite3
+import string
 import uuid
 from datetime import datetime
 
 from .config import settings
-from .security import hash_password
+from .security import hash_password, verify_password
 from .codes import gen_join_code
 
+_logger = logging.getLogger(__name__)
+
 # 枚举取值（与规划文档表格 8/9/10/11 的 ENUM 定义一致，供应用层校验）
-USER_ROLES = ("teacher", "student")
+# admin 为管理员端新增角色（平台治理，不属于任何课程的教学角色）。
+# 注意：注册接口（api/auth.py）刻意不接受 "admin"，管理员只能由既有管理员在后台指派。
+USER_ROLES = ("admin", "teacher", "student")
 DOC_FILE_TYPES = ("PDF", "TXT", "DOCX", "MD")
 DOC_PARSE_STATUS = ("UPLOADED", "PARSING", "PARSED", "FAILED")
 DOC_EXTRACT_STATUS = ("PENDING", "EXTRACTING", "COMPLETED", "FAILED")
@@ -47,8 +54,84 @@ ANSWER_GRADE_STATUS = ("PENDING", "GRADED")
 QUESTION_SOURCE = ("MANUAL", "AI", "IMPORT")
 ANSWER_GRADE_SOURCE = ("AUTO", "LLM", "TEACHER")
 
-# 默认教师账号初始密码（仅用于演示/初始开发；生产环境应删除默认账号或改为环境变量注入）
-DEFAULT_TEACHER_PASSWORD = "admin123"
+# 管理员端枚举
+# 课程治理状态：normal=正常 / hidden=已下架（学生不可见，课程数据保留）/ archived=已归档（冻结）
+COURSE_GOVERNANCE_STATUS = ("normal", "hidden", "archived")
+
+# 「课程对学生可见（可发现 / 可申请 / 可用加课码加入）」的**唯一**定义。
+#
+# 课程状态是两个正交维度，必须同时成立才算可见：
+#   status = 1                     业务状态：教师或管理员显式开放（治理动作不写这一列）
+#   governance_status = 'normal'   治理状态：未被平台下架 / 归档
+# 只看 status，「下架」对发现页完全无效；只看 governance_status，
+# 「被教师关闭的课程」仍会出现在发现页与加课码入口。
+#
+# 两处消费点必须保持一致，改这里时同步 core/permissions.py 的 course_is_visible：
+#   1. SQL：admin_platform_counts 的公开课程数
+#   2. Python：Permissions._relation 的 PUBLIC 判定、CourseService.list_discover、
+#      MemberService.apply_to_course / join_by_code
+COURSE_VISIBLE_SQL = "status = 1 AND COALESCE(governance_status, 'normal') = 'normal'"
+
+
+def course_is_visible(course: dict) -> bool:
+    """COURSE_VISIBLE_SQL 的行级等价实现（Python 侧过滤用）。
+
+    两个维度同时成立才算可见，判定语义与上面那段 SQL 完全一致。
+    """
+    if not course:
+        return False
+    if course.get("status") != 1:
+        return False
+    return (course.get("governance_status") or "normal") == "normal"
+# 用户账号状态筛选值（映射 t_user.is_active）
+USER_ACTIVE_STATUS = ("active", "disabled")
+# 审计日志动作名（与 api/admin.py 的调用点一一对应，便于筛选与统计）
+ADMIN_ACTIONS = (
+    "admin.login",             # 管理员登录
+    "user.update",             # 编辑用户资料
+    "user.enable",             # 启用账号
+    "user.disable",            # 禁用账号
+    "user.role_change",        # 修改角色
+    "user.reset_password",     # 重置密码
+    "user.delete",             # 删除用户
+    "course.hide",             # 平台下架（改治理状态，不动业务状态）
+    "course.restore",          # 撤销下架
+    "course.archive",          # 归档课程
+    "course.unarchive",        # 取消归档
+    "course.close",            # 管理员代教师关闭课程（只改业务状态）
+    "course.reopen",           # 撤销关闭
+    "course.transfer",         # 转移课程负责人
+    "course.delete",           # 删除课程
+    "resource.delete",         # 删除文档资源
+    "settings.update",         # 修改平台设置
+)
+
+# 引导账号（首次启动自动创建）的凭据策略。
+#
+# **代码里不再内置任何默认密码。** 历史版本曾把 admin123 写成 DEFAULT_ADMIN_PASSWORD 的兜底值，
+# 那等于给每份部署装了一个公开口令：任何人 clone 仓库就知道管理员密码。
+# 现在的规则（ensure_default_admin 执行）：
+#   1. 环境变量 DEFAULT_ADMIN_PASSWORD 有值  -> 用它（部署方自己负责保密），不强制改密；
+#   2. 未配置                              -> 现场生成随机强密码，**只在启动日志里打印一次**，
+#      并给该账号打上 must_change_password=1（首次登录必须改密，日志泄漏也只有一次性价值）。
+#
+# 刻意**不**复用已有的 "admin" 用户名：那个账号是 role=teacher 的演示教师，且是课程 5 的
+# 创建者，把它改成管理员会让「教师登录」与权限回归测试全线受影响。
+DEFAULT_ADMIN_USERNAME = os.getenv("DEFAULT_ADMIN_USERNAME", "sysadmin")
+
+# 演示教师账号的初始密码。同样不内置默认值，未配置时随机生成并打印一次。
+# 注意：仅在**该账号尚不存在**时生效；已存在的账号密码不会被覆盖。
+DEFAULT_TEACHER_USERNAME = "admin"
+
+# 历史版本内置过的引导密码。启动时若发现引导账号仍能用其中任何一个登录，
+# 打一条 WARNING 提醒轮换——这是「已知弱口令清单」，不是可用的默认值。
+LEGACY_WEAK_PASSWORDS = ("admin123",)
+
+
+def generate_bootstrap_password(length: int = 16) -> str:
+    """生成随机引导密码（去易混字符，便于从日志里准确抄录）"""
+    alphabet = string.ascii_letters.replace("l", "").replace("I", "").replace("O", "") + "23456789"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def _now() -> str:
@@ -87,15 +170,20 @@ CREATE TABLE IF NOT EXISTS t_question (
 # 建表 DDL（含索引、CHECK 约束、外键）。顺序敏感：先建被引用的父表。
 _SCHEMA_SQL = [
     # 4.2.1 用户表
+    # role 的 CHECK 含 'admin'（管理员端）。旧库的 CHECK 只有 teacher/student，
+    # SQLite 无法修改 CHECK，由 _migrate_admin_role() 重建表补齐。
     """
     CREATE TABLE IF NOT EXISTS t_user (
         user_id       INTEGER PRIMARY KEY AUTOINCREMENT,
         username      TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        role          TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('teacher', 'student')),
+        role          TEXT NOT NULL DEFAULT 'student'
+                      CHECK (role IN ('admin', 'teacher', 'student')),
         display_name  TEXT,
         email         TEXT,
         is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+        must_change_password INTEGER NOT NULL DEFAULT 0
+                      CHECK (must_change_password IN (0, 1)),
         created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         updated_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
     )
@@ -389,6 +477,33 @@ _SCHEMA_SQL = [
     )
     """,
     "CREATE INDEX IF NOT EXISTS idx_import_batch_course ON t_question_import_batch(course_id, document_id);",
+
+    # ---------- 管理员端：审计日志 ----------
+    # 4.2.16 管理员操作审计（管理员端新增）
+    # 只追加、不修改：管理员的关键操作一律先写库再返回，日志本身不提供删除接口。
+    # operator_name 冗余存一份用户名：管理员账号后续被改名/删除后，历史日志仍可读。
+    # operator_role 记录「操作发生时的角色」，便于追溯角色变更前后的行为。
+    """
+    CREATE TABLE IF NOT EXISTS t_admin_audit_log (
+        log_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        operator_id   INTEGER,
+        operator_name TEXT,
+        operator_role TEXT,
+        action        TEXT NOT NULL,
+        target_type   TEXT,
+        target_id     TEXT,
+        result        TEXT NOT NULL DEFAULT 'success'
+                      CHECK (result IN ('success', 'failure')),
+        detail        TEXT,
+        ip            TEXT,
+        user_agent    TEXT,
+        created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_audit_created ON t_admin_audit_log(created_at);",
+    "CREATE INDEX IF NOT EXISTS idx_audit_operator ON t_admin_audit_log(operator_id);",
+    "CREATE INDEX IF NOT EXISTS idx_audit_action ON t_admin_audit_log(action);",
+    "CREATE INDEX IF NOT EXISTS idx_audit_target ON t_admin_audit_log(target_type, target_id);",
 ]
 
 
@@ -418,6 +533,8 @@ class SQLDatabase:
         # Scope B 题型扩展：t_question 的 q_type CHECK 需重建表（SQLite 不能改 CHECK）。
         # 该步骤要用「关闭外键的独立连接」执行，故放在 _migrate（共用连接）之外。
         self._migrate_question_types()
+        # 管理员端：t_user.role 的 CHECK 需加入 'admin'，同样是「重建表」类迁移。
+        self._migrate_admin_role()
 
     def _migrate(self):
         """幂等迁移：为旧库补齐 document_id 列并回填（文档作用域改造）。
@@ -457,6 +574,8 @@ class SQLDatabase:
             )
             self._migrate_question_bank(conn)
             self._migrate_course_center(conn)
+            self._migrate_admin(conn)
+            self._migrate_admin_user_columns(conn)
             conn.commit()
 
     # t_course 在课程中心改造中新增的列（全部可空或带默认值，历史行不受影响）
@@ -660,6 +779,150 @@ class SQLDatabase:
         finally:
             conn.close()
 
+    # 重建 t_user 时保留的列（显式列名 INSERT…SELECT，避免历史列序差异）
+    _USER_COLUMNS = (
+        "user_id", "username", "password_hash", "role", "display_name",
+        "email", "is_active", "must_change_password", "created_at", "updated_at",
+    )
+
+    def _migrate_admin_user_columns(self, conn: sqlite3.Connection):
+        """幂等迁移：t_user 补 must_change_password 列（管理员端强制改密）。
+
+        历史行取默认值 0 —— 既有账号（包括已用过一段时间的 sysadmin）不会被强制改密，
+        避免一次升级把所有在线用户挡在改密页上。该标记只对**新引导创建**的账号
+        以及被管理员重置过密码的账号置 1。
+
+        用 PRAGMA table_info 守卫而非 ALTER ... IF NOT EXISTS：SQLite 没有后者。
+        """
+        cols = {row["name"] for row in conn.execute("PRAGMA table_info(t_user)").fetchall()}
+        if "must_change_password" not in cols:
+            conn.execute(
+                "ALTER TABLE t_user ADD COLUMN must_change_password "
+                "INTEGER NOT NULL DEFAULT 0"
+            )
+
+    def _migrate_admin_role(self) -> bool:
+        """幂等迁移：把 t_user.role 的 CHECK 从 teacher/student 扩到含 admin。
+
+        为什么必须重建表：SQLite 不支持修改 CHECK 约束（与 _migrate_question_types 同理）。
+        为什么用独立连接且关闭外键：t_user 是 t_course / t_document / t_learning_record /
+        t_course_member / t_course_invite / t_user_profile / t_question / t_answer_record 等
+        多张表的父表，_connect() 默认开外键，直接 DROP 父表会触发外键检查而失败；
+        且 `PRAGMA foreign_keys` 在事务内是空操作，必须在 BEGIN 之前设置。
+
+        流程与 _migrate_question_types 完全一致：关外键 → BEGIN → 建新表 → 拷数据（行数校验）
+        → 删旧表 → 改名 → 重建索引 → 修正 AUTOINCREMENT 续号 → foreign_key_check → COMMIT。
+        任一步失败即 ROLLBACK，原表原样保留（旧库不会被改坏）。
+
+        返回 True = 本次执行了重建；False = 已是最新（幂等跳过）。
+        """
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 't_user'"
+            ).fetchone()
+        if row is None or not row["sql"]:
+            return False                     # 空库：首次由 _SCHEMA_SQL 直接建出含 admin 的 CHECK
+        if "'admin'" in row["sql"] or '"admin"' in row["sql"]:
+            return False                     # 已迁移（CHECK 文本里能看到 admin）
+
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        conn.isolation_level = None          # 显式控制事务，保证 PRAGMA 生效时机可控
+        try:
+            conn.execute("PRAGMA foreign_keys = OFF")
+            conn.execute("BEGIN IMMEDIATE")
+            old_seq_row = conn.execute(
+                "SELECT seq FROM sqlite_sequence WHERE name = 't_user'"
+            ).fetchone()
+            old_seq = old_seq_row["seq"] if old_seq_row else 0
+            conn.execute("DROP TABLE IF EXISTS t_user_new")
+            conn.execute(
+                """
+                CREATE TABLE t_user_new (
+                    user_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username      TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    role          TEXT NOT NULL DEFAULT 'student'
+                                  CHECK (role IN ('admin', 'teacher', 'student')),
+                    display_name  TEXT,
+                    email         TEXT,
+                    is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+                    must_change_password INTEGER NOT NULL DEFAULT 0
+                                  CHECK (must_change_password IN (0, 1)),
+                    created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                    updated_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+                )
+                """
+            )
+            existing = {r["name"] for r in
+                        conn.execute("PRAGMA table_info(t_user)").fetchall()}
+            cols = ", ".join(c for c in self._USER_COLUMNS if c in existing)
+            conn.execute(f"INSERT INTO t_user_new ({cols}) SELECT {cols} FROM t_user")
+            old_cnt = conn.execute("SELECT count(*) AS c FROM t_user").fetchone()["c"]
+            new_cnt = conn.execute("SELECT count(*) AS c FROM t_user_new").fetchone()["c"]
+            if old_cnt != new_cnt:
+                raise RuntimeError(f"t_user 重建行数不一致：旧 {old_cnt} 行 / 新 {new_cnt} 行")
+            conn.execute("DROP TABLE t_user")
+            conn.execute("ALTER TABLE t_user_new RENAME TO t_user")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_role ON t_user(role)")
+            # AUTOINCREMENT 续号取 max(旧续号, 当前最大 id)：单取 max(user_id) 会在历史上
+            # 物理删除过用户时复用已删除的 user_id，导致历史引用静默串到新用户上。
+            max_id = conn.execute(
+                "SELECT COALESCE(MAX(user_id), 0) AS m FROM t_user"
+            ).fetchone()["m"]
+            next_seq = old_seq if old_seq >= max_id else max_id
+            seq = conn.execute(
+                "SELECT seq FROM sqlite_sequence WHERE name = 't_user'"
+            ).fetchone()
+            if seq is None:
+                conn.execute(
+                    "INSERT INTO sqlite_sequence (name, seq) VALUES ('t_user', ?)", (next_seq,)
+                )
+            elif seq["seq"] != next_seq:
+                conn.execute(
+                    "UPDATE sqlite_sequence SET seq = ? WHERE name = 't_user'", (next_seq,)
+                )
+            issues = conn.execute("PRAGMA foreign_key_check").fetchall()
+            if issues:
+                raise RuntimeError(f"外键校验失败，已回滚：{[tuple(r) for r in issues]}")
+            conn.execute("COMMIT")
+            return True
+        except Exception:
+            try:
+                conn.execute("ROLLBACK")
+            except Exception:
+                pass
+            raise
+        finally:
+            conn.close()
+
+    # t_course 在管理员端新增的列。
+    # governance_status 刻意与既有 status（0=停用 / 1=启用，课程中心与发现课程都在用）分开：
+    #   status 是「课程是否启用」的业务开关，管理员下架/恢复同时改 status，
+    #   因为发现课程（is_public=1 AND status=1）与 Permissions 的公开课判定都只看 status，
+    #   只加新列不动 status 的话「下架」对现有查询完全无效。
+    #   governance_status 记录治理语义（normal / hidden / archived），供管理员端筛选与展示。
+    _ADMIN_COURSE_COLUMNS = (
+        ("governance_status", "TEXT NOT NULL DEFAULT 'normal'"),
+        ("governance_note", "TEXT"),
+        ("archived_at", "TEXT"),
+    )
+
+    def _migrate_admin(self, conn: sqlite3.Connection):
+        """幂等迁移：管理员端（t_course 补治理列）。
+
+        仅为「不存在该列」的课程表补列，历史行取默认值 'normal'，
+        所有既有课程的 status / is_public 原样不动 —— 旧课程数据零影响。
+
+        注：ADD COLUMN 不允许带 CHECK，governance_status 的取值合法性由应用层
+        COURSE_GOVERNANCE_STATUS 白名单兜底（新库同样走这里，故不写进 _SCHEMA_SQL，
+        以免出现「新建库」与「迁移库」两套表结构）。
+        """
+        cols = {row["name"] for row in conn.execute("PRAGMA table_info(t_course)").fetchall()}
+        for name, decl in self._ADMIN_COURSE_COLUMNS:
+            if name not in cols:
+                conn.execute(f"ALTER TABLE t_course ADD COLUMN {name} {decl}")
+
     def _execute(self, sql: str, params: tuple = ()) -> int:
         """执行写操作，返回 lastrowid（INSERT 时的自增主键）"""
         with self._connect() as conn:
@@ -713,20 +976,109 @@ class SQLDatabase:
         return self._query("SELECT * FROM t_user ORDER BY user_id")
 
     def ensure_default_teacher(self) -> int:
-        """确保存在默认教师账号 admin（初始密码 admin123，仅用于演示），返回其 user_id"""
-        existing = self.get_user_by_username("admin")
+        """确保存在演示教师账号 admin，返回其 user_id。
+
+        幂等：已存在则原样返回，**不覆盖密码**。
+        新库首次创建时：优先取环境变量 DEFAULT_TEACHER_PASSWORD；
+        未配置则随机生成并只在启动日志打印一次（不再内置 admin123 这类公开口令）。
+        """
+        existing = self.get_user_by_username(DEFAULT_TEACHER_USERNAME)
         if existing:
             # 迁移：旧版占位密码 "<not-implemented>" 无法通过校验，替换为真实哈希
             if existing["password_hash"] == "<not-implemented>":
+                password, _ = self._bootstrap_password("DEFAULT_TEACHER_PASSWORD")
                 self._execute(
                     "UPDATE t_user SET password_hash = ? WHERE user_id = ?",
-                    (hash_password(DEFAULT_TEACHER_PASSWORD), existing["user_id"]),
+                    (hash_password(password), existing["user_id"]),
                 )
-                existing = self.get_user_by_username("admin")
+                _logger.warning(
+                    "演示教师 %s 的历史占位密码已替换为随机密码，请用重置密码流程重新获取",
+                    DEFAULT_TEACHER_USERNAME)
+                existing = self.get_user_by_username(DEFAULT_TEACHER_USERNAME)
+            self._warn_if_legacy_weak_password(existing)
             return existing["user_id"]
-        return self.create_user(
-            username="admin", password_hash=hash_password(DEFAULT_TEACHER_PASSWORD),
+
+        password, generated = self._bootstrap_password("DEFAULT_TEACHER_PASSWORD")
+        user_id = self.create_user(
+            username=DEFAULT_TEACHER_USERNAME, password_hash=hash_password(password),
             role="teacher", display_name="默认教师",
+        )
+        if generated:
+            self._print_bootstrap_credentials(DEFAULT_TEACHER_USERNAME, password, "演示教师")
+        return user_id
+
+    def ensure_default_admin(self) -> int:
+        """确保存在管理员引导账号（管理员端首次可用），返回其 user_id。
+
+        幂等：已存在则原样返回，**不覆盖密码、不改角色**——管理员上线后自行改过密码，
+        重启服务不应该把它重置回默认值。用户名见 DEFAULT_ADMIN_USERNAME。
+
+        密码来源（见文件头 DEFAULT_ADMIN_* 注释）：
+        - 环境变量 DEFAULT_ADMIN_PASSWORD 有值 -> 用它，不强制改密；
+        - 未配置 -> 现场生成随机密码，只在启动日志打印一次，并置 must_change_password=1。
+        """
+        existing = self.get_user_by_username(DEFAULT_ADMIN_USERNAME)
+        if existing:
+            self._warn_if_legacy_weak_password(existing)
+            return existing["user_id"]
+
+        password, generated = self._bootstrap_password("DEFAULT_ADMIN_PASSWORD")
+        user_id = self.create_user(
+            username=DEFAULT_ADMIN_USERNAME,
+            password_hash=hash_password(password),
+            role="admin", display_name="系统管理员",
+        )
+        if generated:
+            # 随机密码是打印在日志里的，日志可能被留存/转发，故首次登录强制改密。
+            self.set_must_change_password(user_id, True)
+            self._print_bootstrap_credentials(DEFAULT_ADMIN_USERNAME, password, "管理员")
+        return user_id
+
+    @staticmethod
+    def _bootstrap_password(env_key: str) -> tuple:
+        """引导密码来源：(password, generated)。
+
+        环境变量优先；未配置则随机生成。生成时必须由调用方安排「只打印一次」，
+        generated=True 也用于决定是否强制首次改密。
+        """
+        configured = (os.getenv(env_key) or "").strip()
+        if configured:
+            return configured, False
+        return generate_bootstrap_password(), True
+
+    @staticmethod
+    def _print_bootstrap_credentials(username: str, password: str, label: str) -> None:
+        """把随机生成的引导凭据打印到启动日志（仅此一次，之后无法再查）。"""
+        banner = "=" * 68
+        print(f"\n{banner}\n"
+              f"  已创建{label}引导账号（随机密码，仅本次显示，请立即记录并在首次登录后修改）\n"
+              f"    用户名：{username}\n"
+              f"    密  码：{password}\n"
+              f"  如需自行指定，请在启动前设置环境变量：\n"
+              f"    DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_PASSWORD\n"
+              f"{banner}\n", flush=True)
+
+    @staticmethod
+    def _warn_if_legacy_weak_password(user: dict) -> None:
+        """引导账号仍在使用历史内置弱口令时，每次启动都提醒轮换。
+
+        只提示、不改动：把密码改掉可能让正在使用该账号的人被锁在外面。
+        """
+        try:
+            if any(verify_password(p, user["password_hash"]) for p in LEGACY_WEAK_PASSWORDS):
+                _logger.warning(
+                    "安全提醒：引导账号 %s 仍在使用内置的历史弱口令 %s，请尽快通过"
+                    "「修改密码」或管理员端「重置密码」轮换。",
+                    user["username"], "/".join(LEGACY_WEAK_PASSWORDS),
+                )
+        except Exception:                       # 哈希格式异常不应阻断启动
+            pass
+
+    def set_must_change_password(self, user_id: int, required: bool) -> int:
+        """设置/清除「首次登录必须修改密码」标记"""
+        return self._execute(
+            "UPDATE t_user SET must_change_password = ? WHERE user_id = ?",
+            (1 if required else 0, user_id),
         )
 
     # ---------- 课程 ----------
@@ -2267,6 +2619,702 @@ class SQLDatabase:
     def count_documents(self) -> int:
         """文档总数"""
         return self._query_one("SELECT count(*) AS cnt FROM t_document")["cnt"]
+
+    # ---------- 管理员端：用户管理 ----------
+
+    # 「最近活动」的取数口径：学习记录 / 答题 / 上传文档 / 加入课程 四类行为的时间最大值。
+    # 项目里没有统一的用户活跃字段，也没有登录日志表，故用这四张已有的表聚合，
+    # 取不到（从未产生上述行为，如刚注册的管理员）就返回 NULL，前端显示「—」而不是伪造时间。
+    _LAST_ACTIVE_SQL = """
+        (SELECT MAX(t) FROM (
+            SELECT MAX(updated_at) AS t FROM t_learning_record WHERE user_id = u.user_id
+            UNION ALL SELECT MAX(answered_at) FROM t_answer_record WHERE user_id = u.user_id
+            UNION ALL SELECT MAX(created_at) FROM t_document WHERE uploader_id = u.user_id
+            UNION ALL SELECT MAX(created_at) FROM t_course_member WHERE user_id = u.user_id
+        )) AS last_active
+    """
+
+    _ADMIN_USER_SORT = {
+        "user_id": "u.user_id",
+        "username": "u.username",
+        "role": "u.role",
+        "created_at": "u.created_at",
+        "last_active": "last_active",
+    }
+
+    def list_users_admin(self, keyword: str = None, role: str = None, status: str = None,
+                         page: int = 1, page_size: int = 20,
+                         sort_by: str = None, sort_order: str = None):
+        """管理员端用户列表（分页 + 搜索 + 角色/状态筛选 + 排序），返回 (total, rows)。
+
+        status：active / disabled（映射 t_user.is_active）。
+        LEFT JOIN t_user_profile 取真实姓名/学号/工号参与搜索，缺失资料的用户不会因此丢失。
+        """
+        where, params = [], []
+        if keyword:
+            like = f"%{keyword}%"
+            where.append(
+                "(u.username LIKE ? OR u.display_name LIKE ? OR u.email LIKE ? "
+                "OR p.real_name LIKE ? OR p.nickname LIKE ? "
+                "OR p.student_no LIKE ? OR p.teacher_no LIKE ?)"
+            )
+            params.extend([like] * 7)
+        if role:
+            where.append("u.role = ?")
+            params.append(role)
+        if status == "active":
+            where.append("u.is_active = 1")
+        elif status == "disabled":
+            where.append("u.is_active = 0")
+        where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
+        base = f"FROM t_user u LEFT JOIN t_user_profile p ON p.user_id = u.user_id {where_sql}"
+        total = self._query_one(f"SELECT count(*) AS cnt {base}", tuple(params))["cnt"]
+
+        order_col = self._ADMIN_USER_SORT.get(sort_by or "", "u.user_id")
+        direction = "ASC" if str(sort_order or "").lower() == "asc" else "DESC"
+        rows = self._query(
+            f"""
+            SELECT u.user_id, u.username, u.role, u.display_name, u.email,
+                   u.is_active, u.created_at,
+                   p.real_name, p.nickname, p.school, p.college,
+                   p.student_no, p.teacher_no, p.avatar_url,
+                   {self._LAST_ACTIVE_SQL}
+            {base}
+            ORDER BY {order_col} {direction}
+            LIMIT ? OFFSET ?
+            """,
+            tuple(params + [page_size, (page - 1) * page_size]),
+        )
+        return total, rows
+
+    def get_user_admin_detail(self, user_id: int) -> dict:
+        """用户详情：t_user + t_user_profile 全字段（不含 password_hash）。
+
+        刻意不 SELECT u.*：避免把 password_hash 带进 API 层。管理员永远看不到密码哈希。
+        """
+        return self._query_one(
+            """
+            SELECT u.user_id, u.username, u.role, u.display_name, u.email,
+                   u.is_active, u.created_at, u.updated_at,
+                   p.avatar_url, p.real_name, p.nickname, p.gender, p.school, p.college,
+                   p.bio, p.student_no, p.major, p.grade, p.class_name,
+                   p.teacher_no, p.title, p.research_area
+            FROM t_user u LEFT JOIN t_user_profile p ON p.user_id = u.user_id
+            WHERE u.user_id = ?
+            """,
+            (user_id,),
+        )
+
+    def get_user_admin_stats(self, user_id: int) -> dict:
+        """用户维度的统计（课程数 / 待批改 / 学习记录 / 收藏 / 上传文档数）"""
+        return self._query_one(
+            """
+            SELECT
+                (SELECT count(*) FROM t_course WHERE teacher_id = ?) AS owned_course_count,
+                (SELECT count(*) FROM t_course_member
+                  WHERE user_id = ? AND status = 'approved') AS joined_course_count,
+                (SELECT count(*) FROM t_document WHERE uploader_id = ?) AS document_count,
+                (SELECT count(*) FROM t_learning_record WHERE user_id = ?) AS learning_record_count,
+                (SELECT count(*) FROM t_student_favorite WHERE user_id = ?) AS favorite_count,
+                (SELECT count(*) FROM t_answer_record WHERE user_id = ?) AS answer_count
+            """,
+            (user_id, user_id, user_id, user_id, user_id, user_id),
+        )
+
+    def list_user_courses_admin(self, user_id: int) -> list:
+        """用户所在课程列表（区分「自己创建」与「加入的」，供用户详情抽屉展示）"""
+        return self._query(
+            """
+            SELECT c.course_id, c.course_name, c.status, c.archived_at,
+                   COALESCE(c.governance_status, 'normal') AS governance_status,
+                   c.created_at,
+                   CASE WHEN c.teacher_id = ? THEN 'owner' ELSE COALESCE(m.role, 'student') END AS rel_role,
+                   COALESCE(m.status, 'approved') AS member_status
+            FROM t_course c
+            LEFT JOIN t_course_member m ON m.course_id = c.course_id AND m.user_id = ?
+            WHERE c.teacher_id = ? OR m.member_id IS NOT NULL
+            ORDER BY c.course_id DESC
+            """,
+            (user_id, user_id, user_id),
+        )
+
+    def set_user_active(self, user_id: int, is_active: bool) -> int:
+        """启用 / 禁用账号（管理员操作；与「用户自助注销」共用 is_active 字段）"""
+        return self._execute(
+            "UPDATE t_user SET is_active = ?, updated_at = ? WHERE user_id = ?",
+            (1 if is_active else 0, _now(), user_id),
+        )
+
+    def set_user_role(self, user_id: int, role: str) -> int:
+        """修改用户角色（管理员操作）。调用方必须先用 USER_ROLES 白名单校验。"""
+        return self._execute(
+            "UPDATE t_user SET role = ?, updated_at = ? WHERE user_id = ?",
+            (role, _now(), user_id),
+        )
+
+    def delete_user(self, user_id: int) -> int:
+        """物理删除用户（仅在没有留下任何业务数据时允许，由 AdminService 前置校验）。
+
+        这里只删 t_user 与其资料行：t_user 被 t_course / t_document / t_learning_record
+        等表引用，若仍有引用行会因外键约束失败而报错——这正是我们想要的「拒绝删除」。
+        """
+        with self._connect() as conn:
+            conn.execute("DELETE FROM t_user_profile WHERE user_id = ?", (user_id,))
+            cur = conn.execute("DELETE FROM t_user WHERE user_id = ?", (user_id,))
+            conn.commit()
+            return cur.rowcount
+
+    def count_user_references(self, user_id: int) -> dict:
+        """用户被业务数据引用的数量（删除前置校验用）"""
+        return self._query_one(
+            """
+            SELECT
+                (SELECT count(*) FROM t_course WHERE teacher_id = ?) AS owned_courses,
+                (SELECT count(*) FROM t_document WHERE uploader_id = ?) AS documents,
+                (SELECT count(*) FROM t_learning_record WHERE user_id = ?) AS learning_records,
+                (SELECT count(*) FROM t_student_favorite WHERE user_id = ?) AS favorites,
+                (SELECT count(*) FROM t_course_member WHERE user_id = ?) AS memberships,
+                (SELECT count(*) FROM t_answer_record WHERE user_id = ?) AS answers,
+                (SELECT count(*) FROM t_question WHERE created_by = ?) AS questions
+            """,
+            (user_id,) * 7,
+        )
+
+    # ---------- 管理员端：课程管理 ----------
+
+    _COURSE_AGGREGATE_SQL = """
+        (SELECT count(*) FROM t_course_member m
+          WHERE m.course_id = c.course_id AND m.status = 'approved') AS member_count,
+        (SELECT count(*) FROM t_course_member m
+          WHERE m.course_id = c.course_id AND m.status = 'pending') AS pending_member_count,
+        (SELECT count(*) FROM t_document d
+          WHERE d.course_id = c.course_id) AS document_count,
+        (SELECT COALESCE(SUM(d.entity_count), 0) FROM t_document d
+          WHERE d.course_id = c.course_id) AS entity_count,
+        (SELECT COALESCE(SUM(d.relation_count), 0) FROM t_document d
+          WHERE d.course_id = c.course_id) AS relation_count
+    """
+
+    _ADMIN_COURSE_SORT = {
+        "course_id": "c.course_id",
+        "course_name": "c.course_name",
+        "created_at": "c.created_at",
+        "updated_at": "c.updated_at",
+        "member_count": "member_count",
+        "document_count": "document_count",
+    }
+
+    def list_courses_admin(self, keyword: str = None, teacher_id: int = None,
+                           category: str = None, is_public: int = None,
+                           status: int = None, governance_status: str = None,
+                           only_without_teacher: bool = False,
+                           inactive_days: int = None,
+                           page: int = 1, page_size: int = 20,
+                           sort_by: str = None, sort_order: str = None):
+        """管理员端课程列表（全平台课程，不只「我的课程」），返回 (total, rows)。
+
+        - keyword：课程名 / 描述 / 课程号 / 加课码
+        - is_public / status / governance_status：公开状态、启用状态、治理状态筛选
+        - only_without_teacher：无教师课程（teacher_id 为空或指向已不存在的用户）
+        - inactive_days：长期无活动课程（updated_at 早于 N 天前）
+
+        member_count / document_count / entity_count / relation_count 由子查询聚合，
+        刻意不在 Python 里逐课程再查一次（N+1）。
+        """
+        where, params = [], []
+        if keyword:
+            like = f"%{keyword}%"
+            where.append(
+                "(c.course_name LIKE ? OR c.description LIKE ? "
+                "OR c.course_code LIKE ? OR c.join_code LIKE ?)"
+            )
+            params.extend([like] * 4)
+        if teacher_id is not None:
+            where.append("c.teacher_id = ?")
+            params.append(teacher_id)
+        if category:
+            where.append("c.category = ?")
+            params.append(category)
+        if is_public is not None:
+            where.append("c.is_public = ?")
+            params.append(is_public)
+        if status is not None:
+            where.append("c.status = ?")
+            params.append(status)
+        if governance_status:
+            where.append("COALESCE(c.governance_status, 'normal') = ?")
+            params.append(governance_status)
+        if only_without_teacher:
+            where.append(
+                "(c.teacher_id IS NULL OR NOT EXISTS "
+                " (SELECT 1 FROM t_user u2 WHERE u2.user_id = c.teacher_id))"
+            )
+        if inactive_days:
+            where.append(
+                "c.updated_at < datetime('now', 'localtime', ?)"
+            )
+            params.append(f"-{int(inactive_days)} days")
+        where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
+        base = f"FROM t_course c LEFT JOIN t_user u ON c.teacher_id = u.user_id {where_sql}"
+        total = self._query_one(f"SELECT count(*) AS cnt {base}", tuple(params))["cnt"]
+
+        order_col = self._ADMIN_COURSE_SORT.get(sort_by or "", "c.course_id")
+        direction = "ASC" if str(sort_order or "").lower() == "asc" else "DESC"
+        rows = self._query(
+            f"""
+            SELECT c.course_id, c.course_name, c.course_code, c.description,
+                   c.teacher_id, c.status, c.is_public, c.join_mode, c.category,
+                   c.organization, c.join_code, c.created_at, c.updated_at,
+                   COALESCE(c.governance_status, 'normal') AS governance_status,
+                   c.governance_note, c.archived_at,
+                   COALESCE(u.display_name, u.username, '') AS teacher_name,
+                   u.is_active AS teacher_active,
+                   {self._COURSE_AGGREGATE_SQL}
+            {base}
+            ORDER BY {order_col} {direction}
+            LIMIT ? OFFSET ?
+            """,
+            tuple(params + [page_size, (page - 1) * page_size]),
+        )
+        return total, rows
+
+    def get_course_admin_detail(self, course_id: int) -> dict:
+        """管理员端课程详情（含教师名与聚合计数；不含内容级数据，内容走各自的 admin 接口）"""
+        return self._query_one(
+            f"""
+            SELECT c.*, COALESCE(u.display_name, u.username, '') AS teacher_name,
+                   u.username AS teacher_username, u.is_active AS teacher_active,
+                   {self._COURSE_AGGREGATE_SQL}
+            FROM t_course c LEFT JOIN t_user u ON c.teacher_id = u.user_id
+            WHERE c.course_id = ?
+            """,
+            (course_id,),
+        )
+
+    def count_courses_by_governance(self) -> dict:
+        """按治理状态统计课程数（工作台的课程治理概览）"""
+        rows = self._query(
+            "SELECT COALESCE(governance_status, 'normal') AS gs, count(*) AS cnt "
+            "FROM t_course GROUP BY COALESCE(governance_status, 'normal')"
+        )
+        result = {k: 0 for k in COURSE_GOVERNANCE_STATUS}
+        for r in rows:
+            result[r["gs"]] = r["cnt"]
+        return result
+
+    def set_course_governance(self, course_id: int, governance_status: str,
+                             note: str = None, archived_at: str = None) -> int:
+        """设置课程治理状态（管理员操作）——**只动治理字段，绝不写 status**。
+
+        为什么刻意不提供 status 参数（早期版本有过，已移除）：
+        status 是课程的**业务状态**（教师/管理员显式设置的 0=关闭 / 1=开放），
+        治理状态是**平台治理结论**（normal / hidden / archived），两者是正交的两维。
+        一旦让下架去写 status=0、恢复去写 status=1，恢复就会把「教师原本就关闭的课程」
+        一并打开——治理动作覆盖了业务事实，且事后无法区分。移除该参数后这种覆盖
+        在类型层面就不可能发生，无需额外字段记录「治理前的状态」。
+
+        代价是「下架」的可见性效果不再靠 status 生效，而由 COURSE_VISIBLE_TO_STUDENT
+        这个组合谓词在各消费点统一判定（见 core/permissions.py 的 course_is_visible）。
+
+        note 传 None 表示「不修改备注」，传空串表示「清空备注」。
+        """
+        sets = ["governance_status = ?", "updated_at = ?"]
+        params = [governance_status, _now()]
+        if archived_at is not None:
+            sets.append("archived_at = ?")
+            params.append(archived_at or None)
+        if note is not None:
+            sets.append("governance_note = ?")
+            params.append(note or None)
+        params.append(course_id)
+        return self._execute(
+            f"UPDATE t_course SET {', '.join(sets)} WHERE course_id = ?", tuple(params)
+        )
+
+    def transfer_course_owner(self, course_id: int, old_teacher_id: int, new_teacher_id: int) -> None:
+        """转移课程负责人（管理员操作）。
+
+        三步在同一事务内完成，避免出现「课程没有负责人」的中间态：
+        1) t_course.teacher_id 指向新负责人；
+        2) 新负责人写入 role=teacher/status=approved 的成员行（已存在则升级为教师并置回已通过）；
+        3) 原负责人保留为协作教师成员（不删除其成员行，避免连带失去课程访问权）。
+        """
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE t_course SET teacher_id = ?, updated_at = ? WHERE course_id = ?",
+                (new_teacher_id, _now(), course_id),
+            )
+            conn.execute(
+                """
+                INSERT INTO t_course_member
+                    (course_id, user_id, role, status, join_source, joined_at, created_at, updated_at)
+                VALUES (?, ?, 'teacher', 'approved', 'invite', ?, ?, ?)
+                ON CONFLICT(course_id, user_id) DO UPDATE SET
+                    role = 'teacher', status = 'approved', updated_at = excluded.updated_at
+                """,
+                (course_id, new_teacher_id, _now(), _now(), _now()),
+            )
+            if old_teacher_id and old_teacher_id != new_teacher_id:
+                conn.execute(
+                    """
+                    INSERT INTO t_course_member
+                        (course_id, user_id, role, status, join_source, joined_at, created_at, updated_at)
+                    VALUES (?, ?, 'teacher', 'approved', 'create', ?, ?, ?)
+                    ON CONFLICT(course_id, user_id) DO UPDATE SET
+                        role = 'teacher', updated_at = excluded.updated_at
+                    """,
+                    (course_id, old_teacher_id, _now(), _now(), _now()),
+                )
+            conn.commit()
+
+    # ---------- 管理员端：资源（文档）管理 ----------
+
+    def list_documents_admin(self, keyword: str = None, course_id: int = None,
+                             file_type: str = None, parse_status: str = None,
+                             extract_status: str = None, uploader_id: int = None,
+                             page: int = 1, page_size: int = 20,
+                             sort_by: str = None, sort_order: str = None):
+        """管理员端文档列表（全平台文档），返回 (total, rows)。
+
+        系统监控与审计之外，「解析 / 抽取状态」是本系统最需要管理员关注的资源属性，
+        故 parse_status / extract_status 都可单独筛选。
+        """
+        where, params = [], []
+        if keyword:
+            like = f"%{keyword}%"
+            where.append("(d.file_name LIKE ? OR c.course_name LIKE ?)")
+            params.extend([like, like])
+        if course_id is not None:
+            where.append("d.course_id = ?")
+            params.append(course_id)
+        if file_type:
+            where.append("d.file_type = ?")
+            params.append(file_type)
+        if parse_status:
+            where.append("d.parse_status = ?")
+            params.append(parse_status)
+        if extract_status:
+            where.append("d.extract_status = ?")
+            params.append(extract_status)
+        if uploader_id is not None:
+            where.append("d.uploader_id = ?")
+            params.append(uploader_id)
+        where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
+        base = (
+            "FROM t_document d "
+            "LEFT JOIN t_course c ON d.course_id = c.course_id "
+            "LEFT JOIN t_user u ON d.uploader_id = u.user_id "
+            f"{where_sql}"
+        )
+        total = self._query_one(f"SELECT count(*) AS cnt {base}", tuple(params))["cnt"]
+
+        sort_cols = {
+            "doc_id": "d.doc_id", "created_at": "d.created_at",
+            "file_size": "d.file_size", "file_name": "d.file_name",
+        }
+        order_col = sort_cols.get(sort_by or "", "d.doc_id")
+        direction = "ASC" if str(sort_order or "").lower() == "asc" else "DESC"
+        rows = self._query(
+            f"""
+            SELECT d.doc_id, d.course_id, d.uploader_id, d.file_name, d.file_type,
+                   d.file_size, d.parse_status, d.extract_status, d.error_message,
+                   d.chunk_count, d.entity_count, d.relation_count, d.created_at, d.updated_at,
+                   COALESCE(c.course_name, '') AS course_name,
+                   COALESCE(u.display_name, u.username, '') AS uploader_name
+            {base}
+            ORDER BY {order_col} {direction}
+            LIMIT ? OFFSET ?
+            """,
+            tuple(params + [page_size, (page - 1) * page_size]),
+        )
+        return total, rows
+
+    def count_documents_by_status(self) -> dict:
+        """按解析/抽取状态统计文档数（系统监控的资源概览）"""
+        parse_rows = self._query(
+            "SELECT parse_status AS s, count(*) AS cnt FROM t_document GROUP BY parse_status"
+        )
+        extract_rows = self._query(
+            "SELECT extract_status AS s, count(*) AS cnt FROM t_document GROUP BY extract_status"
+        )
+        return {
+            "parse": {r["s"]: r["cnt"] for r in parse_rows},
+            "extract": {r["s"]: r["cnt"] for r in extract_rows},
+        }
+
+    def list_extraction_tasks(self, course_id: int = None, status: str = None,
+                              keyword: str = None, page: int = 1, page_size: int = 20):
+        """知识抽取任务列表，返回 (total, rows)。
+
+        本系统没有独立的异步任务表：一次「知识抽取」与一份文档一一对应
+        （上传接口内同步解析 + 抽取，状态写在 t_document 的 parse_status /
+        extract_status / entity_count / relation_count / error_message 上）。
+        故这里以 t_document 为任务事实来源直接派生任务视图，不新建任务表、
+        也不引入与现有同步流程并行的第二套状态机（避免两处状态不一致）。
+
+        状态映射（status 参数取 processing / success / failed / pending）：
+          PENDING                         -> pending    等待中
+          PARSING / EXTRACTING            -> processing 处理中
+          COMPLETED                       -> success    成功
+          FAILED                          -> failed     失败
+        失败优先：parse_status 或 extract_status 任一为 FAILED 即归入 failed。
+        """
+        case_status = """
+            CASE
+                WHEN d.parse_status = 'FAILED' OR d.extract_status = 'FAILED' THEN 'failed'
+                WHEN d.parse_status IN ('PARSING') OR d.extract_status = 'EXTRACTING' THEN 'processing'
+                WHEN d.parse_status = 'PARSED' AND d.extract_status = 'COMPLETED' THEN 'success'
+                ELSE 'pending'
+            END
+        """
+        where, params = [], []
+        if course_id is not None:
+            where.append("d.course_id = ?")
+            params.append(course_id)
+        if keyword:
+            like = f"%{keyword}%"
+            where.append("(d.file_name LIKE ? OR c.course_name LIKE ?)")
+            params.extend([like, like])
+        if status:
+            where.append(f"{case_status} = ?")
+            params.append(status)
+        where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
+        base = (
+            "FROM t_document d LEFT JOIN t_course c ON d.course_id = c.course_id "
+            f"{where_sql}"
+        )
+        total = self._query_one(f"SELECT count(*) AS cnt {base}", tuple(params))["cnt"]
+        rows = self._query(
+            f"""
+            SELECT d.doc_id AS task_id, d.course_id, d.file_name,
+                   COALESCE(c.course_name, '') AS course_name,
+                   d.parse_status, d.extract_status, d.error_message,
+                   d.chunk_count, d.entity_count, d.relation_count,
+                   d.created_at AS started_at,
+                   CASE WHEN d.extract_status IN ('COMPLETED', 'FAILED')
+                        THEN d.updated_at ELSE NULL END AS finished_at,
+                   {case_status} AS task_status
+            {base}
+            ORDER BY d.doc_id DESC
+            LIMIT ? OFFSET ?
+            """,
+            tuple(params + [page_size, (page - 1) * page_size]),
+        )
+        return total, rows
+
+    def count_extraction_tasks(self) -> dict:
+        """抽取任务状态分布（工作台 / 系统监控用）"""
+        row = self._query_one(
+            """
+            SELECT
+                sum(CASE WHEN parse_status = 'FAILED' OR extract_status = 'FAILED'
+                         THEN 1 ELSE 0 END) AS failed,
+                sum(CASE WHEN parse_status = 'PARSING' OR extract_status = 'EXTRACTING'
+                         THEN 1 ELSE 0 END) AS processing,
+                sum(CASE WHEN parse_status = 'PARSED' AND extract_status = 'COMPLETED'
+                         THEN 1 ELSE 0 END) AS success,
+                count(*) AS total
+            FROM t_document
+            """
+        ) or {}
+        total = row.get("total") or 0
+        failed = row.get("failed") or 0
+        processing = row.get("processing") or 0
+        success = row.get("success") or 0
+        return {
+            "total": total, "success": success, "failed": failed,
+            "processing": processing, "pending": max(total - success - failed - processing, 0),
+        }
+
+    # ---------- 管理员端：审计日志 ----------
+
+    def add_audit_log(self, operator_id: int, operator_name: str, operator_role: str,
+                      action: str, target_type: str = None, target_id=None,
+                      result: str = "success", detail: str = None,
+                      ip: str = None, user_agent: str = None) -> int:
+        """写入一条管理员操作审计日志（只追加，不提供更新/删除接口）"""
+        return self._execute(
+            "INSERT INTO t_admin_audit_log "
+            "(operator_id, operator_name, operator_role, action, target_type, target_id, "
+            " result, detail, ip, user_agent) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (operator_id, operator_name, operator_role, action, target_type,
+             None if target_id is None else str(target_id), result, detail, ip, user_agent),
+        )
+
+    def list_audit_logs(self, operator_id: int = None, action: str = None,
+                        target_type: str = None, target_id=None, result: str = None,
+                        keyword: str = None, start_time: str = None, end_time: str = None,
+                        page: int = 1, page_size: int = 20):
+        """审计日志查询（时间 / 操作人 / 操作动作 / 目标类型 / 目标 ID / 结果 / 关键词 + 分页）
+
+        target_id 与 target_type 配合使用，用于「某个对象的操作记录」这类定向查询
+        （如用户详情抽屉里的相关操作）。target_id 在库中是 TEXT，故按字符串比较。
+        """
+        where, params = [], []
+        if operator_id is not None:
+            where.append("operator_id = ?")
+            params.append(operator_id)
+        if action:
+            where.append("action = ?")
+            params.append(action)
+        if target_type:
+            where.append("target_type = ?")
+            params.append(target_type)
+        if target_id is not None:
+            where.append("target_id = ?")
+            params.append(str(target_id))
+        if result:
+            where.append("result = ?")
+            params.append(result)
+        if keyword:
+            like = f"%{keyword}%"
+            where.append(
+                "(detail LIKE ? OR operator_name LIKE ? OR target_id LIKE ? OR action LIKE ?)"
+            )
+            params.extend([like] * 4)
+        # 时间筛选统一用「日期或日期时间字符串」比较：SQLite 的 TEXT 时间按字典序比较，
+        # 'YYYY-MM-DD HH:MM:SS' 的字典序与时间序一致，故可直接用 >= / <=。
+        if start_time:
+            where.append("created_at >= ?")
+            params.append(start_time)
+        if end_time:
+            where.append("created_at <= ?")
+            params.append(end_time)
+        where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
+        total = self._query_one(
+            f"SELECT count(*) AS cnt FROM t_admin_audit_log {where_sql}", tuple(params)
+        )["cnt"]
+        rows = self._query(
+            f"""
+            SELECT log_id, operator_id, operator_name, operator_role, action,
+                   target_type, target_id, result, detail, ip, user_agent, created_at
+            FROM t_admin_audit_log {where_sql}
+            ORDER BY log_id DESC
+            LIMIT ? OFFSET ?
+            """,
+            tuple(params + [page_size, (page - 1) * page_size]),
+        )
+        return total, rows
+
+    def count_audit_logs(self) -> int:
+        return self._query_one("SELECT count(*) AS cnt FROM t_admin_audit_log")["cnt"]
+
+    # ---------- 管理员端：平台总览 ----------
+
+    def admin_platform_counts(self) -> dict:
+        """平台核心计数（管理员工作台顶部统计）。
+
+        用户/课程/文档口径复用已有的 count_* 方法；admin_count 直接按 role 统计。
+        """
+        return {
+            "user_count": self._query_one("SELECT count(*) AS c FROM t_user")["c"],
+            "admin_count": self.count_users_by_role("admin"),
+            "teacher_count": self.count_users_by_role("teacher"),
+            "student_count": self.count_users_by_role("student"),
+            "active_user_count": self._query_one(
+                "SELECT count(*) AS c FROM t_user WHERE is_active = 1")["c"],
+            "disabled_user_count": self._query_one(
+                "SELECT count(*) AS c FROM t_user WHERE is_active = 0")["c"],
+            "course_count": self.count_courses(),
+            # 公开课程数：与 COURSE_VISIBLE_SQL 同一口径——已下架/归档的课程不算「公开可加入」
+            "public_course_count": self._query_one(
+                f"SELECT count(*) AS c FROM t_course WHERE is_public = 1 AND {COURSE_VISIBLE_SQL}")["c"],
+            "document_count": self.count_documents(),
+            "member_count": self._query_one(
+                "SELECT count(*) AS c FROM t_course_member WHERE status = 'approved'")["c"],
+            "question_count": self._query_one("SELECT count(*) AS c FROM t_question")["c"],
+        }
+
+    def admin_platform_trend(self, days: int = 14) -> list:
+        """按天统计「新增用户 / 新增课程 / 新增文档」，返回最近 days 天（含今天）。
+
+        只统计真实存在的 created_at，不做任何估算或补值外推。
+        空缺的日期在这里补 0（而不是让前端自己猜），这样图上不会出现断点。
+        """
+        from datetime import date, timedelta
+
+        # None 表示「用默认值」，显式传 0 / 负数则夹到 1 —— 不用 `days or 14`，
+        # 否则 days=0 会被悄悄当成 14，与「夹到 [1,90]」的语义不符。
+        days = 14 if days is None else max(1, min(int(days), 90))
+        today = date.today()
+        start = today - timedelta(days=days - 1)
+
+        def _daily(sql: str) -> dict:
+            return {
+                r["d"]: r["c"]
+                for r in self._query(sql, (start.isoformat(),))
+                if r.get("d")
+            }
+
+        users = _daily("SELECT date(created_at) AS d, count(*) AS c FROM t_user "
+                       "WHERE date(created_at) >= ? GROUP BY d")
+        courses = _daily("SELECT date(created_at) AS d, count(*) AS c FROM t_course "
+                         "WHERE date(created_at) >= ? GROUP BY d")
+        documents = _daily("SELECT date(created_at) AS d, count(*) AS c FROM t_document "
+                           "WHERE date(created_at) >= ? GROUP BY d")
+
+        trend = []
+        for i in range(days):
+            d = (start + timedelta(days=i)).isoformat()
+            trend.append({
+                "date": d,
+                "users": users.get(d, 0),
+                "courses": courses.get(d, 0),
+                "documents": documents.get(d, 0),
+            })
+        return trend
+
+    def list_recent_audit_logs(self, limit: int = 10) -> list:
+        """最近的管理员操作（工作台「最近活动」）"""
+        return self._query(
+            "SELECT log_id, operator_name, operator_role, action, target_type, target_id, "
+            "result, detail, created_at FROM t_admin_audit_log "
+            "ORDER BY log_id DESC LIMIT ?",
+            (limit,),
+        )
+
+    def list_recent_users(self, limit: int = 10) -> list:
+        """最近注册的用户（工作台「最近活动」）"""
+        return self._query(
+            "SELECT user_id, username, role, display_name, is_active, created_at "
+            "FROM t_user ORDER BY user_id DESC LIMIT ?",
+            (limit,),
+        )
+
+    def list_recent_courses(self, limit: int = 10) -> list:
+        """最近创建的课程（工作台「最近活动」）"""
+        return self._query(
+            """
+            SELECT c.course_id, c.course_name, c.created_at, c.status,
+                   COALESCE(c.governance_status, 'normal') AS governance_status,
+                   COALESCE(u.display_name, u.username, '') AS teacher_name
+            FROM t_course c LEFT JOIN t_user u ON c.teacher_id = u.user_id
+            ORDER BY c.course_id DESC LIMIT ?
+            """,
+            (limit,),
+        )
+
+    def list_recent_documents(self, limit: int = 10) -> list:
+        """最近上传的文档（工作台「最近活动」）"""
+        return self._query(
+            """
+            SELECT d.doc_id, d.file_name, d.course_id, d.file_type,
+                   d.parse_status, d.extract_status, d.created_at,
+                   COALESCE(c.course_name, '') AS course_name,
+                   COALESCE(u.display_name, u.username, '') AS uploader_name
+            FROM t_document d
+            LEFT JOIN t_course c ON d.course_id = c.course_id
+            LEFT JOIN t_user u ON d.uploader_id = u.user_id
+            ORDER BY d.doc_id DESC LIMIT ?
+            """,
+            (limit,),
+        )
 
 
 # 全局关系型数据库实例

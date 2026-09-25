@@ -8,7 +8,7 @@ import os
 
 from ..core.codes import gen_join_code
 from ..core.database import db
-from ..core.sql_database import JOIN_MODES, sql_db
+from ..core.sql_database import JOIN_MODES, course_is_visible, sql_db
 from ..core.storage import resolve_document_path
 from .profile_service import ProfileService
 
@@ -154,6 +154,10 @@ class CourseService:
                 "node_count": node_counts.get(cid, 0),
                 "edge_count": edge_counts.get(cid, 0),
                 "status": r["status"],
+                # 治理状态必须带出来：发现课程等功能用 course_is_visible 组合判定
+                # （status 与 governance_status 同时满足），少了这个键会让过滤条件
+                # 因为读到 None 而静默失效——下架的课程照样出现在发现页。
+                "governance_status": r.get("governance_status") or "normal",
                 "created_at": r["created_at"],
                 "updated_at": r.get("updated_at"),
                 "category": r.get("category"),
@@ -219,9 +223,10 @@ class CourseService:
                                        category=category, is_public=1,
                                        exclude_course_ids=mine)
         # 发现课程页不带加课码：这里的课程调用者都不是教师（自己创建的课已被排除）
-        # 只保留启用中的课程（status=1）
+        # 只保留「对学生可见」的课程：业务状态开放 **且** 未被平台下架 / 归档。
+        # 判定口径统一在 course_is_visible，避免各处自行组合 status 与 governance_status。
         data = r["data"]
-        data["items"] = [i for i in data["items"] if i["status"] == 1]
+        data["items"] = [i for i in data["items"] if course_is_visible(i)]
         memberships = {m["course_id"]: m for m in sql_db.list_memberships_by_user(uid)}
         for item in data["items"]:
             item["my_relation"] = "NONE" if item["course_id"] not in memberships else "KNOWN"

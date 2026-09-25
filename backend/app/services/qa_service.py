@@ -12,6 +12,7 @@ from openai import OpenAI
 
 from ..core.config import settings
 from ..core.database import db
+from ..core.metrics import track_llm_call
 from .embedding import EmbeddingClient, KnowledgeEmbedder
 
 _logger = logging.getLogger(__name__)
@@ -243,16 +244,17 @@ class QAService:
 
         # 2. 调用 LLM 生成回答
         try:
-            response = self.client.chat.completions.create(
-                model=settings.LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": QA_SYSTEM_PROMPT.format(context=context_text)},
-                    {"role": "user", "content": question},
-                ],
-                temperature=0.3,
-                max_tokens=1024,
-                timeout=settings.QA_TIMEOUT,
-            )
+            with track_llm_call("qa"):
+                response = self.client.chat.completions.create(
+                    model=settings.LLM_MODEL,
+                    messages=[
+                        {"role": "system", "content": QA_SYSTEM_PROMPT.format(context=context_text)},
+                        {"role": "user", "content": question},
+                    ],
+                    temperature=0.3,
+                    max_tokens=1024,
+                    timeout=settings.QA_TIMEOUT,
+                )
             answer = response.choices[0].message.content.strip()
         except Exception as e:
             answer = f"抱歉，问答服务暂时不可用：{str(e)}"

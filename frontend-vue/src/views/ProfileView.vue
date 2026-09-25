@@ -28,9 +28,7 @@
           </div>
           <div class="identity-row">
             <span class="identity-label">身份</span>
-            <el-tag size="small" :type="isTeacher ? 'warning' : 'success'" effect="dark">
-              {{ isTeacher ? '教师' : '学生' }}
-            </el-tag>
+            <el-tag size="small" :type="roleTagType" effect="dark">{{ roleText }}</el-tag>
           </div>
           <div class="identity-row">
             <span class="identity-label">邮箱</span>
@@ -76,8 +74,8 @@
             </el-col>
           </el-row>
 
-          <!-- 学生专属 -->
-          <template v-if="!isTeacher">
+          <!-- 学生专属（管理员没有学籍，不展示这几项——后端也会静默丢弃这些字段） -->
+          <template v-if="isStudent">
             <el-divider content-position="left">学籍信息</el-divider>
             <el-row :gutter="16">
               <el-col :span="12">
@@ -112,8 +110,8 @@
             </el-row>
           </template>
 
-          <!-- 教师专属 -->
-          <template v-else>
+          <!-- 教师专属（管理员不是教师，不展示工号/职称/研究方向） -->
+          <template v-else-if="isTeacher">
             <el-divider content-position="left">教师信息</el-divider>
             <el-row :gutter="16">
               <el-col :span="12">
@@ -303,6 +301,10 @@ const activeSection = computed(() => {
 })
 
 const isTeacher = computed(() => store.role === 'teacher')
+const isStudent = computed(() => store.role === 'student')
+const isAdmin = computed(() => store.role === 'admin')
+const roleText = computed(() => ({ teacher: '教师', student: '学生', admin: '管理员' }[store.role] || '学生'))
+const roleTagType = computed(() => ({ teacher: 'warning', student: 'success', admin: 'primary' }[store.role] || 'success'))
 const profile = computed(() => store.profile || {})
 const initial = computed(() => (store.displayName || '?').slice(0, 1).toUpperCase())
 
@@ -327,6 +329,16 @@ const deactivating = ref(false)
 const FIELDS = ['avatar_url', 'real_name', 'nickname', 'gender', 'school', 'college', 'bio',
   'student_no', 'major', 'grade', 'class_name', 'teacher_no', 'title', 'research_area']
 
+// 各角色可提交的字段（与后端 ProfileService.editable_fields 的白名单一一对应）。
+// 提交前就按角色收敛，是为了不让用户遇到「填了但保存后变空」——后端对越权字段是静默丢弃的。
+const SHARED_FIELDS = ['real_name', 'nickname', 'gender', 'school', 'bio']
+const STUDENT_ONLY = ['student_no', 'college', 'major', 'grade', 'class_name']
+const TEACHER_ONLY = ['teacher_no', 'college', 'title', 'research_area']
+const editableFields = computed(() => {
+  if (isAdmin.value) return SHARED_FIELDS
+  return isTeacher.value ? [...SHARED_FIELDS, ...TEACHER_ONLY] : [...SHARED_FIELDS, ...STUDENT_ONLY]
+})
+
 const form = reactive(Object.fromEntries(FIELDS.map((f) => [f, ''])))
 
 const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
@@ -347,10 +359,9 @@ async function load() {
 async function save() {
   saving.value = true
   try {
-    // 只提交本次表单里出现过的字段；空串表示清空（后端会把空串写为 NULL）
+    // 只提交当前角色可编辑的字段；空串表示清空（后端会把空串写为 NULL）
     const payload = {}
-    for (const f of FIELDS) payload[f] = form[f] === '' ? '' : form[f]
-    delete payload.avatar_url   // 头像只通过上传/删除接口修改，避免被表单覆盖
+    for (const f of editableFields.value) payload[f] = form[f] === '' ? '' : form[f]
     const data = await api.updateProfile(payload)
     store.applyProfile(data)
     fillForm(data)

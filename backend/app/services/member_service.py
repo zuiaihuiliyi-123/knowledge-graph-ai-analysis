@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 from ..core.codes import gen_invite_token, normalize_join_code
 from ..core.database import db
-from ..core.sql_database import sql_db
+from ..core.sql_database import course_is_visible, sql_db
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 INVITE_DEFAULT_DAYS = 7
@@ -209,8 +209,10 @@ class MemberService:
         course = sql_db.get_course_by_join_code(code)
         if course is None:
             return MemberService._fail(4005, "加课码无效，请确认后重试")
-        if course["status"] != 1:
-            return MemberService._fail(4003, "该课程已停用，无法加入")
+        # 已停用（教师/管理员关闭）或被平台下架/归档的课程都不再接受新成员。
+        # 判定走 course_is_visible：只加治理维度，不改变原有 status 语义。
+        if not course_is_visible(course):
+            return MemberService._fail(4003, "该课程已停用或已下架，无法加入")
 
         course_id = course["course_id"]
         if course["teacher_id"] == user_id:
@@ -255,7 +257,7 @@ class MemberService:
         course = sql_db.get_course(course_id)
         if course is None:
             return MemberService._fail(2001, f"课程不存在: course_id={course_id}")
-        if course.get("is_public") != 1 or course["status"] != 1:
+        if course.get("is_public") != 1 or not course_is_visible(course):
             return MemberService._fail(4003, "该课程未开放申请")
         if course["teacher_id"] == user_id:
             return MemberService._fail(4004, "您是该课程的创建教师")
@@ -383,6 +385,13 @@ class MemberService:
         course = sql_db.get_course(course_id)
         if course is None:
             return MemberService._fail(4010, "邀请对应的课程已不存在")
+
+        # 平台治理优先于教师的课程设置：已下架 / 已归档的课程不接受任何方式加入，
+        # 邀请链接也不例外（它是教师的决定，但下架是平台的结论）。
+        # 刻意只查 governance_status 而不查 status —— status=0 的课程仍允许邀请加入，
+        # 这是 join_mode='closed' 的既有设计（关闭加课码与申请，保留邀请）。
+        if (course.get("governance_status") or "normal") != "normal":
+            return MemberService._fail(4003, "该课程已被平台下架或归档，无法加入")
 
         # 已是成员：幂等返回，不再消费邀请令牌
         member = sql_db.get_membership(course_id, user_id)

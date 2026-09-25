@@ -9,6 +9,7 @@ from typing import List, Tuple
 from openai import OpenAI
 from ..core.config import settings
 from ..core.database import VALID_RELATION_TYPES
+from ..core.metrics import track_llm_call
 from ..utils.text_processor import chunk_text_for_llm
 
 _logger = logging.getLogger(__name__)
@@ -228,16 +229,18 @@ class KnowledgeExtractor:
     def _extract_single(self, text: str) -> dict:
         """对单个文本块执行提取（同步；由 extract 通过线程池并发调用）"""
         try:
-            response = self.client.chat.completions.create(
-                model=settings.LLM_MODEL,
-                messages=[
-                    {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
-                    {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
-                ],
-                temperature=self.temperature,
-                max_tokens=_MAX_OUTPUT_TOKENS,
-                timeout=settings.EXTRACTION_TIMEOUT
-            )
+            # 只包住「发起请求」这一行：解析失败仍算本次 LLM 调用成功（见 core/metrics 说明）
+            with track_llm_call("extraction"):
+                response = self.client.chat.completions.create(
+                    model=settings.LLM_MODEL,
+                    messages=[
+                        {"role": "system", "content": "你是一个精确的知识图谱构建助手。请只输出JSON格式的结果。"},
+                        {"role": "user", "content": EXTRACTION_PROMPT.replace("{text}", text)}
+                    ],
+                    temperature=self.temperature,
+                    max_tokens=_MAX_OUTPUT_TOKENS,
+                    timeout=settings.EXTRACTION_TIMEOUT
+                )
 
             content = response.choices[0].message.content.strip()
             return self._parse_json(content)

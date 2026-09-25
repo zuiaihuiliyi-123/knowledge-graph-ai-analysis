@@ -28,10 +28,19 @@ test('合并：教师端 7 个 Tab 并存，题库管理深链直达题库总览
   await page.goto(`${BASE}/teacher?tab=questions&course_id=${courseId}`)
   await dismissBackendStatus(page)
 
-  // 两侧 Tab 必须同时存在（课程中心 6 个 + 题库 1 个）
-  for (const tab of ['课程管理', '课程文档', '学生管理', '图谱预览', '编辑图谱', '教学监测', '题库管理']) {
-    await expect(page.getByRole('tab', { name: new RegExp(tab) })).toBeVisible({ timeout: 15000 })
+  // 两侧 Tab 必须同时存在（课程中心 6 个 + 题库 1 个）。
+  //
+  // 注意：**不能用 getByRole('tab')** —— 顶部标签栏已被 CSS 刻意隐藏
+  // （TeacherView 的 `.main-view-tabs > :deep(.el-tabs__header) { display: none }`，
+  //  注释写明「顶部标签栏已由左侧菜单接管」），隐藏元素不会被 role 选择器命中，
+  //  该断言必然失败（属测试过时，不是功能损坏）。
+  // 改为断言 7 个面板都存在于 DOM，且侧栏能看到新增的「题库管理」入口。
+  for (const pane of ['pane-courses', 'pane-documents', 'pane-members', 'pane-preview',
+    'pane-monitor', 'pane-questions', 'pane-grading']) {
+    await expect(page.locator(`#${pane}`), `${pane} 应存在`).toHaveCount(1, { timeout: 15000 })
   }
+  await expect(page.locator('.sidebar-menu').getByText('题库管理', { exact: true }).first())
+    .toBeVisible({ timeout: 15000 })
 
   // 深链必须带出课程上下文：不出现「请先选择课程」空态，而是渲染题库总览
   await expect(page.getByText('请先选择要管理题库的课程')).toHaveCount(0)
@@ -47,8 +56,10 @@ test('合并：学生端「做题练习」Tab 已并入，且缺上下文时按�
   await page.goto(`${BASE}/student?tab=practice`)
   await dismissBackendStatus(page)
 
-  // 「做题练习」Tab 已随 PR #3 并入学生端页签
-  await expect(page.getByRole('tab', { name: /做题练习/ })).toBeVisible({ timeout: 15000 })
+  // 「做题练习」Tab 已随 PR #3 并入学生端页签。
+  // 同样不能用 getByRole('tab')（顶部标签栏被刻意隐藏），改为断言侧栏入口可见。
+  await expect(page.locator('.sidebar-menu').getByText('做题练习', { exact: true }).first())
+    .toBeVisible({ timeout: 15000 })
 
   // 但它是 LEARNING_TABS：没有「课程 + 文档」上下文时不进面板，而是回落到学习总览并提示选择课程/资料。
   // 这是合作者的既有设计（非合并引入），此处锁住该行为，避免日后被误当 bug 改掉。
