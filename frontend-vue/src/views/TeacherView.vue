@@ -279,6 +279,27 @@
           <span class="context-title">{{ currentCourseName }}</span>
           <el-tag size="small" type="info">{{ currentDocumentName || '文档' }}</el-tag>
           <el-tag size="small" :type="graphEditMode ? 'warning' : 'success'" effect="plain">{{ graphEditMode ? '编辑模式' : '查看模式' }}</el-tag>
+          <!-- 右侧动作组：这两个动作都要离开当前视图，与左边「返回 / 课程 / 文档 / 模式」那组信息标签分开 -->
+          <div class="ctx-right">
+            <!-- 换一篇文档看它的图谱。与学生端「图谱浏览」上方的「切换资料」是同一个选择器组件，
+                 只是教师这里换的是「要管理图谱的文档」，所以用教师自己的措辞。
+                 只依赖 currentDocumentId（不依赖文档对象）：文档列表万一没取回来，也还能换一篇。 -->
+            <el-button
+              v-if="currentDocumentId"
+              :icon="Switch"
+              @click="docSwitchVisible = true"
+            >切换文档</el-button>
+            <!-- 在线阅读本文档：与学生端「图谱浏览」上的「在线阅读」同一入口（同一个阅读器整页）。
+                 查看/编辑两种模式都显示——改知识点时常常需要回原文核对一句话的措辞。
+                 文档元信息还没加载出来时不显示，避免点进去只有空壳。 -->
+            <el-button
+              v-if="currentDocumentId && currentDocument"
+              type="primary"
+              plain
+              :icon="Reading"
+              @click="readCurrentDocument"
+            >在线阅读文档</el-button>
+          </div>
         </div>
 
         <!-- 查看模式 -->
@@ -301,7 +322,17 @@
           </div>
         </el-card>
         <el-card class="page-card graph-card">
+          <!--
+            :key 必需，不是顺手加的：切换文档/课程时本页是【就地】换作用域，画布组件不重建。
+            而 GraphCanvas 内部的 rawNodes/rawEdges 是普通 let 变量（非响应式），
+            依赖它们的 computed（visibleNodeIds / visibleEdges / neighborMap…）在属性变化后
+            不会失效——于是新节点被旧 id 集合过滤成空，旧边却仍被画出来，G6 直接抛
+            「Unknown element type of id」。按作用域换 key 强制重建，等于回到「换上下文即重新挂载」
+            的既有语义（打开阅读器里的 PDF 也是同样的写法）。
+            根治要改 GraphCanvas 的数据源为响应式，那是独立一件事，不在本次范围内。
+          -->
           <GraphCanvas
+            :key="`preview-${currentCourseId}-${currentDocumentId}`"
             ref="previewGraphRef"
             :course-id="currentCourseId"
             :document-id="currentDocumentId"
@@ -366,7 +397,9 @@
 
           <el-col :xs="24" :sm="13">
             <el-card class="panel-card graph-panel">
+              <!-- :key 同上：编辑模式换文档也是就地换作用域，不重建会留下上一个文档的陈旧数据 -->
               <GraphCanvas
+                :key="`edit-${currentCourseId}-${currentDocumentId}`"
                 ref="editGraphRef"
                 :course-id="currentCourseId"
                 :document-id="currentDocumentId"
@@ -1494,6 +1527,17 @@
       @deleted="onCourseDeleted"
     />
 
+    <!-- 切换文档：复用学生端「切换资料」的同一个选择器（课程 + 文档），
+         教师端不据此重设任何学习上下文，只用来换图谱/阅读器的作用域 -->
+    <el-dialog v-model="docSwitchVisible" title="切换文档" width="560px" :close-on-click-modal="false">
+      <CourseDocumentSelector
+        :initial-course-id="currentCourseId"
+        :initial-document-id="currentDocumentId"
+        @confirm="applyDocSwitch"
+        @cancel="docSwitchVisible = false"
+      />
+    </el-dialog>
+
     <!-- 邀请学生 / 协作教师 -->
     <InviteDialog v-model="inviteVisible" :course-id="inviteCourseId" />
   </div>
@@ -1508,7 +1552,7 @@ import {
   UploadFilled, Upload, View, EditPen, Refresh, FullScreen, Plus, Connection, ArrowRight, Search, SuccessFilled,
   Notebook, Document, Delete, DataAnalysis, Clock, User, UserFilled, Back, Files, FolderOpened,
   Reading, Download, Promotion, Collection, Star, Aim, WarningFilled, CircleCheckFilled,
-  DocumentChecked, MagicStick,
+  DocumentChecked, MagicStick, Switch,
 } from '@element-plus/icons-vue'
 import { api } from '../api'
 import { fetchDocumentBuffer } from '../utils/documentContent'
@@ -1518,6 +1562,7 @@ import GraphCanvas from '../components/GraphCanvas.vue'
 import NodeDetailDrawer from '../components/NodeDetailDrawer.vue'
 import MyCourseGrid from '../components/course/MyCourseGrid.vue'
 import CreateCourseDialog from '../components/course/CreateCourseDialog.vue'
+import CourseDocumentSelector from '../components/CourseDocumentSelector.vue'
 import CourseSettingsDialog from '../components/course/CourseSettingsDialog.vue'
 import CourseMembersPanel from '../components/course/CourseMembersPanel.vue'
 import InviteDialog from '../components/course/InviteDialog.vue'
@@ -2348,6 +2393,26 @@ async function downloadDocument(doc) {
     ElMessage.error(`下载失败：${e.message}`)
   }
 }
+
+/**
+ * 图谱管理页「在线阅读」：进的是同一个阅读器整页，只是带 from=teacher-graph，
+ * 让阅读器里的「返回」回到图谱管理（而不是被甩到课程文档列表）。
+ * 课程 id 以当前上下文为准——同一课程的文档列表本来就按 course_id 取回，
+ * 文档对象上的 course_id 只是冗余字段，缺了也不该让按钮失效。
+ */
+function readCurrentDocument() {
+  const doc = currentDocument.value
+  if (!doc) return
+  router.push({
+    name: 'reader',
+    params: { docId: String(doc.doc_id) },
+    query: {
+      course_id: String(doc.course_id ?? currentCourseId.value),
+      from: 'teacher-graph',
+    },
+  })
+}
+
 function monitorDocument(doc) {
   router.push({
     path: '/teacher',
@@ -2365,14 +2430,49 @@ function syncDocumentsRoute(id) {
     .catch(() => {})
 }
 
-// 图谱管理/监测页内选择课程：清空已选文档并重置各页内部状态，避免残留上一个上下文的选中项
-function onContextCourseChange(id) {
-  currentDocumentId.value = ''
+/**
+ * 清掉「跟着 (课程, 文档) 走」的图谱页内部选中态。
+ * 不清的话，换作用域后详情抽屉与前置知识面板还停在上一个文档的节点上——
+ * 那些节点在新文档里可能根本不存在（节点按文档隔离），点进去会查到空数据。
+ */
+function resetContextSelection() {
   drawerVisible.value = false
   drawerNode.value = null
   selectedNode.value = null
   prereqs.value = []
   prereqLoaded.value = false
+}
+
+// ===================== 切换文档（图谱管理页内换 (课程, 文档) 作用域） =====================
+const docSwitchVisible = ref(false)
+
+/**
+ * 应用选择器给出的 (课程, 文档)。
+ *
+ * 只改路由，状态同步全部交给既有的 route watcher：它已经负责把 query 落到
+ * currentCourseId / currentDocumentId，并在课程变化时重载文档列表。
+ * 这里额外只做它不管的一件事：清掉图谱页自己的选中项。
+ *
+ * 编辑模式下的「可编辑知识点列表」不在这里重载——路由 replace 后 ref 是异步更新的，
+ * 此处同步调用 loadEditNodes() 读到的是切换前那篇文档。那件事交给下面的
+ * watch([currentCourseId, currentDocumentId])。
+ */
+function applyDocSwitch({ courseId: cid, documentId: did }) {
+  docSwitchVisible.value = false
+  if (!cid || !did) return
+  resetContextSelection()
+  router
+    .replace({
+      path: '/teacher',
+      query: { tab: 'preview', course_id: String(cid), document_id: String(did) },
+    })
+    .catch(() => {})
+}
+
+// 图谱管理/监测页内选择课程：清空已选文档并重置各页内部状态，避免残留上一个上下文的选中项
+function onContextCourseChange(id) {
+  currentDocumentId.value = ''
+  resetContextSelection()
   router
     .replace({
       path: '/teacher',
@@ -2387,13 +2487,9 @@ function onContextCourseChange(id) {
   }
 }
 
-// 图谱管理页内选择文档：重置内部状态并同步路由；编辑模式下需主动拉取知识点列表
+// 图谱管理页内选择文档：重置内部状态并同步路由；编辑模式下的知识点列表由下面的 watch 重载
 function onContextDocChange(id) {
-  drawerVisible.value = false
-  drawerNode.value = null
-  selectedNode.value = null
-  prereqs.value = []
-  prereqLoaded.value = false
+  resetContextSelection()
   router
     .replace({
       path: '/teacher',
@@ -2401,11 +2497,11 @@ function onContextDocChange(id) {
     })
     .catch(() => {})
 
-  if (activeTab.value === 'edit' && id) loadEditNodes()
+  // 原先是 `if (activeTab.value === 'edit') loadEditNodes()`——'edit' 这个 Tab 已被
+  // 并入 preview（见上面的 targetTab 改写），activeTab 永远不会等于 'edit'，是段死代码；
+  // 而且即便成立也会读错文档（路由 replace 后 ref 异步才更新）。已由
+  // watch([currentCourseId, currentDocumentId]) 统一接管。
   if (activeTab.value === 'grading') loadGrading()
-
- 
-
 }
 
 // 用户直接点击 Tab 头：同步路由（缺失参数的守卫统一由 route watcher 处理）
@@ -2471,6 +2567,15 @@ watch(
 watch(currentCourseId, (cid) => {
   if (cid) loadDocuments()
   else documents.value = []
+})
+
+// (课程, 文档) 变了 → 编辑模式下的「可编辑知识点列表」跟着换。
+// 列表按文档隔离（getGraphV1 带 document_id），不重载就会把上一篇文档的节点当成
+// 当前文档的可编辑内容——不仅显示错的，改/删还会作用到错的节点上。
+// 必须用 watch 而不是在切换处手动调用：router.replace 之后 ref 由 route watcher
+// 异步更新，切换处同步调用 loadEditNodes() 读到的仍然是旧文档。
+watch([currentCourseId, currentDocumentId], ([cid, did]) => {
+  if (graphEditMode.value && cid && did) loadEditNodes()
 })
 
 
@@ -3290,6 +3395,10 @@ watch(activeTab, (tab) => {
   if (tab === 'preview') {
     drawerVisible.value = false
     drawerNode.value = null
+    // 图谱管理也要文档列表：上下文条要显示文档名、「在线阅读文档」入口要拿 doc_id。
+    // 只靠 watch(currentCourseId) 加载是不够的——那条 watch 注册时 currentCourseId
+    // 已被路由 watcher（immediate）写好，深链进来时它一次都不会触发。
+    if (currentCourseId.value && !documents.value.length) loadDocuments()
     // 图谱管理：编辑模式下进入该页时主动拉取可编辑知识点列表
     if (graphEditMode.value && currentCourseId.value) loadEditNodes()
   }
@@ -3302,6 +3411,9 @@ onMounted(() => {
   window.addEventListener('resize', handleMonitorResize)
   // 深链直达时 activeTab 初始即等于目标 tab，activeTab watcher 不会触发，需在此补一次加载
   if (activeTab.value === 'documents' && currentCourseId.value) loadDocuments()
+  if (activeTab.value === 'preview' && currentCourseId.value && !documents.value.length) {
+    loadDocuments() // 同上：上下文条 / 在线阅读入口需要文档列表
+  }
   if (activeTab.value === 'monitor' && currentCourseId.value) loadMonitorData()
   if (activeTab.value === 'questions' && currentCourseId.value) loadQuestionsTab()
 })
@@ -3406,6 +3518,13 @@ function isDocInFlight(doc) {
   font-size: var(--font-size-section);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+}
+/* 右侧动作组推到最右：点击它们是要离开当前视图，不该混在左侧的信息标签里 */
+.ctx-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 /* ===== 文档列表 / 上传 ===== */

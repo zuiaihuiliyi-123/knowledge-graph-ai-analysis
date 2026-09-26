@@ -84,9 +84,18 @@ function parseStatusText(s) {
   return map[s] || s || ''
 }
 
-// 切换课程：必须清空已选文档（禁止沿用上一课程的文档）
-async function onCourseChange(cid) {
-  documentId.value = ''
+/**
+ * 加载课程下的文档列表。
+ *
+ * resetDoc 用来区分两种调用来源：
+ * - 用户在课程下拉里主动换课程（模板 @change，缺省 true）：必须清空已选文档，
+ *   沿用上一篇课程的文档是错的——文档按课程隔离，它根本不在新列表里。
+ * - 首次挂载（onMounted 传 false）：此时的 documentId 是调用方用 initialDocumentId
+ *   预选的「当前文档」，清掉就等于这个 prop 从未生效：对话框每次打开都是空白，
+ *   用户看不出自己现在停在哪一篇（本组件两个调用方都传了这个 prop）。
+ */
+async function onCourseChange(cid, resetDoc = true) {
+  if (resetDoc) documentId.value = ''
   documentList.value = []
   if (!cid) return
   docLoading.value = true
@@ -112,7 +121,8 @@ function continueSingle() {
 
 onMounted(() => {
   store.fetchCourses().catch(() => {})
-  if (courseId.value) onCourseChange(courseId.value)
+  // 首次加载只取列表，保留调用方预选的 documentId（见 onCourseChange 的 resetDoc 说明）
+  if (courseId.value) onCourseChange(courseId.value, false)
 })
 </script>
 

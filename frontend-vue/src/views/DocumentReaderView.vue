@@ -305,7 +305,10 @@ const courseName = computed(() => {
   return c ? c.course_name : ''
 })
 
-const backText = computed(() => (from === 'teacher' ? '返回课程管理' : '返回课程'))
+const backText = computed(() => {
+  if (from === 'teacher-graph') return '返回图谱管理'
+  return from === 'teacher' ? '返回课程管理' : '返回课程'
+})
 
 const searchPlaceholder = computed(() =>
   kind.value === 'docx' ? 'Word 文档暂不支持文内搜索' : '在文档中搜索（Ctrl+F）',
@@ -726,6 +729,20 @@ async function onDocumentChange() {
 // ---------------- 导航 / 工具 ----------------
 
 function goBack() {
+  // 从图谱管理进来的，回到原文档的图谱——否则读完原文再想改知识点，
+  // 得从文档列表重新点一遍课程和文档。docId 用当前值：阅读器内换过文档时
+  // 该值已被 replace 更新（switchDocument 保留了 query），与「查看图谱」对称。
+  if (from === 'teacher-graph') {
+    router.push({
+      path: '/teacher',
+      query: {
+        tab: 'preview',
+        ...(courseId ? { course_id: courseId } : {}),
+        document_id: docId.value,
+      },
+    })
+    return
+  }
   const target = from === 'teacher' || store.role === 'teacher'
     ? { path: '/teacher', query: { tab: 'documents', ...(courseId ? { course_id: courseId } : {}) } }
     : { path: '/student', query: { tab: 'documents', ...(courseId ? { course_id: courseId } : {}) } }
