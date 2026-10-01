@@ -324,6 +324,15 @@ class DocumentService:
         except Exception as e:
             return {"ok": False, "code": 5002, "message": f"删除文档题库数据失败: {str(e)}"}
 
+        # 4.8 文档级知识融合数据（run / candidate / map / conflict / scope）
+        # 融合映射按 kp_id 指向本文件的节点，文档一删这些 kp_id 就再无意义；
+        # 留下不清理会让 t_kp_fusion_map 里堆积指向不存在节点的"僵尸映射"。
+        # 纯 SQLite 操作，不触碰 Neo4j；必须排在 DELETE FROM t_document 之前。
+        try:
+            removed_fusion = sql_db.delete_fusion_by_document(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档融合记录失败: {str(e)}"}
+
         # 5. 本地文件（不存在视为已删，幂等）
         # 同样走路径解析：历史行的 file_path 可能是其他机器的路径，只按原值判断会漏删本机文件
         path = resolve_document_path(doc)
@@ -348,4 +357,5 @@ class DocumentService:
             "removed_questions": removed_questions,
             "removed_question_favorites": removed_question_favorites,
             "removed_answers": removed_answers,
+            "removed_fusion": removed_fusion,
         }}

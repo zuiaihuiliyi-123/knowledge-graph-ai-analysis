@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from typing import List, Dict
 from ..core.database import db, VALID_RELATION_TYPES, RELATION_TYPE_LABELS
 from ..core.sql_database import sql_db
+from .fusion.fusion_map import load_active_mapping
+from .fusion.graph_folder import fold_graph
 
 _logger = logging.getLogger(__name__)
 
@@ -145,12 +147,17 @@ class KnowledgeGraphManager:
         }
 
     @staticmethod
-    def get_graph_v1(course_id: str, document_id, limit: int = 500, node_type: str = None) -> dict:
+    def get_graph_v1(course_id: str, document_id, limit: int = 500, node_type: str = None,
+                     apply_fusion: bool = True) -> dict:
         """
         获取文档级图谱数据（对齐规划文档 6.3.2）
         返回 {"nodes": [...], "edges": [...]}，节点以 kp_id 为 id。
 
         Phase 8A：按 course_id + document_id 读取，不猜测 document。
+
+        apply_fusion：默认 True，按融合映射把已融合的源节点折进目标节点（无映射时是纯 no-op）。
+        只有融合模块自身需要 False —— 扫描候选时要看到**真实节点集合**，
+        否则已折掉的源节点会从视野里消失，连核对都无从谈起。
         """
         params = {"course_id": course_id, "document_id": document_id, "limit": limit}
 
@@ -214,6 +221,32 @@ class KnowledgeGraphManager:
                     },
                 })
 
+        # 文档级融合折叠：把「已融合的源节点」折进它的目标节点。
+        #
+        # 必须放在下面的「悬挂边不变量」**之前** —— 该不变量看到的应当是折叠后的 id 集合，
+        # 折叠本身也正是在这一步把自环丢弃、把重复边去重。
+        #
+        # 无 ACTIVE 映射时 `fold_graph` 是纯 no-op（直接返回入参本身），
+        # 所以没有融合记录的文档，读图结果与引入本模块之前逐字节相同。
+        # 读取失败时降级为未融合图谱并记 WARNING（普通读图 tolerant；管理操作另走 strict 入口）。
+        mapping = load_active_mapping(course_id, document_id) if apply_fusion else {}
+        if mapping:
+            fold_report = {}
+            folded_nodes, edges = fold_graph(list(nodes.values()), edges, mapping,
+                                            report=fold_report)
+            nodes = {n["id"]: n for n in folded_nodes}
+            if fold_report.get("cycles"):
+                _logger.warning(
+                    "融合映射存在环（已就地切断）course_id=%s document_id=%s: %s",
+                    course_id, document_id, fold_report["cycles"],
+                )
+            if fold_report.get("stale"):
+                _logger.warning(
+                    "融合映射端点已不在图中（文档重新抽取后 kp_id 会整体更换），本次跳过 "
+                    "course_id=%s document_id=%s 条数=%d",
+                    course_id, document_id, len(fold_report["stale"]),
+                )
+
         # 硬不变量：API 返回的每一条 edge，其 source/target 必须能在本次响应的 nodes 中找到对应 id。
         # 正常数据下恒成立；若历史/并发写入产生悬挂引用（如节点被删但关系残留），
         # 日志化丢弃而非让前端 G6 抛出 "Node not found for id: ..."。
@@ -230,6 +263,17 @@ class KnowledgeGraphManager:
         edges = valid_edges
 
         return {"nodes": list(nodes.values()), "edges": edges}
+
+    @staticmethod
+    def get_raw_graph_v1(course_id: str, document_id, limit: int = 500,
+                         node_type: str = None) -> dict:
+        """未应用融合折叠的**原始**文档图。
+
+        仅供融合模块自身使用（扫描候选、核对端点归属）。前端与其它模块一律走
+        `get_graph_v1` —— 那条路径才反映"融合之后"的图谱。
+        """
+        return KnowledgeGraphManager.get_graph_v1(
+            course_id, document_id, limit=limit, node_type=node_type, apply_fusion=False)
 
     # ---------- 教师手动编辑（按 kp_id / edge_id 定位，避免 name 跨课程重名误伤） ----------
 

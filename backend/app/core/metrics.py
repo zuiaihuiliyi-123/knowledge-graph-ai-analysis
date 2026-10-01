@@ -27,6 +27,7 @@ from datetime import datetime
 LLM_SCOPES = {
     "extraction": "知识抽取",
     "qa": "智能问答",
+    "fusion_disambiguation": "实体消歧",
 }
 
 # 明确声明「未接入统计」的调用点：管理员端据此显示「未统计」，

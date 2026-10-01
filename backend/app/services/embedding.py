@@ -54,14 +54,27 @@ class KnowledgeEmbedder:
         self.embedding = EmbeddingClient()
 
     @staticmethod
-    def _current_kp_ids(course_id, document_id) -> set:
+    def _fused_sources(course_id, document_id) -> set:
+        """已被文档级融合折掉的源 kp_id 集合。
+
+        **三处过滤必须完全一致**（这里 / `_load_kp_records` / 它的 t_kp_text 回落分支）：
+        只改其中一处会让「新鲜度基准集合」与「实际写入集合」不相等，
+        于是 `ensure_index` 每次都判定索引过期、**每次问答都全量重建索引**
+        （配了 embedding key 时等于每次提问多一次外部 API 调用）。
+        """
+        from .fusion.fusion_map import active_fused_sources
+        return active_fused_sources(course_id, document_id)   # tolerant：失败即降级为不过滤
+
+    @classmethod
+    def _current_kp_ids(cls, course_id, document_id) -> set:
         """该文档当前在 Neo4j 里的 kp_id 集合（向量索引的新鲜度基准）"""
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
             "RETURN n.kp_id AS kp_id",
             {"cid": course_id, "did": document_id},
         )
-        return {r["kp_id"] for r in recs if r.get("kp_id")}
+        ids = {r["kp_id"] for r in recs if r.get("kp_id")}
+        return ids - cls._fused_sources(course_id, document_id)
 
     def ensure_index(self, course_id, document_id) -> list:
         """确保文档知识点向量与图谱一致，返回该文档的全部向量行 [{kp_id, embedding}]。
@@ -81,7 +94,23 @@ class KnowledgeEmbedder:
             return []  # 图谱为空（节点尚未抽取），交给关键词检索兜底
         if sql_db.get_embedding_kp_ids(course_id, document_id) != current:
             self.build_index(course_id, document_id)
+        elif self._fusion_epoch_changed(course_id, document_id):
+            # kp_id 集合碰巧一致、但融合状态变过（apply / revoke / 整批撤销）
+            # → 仍要重建。epoch 是权威且顺序无关的信号，不依赖图库可用性。
+            self.build_index(course_id, document_id)
         return sql_db.get_embeddings_by_document(course_id, document_id)
+
+    @staticmethod
+    def _fusion_epoch_changed(course_id, document_id) -> bool:
+        """融合 epoch 是否领先于「上次建索引时的 epoch」。
+
+        文档从未融合过（无 scope 行）时为 False —— 既避免误判，
+        也**不会**为未融合的文档凭空写一行 scope 记录。
+        """
+        scope = sql_db.fusion_scope_get(course_id, document_id)
+        if not scope:
+            return False
+        return scope.get("indexed_epoch") != scope.get("epoch")
 
     def build_index(self, course_id, document_id) -> int:
         """为文档全部知识点生成并持久化 embedding；无 key 或无知识点时返回 0。
@@ -106,13 +135,23 @@ class KnowledgeEmbedder:
         vecs = self.embedding.embed(texts)
         for r, vec in zip(recs, vecs):
             sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
+        # 记下「本次索引是按哪个融合 epoch 建的」，供 ensure_index 判新鲜度。
+        # 只在文档已有 scope 行时写 —— 未融合过的文档不该因为建索引而凭空多出一行。
+        scope = sql_db.fusion_scope_get(course_id, document_id)
+        if scope:
+            sql_db.fusion_scope_mark_indexed(course_id, document_id, scope.get("epoch") or 0)
         # L2 阶段 E：写完失效检索层缓存（同进程立即生效；跨进程由 VECTOR_CACHE_TTL 收敛）
         vector_index.invalidate(kind="kp", course_id=course_id)
         return len(recs)
 
-    @staticmethod
-    def _load_kp_records(course_id, document_id) -> list:
-        """知识点清单：图谱优先 → 回落 `t_kp_text` 缓存（含 name / category / description）"""
+    @classmethod
+    def _load_kp_records(cls, course_id, document_id) -> list:
+        """知识点清单：图谱优先 → 回落 `t_kp_text` 缓存（含 name / category / description）。
+
+        **两条路径都扣除已被融合折掉的源节点**，否则问答仍会把「BFS」和
+        「广度优先搜索」当成两个知识点重复召回，与图谱上看到的对不上。
+        """
+        fused = cls._fused_sources(course_id, document_id)
         doc_filter = ", document_id: $did" if document_id is not None else ""
         params = {"cid": course_id}
         if document_id is not None:
@@ -123,7 +162,7 @@ class KnowledgeEmbedder:
                 "RETURN n.kp_id AS kp_id, n.name AS name, n.category AS category, "
                 "n.description AS description", params)
             if recs:
-                return recs
+                return [r for r in recs if r.get("kp_id") not in fused]
         except Exception:
             pass                                   # 图库不可用 → 静默回落缓存
         try:
@@ -131,4 +170,5 @@ class KnowledgeEmbedder:
         except Exception:
             return []
         return [{"kp_id": r["kp_id"], "name": r.get("name"), "category": r.get("category"),
-                 "description": r.get("description")} for r in rows]
+                 "description": r.get("description")}
+                for r in rows if r.get("kp_id") not in fused]

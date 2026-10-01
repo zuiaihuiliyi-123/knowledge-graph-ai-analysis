@@ -19,6 +19,7 @@ from ..core.config import settings
 from ..core.database import db
 from ..core.metrics import track_llm_call
 from .embedding import EmbeddingClient, KnowledgeEmbedder
+from .fusion.rag_bridge import RagFusionView
 from .vector_index import vector_index
 
 _logger = logging.getLogger(__name__)
@@ -75,8 +76,16 @@ def _cosine(a: List[float], b: List[float], norm_a: float = None) -> float:
 
 
 def _format_node(node) -> str:
-    """格式化知识点为上下文/来源文本"""
+    """格式化知识点为上下文/来源文本。
+
+    若该知识点吸收过被融合的旧名称，**一并带上** —— 否则会出现
+    「图谱上只有『广度优先搜索』、问答却对『BFS』闭口不谈」这种不一致，
+    而学生问的恰恰可能是那个旧名称。
+    """
     ctx = f"[{node.get('category', '知识点')}] {node.get('name', '')}"
+    aliases = node.get("fused_aliases") or []
+    if aliases:
+        ctx += f"（又称：{'、'.join(aliases)}）"
     if node.get('description'):
         ctx += f": {node.get('description')}"
     return ctx
@@ -96,14 +105,58 @@ class QAService:
     # ---------- 向量检索 ----------
 
     @staticmethod
-    def _node_dict(n) -> dict:
-        """Neo4j 节点 → 结构化引用（供前端"证据链"展示）"""
-        return {
+    def _node_dict(n, fused_aliases=None) -> dict:
+        """Neo4j 节点 → 结构化引用（供前端"证据链"展示）。
+
+        `fused_aliases`：该节点通过文档级融合吸收的旧名称。前端来源卡片据此
+        与图谱视图保持一致；没有融合时不带这个字段（保持既有响应逐字节兼容）。
+        """
+        d = {
             "kp_id": n.get("kp_id"),
             "name": n.get("name", ""),
             "category": n.get("category", ""),
             "description": n.get("description", ""),
         }
+        if fused_aliases:
+            d["fused_aliases"] = list(fused_aliases)
+        return d
+
+    @staticmethod
+    def _fold_to_root(records, fusion, course_id, document_id) -> list:
+        """把命中的节点按融合映射折到规范节点，返回去重后的节点字典列表。
+
+        关键词检索走的是 `n.name CONTAINS $keyword`，**会命中已被折掉的源节点名**
+        （向量索引的过滤挡不住这条路径）。若不改写，学生搜「BFS」拿到的会是
+        图谱上已经不存在的那个节点 —— 问答与图谱就对不上了。
+        """
+        roots, by_id = [], {}
+        for rec in records:
+            n = rec.get("n")
+            if not n:
+                continue
+            kp_id = n.get("kp_id")
+            root = fusion.root_of(kp_id)
+            if root not in by_id:
+                roots.append(root)
+                by_id[root] = n if root == kp_id else None
+
+        missing = [k for k, v in by_id.items() if v is None]
+        if missing:
+            extra = db.query(
+                "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
+                "WHERE n.kp_id IN $ids RETURN n",
+                {"cid": course_id, "did": document_id, "ids": missing})
+            for rec in extra:
+                n = rec.get("n")
+                if n and n.get("kp_id") in by_id:
+                    by_id[n["kp_id"]] = n
+
+        out = []
+        for root in roots:
+            n = by_id.get(root)
+            if n:
+                out.append(QAService._node_dict(n, fusion.aliases_of(root)))
+        return out
 
     def _vector_search(self, question: str, course_id, document_id, top_k: int) -> List[dict]:
         """真向量检索：问题与文档知识点 embedding 做余弦相似度排序，返回结构化节点列表"""
@@ -128,7 +181,13 @@ class QAService:
             return []
 
         # 按 kp_id 回查节点元数据，拼接上下文（限定文档）
-        kp_ids = [kp_id for kp_id, _ in ranked]
+        fusion = RagFusionView(cid, did)
+        # 索引构建时已排除被融合的源节点，这里再折一次是**防御性**的：
+        # 万一拿到的是尚未重建的旧索引（跨进程缓存 / 刚 apply 完），
+        # 也不能让图谱上已经不存在的节点重新冒到问答上下文里。
+        wanted = [(fusion.root_of(kp_id), score) for kp_id, score in ranked]
+        kp_ids = sorted({k for k, _ in wanted})
+
         nodes = {}
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
@@ -140,7 +199,15 @@ class QAService:
             if n:
                 nodes[n.get("kp_id")] = n
 
-        return [self._node_dict(nodes[kp_id]) for kp_id, _ in ranked if kp_id in nodes]
+        out, seen = [], set()
+        for kp_id, _score in wanted:
+            if kp_id in seen or kp_id not in nodes:
+                continue
+            seen.add(kp_id)
+            out.append(self._node_dict(nodes[kp_id], fusion.aliases_of(kp_id)))
+            if len(out) >= top_k:
+                break
+        return out
 
     # ---------- 关键词检索（兜底） ----------
 
@@ -186,35 +253,46 @@ class QAService:
             cypher += "RETURN n LIMIT $top_k"
 
         records = db.query(cypher, params)
-        contexts = [self._node_dict(rec["n"]) for rec in records if rec.get("n")]
+        # 关键词检索会直接命中「已被融合折掉的源节点名」，这里按映射改写为规范节点，
+        # 保证问答上下文与图谱上看到的完全一致。
+        fusion = RagFusionView(cid, did)
+        contexts = self._fold_to_root(records, fusion, cid, did)
 
-        # 结果不足 top_k 时，用同文档节点兜底补足
+        # 结果不足 top_k 时，用同文档节点兜底补足（**同样要排除已折掉的源节点**）
         if len(contexts) < top_k:
             existing_names = {c["name"] for c in contexts}
+            fused = sorted(fusion.sources)
             if cid is not None and did is not None:
                 records = db.query(
                     "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id}) "
-                    "RETURN n LIMIT $top_k",
-                    {"course_id": cid, "document_id": did, "top_k": top_k},
+                    "WHERE NOT n.kp_id IN $fused RETURN n LIMIT $top_k",
+                    {"course_id": cid, "document_id": did, "top_k": top_k, "fused": fused},
                 )
             elif cid is not None:
                 records = db.query(
-                    "MATCH (n:KnowledgePoint {course_id: $course_id}) RETURN n LIMIT $top_k",
-                    {"course_id": cid, "top_k": top_k},
+                    "MATCH (n:KnowledgePoint {course_id: $course_id}) "
+                    "WHERE NOT n.kp_id IN $fused RETURN n LIMIT $top_k",
+                    {"course_id": cid, "top_k": top_k, "fused": fused},
                 )
             else:
                 fallback_cypher = "MATCH (n:KnowledgePoint)"
-                fallback_params = {"top_k": top_k}
+                fallback_params = {"top_k": top_k, "fused": fused}
+                conditions = ["NOT n.kp_id IN $fused"]
                 if allowed_ids is not None:
-                    fallback_cypher += " WHERE n.course_id IN $allowed_course_ids"
+                    conditions.append("n.course_id IN $allowed_course_ids")
                     fallback_params["allowed_course_ids"] = list(allowed_ids)
+                fallback_cypher += " WHERE " + " AND ".join(conditions)
                 fallback_cypher += " RETURN n LIMIT $top_k"
                 records = db.query(fallback_cypher, fallback_params)
-            for rec in records:
-                n = rec.get("n")
-                if not n or n.get("name") in existing_names:
+            # 兜底分支同样走一遍折叠。Cypher 里已经有 `NOT n.kp_id IN $fused`，
+            # 正常情况下不会被折掉的节点根本进不来；这里再折一次是**纵深的第二道**，
+            # 避免"排除条件"和"映射表"万一不同步时把已折掉的节点漏进上下文。
+            picked = [rec for rec in records
+                      if rec.get("n") and rec["n"].get("name") not in existing_names]
+            for d in self._fold_to_root(picked, fusion, cid, did):
+                if d["name"] in existing_names:
                     continue
-                contexts.append(self._node_dict(n))
+                contexts.append(d)
                 if len(contexts) >= top_k:
                     break
         return contexts

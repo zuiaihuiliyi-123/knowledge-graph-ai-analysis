@@ -143,6 +143,13 @@ const router = createRouter({
       component: () => import('../views/admin/AdminAuditLogsView.vue'),
       meta: { title: '审计日志', admin: true },
     },
+    {
+      // 文档级知识融合：候选审核 / 应用 / 撤销，全部按 document_id 隔离
+      path: '/admin/fusion',
+      name: 'admin-fusion',
+      component: () => import('../views/admin/AdminFusionView.vue'),
+      meta: { title: '知识融合', admin: true },
+    },
   ],
 })
 

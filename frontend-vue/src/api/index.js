@@ -312,6 +312,41 @@ export const api = {
   adminExtractionTasks: (params = {}) =>
     request.get('/api/v1/admin/resources/extraction-tasks', { params }),
 
+  // ---------- 管理员端 · 文档级知识融合 ----------
+  // 全部按 (course_id, document_id) 隔离；文档下拉请用 adminListDocuments（管理员的
+  // 非成员身份拿不到 /api/v1/documents，那条路径要求课程成员）。
+  /** 融合概览（统计卡；同时返回原始 / 折叠后两个口径的图规模） */
+  adminFusionOverview: (courseId, documentId) =>
+    request.get('/api/v1/admin/fusion/overview', { params: { course_id: courseId, document_id: documentId } }),
+  /** 管理员专用只读图谱（folded=false 可看未折叠的原始图） */
+  adminFusionGraph: (courseId, documentId, folded = true, limit = 800) =>
+    request.get('/api/v1/admin/fusion/graph', {
+      params: { course_id: courseId, document_id: documentId, folded, limit },
+    }),
+  /** 候选列表 */
+  adminFusionCandidates: (params = {}) => request.get('/api/v1/admin/fusion/candidates', { params }),
+  /** 候选详情（双方上下文 + 评分明细 + 重建的文本命中上下文） */
+  adminFusionCandidate: (candidateId) => request.get(`/api/v1/admin/fusion/candidates/${candidateId}`),
+  /** 扫描候选；persist=false 时零写入 */
+  adminFusionScan: (body) => request.post('/api/v1/admin/fusion/candidates/scan', body),
+  /** 人工审核：accept / reject / defer */
+  adminFusionReview: (candidateId, body) =>
+    request.post(`/api/v1/admin/fusion/candidates/${candidateId}/review`, body),
+  /** 应用融合；dry_run=true（默认）零写入 */
+  adminFusionApply: (body) => request.post('/api/v1/admin/fusion/apply', body),
+  /** 已应用映射 */
+  adminFusionMaps: (params = {}) => request.get('/api/v1/admin/fusion/maps', { params }),
+  /** 撤销单条融合 */
+  adminFusionRevoke: (fusionId, body) =>
+    request.post(`/api/v1/admin/fusion/maps/${fusionId}/revoke`, body),
+  /** 整批撤销 */
+  adminFusionUndoRun: (runId, body) =>
+    request.post(`/api/v1/admin/fusion/runs/${runId}/undo`, body),
+  /** 融合批次历史 */
+  adminFusionRuns: (params = {}) => request.get('/api/v1/admin/fusion/runs', { params }),
+  /** 冲突列表 */
+  adminFusionConflicts: (params = {}) => request.get('/api/v1/admin/fusion/conflicts', { params }),
+
   /** 系统监控：组件真实状态 + 运行指标 + 库表行数 */
   adminSystem: () => request.get('/api/v1/admin/system'),
   /** 审计日志查询 */

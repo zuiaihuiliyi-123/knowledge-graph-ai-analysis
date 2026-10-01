@@ -159,7 +159,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
   HomeFilled, DataAnalysis, Reading, User, UserFilled, EditPen, Notebook, Compass, Fold, Expand, SwitchButton, Share,
-  Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star,
+  Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star, Connection,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import AIChatWidget from './components/AIChatWidget.vue'
@@ -225,6 +225,7 @@ const adminMenu = [
   { path: '/admin/users', title: '用户管理', icon: UserFilled },
   { path: '/admin/courses', title: '课程管理', icon: Reading },
   { path: '/admin/resources', title: '资源管理', icon: Folder },
+  { path: '/admin/fusion', title: '知识融合', icon: Connection },
   { path: '/admin/governance', title: '课程治理', icon: Compass },
   { path: '/admin/system', title: '系统监控', icon: Monitor },
   { path: '/admin/audit-logs', title: '审计日志', icon: Document },
@@ -281,6 +282,7 @@ const breadcrumbs = computed(() => {
     '/admin/users': ['用户管理'],
     '/admin/courses': ['课程管理'],
     '/admin/resources': ['资源管理'],
+    '/admin/fusion': ['知识融合'],
     '/admin/governance': ['课程治理'],
     '/admin/system': ['系统监控'],
     '/admin/audit-logs': ['审计日志'],

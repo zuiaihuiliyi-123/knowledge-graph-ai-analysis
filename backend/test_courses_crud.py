@@ -1,8 +1,17 @@
 """
 课程管理 CRUD 验证（对齐规划文档 6.6.6~6.6.10）
 运行方式：python test_courses_crud.py
+
+⚠️ 历史事故记录（2026-10-01，已修复，请勿重蹈）⚠️
+    本脚本原先在 Step 1 同时做两件**破坏性**的事，且都发生在任何断言之前、不可回退：
+      1. `db.query("MATCH (n) DETACH DELETE n")` —— Neo4j **全库**清空；
+      2. 对**线上** `app.db` 直接 `DELETE FROM t_learning_record / t_document / t_course`。
+    也就是说，照惯例跑一遍 `python test_*.py` 就会清掉本机全部课程、文档与知识图谱。
+    现在：SQLite 的清理改在 app.db 的**临时副本**上执行；Neo4j 那道全局删除已移除
+    （课程 CRUD 断言用的是新建课程自己的统计，本来就不需要清空图库）。
 """
 import os
+import shutil
 import sys
 import tempfile
 
@@ -12,6 +21,7 @@ try:
 except Exception:
     pass
 
+from app.core.config import settings
 from app.core.database import db
 from app.core.sql_database import sql_db
 from app.services.course_service import CourseService
@@ -19,10 +29,19 @@ from app.services.course_service import CourseService
 
 def main():
     print("=" * 60)
-    print("Step 1: 初始化（清空业务数据，保留默认教师）")
+    print("Step 1: 初始化（在 app.db 的**副本**上清空业务数据，保留默认教师）")
     print("=" * 60)
+    # 全程只动副本：本脚本会 DELETE 课程 / 文档 / 学习记录，指向线上库即是灾难
+    tmp_dir = tempfile.mkdtemp(prefix="kg_courses_crud_")
+    live_db = settings.SQLITE_DB_PATH
+    tmp_db = os.path.join(tmp_dir, "app_copy.db")
+    shutil.copy2(live_db, tmp_db)
+    sql_db.db_path = tmp_db
+    print(f"  副本: {tmp_db}")
+
     sql_db.init_tables()
-    db.query("MATCH (n) DETACH DELETE n")
+    # 注意：**不再**清空 Neo4j。课程 CRUD 只关心新建课程自己的节点统计，
+    # 清空整库对断言没有帮助，却会让别人的知识图谱消失。
     with sql_db._connect() as conn:
         for t in ("t_learning_record", "t_document", "t_course"):
             conn.execute(f"DELETE FROM {t}")
@@ -106,7 +125,11 @@ def main():
 
 
 if __name__ == "__main__":
+    _live = settings.SQLITE_DB_PATH
     try:
         main()
     finally:
+        # 恢复单例指向线上库并清掉副本目录：脚本异常退出时也不能把单例留在副本上，
+        # 否则同进程内后续代码会继续写测试副本（更糟：以为写的是线上库）
+        sql_db.db_path = _live
         db.close()

@@ -1666,15 +1666,48 @@ function startDocPolling() {
   }, DOC_POLL_INTERVAL)
 }
 
+/**
+ * 占位行与后端真实行是否指同一篇文档：文件名 + 字节数一致。
+ * 后端 file_name 取的是 basename（_clean_filename），与浏览器 File.name 相同；
+ * file_size 是 content 字节数，与 File.size 相同。
+ */
+function isSameDocument(row, placeholder) {
+  return row.file_name === placeholder.file_name && Number(row.file_size) === Number(placeholder.file_size)
+}
+
 // 静默刷新文档列表（不触发表格 loading 闪烁），状态进入终态时给出提示
 async function pollDocuments() {
   if (!currentCourseId.value) return
   try {
     const prev = new Map(documents.value.map((d) => [d.doc_id, `${d.parse_status}|${d.extract_status}`]))
     const list = await api.getDocuments(currentCourseId.value)
-    // 保留上传中的本地占位行（后端在解析完成前不会返回该记录，避免进度条被轮询刷掉）
-    const placeholders = documents.value.filter((d) => d.is_placeholder)
-    documents.value = [...placeholders, ...list]
+    // 占位行与后端真实行合并成一行显示。
+    // 后端建文档记录发生在解析【之前】（document_service.process_upload 第 5 步 insert，
+    // 之后才 update 成 PARSING），所以解析/抽取期间后端列表里本来就有这一行。
+    // 旧写法「占位行照留 + 真实行照加」会让同一篇文档同时出现两行（本地占位行在上、
+    // 后端真实行在下），要等上传请求返回、占位行被移除才少掉一行——即
+    // 「上传时出现两篇同名文档，解析结束又消失一篇」。
+    // 现在让真实行【顶替】占位行，保留它在列表顶部的位置，一篇文档始终只占一行。
+    const claimed = new Set()
+    const heads = []
+    for (const ph of documents.value.filter((d) => d.is_placeholder)) {
+      const matchReal = (inFlightOnly) =>
+        list.find(
+          (r) =>
+            !claimed.has(r.doc_id) &&
+            isSameDocument(r, ph) &&
+            (!inFlightOnly || r.extract_status !== 'COMPLETED'),
+        )
+      // 优先认领「处理中 / 已失败」的行：同课程里构建完成的同名同大小旧记录不算本次上传
+      const real = matchReal(true) || matchReal(false)
+      if (real) {
+        claimed.add(real.doc_id)
+        heads.push(real) // 真实行接管占位行的位置与进度条，状态以后端为准
+      } else {
+        heads.push(ph) // 后端还没建档（大文件上传中），继续用占位行撑住即时反馈
+      }
+    }
+    documents.value = [...heads, ...list.filter((r) => !claimed.has(r.doc_id))]
     for (const d of list) {
       const key = `${d.parse_status}|${d.extract_status}`
       if (prev.get(d.doc_id) && prev.get(d.doc_id) !== key) {
@@ -1715,8 +1748,9 @@ async function doUpload() {
   uploadResult.value = null
   uploadError.value = ''
 
-  // 后端为同步处理（解析+抽取耗时较长，且文档记录在完成后才入库），
-  // 请求返回前列表不会有任何变化。先插入一行本地占位行，让下方进度条立即显示。
+  // 后端为同步处理（解析+抽取耗时较长），请求返回前前端拿不到 document_id。
+  // 先插入一行本地占位行占住列表顶部，避免点下上传后到后端建档之间进度条一片空白；
+  // 后端建档（解析之前）后，pollDocuments 会用真实行把这一行顶替掉，因此不会出现两行。
   const placeholderId = `local-${Date.now()}`
   const placeholder = {
     doc_id: placeholderId,
@@ -1747,7 +1781,8 @@ async function doUpload() {
     const result = await api.uploadCourse(formData, currentCourseId.value)
     uploadResult.value = result
     ElMessage.success('知识图谱构建完成')
-    // 用真实文档替换占位行；若仍有处理中任务则由轮询继续驱动进度
+    // 兜底清掉占位行：轮询通常早已用真实行把它顶替掉（见 pollDocuments），
+    // 这里再滤一次以覆盖「处理极快、全程没轮询过」的情况；若仍有进行中任务则由轮询继续驱动进度
     documents.value = documents.value.filter((d) => d.doc_id !== placeholderId)
     await loadDocuments()
     if (hasInFlightDoc.value) startDocPolling()

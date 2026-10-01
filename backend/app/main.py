@@ -12,7 +12,7 @@ from .core.sql_database import sql_db
 from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, documents,
                   learning, dashboard, favorites, teacher,
                   course_members, invites, profile, questions, practice, grading,
-                  admin)
+                  admin, admin_fusion)
 
 
 @asynccontextmanager
@@ -84,6 +84,8 @@ app.include_router(practice.router)
 app.include_router(grading.router)
 # 管理员端：平台治理 / 用户管理 / 课程治理 / 资源管理 / 系统监控 / 审计日志
 app.include_router(admin.router)
+# 管理员端 · 文档级知识融合（候选扫描 / 审核 / 应用 / 撤销，全部按 document_id 隔离）
+app.include_router(admin_fusion.router)
 
 
 @app.get("/")
