@@ -25,7 +25,6 @@ from datetime import datetime
 
 # 只统计这些「AI 能力」的 LLM 调用（其余调用点未接入，见下）
 LLM_SCOPES = {
-    "extraction": "知识抽取",
     "qa": "智能问答",
     "fusion_disambiguation": "实体消歧",
 }
@@ -33,6 +32,7 @@ LLM_SCOPES = {
 # 明确声明「未接入统计」的调用点：管理员端据此显示「未统计」，
 # 而不是把它们当作 0 次调用（0 会被误读为「没调用过」）。
 UNTRACKED_LLM_SCOPES = (
+    "知识抽取（knowledge_extractor）",
     "试题文档导入（question_extractor）",
     "知识点关系补全（relation_completion）",
     "Git 历史分析（git_analyzer）",
