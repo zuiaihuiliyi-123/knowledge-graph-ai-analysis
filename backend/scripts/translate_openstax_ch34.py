@@ -1,29 +1,18 @@
 """
-OpenStax 化学/物理 第3-4章 翻译脚本
+OpenStax 化学/物理 章节翻译脚本
 将 _work_extract 下的英文正文/题目/答案翻译为中文, 输出到 _work_translate
 用法: python translate_openstax_ch34.py [--start N]
 断点续跑: 每完成一个文件写日志, 重跑跳过已完成
 """
-import json, re, os, sys, time
-import requests
+import os
+import sys
+import time
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from _common import BASE, call_llm
+
 WORK = os.path.join(BASE, 'data', 'sample_docs', '_work_extract')
 OUT = os.path.join(BASE, 'data', 'sample_docs', '_work_translate')
 os.makedirs(OUT, exist_ok=True)
-
-# 读取 .env
-env = {}
-env_path = os.path.join(BASE, '.env')
-with open(env_path, encoding='utf-8') as f:
-    for line in f:
-        line = line.strip()
-        if line and not line.startswith('#') and '=' in line:
-            k, v = line.split('=', 1)
-            env[k.strip()] = v.strip().strip('"').strip("'")
-API_URL = env.get('LLM_API_BASE', 'https://api.deepseek.com/v1').rstrip('/') + '/chat/completions'
-HEADERS = {'Authorization': f"Bearer {env['LLM_API_KEY']}", 'Content-Type': 'application/json'}
-MODEL = env.get('LLM_MODEL', 'deepseek-chat')
 
 BODY_SYS = """你是学术教材翻译专家。将《Chemistry 2e》/《College Physics 2e》(OpenStax) 教材章节从英文翻译成中文。
 要求：
@@ -46,26 +35,9 @@ ANSWER_SYS = """你是学术教材翻译专家。将教材习题答案从英文�
 2. 化学式、数值、单位、公式保留原文
 3. 只输出翻译结果，保持原结构"""
 
-def llm(system, user, max_tokens=8192):
-    for attempt in range(4):
-        try:
-            resp = requests.post(API_URL, headers=HEADERS, json={
-                'model': MODEL,
-                'messages': [
-                    {'role': 'system', 'content': system},
-                    {'role': 'user', 'content': user}
-                ],
-                'temperature': 0.1, 'max_tokens': max_tokens
-            }, timeout=300)
-            resp.raise_for_status()
-            return resp.json()['choices'][0]['message']['content'].strip()
-        except Exception as e:
-            print(f'  [retry {attempt+1}] {e}', flush=True)
-            time.sleep(5)
-    return None
 
 def chunk_text(text, size=6000):
-    """按段落边界分块"""
+    """按段落边界分块（按字符数，与 LLM 翻译场景匹配）"""
     paras = text.split('\n')
     chunks, cur = [], ''
     for p in paras:
@@ -78,6 +50,7 @@ def chunk_text(text, size=6000):
         chunks.append(cur)
     return chunks
 
+
 def translate_file(src_name, out_name, sys_prompt):
     out_path = os.path.join(OUT, out_name)
     if os.path.exists(out_path):
@@ -89,7 +62,7 @@ def translate_file(src_name, out_name, sys_prompt):
     print(f'[翻译] {src_name}: {len(text)}字符, {len(chunks)}块', flush=True)
     parts = []
     for i, ch in enumerate(chunks):
-        r = llm(sys_prompt, ch)
+        r = call_llm(sys_prompt, ch, max_tokens=8192)
         if r is None:
             print(f'[失败] {src_name} 第{i}块', flush=True)
             return False
@@ -101,20 +74,12 @@ def translate_file(src_name, out_name, sys_prompt):
     print(f'[完成] {out_name}', flush=True)
     return True
 
+
+# (科目, 章, 类型) 直积生成任务清单；文件名与系统提示均机械推导
+KINDS = {'body': BODY_SYS, 'questions': QUESTION_SYS, 'answer': ANSWER_SYS}
 JOBS = [
-    # (源文件, 输出文件, 系统提示)
-    ('chem_ch3_body_en.txt', 'chem_ch3_body_cn.txt', BODY_SYS),
-    ('chem_ch4_body_en.txt', 'chem_ch4_body_cn.txt', BODY_SYS),
-    ('chem_ch3_questions_en.txt', 'chem_ch3_questions_cn.txt', QUESTION_SYS),
-    ('chem_ch4_questions_en.txt', 'chem_ch4_questions_cn.txt', QUESTION_SYS),
-    ('chem_ch3_answer_en.txt', 'chem_ch3_answer_cn.txt', ANSWER_SYS),
-    ('chem_ch4_answer_en.txt', 'chem_ch4_answer_cn.txt', ANSWER_SYS),
-    ('phys_ch3_body_en.txt', 'phys_ch3_body_cn.txt', BODY_SYS),
-    ('phys_ch4_body_en.txt', 'phys_ch4_body_cn.txt', BODY_SYS),
-    ('phys_ch3_questions_en.txt', 'phys_ch3_questions_cn.txt', QUESTION_SYS),
-    ('phys_ch4_questions_en.txt', 'phys_ch4_questions_cn.txt', QUESTION_SYS),
-    ('phys_ch3_answer_en.txt', 'phys_ch3_answer_cn.txt', ANSWER_SYS),
-    ('phys_ch4_answer_en.txt', 'phys_ch4_answer_cn.txt', ANSWER_SYS),
+    (f'{s}_ch{c}_{k}_en.txt', f'{s}_ch{c}_{k}_cn.txt', KINDS[k])
+    for s in ('chem', 'phys') for c in ('3', '4') for k in ('body', 'questions', 'answer')
 ]
 
 start = 0
