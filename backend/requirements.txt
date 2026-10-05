@@ -15,10 +15,13 @@ openai==1.59.3
 # 图数据库
 neo4j==5.27.0
 
-# RAG框架（可选）
-langchain==0.3.14
-langchain-community==0.3.14
-chromadb==0.5.23
+# RAG框架（可选，代码中尚未使用）
+# 注意：chromadb 0.5.23 的依赖 chroma-hnswlib 在 Windows + Python 3.12 下无预编译 wheel，
+# 会回退到源码编译并要求安装 Microsoft Visual C++ 14.0 编译器。
+# 做向量检索重写时再启用（建议改用有 py3.12 wheel 的新版 chromadb 1.x 或 SiliconFlow bge-m3 等替代方案）
+# langchain==0.3.14
+# langchain-community==0.3.14
+# chromadb==0.5.23
 
 # 文本处理
 tiktoken==0.8.0
