@@ -1,0 +1,21 @@
+{
+ "text_id": "化学_第2章_原子分子与离子",
+ "source": "化学_第2章_原子分子与离子",
+ "entities": [
+  {
+   "name": "",
+   "category": "概念",
+   "description": ""
+  }
+ ],
+ "relations": [
+  {
+   "source": "",
+   "target": "",
+   "type": "CONTAINS",
+   "evidence": "",
+   "confidence": 0.9,
+   "core": true
+  }
+ ]
+}

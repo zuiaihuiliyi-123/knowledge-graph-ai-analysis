@@ -1,0 +1,21 @@
+{
+ "text_id": "物理_第2章_运动学_Kinematics",
+ "source": "物理_第2章_运动学_Kinematics",
+ "entities": [
+  {
+   "name": "",
+   "category": "概念",
+   "description": ""
+  }
+ ],
+ "relations": [
+  {
+   "source": "",
+   "target": "",
+   "type": "CONTAINS",
+   "evidence": "",
+   "confidence": 0.9,
+   "core": true
+  }
+ ]
+}
