@@ -25,22 +25,51 @@ import re
 
 # ---------- 正则（对真实版式做过适配） ----------
 
+# 中文数字：章节号与分节序号都要用（第1章 / 第五章 / 二、）
+_CN_NUM = r"[0-9一二三四五六七八九十百零]+"
+
 # 答案区起始行：##答案 / 第3章 答案 / 答案 / 参考答案 / 答案与解析 / Answer Key
-# 注意允许「章节前缀」（实测有 `第3章 答案` 这种写法），但不允许后面还有其他文字
-# （否则会把标题行 `第1章：xxx—— 测试题与答案（中文版）` 误判为分界）
+# 实测版式比想象的杂，除裸标题外还出现过两类：
+#   ① 中文分节序号：`## 二、参考答案`（中文文档里极常见的分节写法）
+#   ② 章节标题夹描述词：`第五章 定积分单元测试 参考答案`
+# 共同约束：**整行以「答案」收尾**（其后最多再跟一个冒号）。这条是防误判的关键——
+# 文档标题行 `第1章 …—— 测试题与答案（中文版）`、正文行 `答案：78个质子；117个中子`、
+# `4. 检查你的答案。答案合理吗？单位正确吗？` 都因「不以答案收尾」而被排除；
+# 描述词一段再排除句读标点（。！？；），避免把正文句子误当分界。
 ANSWER_SECTION_RE = re.compile(
-    r"^\s*#{0,4}\s*(?:第\s*\d+\s*[章节]?\s*)?(?:参考)?答案(?:与解析|及解析)?\s*[:：]?\s*$"
+    r"^\s*#{0,4}\s*"
+    r"(?:(?:第\s*" + _CN_NUM + r"\s*[章节篇部分]?|[（(]?\s*" + _CN_NUM
+    + r"\s*[)）]?\s*[、.．])\s*)?"
+    r"[^：:\n。！？；]{0,24}?"
+    r"(?:参考)?答案(?:与解析|及解析)?"
+    r"\s*[:：]?\s*$"
     r"|^\s*#{0,4}\s*Answer\s*Key\s*[:：]?\s*$",
     re.I,
 )
 # 题号起始：兼容 "1 ." / "31." / "1、"
 QUESTION_NO_RE = re.compile(r"^\s*(\d{1,3})\s*[.、．]\s*")
-# 选项：a./b)/A、，缩进任意
-OPTION_RE = re.compile(r"^\s*([a-hA-H])\s*[.、．)）]\s*(.*)$")
+# 选项：行首 `A.` / `A、` / `A)`，以及括号式 `（A）` / `(A)`。
+# 括号式**只认大写**：教材正文里 `(a)(b)` 是小题号而非选项，把小写也收进来会把
+# 正文小问误判成选项（实测 doc 107 / 159 正是这种写法）。
+OPTION_RE = re.compile(
+    r"^\s*(?:([A-Ha-h])\s*[.、．)）]\s*(.*)$"
+    r"|[（(]\s*([A-H])\s*[)）]\s*(.*)$)"
+)
 # 章节标题：##1.1 背景 (Backgrounds)
 SECTION_RE = re.compile(r"^\s*#{0,4}\s*\d+\.\d+.*$")
 # 答案条目：1.b / 1. b / 1、B
 ANSWER_ENTRY_RE = re.compile(r"^\s*(\d{1,3})\s*[.、．]?\s*([a-hA-H])\s*$")
+# 一个题号跟多个字母（多选答案）：`7. A、C` / `7. A C` / `7. AC`
+# 连写形态只认大写（`7.AC`、`7.ABC`）：小写连写更可能是文字答案（如 `2. face`），
+# 大写才是选项键——与 OPTION_RE 里「括号式只认大写」是同一条判断标准。
+ANSWER_LETTERS_RE = re.compile(
+    r"^\s*(\d{1,3})\s*[.、．]\s*("
+    r"[A-H]{2,}"
+    r"|[a-hA-H](?:\s*[、,，/\s]\s*[a-hA-H])+"
+    r")\s*$")
+# 一行多个答案条目（排版被压扁时出现）：`1. D . 2. A 3. B 4. C 5. C`
+# 只在单条目写法都不匹配、且本行能拆出 ≥2 条时才启用，避免拆错单条目行。
+ANSWER_INLINE_ENTRIES_RE = re.compile(r"(\d{1,3})\s*[.、．]?\s*([a-hA-H])")
 # 答案条目（文字型）：1. 答案：xxx / 5. 参考解答：xxx
 ANSWER_TEXT_RE = re.compile(r"^\s*(\d{1,3})\s*[.、．]\s*(?:答案|解答|参考解答|参考答)\s*[:：]?\s*(.+)$")
 CODE_FENCE_RE = re.compile(r"^\s*```[A-Za-z0-9_+\-]*\s*$")
@@ -63,19 +92,28 @@ def _norm_stem(text: str) -> str:
     return text[:200]
 
 
+def _is_answer_entry_line(line: str) -> bool:
+    """该行是否"像一条答案"（分界判定的准入条件，与 parse_answers 的写法保持一致）。
+
+    四种写法见 parse_answers 的 docstring；压扁行要求能拆出 ≥2 条才算，
+    否则正文里形如 `2. A` 的题号行会被误认为答案区。
+    """
+    if ANSWER_TEXT_RE.match(line) or ANSWER_ENTRY_RE.match(line) or ANSWER_LETTERS_RE.match(line):
+        return True
+    return len(ANSWER_INLINE_ENTRIES_RE.findall(line)) >= 2
+
+
 def split_answer_section(text: str) -> tuple:
     """① 切分「题目区 / 答案区」。
 
-    取**最后一个**满足条件的「答案」标记行：其后续 30 个非空行里至少 2 行像答案条目
-    （`1.b` 或 `1. 答案：xxx`）——避免把正文里出现的"答案"二字误当分界。
-    找不到则返回 (全文, "")。
+    取**最后一个**满足条件的「答案」标记行：其后续 30 个非空行里至少 2 行像答案条目——
+    避免把正文里出现的"答案"二字误当分界。找不到则返回 (全文, "")。
     """
     lines = text.splitlines()
     candidates = [i for i, l in enumerate(lines) if ANSWER_SECTION_RE.match(l)]
     for idx in reversed(candidates):
         look = [l for l in lines[idx + 1: idx + 60] if l.strip()]
-        hits = sum(1 for l in look[:30]
-                   if ANSWER_ENTRY_RE.match(l) or ANSWER_TEXT_RE.match(l))
+        hits = sum(1 for l in look[:30] if _is_answer_entry_line(l))
         if hits >= 2:
             return "\n".join(lines[:idx]), "\n".join(lines[idx + 1:])
     return text, ""
@@ -135,11 +173,20 @@ def parse_question_blocks(question_text: str) -> tuple:
             if CODE_FENCE_RE.match(line):          # 围栏行本身不进题干，块内代码内容保留
                 in_code = not in_code
                 continue
+            # markdown 标题不是题干内容，直接跳过。非 `1.2` 形式的标题（如
+            # `## 三、准确度与有效数字`）不会被 SECTION_RE 收走，以前会被并进
+            # 上一题的 stem 里（实测：题干尾部挂着一整行 `## 三、…`）。
+            # 代码块内的 `#` 是注释，不能跳（in_code 时不生效）。
+            if not in_code and line.lstrip().startswith("#"):
+                continue
             if not in_code:
                 m_opt = OPTION_RE.match(line)
                 if m_opt:
-                    options.append({"key": m_opt.group(1).upper(),
-                                    "text": m_opt.group(2).strip()})
+                    # OPTION_RE 两个分支各占两组：无括号式用 1/2，括号式用 3/4
+                    key = m_opt.group(1) or m_opt.group(3)
+                    text_opt = m_opt.group(2) if m_opt.group(2) is not None else m_opt.group(4)
+                    options.append({"key": key.upper(),
+                                    "text": (text_opt or "").strip()})
                     continue
             stem_lines.append(line)
         # 章节归属：取该题之前最后一个章节标题
@@ -156,8 +203,22 @@ def parse_question_blocks(question_text: str) -> tuple:
 
 
 def parse_answers(answer_text: str) -> dict:
-    """③ 答案区：题号 → {letters:[...], text:str}（字母型与文字型都支持）"""
+    """③ 答案区：题号 → {letters:[...], text:str}
+
+    支持四种写法，按优先级判定（前一种匹配上就不再看后面的）：
+      1. 文字型：`3. 答案：xxx` / `3. 参考解答：xxx`
+      2. 单字母：`3.b` / `3. B`
+      3. 一个题号多个字母（多选）：`3. A、C` / `3. AC`
+      4. 一行多个条目（排版被压扁时的形态）：`1. D . 2. A 3. B 4. C`
+    """
     answers = {}
+
+    def _add(no: int, letter: str) -> None:
+        rec = answers.setdefault(no, {"letters": [], "text": ""})
+        letter = letter.upper()
+        if letter not in rec["letters"]:
+            rec["letters"].append(letter)
+
     for line in (answer_text or "").splitlines():
         if not line.strip():
             continue
@@ -167,11 +228,19 @@ def parse_answers(answer_text: str) -> dict:
             continue
         m_entry = ANSWER_ENTRY_RE.match(line)
         if m_entry:
-            no = int(m_entry.group(1))
-            letter = m_entry.group(2).upper()
-            rec = answers.setdefault(no, {"letters": [], "text": ""})
-            if letter not in rec["letters"]:
-                rec["letters"].append(letter)
+            _add(int(m_entry.group(1)), m_entry.group(2))
+            continue
+        m_letters = ANSWER_LETTERS_RE.match(line)
+        if m_letters:
+            no = int(m_letters.group(1))
+            for ch in re.findall(r"[a-hA-H]", m_letters.group(2)):
+                _add(no, ch)
+            continue
+        # 压扁行：必须能拆出 ≥2 条才认，否则交给上一步/留作未匹配
+        pairs = ANSWER_INLINE_ENTRIES_RE.findall(line)
+        if len(pairs) >= 2:
+            for num, letter in pairs:
+                _add(int(num), letter)
     for rec in answers.values():
         rec["letters"] = sorted(rec["letters"])
     return answers
@@ -218,7 +287,13 @@ def _assemble(blocks: list, answers: dict) -> list:
                 q_type, answer = "ESSAY", None                 # 无选项无答案 → 待补
                 warnings.append("no_options_no_answer")
 
-        has_answer = bool(answer) if q_type in ("SINGLE", "MULTI", "JUDGE") else bool(answer)
+        # 填空题的答案存在 options（空位定义）里，answer 按约定为 None——
+        # 这里必须看空位，否则每道填了答案的填空题都会被标成「缺答案」
+        # （原写法是个恒等于 bool(answer) 的三元式，FILL 必中此坑）。
+        if q_type == "FILL":
+            has_answer = any((b.get("answer") or "").strip() for b in options)
+        else:
+            has_answer = bool(answer)
         if not has_answer:
             warnings.append("answer_missing")
 

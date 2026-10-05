@@ -919,7 +919,11 @@ class QuestionService:
         """
         from .document_parser import DocumentParser
         from .question_importer import parse_text
-        from .document_service import _resolve_stored_path
+        # 路径解析统一走 core.storage：t_document.file_path 存在本机绝对路径 / 相对
+        # backend/ / 其他机器绝对路径三种形态，直连 file_path 会在换机器后打不开
+        # （原写法引用的 document_service._resolve_stored_path 已不存在 → ImportError
+        #  → 端点 500，所有课程都导不进来）
+        from ..core.storage import resolve_document_path
 
         _, err = _course_for_teacher(course_id, user_id)
         if err:
@@ -928,8 +932,12 @@ class QuestionService:
         if err:
             return err
         doc = sql_db.get_document(did)
+        path = resolve_document_path(doc)
+        if not path:
+            return {"ok": False, "code": 2005,
+                    "message": "文档解析失败：该文档没有可用的原始文件（file_path 为空）"}
         try:
-            text = await DocumentParser.parse(_resolve_stored_path(doc["file_path"]))
+            text = await DocumentParser.parse(path)
         except Exception as e:
             return {"ok": False, "code": 2005, "message": f"文档解析失败：{e}"}
         result = parse_text(text, max_questions=max_questions)

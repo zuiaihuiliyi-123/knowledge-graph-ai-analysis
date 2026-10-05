@@ -210,9 +210,24 @@
             <el-table-column label="分块" width="76">
               <template #default="{ row }"><span class="dim">{{ row.chunk_count || 0 }}</span></template>
             </el-table-column>
-            <el-table-column label="耗时" width="90">
+            <el-table-column width="124">
+              <template #header>
+                <el-tooltip placement="top" effect="dark">
+                  <template #content>
+                    <div style="max-width: 300px; line-height: 1.7">
+                      <b>实测值</b>：后端记录的抽取起止时刻之差（新抽取的文档）。<br />
+                      <b>估算值</b>（带 ~ 号）：历史文档从未记录抽取时刻——该字段
+                      2026-10 才加入（见 docs/问题修复记录.md 第 5 条），真实耗时已不可还原。
+                      此处仅按知识产出规模给一个量级参考，<b>不是测量值</b>。<br />
+                      失败任务与进行中的任务不做估算，显示「—」。
+                    </div>
+                  </template>
+                  <span class="th-tip">耗时<el-icon><QuestionFilled /></el-icon></span>
+                </el-tooltip>
+              </template>
               <template #default="{ row }">
-                <span class="dim">{{ fmtDuration(row.duration_seconds) }}</span>
+                <span :class="estimateApplies(row) ? 'est' : 'dim'"
+                      :title="durationTitle(row)">{{ durationText(row) }}</span>
               </template>
             </el-table-column>
             <el-table-column label="开始时间" width="140">
@@ -321,6 +336,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, Document, Notebook, CircleCheck, WarningFilled, Loading, Share,
+  QuestionFilled,
 } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import MetricTile from '../../components/admin/MetricTile.vue'
@@ -377,12 +393,55 @@ function fmtSize(bytes) {
   return `${(n / 1024 / 1024).toFixed(2)} MB`
 }
 
-// duration_seconds 为 null 表示任务未结束（没有 finished_at），而不是耗时 0
+// duration_seconds 为 null 表示「未记录」——任务尚未结束，或历史数据没有抽取起止时刻
+// （旧库 extract_started_at / extract_finished_at 从未写过，真实耗时已不可还原），不是耗时 0
 function fmtDuration(sec) {
   if (sec === null || sec === undefined) return '—'
   const s = Number(sec)
   if (s < 60) return `${s.toFixed(1)} 秒`
   return `${Math.floor(s / 60)} 分 ${Math.round(s % 60)} 秒`
+}
+
+// ---- 历史文档的耗时「估算」 ----------------------------------------------------
+// 背景：extract_started_at / extract_finished_at 是 2026-10 才加入 t_document 的列
+// （见 docs/问题修复记录.md 第 5 条）。此前抽取从不记录时刻，历史文档的真实耗时
+// **无法还原**，接口对它们返回 duration_seconds = null。
+//
+// 这里给一个量级参考，唯一的依据是「知识产出规模」这个真实字段：抽出的实体+关系越多，
+// 说明分块越多、LLM 生成越长，耗时越长。
+// 常量取值使现有全部文档的估算落在 70 秒以内（上界另有硬截断兜底）。
+// 它们是**经验取值，不是拟合结果**，因此界面上必须带 ~ 号并标注为估算，
+// 绝不能让它看起来像实测值。一旦该文档被重新抽取，就会拿到真实值，估算自动让位。
+const EST_BASE_SECONDS = 8           // 固定开销（建连、首块延迟）
+const EST_SECONDS_PER_OUTPUT = 0.45  // 每产出 1 项知识（实体或关系）的经验增量
+const EST_MAX_SECONDS = 70           // 估算上界（一分十秒）：仅兜底超出量程的文档
+
+const durationIsReal = (row) => row.duration_seconds !== null && row.duration_seconds !== undefined
+const outputCount = (row) => (row.entity_count || 0) + (row.relation_count || 0)
+// 只有「成功」的任务才谈得上估算产出：失败任务的产出是残缺或为 0 的，
+// 拿它去乘系数只会得出「失败了所以很快」这种反直觉且无意义的数字。
+const estimateApplies = (row) => !durationIsReal(row) && row.status === 'success'
+
+function estimateSeconds(row) {
+  const raw = EST_BASE_SECONDS + EST_SECONDS_PER_OUTPUT * outputCount(row)
+  return Math.round(Math.min(raw, EST_MAX_SECONDS))
+}
+
+function durationText(row) {
+  if (durationIsReal(row)) return fmtDuration(row.duration_seconds)
+  if (estimateApplies(row)) return `~${fmtDuration(estimateSeconds(row))}`
+  return '—'
+}
+
+function durationTitle(row) {
+  if (durationIsReal(row)) return '实测值：后端记录的抽取起止时刻之差'
+  if (estimateApplies(row)) {
+    return `估算值（非测量）：历史文档未记录抽取起止时刻，`
+      + `按产出 ${outputCount(row)} 项、以 ${EST_BASE_SECONDS}s + ${EST_SECONDS_PER_OUTPUT}s/项 估算`
+      + `（上界 ${EST_MAX_SECONDS}s），仅供参考`
+  }
+  if (row.status === 'failed') return '失败任务：产出残缺，不做估算；起止时刻未记录'
+  return '任务尚未结束'
 }
 
 const taskSummaryCells = computed(() => {
@@ -567,6 +626,17 @@ onMounted(async () => {
 .fsub { font-size: 11.5px; color: var(--color-text-muted); margin-top: 1px; }
 .dim { color: var(--color-text-muted); font-size: 12.5px; }
 .num { font-family: var(--font-family-number); font-weight: 600; color: var(--text-primary); }
+
+/* 估算值：与实测值在视觉上必须能一眼分开（虚线下划 + 斜体 + 更淡），
+   避免被当成测量结果。悬浮有 title 说明估算依据。 */
+.est {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  font-style: italic;
+  border-bottom: 1px dashed var(--color-border, #c8c9cc);
+  cursor: help;
+}
+.th-tip { display: inline-flex; align-items: center; gap: 3px; }
 
 .pager { display: flex; justify-content: flex-end; margin-top: 14px; }
 .empty-line { padding: 22px 0; text-align: center; color: var(--color-text-muted); font-size: 13px; }

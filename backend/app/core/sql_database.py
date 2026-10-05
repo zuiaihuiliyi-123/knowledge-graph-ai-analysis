@@ -261,6 +261,12 @@ _SCHEMA_SQL = [
         entity_count      INTEGER NOT NULL DEFAULT 0,
         relation_count    INTEGER NOT NULL DEFAULT 0,
         vector_collection TEXT,
+        -- 抽取任务本身的起止时刻。刻意与 updated_at 分开：updated_at 是「行最后修改
+        -- 时间」，回填统计 / 重建图谱 / 改元数据都会刷新它，曾经被拿去算耗时，结果把
+        -- 一个月前抽完的文档显示成 48889 分。旧库由 _migrate_document_extract_timing
+        -- 补列，历史行为 NULL（真实时刻从未记录过，无法还原）。
+        extract_started_at  TEXT,
+        extract_finished_at TEXT,
         created_at        TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         updated_at        TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         FOREIGN KEY (course_id) REFERENCES t_course(course_id),
@@ -874,7 +880,27 @@ class SQLDatabase:
             self._migrate_course_center(conn)
             self._migrate_admin(conn)
             self._migrate_admin_user_columns(conn)
+            self._migrate_document_extract_timing(conn)
             conn.commit()
+
+    def _migrate_document_extract_timing(self, conn: sqlite3.Connection):
+        """幂等迁移：t_document 补「抽取起止时刻」两列。
+
+        背景：管理端「资源管理 → 知识抽取任务」原先用 created_at / updated_at 算耗时，
+        而 updated_at 会被任何后续写操作刷新（回填统计、重建图谱、改元数据），
+        于是「耗时」实际变成了「上传至今」——实测有文档显示 48889 分（34 天）。
+
+        t_document 从未记录过抽取完成时刻，历史数据的真实耗时**无法还原**，
+        故本迁移只补列，不伪造历史值：历史行两列留 NULL，前端显示「—」。
+        之后由 update_document 在写 extract_status 的同一句 UPDATE 里打戳。
+
+        SQLite 的 ADD COLUMN 不允许带 CHECK / UNIQUE，两列均为可空 TEXT，由应用层负责写入。
+        """
+        cols = {row["name"] for row in
+                conn.execute("PRAGMA table_info(t_document)").fetchall()}
+        for name in ("extract_started_at", "extract_finished_at"):
+            if name not in cols:
+                conn.execute(f"ALTER TABLE t_document ADD COLUMN {name} TEXT")
 
     # t_course 在课程中心改造中新增的列（全部可空或带默认值，历史行不受影响）
     _COURSE_NEW_COLUMNS = (
@@ -1677,6 +1703,14 @@ class SQLDatabase:
         """
         更新文档表字段（字段白名单防注入），自动刷新 updated_at。
         示例：update_document(doc_id, parse_status='PARSED', entity_count=12)
+
+        抽取起止时刻在此**收口**：只要本次写了 extract_status，就在同一句 UPDATE 里
+        顺带打戳，调用方无需（也无法）自己传这两个字段：
+          - 置 EXTRACTING：记 extract_started_at，并清空上一轮的 extract_finished_at
+          - 置 COMPLETED / FAILED：仅当 extract_started_at 非空时记 extract_finished_at
+            （在解析阶段就失败、从未开始抽取的任务保持 NULL，前端显示「—」）
+        之所以放在这里而不是 document_service，是因为后者有多条失败返回路径，
+        每新增一条都要记得补一次打戳；收口后不存在「漏写」这种失败方式。
         """
         allowed = {"parse_status", "extract_status", "error_message", "chunk_count",
                    "entity_count", "relation_count", "vector_collection", "file_path"}
@@ -1688,6 +1722,16 @@ class SQLDatabase:
             params.append(val)
         if not sets:
             return
+        status = fields.get("extract_status")
+        if status == "EXTRACTING":
+            sets.append("extract_started_at = ?")
+            params.append(_now())
+            sets.append("extract_finished_at = NULL")
+        elif status in ("COMPLETED", "FAILED"):
+            # 判空放在 SQL 表达式里，省掉一次额外读；未开始抽取的任务不会被写上假结束时刻
+            sets.append("extract_finished_at = CASE WHEN extract_started_at IS NOT NULL "
+                        "THEN ? ELSE extract_finished_at END")
+            params.append(_now())
         sets.append("updated_at = ?")
         params.append(_now())
         params.append(doc_id)
@@ -3712,6 +3756,11 @@ class SQLDatabase:
           COMPLETED                       -> success    成功
           FAILED                          -> failed     失败
         失败优先：parse_status 或 extract_status 任一为 FAILED 即归入 failed。
+
+        时间口径：started_at / finished_at 取 t_document 的 extract_started_at /
+        extract_finished_at，即**纯抽取**的起止时刻（含入图前的 LLM 调用），
+        不含存文件与解析。两列为 NULL 表示「未记录」（历史数据，或尚未跑到该阶段），
+        调用方应显示「—」而不是按 0 处理。
         """
         case_status = """
             CASE
@@ -3745,9 +3794,13 @@ class SQLDatabase:
                    COALESCE(c.course_name, '') AS course_name,
                    d.parse_status, d.extract_status, d.error_message,
                    d.chunk_count, d.entity_count, d.relation_count,
-                   d.created_at AS started_at,
-                   CASE WHEN d.extract_status IN ('COMPLETED', 'FAILED')
-                        THEN d.updated_at ELSE NULL END AS finished_at,
+                   -- 抽取本身的起止时刻（写入收口在 update_document）。
+                   -- 不能用 created_at / updated_at：前者是建档时刻，后者是「行最后修改
+                   -- 时间」，回填统计、重建图谱、改元数据都会刷新它——实测把 08-28 抽完的
+                   -- 文档算成 48889 分（34 天）。旧库两列为 NULL（真实时刻从未记录过），
+                   -- 前端据此显示「—」而不是一个假数字。
+                   d.extract_started_at  AS started_at,
+                   d.extract_finished_at AS finished_at,
                    {case_status} AS task_status
             {base}
             ORDER BY d.doc_id DESC
