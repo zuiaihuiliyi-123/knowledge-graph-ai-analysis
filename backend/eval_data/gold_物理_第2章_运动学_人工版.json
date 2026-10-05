@@ -1,0 +1,564 @@
+{
+ "text_id": "物理_第2章_运动学_Kinematics",
+ "source": "物理_第2章_运动学_Kinematics",
+ "entities": [
+  {
+   "name": "运动学",
+   "category": "概念",
+   "description": "不考虑运动原因的运动研究"
+  },
+  {
+   "name": "一维运动",
+   "category": "概念",
+   "description": "沿直线的运动"
+  },
+  {
+   "name": "位置",
+   "category": "概念",
+   "description": "物体在特定时间的位置"
+  },
+  {
+   "name": "位移",
+   "category": "概念",
+   "description": "物体位置的变化，用 Δx 表示"
+  },
+  {
+   "name": "距离",
+   "category": "概念",
+   "description": "两个位置之间位移的大小"
+  },
+  {
+   "name": "路程",
+   "category": "概念",
+   "description": "两个位置之间走过的路径的总长度"
+  },
+  {
+   "name": "参考系",
+   "category": "概念",
+   "description": "描述物体位置所相对选定的参照"
+  },
+  {
+   "name": "矢量",
+   "category": "概念",
+   "description": "既有大小又有方向的量"
+  },
+  {
+   "name": "标量",
+   "category": "概念",
+   "description": "有大小但没有方向的量"
+  },
+  {
+   "name": "坐标系",
+   "category": "概念",
+   "description": "描述矢量方向所用的正负方向约定"
+  },
+  {
+   "name": "时间",
+   "category": "概念",
+   "description": "变化，或者变化发生的间隔"
+  },
+  {
+   "name": "经过时间",
+   "category": "概念",
+   "description": "结束时间与开始时间之差"
+  },
+  {
+   "name": "速度",
+   "category": "概念",
+   "description": "位移除以时间，既有大小又有方向的矢量"
+  },
+  {
+   "name": "平均速度",
+   "category": "概念",
+   "description": "位移除以行驶时间"
+  },
+  {
+   "name": "瞬时速度",
+   "category": "概念",
+   "description": "特定瞬间的速度，或无穷小时间间隔内的平均速度"
+  },
+  {
+   "name": "速率",
+   "category": "概念",
+   "description": "没有方向的标量，反映运动快慢"
+  },
+  {
+   "name": "平均速率",
+   "category": "概念",
+   "description": "走过的总距离除以经过时间"
+  },
+  {
+   "name": "瞬时速率",
+   "category": "概念",
+   "description": "瞬时速度的大小"
+  },
+  {
+   "name": "加速度",
+   "category": "概念",
+   "description": "速度变化的速率，矢量"
+  },
+  {
+   "name": "平均加速度",
+   "category": "概念",
+   "description": "速度变化除以发生该变化的时间"
+  },
+  {
+   "name": "瞬时加速度",
+   "category": "概念",
+   "description": "特定时间点的加速度"
+  },
+  {
+   "name": "减速",
+   "category": "概念",
+   "description": "与速度方向相反的加速度"
+  },
+  {
+   "name": "匀加速运动",
+   "category": "概念",
+   "description": "加速度恒定的运动"
+  },
+  {
+   "name": "运动学方程",
+   "category": "公式",
+   "description": "加速度恒定时的五个基本方程：v = v₀+at、x = x₀+v̄t、v̄ = (v₀+v)/2、x = x₀+v₀t+½at²、v² = v₀²+2a(x−x₀)"
+  },
+  {
+   "name": "自由落体",
+   "category": "概念",
+   "description": "仅由引力作用产生的运动状态"
+  },
+  {
+   "name": "重力加速度",
+   "category": "概念",
+   "description": "物体因引力而产生的加速度，g = 9.80 m/s²"
+  },
+  {
+   "name": "解题步骤",
+   "category": "方法",
+   "description": "物理学解题的六个基本步骤：检查情境、识别已知量、识别未知量、选方程、代入求解、检查合理性"
+  },
+  {
+   "name": "图像分析",
+   "category": "方法",
+   "description": "用位置、速度和加速度随时间变化的图分析一维运动的方法"
+  },
+  {
+   "name": "位置-时间图",
+   "category": "概念",
+   "description": "位置随时间变化的图，其斜率是速度"
+  },
+  {
+   "name": "速度-时间图",
+   "category": "概念",
+   "description": "速度随时间变化的图，其斜率是加速度"
+  },
+  {
+   "name": "加速度-时间图",
+   "category": "概念",
+   "description": "加速度随时间变化的图"
+  },
+  {
+   "name": "斜率",
+   "category": "概念",
+   "description": "直线上两点的 y 值之差（上升量）除以 x 值之差（前进量）"
+  },
+  {
+   "name": "y截距",
+   "category": "概念",
+   "description": "x = 0 时的值，即图与 y 轴相交时的值"
+  },
+  {
+   "name": "因变量",
+   "category": "概念",
+   "description": "被测量的变量，通常沿 y 轴作图"
+  },
+  {
+   "name": "自变量",
+   "category": "概念",
+   "description": "因变量相对于它测量的变量，通常沿 x 轴作图"
+  },
+  {
+   "name": "模型",
+   "category": "概念",
+   "description": "只包含描述物理情境所需元素的简化描述"
+  }
+ ],
+ "relations": [
+  {
+   "source": "运动学",
+   "target": "一维运动",
+   "type": "CONTAINS",
+   "evidence": "在本章中，我们研究最简单的运动类型——即沿直线的运动，或一维运动",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "位移",
+   "target": "位置",
+   "type": "RELATED_TO",
+   "evidence": "这种位置的变化被称为位移（displacement）",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "位移",
+   "target": "距离",
+   "type": "RELATED_TO",
+   "evidence": "距离被定义为两个位置之间位移的大小或尺寸",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "距离",
+   "target": "路程",
+   "type": "RELATED_TO",
+   "evidence": "路程（distance traveled）是两个位置之间走过的路径的总长度",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "位移",
+   "target": "路程",
+   "type": "RELATED_TO",
+   "evidence": "路程可能大于位移的大小",
+   "confidence": 0.8,
+   "core": true
+  },
+  {
+   "source": "位置",
+   "target": "参考系",
+   "type": "RELATED_TO",
+   "evidence": "你需要指定它相对于一个方便的参考系（reference frame）的位置",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "参考系",
+   "target": "坐标系",
+   "type": "CONTAINS",
+   "evidence": "为了描述矢量量的方向，你必须在参考系内指定一个坐标系",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "坐标系",
+   "target": "矢量",
+   "type": "RELATED_TO",
+   "evidence": "为了描述矢量量的方向，你必须在参考系内指定一个坐标系",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "矢量",
+   "target": "位移",
+   "type": "CONTAINS",
+   "evidence": "位移是矢量（vector）量的一个例子",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "标量",
+   "target": "距离",
+   "type": "CONTAINS",
+   "evidence": "距离是标量（scalar）量的一个例子",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "矢量",
+   "target": "标量",
+   "type": "RELATED_TO",
+   "evidence": "位移由方向和大小两者定义，而距离只由大小定义",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "矢量",
+   "target": "速度",
+   "type": "CONTAINS",
+   "evidence": "注意这个定义表明速度是矢量，因为位移是矢量",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "标量",
+   "target": "速率",
+   "type": "CONTAINS",
+   "evidence": "一个主要区别是速率（speed）没有方向。因此速率是标量",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速度",
+   "target": "速率",
+   "type": "RELATED_TO",
+   "evidence": "然而在物理学中，它们含义不同，是截然不同的概念",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "平均速度",
+   "target": "位移",
+   "type": "RELATED_TO",
+   "evidence": "平均速度是位移（位置的变化）除以行驶时间",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速度",
+   "target": "平均速度",
+   "type": "CONTAINS",
+   "evidence": "正如我们需要区分瞬时速度和平均速度一样",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速度",
+   "target": "瞬时速度",
+   "type": "CONTAINS",
+   "evidence": "平均速度变成瞬时速度（instantaneous velocity），或某个特定瞬间的速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速率",
+   "target": "平均速率",
+   "type": "CONTAINS",
+   "evidence": "平均速率是走过的距离除以经过时间",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速率",
+   "target": "瞬时速率",
+   "type": "CONTAINS",
+   "evidence": "瞬时速率是瞬时速度的大小",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "瞬时速率",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "瞬时速率是瞬时速度的大小",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "平均速率",
+   "target": "平均速度",
+   "type": "RELATED_TO",
+   "evidence": "平均速率与平均速度非常不同",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "平均速度",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "在这样的间隔内，平均速度变成瞬时速度",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "时间",
+   "target": "经过时间",
+   "type": "CONTAINS",
+   "evidence": "经过时间是结束时间 t_f 和开始时间 t_0 之差",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "加速度是速度变化的速率",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "平均加速度",
+   "type": "CONTAINS",
+   "evidence": "平均加速度是速度变化的速率",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "瞬时加速度",
+   "type": "CONTAINS",
+   "evidence": "瞬时加速度 a，或某个特定瞬间的加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "减速",
+   "type": "CONTAINS",
+   "evidence": "当物体减速时，它的加速度与运动方向相反。这被称为减速（deceleration）",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "重力加速度",
+   "type": "CONTAINS",
+   "evidence": "在地球上，所有自由落体物体都有重力加速度 g",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "平均加速度",
+   "target": "瞬时加速度",
+   "type": "RELATED_TO",
+   "evidence": "由于加速度恒定，平均加速度和瞬时加速度相等",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "瞬时加速度",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "瞬时加速度 a，或某个特定瞬间的加速度，通过与“时间、速度与速率”中讨论的瞬时速度相同的过程获得",
+   "confidence": 0.8,
+   "core": true
+  },
+  {
+   "source": "匀加速运动",
+   "target": "加速度",
+   "type": "RELATED_TO",
+   "evidence": "我们现在做一个重要的假设：加速度是恒定的",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "运动学方程",
+   "target": "匀加速运动",
+   "type": "RELATED_TO",
+   "evidence": "以下 a 恒定时的运动学方程很有用",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "匀加速运动",
+   "target": "自由落体",
+   "type": "CONTAINS",
+   "evidence": "自由落体中的物体经历恒定加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "自由落体",
+   "target": "重力加速度",
+   "type": "RELATED_TO",
+   "evidence": "自由落体物体的加速度因此被称为重力加速度（acceleration due to gravity）",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "运动学方程",
+   "target": "自由落体",
+   "type": "RELATED_TO",
+   "evidence": "上述运动学方程可以在适当位置代入 a = −g 或 +g 后应用",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "解题步骤",
+   "target": "一维运动",
+   "type": "APPLIES_TO",
+   "evidence": "应用解题步骤和策略解决一维运动学问题",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "一维运动",
+   "type": "APPLIES_TO",
+   "evidence": "本节使用位置、速度和加速度随时间变化的图来说明一维运动学",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "位置-时间图",
+   "type": "CONTAINS",
+   "evidence": "本节使用位置、速度和加速度随时间变化的图来说明一维运动学",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "速度-时间图",
+   "type": "CONTAINS",
+   "evidence": "本节使用位置、速度和加速度随时间变化的图来说明一维运动学",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "加速度-时间图",
+   "type": "CONTAINS",
+   "evidence": "本节使用位置、速度和加速度随时间变化的图来说明一维运动学",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "位置-时间图",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图的斜率是速度 v",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速度-时间图",
+   "target": "加速度",
+   "type": "RELATED_TO",
+   "evidence": "速度-时间图的斜率是加速度 a",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "位置-时间图",
+   "target": "位移",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图给出了位移（位置变化）、速度和时间之间的一般关系",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "位置-时间图",
+   "target": "速度-时间图",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图可以用来生成速度-时间图，速度-时间图可以用来生成加速度-时间图",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "速度-时间图",
+   "target": "加速度-时间图",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图可以用来生成速度-时间图，速度-时间图可以用来生成加速度-时间图",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "斜率",
+   "target": "位置-时间图",
+   "type": "RELATED_TO",
+   "evidence": "上图（位置-时间图）中的斜率是平均速度",
+   "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "自变量",
+   "target": "因变量",
+   "type": "RELATED_TO",
+   "evidence": "横轴通常被认为是自变量（independent variable），纵轴是因变量（dependent variable）",
+   "confidence": 0.9,
+   "core": true
+  }
+ ]
+}

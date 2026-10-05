@@ -1,0 +1,4966 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "物理_第2章_运动学_Kinematics": "900682db3384723e360497a6be259028b517ec7c08af19ea899bc571aaf0a3da"
+  },
+  "runs": 3,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.7838,
+      "std": 0.0913,
+      "min": 0.6957,
+      "max": 0.878,
+      "values": [
+        0.6957,
+        0.878,
+        0.7778
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.9537,
+      "std": 0.0578,
+      "min": 0.8889,
+      "max": 1.0,
+      "values": [
+        0.8889,
+        1.0,
+        0.9722
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.8599,
+      "std": 0.0774,
+      "min": 0.7805,
+      "max": 0.9351,
+      "values": [
+        0.7805,
+        0.9351,
+        0.8642
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.9523,
+      "std": 0.0309,
+      "min": 0.9167,
+      "max": 0.9714,
+      "values": [
+        0.9688,
+        0.9167,
+        0.9714
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.2742,
+      "std": 0.0338,
+      "min": 0.2353,
+      "max": 0.2963,
+      "values": [
+        0.2963,
+        0.2909,
+        0.2353
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.3404,
+      "std": 0.0,
+      "min": 0.3404,
+      "max": 0.3404,
+      "values": [
+        0.3404,
+        0.3404,
+        0.3404
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.3029,
+      "std": 0.0214,
+      "min": 0.2783,
+      "max": 0.3168,
+      "values": [
+        0.3168,
+        0.3137,
+        0.2783
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.2742,
+      "std": 0.0338,
+      "min": 0.2353,
+      "max": 0.2963,
+      "values": [
+        0.2963,
+        0.2909,
+        0.2353
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.3404,
+      "std": 0.0,
+      "min": 0.3404,
+      "max": 0.3404,
+      "values": [
+        0.3404,
+        0.3404,
+        0.3404
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.3029,
+      "std": 0.0214,
+      "min": 0.2783,
+      "max": 0.3168,
+      "values": [
+        0.3168,
+        0.3137,
+        0.2783
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.2742,
+      "std": 0.0338,
+      "min": 0.2353,
+      "max": 0.2963,
+      "values": [
+        0.2963,
+        0.2909,
+        0.2353
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.3404,
+      "std": 0.0,
+      "min": 0.3404,
+      "max": 0.3404,
+      "values": [
+        0.3404,
+        0.3404,
+        0.3404
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.3029,
+      "std": 0.0214,
+      "min": 0.2783,
+      "max": 0.3168,
+      "values": [
+        0.3168,
+        0.3137,
+        0.2783
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.3866,
+      "std": 0.0435,
+      "min": 0.3485,
+      "max": 0.434,
+      "values": [
+        0.3774,
+        0.434,
+        0.3485
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.4681,
+      "std": 0.0369,
+      "min": 0.4255,
+      "max": 0.4894,
+      "values": [
+        0.4255,
+        0.4894,
+        0.4894
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.4224,
+      "std": 0.0328,
+      "min": 0.4,
+      "max": 0.46,
+      "values": [
+        0.4,
+        0.46,
+        0.4071
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.1886,
+      "std": 0.0441,
+      "min": 0.1547,
+      "max": 0.2384,
+      "values": [
+        0.1727,
+        0.2384,
+        0.1547
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0611,
+      "std": 0.0208,
+      "min": 0.037,
+      "max": 0.0735,
+      "values": [
+        0.037,
+        0.0727,
+        0.0735
+      ]
+    }
+  },
+  "entity_frequency": {
+    "y截距": 3,
+    "一维运动": 3,
+    "位移": 3,
+    "位置": 3,
+    "位置-时间图": 3,
+    "减速": 3,
+    "加速度": 3,
+    "加速度-时间图": 3,
+    "匀加速运动": 3,
+    "匀加速运动方程": 3,
+    "参考系": 3,
+    "坐标系": 3,
+    "平均加速度": 3,
+    "平均速度": 3,
+    "平均速率": 3,
+    "斜率": 3,
+    "时间": 3,
+    "标量": 3,
+    "瞬时加速度": 3,
+    "瞬时速度": 3,
+    "瞬时速率": 3,
+    "矢量": 3,
+    "经过时间": 3,
+    "自由落体": 3,
+    "解题步骤": 3,
+    "距离": 3,
+    "路程": 3,
+    "运动图": 3,
+    "运动学": 3,
+    "运动学方程": 3,
+    "速度": 3,
+    "速度-时间图": 3,
+    "速率": 3,
+    "重力加速度": 3,
+    "一维匀加速运动方程": 2,
+    "位移公式": 2,
+    "分治": 2,
+    "因变量": 2,
+    "平均速度公式": 2,
+    "模型": 2,
+    "自变量": 2,
+    "落体": 2,
+    "速率-时间图": 2,
+    "一维运动学解题基础": 1,
+    "一维运动学解题方法": 1,
+    "一维运动学解题步骤": 1,
+    "二维运动学": 1,
+    "位移时间公式": 1,
+    "减速度": 1,
+    "图像分析": 1,
+    "图像分析方法": 1,
+    "平均加速度公式": 1,
+    "末速度公式": 1,
+    "速度位移公式": 1,
+    "速度变化量": 1
+  },
+  "relation_frequency": {
+    "加速度 -[CONTAINS]-> 减速": 3,
+    "加速度 -[CONTAINS]-> 平均加速度": 3,
+    "加速度 -[CONTAINS]-> 瞬时加速度": 3,
+    "匀加速运动 -[RELATED_TO]-> 运动学方程": 3,
+    "标量 -[CONTAINS]-> 平均速率": 3,
+    "标量 -[CONTAINS]-> 瞬时速率": 3,
+    "标量 -[CONTAINS]-> 距离": 3,
+    "瞬时速度 -[CONTAINS]-> 瞬时速率": 3,
+    "矢量 -[CONTAINS]-> 位移": 3,
+    "矢量 -[CONTAINS]-> 加速度": 3,
+    "矢量 -[CONTAINS]-> 平均速度": 3,
+    "矢量 -[CONTAINS]-> 瞬时速度": 3,
+    "解题步骤 -[APPLIES_TO]-> 匀加速运动方程": 3,
+    "运动图 -[APPLIES_TO]-> 加速度": 3,
+    "运动图 -[APPLIES_TO]-> 平均速度": 3,
+    "运动图 -[APPLIES_TO]-> 瞬时速度": 3,
+    "运动学 -[CONTAINS]-> 一维运动": 3,
+    "运动学 -[CONTAINS]-> 位移": 3,
+    "运动学 -[CONTAINS]-> 加速度": 3,
+    "运动学 -[CONTAINS]-> 平均速度": 3,
+    "运动学 -[CONTAINS]-> 自由落体": 3,
+    "运动学 -[CONTAINS]-> 运动图": 3,
+    "运动学方程 -[APPLIES_TO]-> 自由落体": 3,
+    "速度 -[CONTAINS]-> 平均速度": 3,
+    "速度 -[CONTAINS]-> 瞬时速度": 3,
+    "速率 -[CONTAINS]-> 平均速率": 3,
+    "速率 -[CONTAINS]-> 瞬时速率": 3,
+    "一维匀加速运动方程 -[APPLIES_TO]-> 自由落体": 2,
+    "一维运动 -[RELATED_TO]-> 运动学方程": 2,
+    "位移 -[RELATED_TO]-> 距离": 2,
+    "位移 -[RELATED_TO]-> 路程": 2,
+    "位置-时间图 -[PRECEDES]-> 速度-时间图": 2,
+    "位置-时间图 -[RELATED_TO]-> 平均速度": 2,
+    "位置-时间图 -[RELATED_TO]-> 瞬时速度": 2,
+    "位置-时间图 -[RELATED_TO]-> 速度-时间图": 2,
+    "匀加速运动 -[CONTAINS]-> 落体": 2,
+    "平均速度 -[RELATED_TO]-> 位移": 2,
+    "斜率 -[RELATED_TO]-> 加速度": 2,
+    "斜率 -[RELATED_TO]-> 平均速度": 2,
+    "斜率 -[RELATED_TO]-> 瞬时速度": 2,
+    "时间 -[CONTAINS]-> 经过时间": 2,
+    "自由落体 -[RELATED_TO]-> 重力加速度": 2,
+    "运动学 -[CONTAINS]-> 一维匀加速运动方程": 2,
+    "速度-时间图 -[PRECEDES]-> 加速度-时间图": 2,
+    "速度-时间图 -[RELATED_TO]-> 平均加速度": 2,
+    "速度-时间图 -[RELATED_TO]-> 瞬时加速度": 2,
+    "速度-时间图 -[RELATED_TO]-> 速率-时间图": 2,
+    "一维运动 -[CONTAINS]-> 匀加速运动": 1,
+    "一维运动学解题方法 -[APPLIES_TO]-> 运动学方程": 1,
+    "位移 -[PRECEDES]-> 速度": 1,
+    "位移 -[RELATED_TO]-> 位移公式": 1,
+    "位移 -[RELATED_TO]-> 平均速度": 1,
+    "位置-时间图 -[APPLIES_TO]-> 平均速度": 1,
+    "位置-时间图 -[APPLIES_TO]-> 瞬时速度": 1,
+    "减速 -[RELATED_TO]-> 加速度": 1,
+    "减速度 -[RELATED_TO]-> 平均加速度": 1,
+    "匀加速运动方程 -[APPLIES_TO]-> 位移": 1,
+    "匀加速运动方程 -[APPLIES_TO]-> 加速度": 1,
+    "匀加速运动方程 -[APPLIES_TO]-> 自由落体": 1,
+    "匀加速运动方程 -[APPLIES_TO]-> 速度": 1,
+    "匀加速运动方程 -[CONTAINS]-> 位移公式": 1,
+    "匀加速运动方程 -[CONTAINS]-> 位移时间公式": 1,
+    "匀加速运动方程 -[CONTAINS]-> 平均速度公式": 1,
+    "匀加速运动方程 -[CONTAINS]-> 末速度公式": 1,
+    "匀加速运动方程 -[CONTAINS]-> 速度位移公式": 1,
+    "匀加速运动方程 -[RELATED_TO]-> 位移": 1,
+    "匀加速运动方程 -[RELATED_TO]-> 加速度": 1,
+    "匀加速运动方程 -[RELATED_TO]-> 平均速度": 1,
+    "匀加速运动方程 -[RELATED_TO]-> 速度": 1,
+    "图像分析 -[RELATED_TO]-> 位置-时间图": 1,
+    "图像分析 -[RELATED_TO]-> 加速度-时间图": 1,
+    "图像分析 -[RELATED_TO]-> 速度-时间图": 1,
+    "图像分析方法 -[APPLIES_TO]-> 位置-时间图": 1,
+    "图像分析方法 -[APPLIES_TO]-> 速度-时间图": 1,
+    "平均加速度 -[RELATED_TO]-> 加速度": 1,
+    "平均加速度 -[RELATED_TO]-> 平均加速度公式": 1,
+    "平均加速度 -[RELATED_TO]-> 速度": 1,
+    "平均加速度 -[RELATED_TO]-> 速度变化量": 1,
+    "平均速度 -[CONTAINS]-> 瞬时速度": 1,
+    "平均速度 -[RELATED_TO]-> 平均速度公式": 1,
+    "平均速度 -[RELATED_TO]-> 瞬时速度": 1,
+    "平均速率 -[RELATED_TO]-> 平均速度": 1,
+    "斜率 -[RELATED_TO]-> 位置-时间图": 1,
+    "斜率 -[RELATED_TO]-> 瞬时加速度": 1,
+    "斜率 -[RELATED_TO]-> 速度-时间图": 1,
+    "标量 -[CONTAINS]-> 速率": 1,
+    "矢量 -[CONTAINS]-> 速度": 1,
+    "自由落体 -[CONTAINS]-> 重力加速度": 1,
+    "距离 -[RELATED_TO]-> 路程": 1,
+    "运动图 -[CONTAINS]-> y截距": 1,
+    "运动图 -[CONTAINS]-> 因变量": 1,
+    "运动图 -[CONTAINS]-> 斜率": 1,
+    "运动图 -[CONTAINS]-> 自变量": 1,
+    "运动学 -[CONTAINS]-> 二维运动学": 1,
+    "运动学 -[CONTAINS]-> 匀加速运动方程": 1,
+    "运动学 -[CONTAINS]-> 图像分析方法": 1,
+    "运动学 -[CONTAINS]-> 落体": 1,
+    "运动学 -[CONTAINS]-> 运动学方程": 1,
+    "运动学 -[CONTAINS]-> 速度": 1,
+    "速度 -[PRECEDES]-> 加速度": 1,
+    "速度-时间图 -[APPLIES_TO]-> 平均加速度": 1,
+    "速度-时间图 -[APPLIES_TO]-> 瞬时加速度": 1,
+    "重力加速度 -[RELATED_TO]-> 自由落体": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 35.3333,
+      "values": [
+        33,
+        30,
+        43
+      ]
+    },
+    "direction_reversed": {
+      "mean": 3.6667,
+      "values": [
+        2,
+        4,
+        5
+      ]
+    },
+    "type_confused": {
+      "mean": 4.0,
+      "values": [
+        3,
+        5,
+        4
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 31.0,
+      "values": [
+        31,
+        31,
+        31
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 0.3333,
+      "values": [
+        1,
+        0,
+        0
+      ]
+    },
+    "duplicate": {
+      "mean": 5.6667,
+      "values": [
+        6,
+        4,
+        7
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 6.0,
+      "values": [
+        7,
+        4,
+        7
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 65.0,
+      "values": [
+        61,
+        59,
+        75
+      ]
+    },
+    "pred_total": {
+      "mean": 59.0,
+      "values": [
+        54,
+        55,
+        68
+      ]
+    },
+    "core_total": {
+      "mean": 47.0,
+      "values": [
+        47,
+        47,
+        47
+      ]
+    },
+    "full_total": {
+      "mean": 47.0,
+      "values": [
+        47,
+        47,
+        47
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 61,
+        "scored": 54,
+        "dropped": 7,
+        "reconciles": true
+      },
+      {
+        "raw": 59,
+        "scored": 55,
+        "dropped": 4,
+        "reconciles": true
+      },
+      {
+        "raw": 75,
+        "scored": 68,
+        "dropped": 7,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 32,
+      "fp": 14,
+      "fn": 4,
+      "precision": 0.6957,
+      "recall": 0.8889,
+      "f1": 0.7805
+    },
+    "entity_macro": {
+      "precision": 0.6957,
+      "recall": 0.8889,
+      "f1": 0.7805
+    },
+    "entity_category_accuracy": 0.9688,
+    "relation_primary_micro": {
+      "pred_total": 54,
+      "core_total": 47,
+      "full_total": 47,
+      "hit_core": 16,
+      "hit_full": 16,
+      "precision": 0.2963,
+      "recall": 0.3404,
+      "f1": 0.3168
+    },
+    "relation_core_micro": {
+      "tp": 16,
+      "fp": 38,
+      "fn": 31,
+      "precision": 0.2963,
+      "recall": 0.3404,
+      "f1": 0.3168
+    },
+    "relation_full_micro": {
+      "tp": 16,
+      "fp": 38,
+      "fn": 31,
+      "precision": 0.2963,
+      "recall": 0.3404,
+      "f1": 0.3168
+    },
+    "relation_strict_micro": {
+      "tp": 16,
+      "fp": 38,
+      "fn": 31,
+      "precision": 0.2963,
+      "recall": 0.3404,
+      "f1": 0.3168
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.2963,
+      "recall": 0.3404,
+      "f1": 0.3168
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 20,
+      "fp": 33,
+      "fn": 27,
+      "precision": 0.3774,
+      "recall": 0.4255,
+      "f1": 0.4
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 0,
+        "pred_total": 2,
+        "micro": {
+          "tp": 0,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "CONTAINS": {
+        "gold_total": 19,
+        "pred_total": 29,
+        "micro": {
+          "tp": 11,
+          "fp": 18,
+          "fn": 8,
+          "precision": 0.3793,
+          "recall": 0.5789,
+          "f1": 0.4583
+        },
+        "mean_document_f1": 0.4583,
+        "active_document_f1": 0.4583
+      },
+      "RELATED_TO": {
+        "gold_total": 26,
+        "pred_total": 17,
+        "micro": {
+          "tp": 5,
+          "fp": 12,
+          "fn": 21,
+          "precision": 0.2941,
+          "recall": 0.1923,
+          "f1": 0.2326
+        },
+        "mean_document_f1": 0.2326,
+        "active_document_f1": 0.2326
+      },
+      "APPLIES_TO": {
+        "gold_total": 2,
+        "pred_total": 6,
+        "micro": {
+          "tp": 0,
+          "fp": 6,
+          "fn": 2,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.1727,
+      "active_types": 0.1727,
+      "active_type_names": [
+        "PRECEDES",
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.037,
+    "error_taxonomy_totals": {
+      "fabricated": 33,
+      "direction_reversed": 2,
+      "type_confused": 3,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 1,
+      "duplicate": 6,
+      "low_confidence": 0,
+      "missed_core": 31,
+      "pred_raw_total": 61,
+      "pred_total": 54,
+      "dropped_total": 7,
+      "core_total": 47,
+      "full_total": 47
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 61,
+      "scored": 54,
+      "dropped": 7,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 32,
+        "fp": 14,
+        "fn": 4,
+        "precision": 0.6957,
+        "recall": 0.8889,
+        "f1": 0.7805
+      },
+      "entity_macro": {
+        "precision": 0.6957,
+        "recall": 0.8889,
+        "f1": 0.7805
+      },
+      "entity_category_accuracy": 0.9688,
+      "relation_primary_micro": {
+        "pred_total": 54,
+        "core_total": 47,
+        "full_total": 47,
+        "hit_core": 16,
+        "hit_full": 16,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_core_micro": {
+        "tp": 16,
+        "fp": 38,
+        "fn": 31,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_full_micro": {
+        "tp": 16,
+        "fp": 38,
+        "fn": 31,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_strict_micro": {
+        "tp": 16,
+        "fp": 38,
+        "fn": 31,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 20,
+        "fp": 33,
+        "fn": 27,
+        "precision": 0.3774,
+        "recall": 0.4255,
+        "f1": 0.4
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 2,
+          "micro": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 19,
+          "pred_total": 29,
+          "micro": {
+            "tp": 11,
+            "fp": 18,
+            "fn": 8,
+            "precision": 0.3793,
+            "recall": 0.5789,
+            "f1": 0.4583
+          },
+          "mean_document_f1": 0.4583,
+          "active_document_f1": 0.4583
+        },
+        "RELATED_TO": {
+          "gold_total": 26,
+          "pred_total": 17,
+          "micro": {
+            "tp": 5,
+            "fp": 12,
+            "fn": 21,
+            "precision": 0.2941,
+            "recall": 0.1923,
+            "f1": 0.2326
+          },
+          "mean_document_f1": 0.2326,
+          "active_document_f1": 0.2326
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 6,
+          "micro": {
+            "tp": 0,
+            "fp": 6,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.1727,
+        "active_types": 0.1727,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.037,
+      "error_taxonomy_totals": {
+        "fabricated": 33,
+        "direction_reversed": 2,
+        "type_confused": 3,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 1,
+        "duplicate": 6,
+        "low_confidence": 0,
+        "missed_core": 31,
+        "pred_raw_total": 61,
+        "pred_total": 54,
+        "dropped_total": 7,
+        "core_total": 47,
+        "full_total": 47
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 61,
+        "scored": 54,
+        "dropped": 7,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 36,
+        "fp": 5,
+        "fn": 0,
+        "precision": 0.878,
+        "recall": 1.0,
+        "f1": 0.9351
+      },
+      "entity_macro": {
+        "precision": 0.878,
+        "recall": 1.0,
+        "f1": 0.9351
+      },
+      "entity_category_accuracy": 0.9167,
+      "relation_primary_micro": {
+        "pred_total": 55,
+        "core_total": 47,
+        "full_total": 47,
+        "hit_core": 16,
+        "hit_full": 16,
+        "precision": 0.2909,
+        "recall": 0.3404,
+        "f1": 0.3137
+      },
+      "relation_core_micro": {
+        "tp": 16,
+        "fp": 39,
+        "fn": 31,
+        "precision": 0.2909,
+        "recall": 0.3404,
+        "f1": 0.3137
+      },
+      "relation_full_micro": {
+        "tp": 16,
+        "fp": 39,
+        "fn": 31,
+        "precision": 0.2909,
+        "recall": 0.3404,
+        "f1": 0.3137
+      },
+      "relation_strict_micro": {
+        "tp": 16,
+        "fp": 39,
+        "fn": 31,
+        "precision": 0.2909,
+        "recall": 0.3404,
+        "f1": 0.3137
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.2909,
+        "recall": 0.3404,
+        "f1": 0.3137
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 23,
+        "fp": 30,
+        "fn": 24,
+        "precision": 0.434,
+        "recall": 0.4894,
+        "f1": 0.46
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 19,
+          "pred_total": 24,
+          "micro": {
+            "tp": 10,
+            "fp": 14,
+            "fn": 9,
+            "precision": 0.4167,
+            "recall": 0.5263,
+            "f1": 0.4651
+          },
+          "mean_document_f1": 0.4651,
+          "active_document_f1": 0.4651
+        },
+        "RELATED_TO": {
+          "gold_total": 26,
+          "pred_total": 22,
+          "micro": {
+            "tp": 6,
+            "fp": 16,
+            "fn": 20,
+            "precision": 0.2727,
+            "recall": 0.2308,
+            "f1": 0.25
+          },
+          "mean_document_f1": 0.25,
+          "active_document_f1": 0.25
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 9,
+          "micro": {
+            "tp": 0,
+            "fp": 9,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.1788,
+        "active_types": 0.2384,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0727,
+      "error_taxonomy_totals": {
+        "fabricated": 30,
+        "direction_reversed": 4,
+        "type_confused": 5,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 4,
+        "low_confidence": 0,
+        "missed_core": 31,
+        "pred_raw_total": 59,
+        "pred_total": 55,
+        "dropped_total": 4,
+        "core_total": 47,
+        "full_total": 47
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 59,
+        "scored": 55,
+        "dropped": 4,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 35,
+        "fp": 10,
+        "fn": 1,
+        "precision": 0.7778,
+        "recall": 0.9722,
+        "f1": 0.8642
+      },
+      "entity_macro": {
+        "precision": 0.7778,
+        "recall": 0.9722,
+        "f1": 0.8642
+      },
+      "entity_category_accuracy": 0.9714,
+      "relation_primary_micro": {
+        "pred_total": 68,
+        "core_total": 47,
+        "full_total": 47,
+        "hit_core": 16,
+        "hit_full": 16,
+        "precision": 0.2353,
+        "recall": 0.3404,
+        "f1": 0.2783
+      },
+      "relation_core_micro": {
+        "tp": 16,
+        "fp": 52,
+        "fn": 31,
+        "precision": 0.2353,
+        "recall": 0.3404,
+        "f1": 0.2783
+      },
+      "relation_full_micro": {
+        "tp": 16,
+        "fp": 52,
+        "fn": 31,
+        "precision": 0.2353,
+        "recall": 0.3404,
+        "f1": 0.2783
+      },
+      "relation_strict_micro": {
+        "tp": 16,
+        "fp": 52,
+        "fn": 31,
+        "precision": 0.2353,
+        "recall": 0.3404,
+        "f1": 0.2783
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.2353,
+        "recall": 0.3404,
+        "f1": 0.2783
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 23,
+        "fp": 43,
+        "fn": 24,
+        "precision": 0.3485,
+        "recall": 0.4894,
+        "f1": 0.4071
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 4,
+          "micro": {
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 19,
+          "pred_total": 36,
+          "micro": {
+            "tp": 13,
+            "fp": 23,
+            "fn": 6,
+            "precision": 0.3611,
+            "recall": 0.6842,
+            "f1": 0.4727
+          },
+          "mean_document_f1": 0.4727,
+          "active_document_f1": 0.4727
+        },
+        "RELATED_TO": {
+          "gold_total": 26,
+          "pred_total": 15,
+          "micro": {
+            "tp": 3,
+            "fp": 12,
+            "fn": 23,
+            "precision": 0.2,
+            "recall": 0.1154,
+            "f1": 0.1463
+          },
+          "mean_document_f1": 0.1463,
+          "active_document_f1": 0.1463
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 13,
+          "micro": {
+            "tp": 0,
+            "fp": 13,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.1547,
+        "active_types": 0.1547,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0735,
+      "error_taxonomy_totals": {
+        "fabricated": 43,
+        "direction_reversed": 5,
+        "type_confused": 4,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 7,
+        "low_confidence": 0,
+        "missed_core": 31,
+        "pred_raw_total": 75,
+        "pred_total": 68,
+        "dropped_total": 7,
+        "core_total": 47,
+        "full_total": 47
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 75,
+        "scored": 68,
+        "dropped": 7,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "物理_第2章_运动学_Kinematics",
+      "gold": {
+        "entity_count": 36,
+        "relation_core_count": 47,
+        "relation_full_count": 47
+      },
+      "entity": {
+        "tp": 32,
+        "fp": 14,
+        "fn": 4,
+        "precision": 0.6957,
+        "recall": 0.8889,
+        "f1": 0.7805
+      },
+      "entity_category": {
+        "gold_entity_count": 36,
+        "pred_entity_count": 46,
+        "evaluated_entity_count": 32,
+        "correct": 31,
+        "accuracy": 0.9688
+      },
+      "relation_primary": {
+        "pred_total": 54,
+        "core_total": 47,
+        "full_total": 47,
+        "hit_core": 16,
+        "hit_full": 16,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_core": {
+        "tp": 16,
+        "fp": 38,
+        "fn": 31,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_full": {
+        "tp": 16,
+        "fp": 38,
+        "fn": 31,
+        "precision": 0.2963,
+        "recall": 0.3404,
+        "f1": 0.3168
+      },
+      "relation_pair_auxiliary": {
+        "tp": 20,
+        "fp": 33,
+        "fn": 27,
+        "precision": 0.3774,
+        "recall": 0.4255,
+        "f1": 0.4
+      },
+      "relation_direction_error_rate": 0.037,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 0,
+          "pred": 2,
+          "tp": 0,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "CONTAINS": {
+          "gold": 19,
+          "pred": 29,
+          "tp": 11,
+          "fp": 18,
+          "fn": 8,
+          "precision": 0.3793,
+          "recall": 0.5789,
+          "f1": 0.4583
+        },
+        "RELATED_TO": {
+          "gold": 26,
+          "pred": 17,
+          "tp": 5,
+          "fp": 12,
+          "fn": 21,
+          "precision": 0.2941,
+          "recall": 0.1923,
+          "f1": 0.2326
+        },
+        "APPLIES_TO": {
+          "gold": 2,
+          "pred": 6,
+          "tp": 0,
+          "fp": 6,
+          "fn": 2,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 33,
+          "direction_reversed": 2,
+          "type_confused": 3,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 1,
+          "duplicate": 6,
+          "low_confidence": 0,
+          "missed_core": 31,
+          "pred_raw_total": 61,
+          "pred_total": 54,
+          "dropped_total": 7,
+          "core_total": 47,
+          "full_total": 47
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "瞬时速度",
+            "type": "CONTAINS",
+            "target": "瞬时速率",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "type_confused": [
+          {
+            "source": "位置-时间图",
+            "type": "PRECEDES",
+            "target": "速度-时间图",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "运动学方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "PRECEDES",
+            "target": "加速度-时间图",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "二叉树",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "位移",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "距离",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "瞬时加速度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "减速",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "平均速度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "加速度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "位置"
+          },
+          {
+            "source": "位置",
+            "type": "RELATED_TO",
+            "target": "参考系"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "重力加速度"
+          },
+          {
+            "source": "加速度",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "参考系",
+            "type": "CONTAINS",
+            "target": "坐标系"
+          },
+          {
+            "source": "图像分析",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "坐标系",
+            "type": "RELATED_TO",
+            "target": "矢量"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "平均速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "平均速率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "速率"
+          },
+          {
+            "source": "瞬时加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "瞬时速率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "速度"
+          },
+          {
+            "source": "矢量",
+            "type": "RELATED_TO",
+            "target": "标量"
+          },
+          {
+            "source": "自变量",
+            "type": "RELATED_TO",
+            "target": "因变量"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "距离",
+            "type": "RELATED_TO",
+            "target": "路程"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "匀加速运动"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度",
+            "type": "RELATED_TO",
+            "target": "速率"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度-时间图"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "一维匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "一维运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "减速度",
+            "type": "RELATED_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "位移公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "位移时间公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "平均速度公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "末速度公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "速度位移公式"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "速度变化量"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "平均速率"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "匀加速运动方程"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "一维匀加速运动方程"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "二维运动学"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "位移"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "运动图"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "速率-时间图"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "一维匀加速运动方程",
+          "type": "APPLIES_TO",
+          "target": "自由落体"
+        },
+        {
+          "source": "一维运动",
+          "type": "RELATED_TO",
+          "target": "运动学方程"
+        },
+        {
+          "source": "位置-时间图",
+          "type": "PRECEDES",
+          "target": "速度-时间图"
+        },
+        {
+          "source": "位置-时间图",
+          "type": "RELATED_TO",
+          "target": "平均速度"
+        },
+        {
+          "source": "位置-时间图",
+          "type": "RELATED_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "减速度",
+          "type": "RELATED_TO",
+          "target": "平均加速度"
+        },
+        {
+          "source": "匀加速运动",
+          "type": "RELATED_TO",
+          "target": "运动学方程"
+        },
+        {
+          "source": "匀加速运动方程",
+          "type": "CONTAINS",
+          "target": "位移公式"
+        },
+        {
+          "source": "匀加速运动方程",
+          "type": "CONTAINS",
+          "target": "位移时间公式"
+        },
+        {
+          "source": "匀加速运动方程",
+          "type": "CONTAINS",
+          "target": "平均速度公式"
+        },
+        {
+          "source": "匀加速运动方程",
+          "type": "CONTAINS",
+          "target": "末速度公式"
+        },
+        {
+          "source": "匀加速运动方程",
+          "type": "CONTAINS",
+          "target": "速度位移公式"
+        },
+        {
+          "source": "平均加速度",
+          "type": "RELATED_TO",
+          "target": "速度变化量"
+        },
+        {
+          "source": "斜率",
+          "type": "RELATED_TO",
+          "target": "加速度"
+        },
+        {
+          "source": "斜率",
+          "type": "RELATED_TO",
+          "target": "平均速度"
+        },
+        {
+          "source": "斜率",
+          "type": "RELATED_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "标量",
+          "type": "CONTAINS",
+          "target": "平均速率"
+        },
+        {
+          "source": "标量",
+          "type": "CONTAINS",
+          "target": "瞬时速率"
+        },
+        {
+          "source": "瞬时速度",
+          "type": "CONTAINS",
+          "target": "瞬时速率"
+        },
+        {
+          "source": "矢量",
+          "type": "CONTAINS",
+          "target": "加速度"
+        },
+        {
+          "source": "矢量",
+          "type": "CONTAINS",
+          "target": "平均速度"
+        },
+        {
+          "source": "矢量",
+          "type": "CONTAINS",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "解题步骤",
+          "type": "APPLIES_TO",
+          "target": "匀加速运动方程"
+        },
+        {
+          "source": "运动图",
+          "type": "APPLIES_TO",
+          "target": "加速度"
+        },
+        {
+          "source": "运动图",
+          "type": "APPLIES_TO",
+          "target": "平均速度"
+        },
+        {
+          "source": "运动图",
+          "type": "APPLIES_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "一维匀加速运动方程"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "二维运动学"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "位移"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "加速度"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "平均速度"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "自由落体"
+        },
+        {
+          "source": "运动学",
+          "type": "CONTAINS",
+          "target": "运动图"
+        },
+        {
+          "source": "运动学方程",
+          "type": "APPLIES_TO",
+          "target": "自由落体"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "PRECEDES",
+          "target": "加速度-时间图"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "RELATED_TO",
+          "target": "平均加速度"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "RELATED_TO",
+          "target": "瞬时加速度"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "RELATED_TO",
+          "target": "速率-时间图"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "位移",
+          "type": "RELATED_TO",
+          "target": "位置"
+        },
+        {
+          "source": "位置",
+          "type": "RELATED_TO",
+          "target": "参考系"
+        },
+        {
+          "source": "位置-时间图",
+          "type": "RELATED_TO",
+          "target": "位移"
+        },
+        {
+          "source": "位置-时间图",
+          "type": "RELATED_TO",
+          "target": "速度"
+        },
+        {
+          "source": "加速度",
+          "type": "CONTAINS",
+          "target": "重力加速度"
+        },
+        {
+          "source": "加速度",
+          "type": "RELATED_TO",
+          "target": "速度"
+        },
+        {
+          "source": "匀加速运动",
+          "type": "CONTAINS",
+          "target": "自由落体"
+        },
+        {
+          "source": "匀加速运动",
+          "type": "RELATED_TO",
+          "target": "加速度"
+        },
+        {
+          "source": "参考系",
+          "type": "CONTAINS",
+          "target": "坐标系"
+        },
+        {
+          "source": "图像分析",
+          "type": "APPLIES_TO",
+          "target": "一维运动"
+        },
+        {
+          "source": "图像分析",
+          "type": "CONTAINS",
+          "target": "位置-时间图"
+        },
+        {
+          "source": "图像分析",
+          "type": "CONTAINS",
+          "target": "加速度-时间图"
+        },
+        {
+          "source": "图像分析",
+          "type": "CONTAINS",
+          "target": "速度-时间图"
+        },
+        {
+          "source": "坐标系",
+          "type": "RELATED_TO",
+          "target": "矢量"
+        },
+        {
+          "source": "平均加速度",
+          "type": "RELATED_TO",
+          "target": "瞬时加速度"
+        },
+        {
+          "source": "平均速度",
+          "type": "RELATED_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "平均速率",
+          "type": "RELATED_TO",
+          "target": "平均速度"
+        },
+        {
+          "source": "斜率",
+          "type": "RELATED_TO",
+          "target": "位置-时间图"
+        },
+        {
+          "source": "标量",
+          "type": "CONTAINS",
+          "target": "速率"
+        },
+        {
+          "source": "瞬时加速度",
+          "type": "RELATED_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "瞬时速率",
+          "type": "RELATED_TO",
+          "target": "瞬时速度"
+        },
+        {
+          "source": "矢量",
+          "type": "CONTAINS",
+          "target": "速度"
+        },
+        {
+          "source": "矢量",
+          "type": "RELATED_TO",
+          "target": "标量"
+        },
+        {
+          "source": "自变量",
+          "type": "RELATED_TO",
+          "target": "因变量"
+        },
+        {
+          "source": "解题步骤",
+          "type": "APPLIES_TO",
+          "target": "一维运动"
+        },
+        {
+          "source": "距离",
+          "type": "RELATED_TO",
+          "target": "路程"
+        },
+        {
+          "source": "运动学方程",
+          "type": "RELATED_TO",
+          "target": "匀加速运动"
+        },
+        {
+          "source": "运动学方程",
+          "type": "RELATED_TO",
+          "target": "自由落体"
+        },
+        {
+          "source": "速度",
+          "type": "RELATED_TO",
+          "target": "速率"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "RELATED_TO",
+          "target": "加速度"
+        },
+        {
+          "source": "速度-时间图",
+          "type": "RELATED_TO",
+          "target": "加速度-时间图"
+        }
+      ],
+      "type_confusions": [
+        {
+          "source": "位置-时间图",
+          "target": "速度-时间图",
+          "gold_type": "RELATED_TO",
+          "pred_type": "PRECEDES"
+        },
+        {
+          "source": "运动学方程",
+          "target": "自由落体",
+          "gold_type": "RELATED_TO",
+          "pred_type": "APPLIES_TO"
+        },
+        {
+          "source": "速度-时间图",
+          "target": "加速度-时间图",
+          "gold_type": "RELATED_TO",
+          "pred_type": "PRECEDES"
+        }
+      ]
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "物理_第2章_运动学_Kinematics",
+        "gold": {
+          "entity_count": 36,
+          "relation_core_count": 47,
+          "relation_full_count": 47
+        },
+        "entity": {
+          "tp": 32,
+          "fp": 14,
+          "fn": 4,
+          "precision": 0.6957,
+          "recall": 0.8889,
+          "f1": 0.7805
+        },
+        "entity_category": {
+          "gold_entity_count": 36,
+          "pred_entity_count": 46,
+          "evaluated_entity_count": 32,
+          "correct": 31,
+          "accuracy": 0.9688
+        },
+        "relation_primary": {
+          "pred_total": 54,
+          "core_total": 47,
+          "full_total": 47,
+          "hit_core": 16,
+          "hit_full": 16,
+          "precision": 0.2963,
+          "recall": 0.3404,
+          "f1": 0.3168
+        },
+        "relation_core": {
+          "tp": 16,
+          "fp": 38,
+          "fn": 31,
+          "precision": 0.2963,
+          "recall": 0.3404,
+          "f1": 0.3168
+        },
+        "relation_full": {
+          "tp": 16,
+          "fp": 38,
+          "fn": 31,
+          "precision": 0.2963,
+          "recall": 0.3404,
+          "f1": 0.3168
+        },
+        "relation_pair_auxiliary": {
+          "tp": 20,
+          "fp": 33,
+          "fn": 27,
+          "precision": 0.3774,
+          "recall": 0.4255,
+          "f1": 0.4
+        },
+        "relation_direction_error_rate": 0.037,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 2,
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 19,
+            "pred": 29,
+            "tp": 11,
+            "fp": 18,
+            "fn": 8,
+            "precision": 0.3793,
+            "recall": 0.5789,
+            "f1": 0.4583
+          },
+          "RELATED_TO": {
+            "gold": 26,
+            "pred": 17,
+            "tp": 5,
+            "fp": 12,
+            "fn": 21,
+            "precision": 0.2941,
+            "recall": 0.1923,
+            "f1": 0.2326
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 6,
+            "tp": 0,
+            "fp": 6,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 33,
+            "direction_reversed": 2,
+            "type_confused": 3,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 1,
+            "duplicate": 6,
+            "low_confidence": 0,
+            "missed_core": 31,
+            "pred_raw_total": 61,
+            "pred_total": 54,
+            "dropped_total": 7,
+            "core_total": 47,
+            "full_total": 47
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "运动学方程",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "瞬时速度",
+              "type": "CONTAINS",
+              "target": "瞬时速率",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "位置-时间图",
+              "type": "PRECEDES",
+              "target": "速度-时间图",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "运动学方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "PRECEDES",
+              "target": "加速度-时间图",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "二叉树",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "位移",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "距离",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "瞬时加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "减速",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "平均速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "位置"
+            },
+            {
+              "source": "位置",
+              "type": "RELATED_TO",
+              "target": "参考系"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "位移"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "重力加速度"
+            },
+            {
+              "source": "加速度",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "参考系",
+              "type": "CONTAINS",
+              "target": "坐标系"
+            },
+            {
+              "source": "图像分析",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "加速度-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "坐标系",
+              "type": "RELATED_TO",
+              "target": "矢量"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "平均速度",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "平均速率",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "速率"
+            },
+            {
+              "source": "瞬时加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "瞬时速率",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "速度"
+            },
+            {
+              "source": "矢量",
+              "type": "RELATED_TO",
+              "target": "标量"
+            },
+            {
+              "source": "自变量",
+              "type": "RELATED_TO",
+              "target": "因变量"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "距离",
+              "type": "RELATED_TO",
+              "target": "路程"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "匀加速运动"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "速度",
+              "type": "RELATED_TO",
+              "target": "速率"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度-时间图"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "一维匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "一维运动",
+              "type": "RELATED_TO",
+              "target": "运动学方程"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "减速度",
+              "type": "RELATED_TO",
+              "target": "平均加速度"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "CONTAINS",
+              "target": "位移公式"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "CONTAINS",
+              "target": "位移时间公式"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "CONTAINS",
+              "target": "平均速度公式"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "CONTAINS",
+              "target": "末速度公式"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "CONTAINS",
+              "target": "速度位移公式"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "速度变化量"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "平均速率"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "瞬时速率"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "匀加速运动方程"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "一维匀加速运动方程"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "二维运动学"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "位移"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "运动图"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "平均加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "速率-时间图"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "一维匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "一维运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "PRECEDES",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "减速度",
+            "type": "RELATED_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "位移公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "位移时间公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "平均速度公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "末速度公式"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "CONTAINS",
+            "target": "速度位移公式"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "速度变化量"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "平均速率"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "瞬时速度",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "匀加速运动方程"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "一维匀加速运动方程"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "二维运动学"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "位移"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "运动图"
+          },
+          {
+            "source": "运动学方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "PRECEDES",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "速率-时间图"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "位置"
+          },
+          {
+            "source": "位置",
+            "type": "RELATED_TO",
+            "target": "参考系"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "重力加速度"
+          },
+          {
+            "source": "加速度",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "参考系",
+            "type": "CONTAINS",
+            "target": "坐标系"
+          },
+          {
+            "source": "图像分析",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "坐标系",
+            "type": "RELATED_TO",
+            "target": "矢量"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "平均速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "平均速率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "速率"
+          },
+          {
+            "source": "瞬时加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "瞬时速率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "速度"
+          },
+          {
+            "source": "矢量",
+            "type": "RELATED_TO",
+            "target": "标量"
+          },
+          {
+            "source": "自变量",
+            "type": "RELATED_TO",
+            "target": "因变量"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "距离",
+            "type": "RELATED_TO",
+            "target": "路程"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "匀加速运动"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度",
+            "type": "RELATED_TO",
+            "target": "速率"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度-时间图"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "位置-时间图",
+            "target": "速度-时间图",
+            "gold_type": "RELATED_TO",
+            "pred_type": "PRECEDES"
+          },
+          {
+            "source": "运动学方程",
+            "target": "自由落体",
+            "gold_type": "RELATED_TO",
+            "pred_type": "APPLIES_TO"
+          },
+          {
+            "source": "速度-时间图",
+            "target": "加速度-时间图",
+            "gold_type": "RELATED_TO",
+            "pred_type": "PRECEDES"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "物理_第2章_运动学_Kinematics",
+        "gold": {
+          "entity_count": 36,
+          "relation_core_count": 47,
+          "relation_full_count": 47
+        },
+        "entity": {
+          "tp": 36,
+          "fp": 5,
+          "fn": 0,
+          "precision": 0.878,
+          "recall": 1.0,
+          "f1": 0.9351
+        },
+        "entity_category": {
+          "gold_entity_count": 36,
+          "pred_entity_count": 41,
+          "evaluated_entity_count": 36,
+          "correct": 33,
+          "accuracy": 0.9167
+        },
+        "relation_primary": {
+          "pred_total": 55,
+          "core_total": 47,
+          "full_total": 47,
+          "hit_core": 16,
+          "hit_full": 16,
+          "precision": 0.2909,
+          "recall": 0.3404,
+          "f1": 0.3137
+        },
+        "relation_core": {
+          "tp": 16,
+          "fp": 39,
+          "fn": 31,
+          "precision": 0.2909,
+          "recall": 0.3404,
+          "f1": 0.3137
+        },
+        "relation_full": {
+          "tp": 16,
+          "fp": 39,
+          "fn": 31,
+          "precision": 0.2909,
+          "recall": 0.3404,
+          "f1": 0.3137
+        },
+        "relation_pair_auxiliary": {
+          "tp": 23,
+          "fp": 30,
+          "fn": 24,
+          "precision": 0.434,
+          "recall": 0.4894,
+          "f1": 0.46
+        },
+        "relation_direction_error_rate": 0.0727,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 19,
+            "pred": 24,
+            "tp": 10,
+            "fp": 14,
+            "fn": 9,
+            "precision": 0.4167,
+            "recall": 0.5263,
+            "f1": 0.4651
+          },
+          "RELATED_TO": {
+            "gold": 26,
+            "pred": 22,
+            "tp": 6,
+            "fp": 16,
+            "fn": 20,
+            "precision": 0.2727,
+            "recall": 0.2308,
+            "f1": 0.25
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 9,
+            "tp": 0,
+            "fp": 9,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 30,
+            "direction_reversed": 4,
+            "type_confused": 5,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 4,
+            "low_confidence": 0,
+            "missed_core": 31,
+            "pred_raw_total": 59,
+            "pred_total": 55,
+            "dropped_total": 4,
+            "core_total": 47,
+            "full_total": 47
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "平均速度",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "减速",
+              "type": "RELATED_TO",
+              "target": "加速度",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "运动学方程",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "瞬时速度",
+              "type": "CONTAINS",
+              "target": "瞬时速率",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "图像分析",
+              "type": "RELATED_TO",
+              "target": "位置-时间图",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "图像分析",
+              "type": "RELATED_TO",
+              "target": "加速度-时间图",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "图像分析",
+              "type": "RELATED_TO",
+              "target": "速度-时间图",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "平均速度",
+              "type": "CONTAINS",
+              "target": "瞬时速度",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "运动学方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "位移",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "距离",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "瞬时加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "减速",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "位置"
+            },
+            {
+              "source": "位置",
+              "type": "RELATED_TO",
+              "target": "参考系"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "位移"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "重力加速度"
+            },
+            {
+              "source": "加速度",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "参考系",
+              "type": "CONTAINS",
+              "target": "坐标系"
+            },
+            {
+              "source": "图像分析",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "加速度-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "坐标系",
+              "type": "RELATED_TO",
+              "target": "矢量"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "平均速度",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "平均速率",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "时间",
+              "type": "CONTAINS",
+              "target": "经过时间"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "速率"
+            },
+            {
+              "source": "瞬时加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "瞬时速率",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "速度"
+            },
+            {
+              "source": "矢量",
+              "type": "RELATED_TO",
+              "target": "标量"
+            },
+            {
+              "source": "自变量",
+              "type": "RELATED_TO",
+              "target": "因变量"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "距离",
+              "type": "RELATED_TO",
+              "target": "路程"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "匀加速运动"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "速度",
+              "type": "RELATED_TO",
+              "target": "速率"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度-时间图"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "一维运动",
+              "type": "RELATED_TO",
+              "target": "运动学方程"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "CONTAINS",
+              "target": "落体"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "位移"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "速度"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "平均速率"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "瞬时速率"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "匀加速运动方程"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "位移"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "匀加速运动方程"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "运动图"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "平均加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "速率-时间图"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "一维运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "减速",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "位移"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "速度"
+          },
+          {
+            "source": "图像分析",
+            "type": "RELATED_TO",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "RELATED_TO",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "RELATED_TO",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "平均速度",
+            "type": "CONTAINS",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "平均速率"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "瞬时速度",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "匀加速运动方程"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "位移"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "匀加速运动方程"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "运动图"
+          },
+          {
+            "source": "运动学方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "速率-时间图"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "位置"
+          },
+          {
+            "source": "位置",
+            "type": "RELATED_TO",
+            "target": "参考系"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "重力加速度"
+          },
+          {
+            "source": "加速度",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "参考系",
+            "type": "CONTAINS",
+            "target": "坐标系"
+          },
+          {
+            "source": "图像分析",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "坐标系",
+            "type": "RELATED_TO",
+            "target": "矢量"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "平均速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "平均速率",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "时间",
+            "type": "CONTAINS",
+            "target": "经过时间"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "速率"
+          },
+          {
+            "source": "瞬时加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "瞬时速率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "速度"
+          },
+          {
+            "source": "矢量",
+            "type": "RELATED_TO",
+            "target": "标量"
+          },
+          {
+            "source": "自变量",
+            "type": "RELATED_TO",
+            "target": "因变量"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "距离",
+            "type": "RELATED_TO",
+            "target": "路程"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "匀加速运动"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度",
+            "type": "RELATED_TO",
+            "target": "速率"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度-时间图"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "图像分析",
+            "target": "位置-时间图",
+            "gold_type": "CONTAINS",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "图像分析",
+            "target": "加速度-时间图",
+            "gold_type": "CONTAINS",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "图像分析",
+            "target": "速度-时间图",
+            "gold_type": "CONTAINS",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "平均速度",
+            "target": "瞬时速度",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "运动学方程",
+            "target": "自由落体",
+            "gold_type": "RELATED_TO",
+            "pred_type": "APPLIES_TO"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "物理_第2章_运动学_Kinematics",
+        "gold": {
+          "entity_count": 36,
+          "relation_core_count": 47,
+          "relation_full_count": 47
+        },
+        "entity": {
+          "tp": 35,
+          "fp": 10,
+          "fn": 1,
+          "precision": 0.7778,
+          "recall": 0.9722,
+          "f1": 0.8642
+        },
+        "entity_category": {
+          "gold_entity_count": 36,
+          "pred_entity_count": 45,
+          "evaluated_entity_count": 35,
+          "correct": 34,
+          "accuracy": 0.9714
+        },
+        "relation_primary": {
+          "pred_total": 68,
+          "core_total": 47,
+          "full_total": 47,
+          "hit_core": 16,
+          "hit_full": 16,
+          "precision": 0.2353,
+          "recall": 0.3404,
+          "f1": 0.2783
+        },
+        "relation_core": {
+          "tp": 16,
+          "fp": 52,
+          "fn": 31,
+          "precision": 0.2353,
+          "recall": 0.3404,
+          "f1": 0.2783
+        },
+        "relation_full": {
+          "tp": 16,
+          "fp": 52,
+          "fn": 31,
+          "precision": 0.2353,
+          "recall": 0.3404,
+          "f1": 0.2783
+        },
+        "relation_pair_auxiliary": {
+          "tp": 23,
+          "fp": 43,
+          "fn": 24,
+          "precision": 0.3485,
+          "recall": 0.4894,
+          "f1": 0.4071
+        },
+        "relation_direction_error_rate": 0.0735,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 4,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 19,
+            "pred": 36,
+            "tp": 13,
+            "fp": 23,
+            "fn": 6,
+            "precision": 0.3611,
+            "recall": 0.6842,
+            "f1": 0.4727
+          },
+          "RELATED_TO": {
+            "gold": 26,
+            "pred": 15,
+            "tp": 3,
+            "fp": 12,
+            "fn": 23,
+            "precision": 0.2,
+            "recall": 0.1154,
+            "f1": 0.1463
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 13,
+            "tp": 0,
+            "fp": 13,
+            "fn": 2,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 43,
+            "direction_reversed": 5,
+            "type_confused": 4,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 7,
+            "low_confidence": 0,
+            "missed_core": 31,
+            "pred_raw_total": 75,
+            "pred_total": 68,
+            "dropped_total": 7,
+            "core_total": 47,
+            "full_total": 47
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "运动学方程",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "加速度",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "瞬时速度",
+              "type": "CONTAINS",
+              "target": "瞬时速率",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "速度",
+              "type": "PRECEDES",
+              "target": "加速度",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "重力加速度",
+              "type": "RELATED_TO",
+              "target": "自由落体",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "位置-时间图",
+              "type": "PRECEDES",
+              "target": "速度-时间图",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "自由落体",
+              "type": "CONTAINS",
+              "target": "重力加速度",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "运动学方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "PRECEDES",
+              "target": "加速度-时间图",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "位移",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "位移",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "距离",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "瞬时加速度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "减速",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "位置"
+            },
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "距离"
+            },
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "路程"
+            },
+            {
+              "source": "位置",
+              "type": "RELATED_TO",
+              "target": "参考系"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "位移"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "RELATED_TO",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "加速度",
+              "type": "CONTAINS",
+              "target": "重力加速度"
+            },
+            {
+              "source": "加速度",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "参考系",
+              "type": "CONTAINS",
+              "target": "坐标系"
+            },
+            {
+              "source": "图像分析",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "加速度-时间图"
+            },
+            {
+              "source": "图像分析",
+              "type": "CONTAINS",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "坐标系",
+              "type": "RELATED_TO",
+              "target": "矢量"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "平均速度",
+              "type": "RELATED_TO",
+              "target": "位移"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "瞬时加速度",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "瞬时速率",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "矢量",
+              "type": "RELATED_TO",
+              "target": "标量"
+            },
+            {
+              "source": "自变量",
+              "type": "RELATED_TO",
+              "target": "因变量"
+            },
+            {
+              "source": "自由落体",
+              "type": "RELATED_TO",
+              "target": "重力加速度"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "一维运动"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "匀加速运动"
+            },
+            {
+              "source": "运动学方程",
+              "type": "RELATED_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "速度",
+              "type": "RELATED_TO",
+              "target": "速率"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "RELATED_TO",
+              "target": "加速度-时间图"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "一维匀加速运动方程",
+              "type": "APPLIES_TO",
+              "target": "自由落体"
+            },
+            {
+              "source": "一维运动",
+              "type": "CONTAINS",
+              "target": "匀加速运动"
+            },
+            {
+              "source": "一维运动学解题方法",
+              "type": "APPLIES_TO",
+              "target": "运动学方程"
+            },
+            {
+              "source": "位移",
+              "type": "PRECEDES",
+              "target": "速度"
+            },
+            {
+              "source": "位移",
+              "type": "RELATED_TO",
+              "target": "位移公式"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "APPLIES_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "位置-时间图",
+              "type": "APPLIES_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "匀加速运动",
+              "type": "CONTAINS",
+              "target": "落体"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "RELATED_TO",
+              "target": "位移"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "RELATED_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "RELATED_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "匀加速运动方程",
+              "type": "RELATED_TO",
+              "target": "速度"
+            },
+            {
+              "source": "图像分析方法",
+              "type": "APPLIES_TO",
+              "target": "位置-时间图"
+            },
+            {
+              "source": "图像分析方法",
+              "type": "APPLIES_TO",
+              "target": "速度-时间图"
+            },
+            {
+              "source": "平均加速度",
+              "type": "RELATED_TO",
+              "target": "平均加速度公式"
+            },
+            {
+              "source": "平均速度",
+              "type": "RELATED_TO",
+              "target": "平均速度公式"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "瞬时加速度"
+            },
+            {
+              "source": "斜率",
+              "type": "RELATED_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "平均速率"
+            },
+            {
+              "source": "标量",
+              "type": "CONTAINS",
+              "target": "瞬时速率"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "矢量",
+              "type": "CONTAINS",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "解题步骤",
+              "type": "APPLIES_TO",
+              "target": "匀加速运动方程"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "加速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动图",
+              "type": "APPLIES_TO",
+              "target": "瞬时速度"
+            },
+            {
+              "source": "运动图",
+              "type": "CONTAINS",
+              "target": "y截距"
+            },
+            {
+              "source": "运动图",
+              "type": "CONTAINS",
+              "target": "因变量"
+            },
+            {
+              "source": "运动图",
+              "type": "CONTAINS",
+              "target": "斜率"
+            },
+            {
+              "source": "运动图",
+              "type": "CONTAINS",
+              "target": "自变量"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "一维匀加速运动方程"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "位移"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "加速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "图像分析方法"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "平均速度"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "自由落体"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "落体"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "运动图"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "运动学方程"
+            },
+            {
+              "source": "运动学",
+              "type": "CONTAINS",
+              "target": "速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "APPLIES_TO",
+              "target": "平均加速度"
+            },
+            {
+              "source": "速度-时间图",
+              "type": "APPLIES_TO",
+              "target": "瞬时加速度"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "一维匀加速运动方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "一维运动",
+            "type": "CONTAINS",
+            "target": "匀加速运动"
+          },
+          {
+            "source": "一维运动学解题方法",
+            "type": "APPLIES_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "位移",
+            "type": "PRECEDES",
+            "target": "速度"
+          },
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "位移公式"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "APPLIES_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "APPLIES_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "PRECEDES",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "运动学方程"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "RELATED_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "匀加速运动方程",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "图像分析方法",
+            "type": "APPLIES_TO",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析方法",
+            "type": "APPLIES_TO",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "平均加速度公式"
+          },
+          {
+            "source": "平均速度",
+            "type": "RELATED_TO",
+            "target": "平均速度公式"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "平均速率"
+          },
+          {
+            "source": "标量",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "瞬时速度",
+            "type": "CONTAINS",
+            "target": "瞬时速率"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "矢量",
+            "type": "CONTAINS",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "自由落体",
+            "type": "CONTAINS",
+            "target": "重力加速度"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "匀加速运动方程"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动图",
+            "type": "APPLIES_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "运动图",
+            "type": "CONTAINS",
+            "target": "y截距"
+          },
+          {
+            "source": "运动图",
+            "type": "CONTAINS",
+            "target": "因变量"
+          },
+          {
+            "source": "运动图",
+            "type": "CONTAINS",
+            "target": "斜率"
+          },
+          {
+            "source": "运动图",
+            "type": "CONTAINS",
+            "target": "自变量"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "一维匀加速运动方程"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "位移"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "加速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "图像分析方法"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "平均速度"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "落体"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "运动图"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "运动学方程"
+          },
+          {
+            "source": "运动学",
+            "type": "CONTAINS",
+            "target": "速度"
+          },
+          {
+            "source": "运动学方程",
+            "type": "APPLIES_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度",
+            "type": "PRECEDES",
+            "target": "加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "APPLIES_TO",
+            "target": "平均加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "APPLIES_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "PRECEDES",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "重力加速度",
+            "type": "RELATED_TO",
+            "target": "自由落体"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "位置"
+          },
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "距离"
+          },
+          {
+            "source": "位移",
+            "type": "RELATED_TO",
+            "target": "路程"
+          },
+          {
+            "source": "位置",
+            "type": "RELATED_TO",
+            "target": "参考系"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "位置-时间图",
+            "type": "RELATED_TO",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "加速度",
+            "type": "CONTAINS",
+            "target": "重力加速度"
+          },
+          {
+            "source": "加速度",
+            "type": "RELATED_TO",
+            "target": "速度"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "CONTAINS",
+            "target": "自由落体"
+          },
+          {
+            "source": "匀加速运动",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "参考系",
+            "type": "CONTAINS",
+            "target": "坐标系"
+          },
+          {
+            "source": "图像分析",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "加速度-时间图"
+          },
+          {
+            "source": "图像分析",
+            "type": "CONTAINS",
+            "target": "速度-时间图"
+          },
+          {
+            "source": "坐标系",
+            "type": "RELATED_TO",
+            "target": "矢量"
+          },
+          {
+            "source": "平均加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时加速度"
+          },
+          {
+            "source": "平均速度",
+            "type": "RELATED_TO",
+            "target": "位移"
+          },
+          {
+            "source": "斜率",
+            "type": "RELATED_TO",
+            "target": "位置-时间图"
+          },
+          {
+            "source": "瞬时加速度",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "瞬时速率",
+            "type": "RELATED_TO",
+            "target": "瞬时速度"
+          },
+          {
+            "source": "矢量",
+            "type": "RELATED_TO",
+            "target": "标量"
+          },
+          {
+            "source": "自变量",
+            "type": "RELATED_TO",
+            "target": "因变量"
+          },
+          {
+            "source": "自由落体",
+            "type": "RELATED_TO",
+            "target": "重力加速度"
+          },
+          {
+            "source": "解题步骤",
+            "type": "APPLIES_TO",
+            "target": "一维运动"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "匀加速运动"
+          },
+          {
+            "source": "运动学方程",
+            "type": "RELATED_TO",
+            "target": "自由落体"
+          },
+          {
+            "source": "速度",
+            "type": "RELATED_TO",
+            "target": "速率"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度"
+          },
+          {
+            "source": "速度-时间图",
+            "type": "RELATED_TO",
+            "target": "加速度-时间图"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "位置-时间图",
+            "target": "速度-时间图",
+            "gold_type": "RELATED_TO",
+            "pred_type": "PRECEDES"
+          },
+          {
+            "source": "自由落体",
+            "target": "重力加速度",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "运动学方程",
+            "target": "自由落体",
+            "gold_type": "RELATED_TO",
+            "pred_type": "APPLIES_TO"
+          },
+          {
+            "source": "速度-时间图",
+            "target": "加速度-时间图",
+            "gold_type": "RELATED_TO",
+            "pred_type": "PRECEDES"
+          }
+        ]
+      }
+    ]
+  ]
+}

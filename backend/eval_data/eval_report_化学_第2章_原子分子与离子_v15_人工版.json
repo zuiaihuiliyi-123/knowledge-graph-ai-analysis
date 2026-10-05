@@ -1,0 +1,5792 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "化学_第2章_原子分子与离子": "3f245dac05c3fc818544b109e2ab4c1a7c9cd8249837bbc5069758aa8f12003f"
+  },
+  "runs": 3,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.7447,
+      "std": 0.0174,
+      "min": 0.7333,
+      "max": 0.7647,
+      "values": [
+        0.7647,
+        0.7333,
+        0.7361
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.8889,
+      "std": 0.0255,
+      "min": 0.8667,
+      "max": 0.9167,
+      "values": [
+        0.8667,
+        0.9167,
+        0.8833
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.8101,
+      "std": 0.0063,
+      "min": 0.803,
+      "max": 0.8148,
+      "values": [
+        0.8125,
+        0.8148,
+        0.803
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.931,
+      "std": 0.0125,
+      "min": 0.9231,
+      "max": 0.9455,
+      "values": [
+        0.9231,
+        0.9455,
+        0.9245
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.3842,
+      "std": 0.0676,
+      "min": 0.3165,
+      "max": 0.4516,
+      "values": [
+        0.4516,
+        0.3846,
+        0.3165
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.401,
+      "std": 0.0365,
+      "min": 0.3623,
+      "max": 0.4348,
+      "values": [
+        0.4058,
+        0.4348,
+        0.3623
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.3912,
+      "std": 0.0472,
+      "min": 0.3378,
+      "max": 0.4275,
+      "values": [
+        0.4275,
+        0.4082,
+        0.3378
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.3842,
+      "std": 0.0676,
+      "min": 0.3165,
+      "max": 0.4516,
+      "values": [
+        0.4516,
+        0.3846,
+        0.3165
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.401,
+      "std": 0.0365,
+      "min": 0.3623,
+      "max": 0.4348,
+      "values": [
+        0.4058,
+        0.4348,
+        0.3623
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.3912,
+      "std": 0.0472,
+      "min": 0.3378,
+      "max": 0.4275,
+      "values": [
+        0.4275,
+        0.4082,
+        0.3378
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.3842,
+      "std": 0.0676,
+      "min": 0.3165,
+      "max": 0.4516,
+      "values": [
+        0.4516,
+        0.3846,
+        0.3165
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.401,
+      "std": 0.0365,
+      "min": 0.3623,
+      "max": 0.4348,
+      "values": [
+        0.4058,
+        0.4348,
+        0.3623
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.3912,
+      "std": 0.0472,
+      "min": 0.3378,
+      "max": 0.4275,
+      "values": [
+        0.4275,
+        0.4082,
+        0.3378
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.4673,
+      "std": 0.0481,
+      "min": 0.4143,
+      "max": 0.5082,
+      "values": [
+        0.5082,
+        0.4795,
+        0.4143
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.4657,
+      "std": 0.0449,
+      "min": 0.4265,
+      "max": 0.5147,
+      "values": [
+        0.4559,
+        0.5147,
+        0.4265
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.4658,
+      "std": 0.0402,
+      "min": 0.4203,
+      "max": 0.4965,
+      "values": [
+        0.4806,
+        0.4965,
+        0.4203
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.2909,
+      "std": 0.0817,
+      "min": 0.1976,
+      "max": 0.3496,
+      "values": [
+        0.3496,
+        0.3256,
+        0.1976
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0543,
+      "std": 0.0194,
+      "min": 0.0385,
+      "max": 0.0759,
+      "values": [
+        0.0484,
+        0.0385,
+        0.0759
+      ]
+    }
+  },
+  "entity_frequency": {
+    "中子": 3,
+    "主族元素": 3,
+    "二元化合物": 3,
+    "二元酸": 3,
+    "二元酸命名法": 3,
+    "倍比定律": 3,
+    "元素周期表": 3,
+    "共价化合物": 3,
+    "共价键": 3,
+    "内过渡金属": 3,
+    "分子化合物": 3,
+    "分子式": 3,
+    "化学式": 3,
+    "化学符号": 3,
+    "单原子离子": 3,
+    "卢瑟福金箔实验": 3,
+    "卤素": 3,
+    "原子序数": 3,
+    "原子核": 3,
+    "原子质量": 3,
+    "原子质量单位": 3,
+    "同位素": 3,
+    "同分异构体": 3,
+    "含氧酸": 3,
+    "含氧酸命名法": 3,
+    "含氧酸根阴离子": 3,
+    "周期": 3,
+    "周期律": 3,
+    "命名法": 3,
+    "多原子离子": 3,
+    "定比定律": 3,
+    "实验式": 3,
+    "平均质量公式": 3,
+    "族": 3,
+    "氧族元素": 3,
+    "氮族元素": 3,
+    "水合物": 3,
+    "油滴实验": 3,
+    "电子": 3,
+    "碱土金属": 3,
+    "碱金属": 3,
+    "离子": 3,
+    "离子化合物": 3,
+    "离子键": 3,
+    "稀有气体": 3,
+    "空间异构体": 3,
+    "类金属": 3,
+    "结构异构体": 3,
+    "结构式": 3,
+    "葡萄干布丁模型": 3,
+    "质子": 3,
+    "质谱法": 3,
+    "质量数": 3,
+    "过渡金属": 3,
+    "道尔顿原子理论": 3,
+    "酸": 3,
+    "金属": 3,
+    "阳离子": 3,
+    "阴极射线": 3,
+    "阴离子": 3,
+    "非金属": 3,
+    "书写离子化合物化学式": 2,
+    "原子理论": 2,
+    "命名分子化合物": 2,
+    "命名离子化合物": 2,
+    "平均原子质量的计算": 2,
+    "恒定组成定律": 2,
+    "百分丰度的计算": 2,
+    "预测离子电荷": 2,
+    "二元离子化合物命名法": 1,
+    "元素": 1,
+    "元素周期律": 1,
+    "分子化合物命名法": 1,
+    "分数丰度": 1,
+    "化合物": 1,
+    "化学命名法": 1,
+    "原子": 1,
+    "命名二元酸": 1,
+    "命名含氧酸": 1,
+    "命名水合物": 1,
+    "命名酸": 1,
+    "基本电荷单位": 1,
+    "希腊语前缀命名法": 1,
+    "平均原子质量": 1,
+    "罗马数字命名法": 1
+  },
+  "relation_frequency": {
+    "二元酸命名法 -[APPLIES_TO]-> 二元酸": 3,
+    "元素周期表 -[CONTAINS]-> 主族元素": 3,
+    "元素周期表 -[CONTAINS]-> 内过渡金属": 3,
+    "元素周期表 -[CONTAINS]-> 周期": 3,
+    "元素周期表 -[CONTAINS]-> 族": 3,
+    "元素周期表 -[CONTAINS]-> 类金属": 3,
+    "元素周期表 -[CONTAINS]-> 过渡金属": 3,
+    "元素周期表 -[CONTAINS]-> 金属": 3,
+    "元素周期表 -[CONTAINS]-> 非金属": 3,
+    "共价化合物 -[CONTAINS]-> 共价键": 3,
+    "卢瑟福金箔实验 -[APPLIES_TO]-> 原子核": 3,
+    "原子核 -[CONTAINS]-> 中子": 3,
+    "原子核 -[CONTAINS]-> 质子": 3,
+    "同位素 -[RELATED_TO]-> 中子": 3,
+    "同分异构体 -[CONTAINS]-> 空间异构体": 3,
+    "同分异构体 -[CONTAINS]-> 结构异构体": 3,
+    "含氧酸命名法 -[APPLIES_TO]-> 含氧酸": 3,
+    "多原子离子 -[CONTAINS]-> 含氧酸根阴离子": 3,
+    "平均质量公式 -[APPLIES_TO]-> 原子质量": 3,
+    "族 -[CONTAINS]-> 卤素": 3,
+    "族 -[CONTAINS]-> 氧族元素": 3,
+    "族 -[CONTAINS]-> 氮族元素": 3,
+    "族 -[CONTAINS]-> 碱土金属": 3,
+    "族 -[CONTAINS]-> 碱金属": 3,
+    "族 -[CONTAINS]-> 稀有气体": 3,
+    "油滴实验 -[APPLIES_TO]-> 电子": 3,
+    "离子 -[CONTAINS]-> 单原子离子": 3,
+    "离子 -[CONTAINS]-> 多原子离子": 3,
+    "离子 -[CONTAINS]-> 阳离子": 3,
+    "离子 -[CONTAINS]-> 阴离子": 3,
+    "离子化合物 -[CONTAINS]-> 水合物": 3,
+    "离子化合物 -[CONTAINS]-> 离子键": 3,
+    "离子键 -[RELATED_TO]-> 离子化合物": 3,
+    "结构式 -[RELATED_TO]-> 分子式": 3,
+    "质谱法 -[APPLIES_TO]-> 同位素": 3,
+    "道尔顿原子理论 -[RELATED_TO]-> 倍比定律": 3,
+    "酸 -[CONTAINS]-> 二元酸": 3,
+    "酸 -[CONTAINS]-> 含氧酸": 3,
+    "主族元素 -[CONTAINS]-> 卤素": 2,
+    "主族元素 -[CONTAINS]-> 氧族元素": 2,
+    "主族元素 -[CONTAINS]-> 氮族元素": 2,
+    "主族元素 -[CONTAINS]-> 碱土金属": 2,
+    "主族元素 -[CONTAINS]-> 碱金属": 2,
+    "主族元素 -[CONTAINS]-> 稀有气体": 2,
+    "书写离子化合物化学式 -[APPLIES_TO]-> 离子化合物": 2,
+    "元素周期表 -[APPLIES_TO]-> 预测离子电荷": 2,
+    "共价键 -[RELATED_TO]-> 分子化合物": 2,
+    "分子式 -[RELATED_TO]-> 化学符号": 2,
+    "卤素 -[CONTAINS]-> 主族元素": 2,
+    "原子序数 -[RELATED_TO]-> 质子": 2,
+    "同位素 -[RELATED_TO]-> 化学符号": 2,
+    "命名分子化合物 -[APPLIES_TO]-> 分子化合物": 2,
+    "命名离子化合物 -[APPLIES_TO]-> 离子化合物": 2,
+    "实验式 -[RELATED_TO]-> 分子式": 2,
+    "平均原子质量的计算 -[APPLIES_TO]-> 原子质量": 2,
+    "百分丰度的计算 -[APPLIES_TO]-> 原子质量": 2,
+    "碱土金属 -[CONTAINS]-> 主族元素": 2,
+    "碱金属 -[CONTAINS]-> 主族元素": 2,
+    "离子化合物 -[RELATED_TO]-> 离子": 2,
+    "稀有气体 -[CONTAINS]-> 主族元素": 2,
+    "质量数 -[RELATED_TO]-> 中子": 2,
+    "质量数 -[RELATED_TO]-> 质子": 2,
+    "道尔顿原子理论 -[CONTAINS]-> 原子理论": 2,
+    "道尔顿原子理论 -[RELATED_TO]-> 定比定律": 2,
+    "阴极射线 -[RELATED_TO]-> 电子": 2,
+    "元素周期表 -[CONTAINS]-> 化学符号": 1,
+    "元素周期表 -[CONTAINS]-> 碱土金属": 1,
+    "元素周期表 -[CONTAINS]-> 碱金属": 1,
+    "元素周期表 -[CONTAINS]-> 稀有气体": 1,
+    "元素周期表 -[RELATED_TO]-> 元素周期律": 1,
+    "元素周期表 -[RELATED_TO]-> 周期律": 1,
+    "元素周期表 -[RELATED_TO]-> 离子": 1,
+    "共价化合物 -[CONTAINS]-> 分子化合物": 1,
+    "共价键 -[RELATED_TO]-> 共价化合物": 1,
+    "分子化合物 -[CONTAINS]-> 分子式": 1,
+    "分子化合物 -[RELATED_TO]-> 分子式": 1,
+    "分子式 -[CONTAINS]-> 实验式": 1,
+    "化学命名法 -[CONTAINS]-> 希腊语前缀命名法": 1,
+    "化学命名法 -[CONTAINS]-> 罗马数字命名法": 1,
+    "化学式 -[CONTAINS]-> 分子式": 1,
+    "化学式 -[CONTAINS]-> 实验式": 1,
+    "化学式 -[CONTAINS]-> 结构式": 1,
+    "化学符号 -[RELATED_TO]-> 元素": 1,
+    "化学符号 -[RELATED_TO]-> 元素周期表": 1,
+    "化学符号 -[RELATED_TO]-> 分子式": 1,
+    "原子序数 -[PRECEDES]-> 元素周期律": 1,
+    "原子序数 -[PRECEDES]-> 元素周期表": 1,
+    "原子序数 -[RELATED_TO]-> 周期律": 1,
+    "原子质量单位 -[APPLIES_TO]-> 原子质量": 1,
+    "原子质量单位 -[PRECEDES]-> 原子质量": 1,
+    "原子质量单位 -[RELATED_TO]-> 原子质量": 1,
+    "同位素 -[PRECEDES]-> 原子质量": 1,
+    "命名二元酸 -[APPLIES_TO]-> 二元酸": 1,
+    "命名含氧酸 -[APPLIES_TO]-> 含氧酸": 1,
+    "命名水合物 -[APPLIES_TO]-> 水合物": 1,
+    "命名法 -[CONTAINS]-> 二元离子化合物命名法": 1,
+    "命名法 -[CONTAINS]-> 二元酸命名法": 1,
+    "命名法 -[CONTAINS]-> 分子化合物命名法": 1,
+    "命名法 -[CONTAINS]-> 含氧酸命名法": 1,
+    "命名酸 -[APPLIES_TO]-> 酸": 1,
+    "平均原子质量 -[RELATED_TO]-> 分数丰度": 1,
+    "平均原子质量 -[RELATED_TO]-> 同位素": 1,
+    "恒定组成定律 -[CONTAINS]-> 定比定律": 1,
+    "恒定组成定律 -[RELATED_TO]-> 倍比定律": 1,
+    "离子化合物 -[CONTAINS]-> 离子": 1,
+    "质谱法 -[APPLIES_TO]-> 平均原子质量": 1,
+    "过渡金属 -[CONTAINS]-> 内过渡金属": 1,
+    "道尔顿原子理论 -[APPLIES_TO]-> 倍比定律": 1,
+    "道尔顿原子理论 -[APPLIES_TO]-> 定比定律": 1,
+    "道尔顿原子理论 -[CONTAINS]-> 元素": 1,
+    "道尔顿原子理论 -[CONTAINS]-> 化合物": 1,
+    "道尔顿原子理论 -[CONTAINS]-> 原子": 1,
+    "道尔顿原子理论 -[RELATED_TO]-> 恒定组成定律": 1,
+    "阳离子 -[CONTAINS]-> 离子": 1,
+    "阴极射线 -[CONTAINS]-> 电子": 1,
+    "阴离子 -[CONTAINS]-> 离子": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 39.6667,
+      "values": [
+        30,
+        42,
+        47
+      ]
+    },
+    "direction_reversed": {
+      "mean": 4.0,
+      "values": [
+        3,
+        3,
+        6
+      ]
+    },
+    "type_confused": {
+      "mean": 1.6667,
+      "values": [
+        1,
+        3,
+        1
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 41.3333,
+      "values": [
+        41,
+        39,
+        44
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 2.3333,
+      "values": [
+        0,
+        0,
+        7
+      ]
+    },
+    "duplicate": {
+      "mean": 16.3333,
+      "values": [
+        27,
+        12,
+        10
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 18.6667,
+      "values": [
+        27,
+        12,
+        17
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 91.6667,
+      "values": [
+        89,
+        90,
+        96
+      ]
+    },
+    "pred_total": {
+      "mean": 73.0,
+      "values": [
+        62,
+        78,
+        79
+      ]
+    },
+    "core_total": {
+      "mean": 69.0,
+      "values": [
+        69,
+        69,
+        69
+      ]
+    },
+    "full_total": {
+      "mean": 69.0,
+      "values": [
+        69,
+        69,
+        69
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 89,
+        "scored": 62,
+        "dropped": 27,
+        "reconciles": true
+      },
+      {
+        "raw": 90,
+        "scored": 78,
+        "dropped": 12,
+        "reconciles": true
+      },
+      {
+        "raw": 96,
+        "scored": 79,
+        "dropped": 17,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 52,
+      "fp": 16,
+      "fn": 8,
+      "precision": 0.7647,
+      "recall": 0.8667,
+      "f1": 0.8125
+    },
+    "entity_macro": {
+      "precision": 0.7647,
+      "recall": 0.8667,
+      "f1": 0.8125
+    },
+    "entity_category_accuracy": 0.9231,
+    "relation_primary_micro": {
+      "pred_total": 62,
+      "core_total": 69,
+      "full_total": 69,
+      "hit_core": 28,
+      "hit_full": 28,
+      "precision": 0.4516,
+      "recall": 0.4058,
+      "f1": 0.4275
+    },
+    "relation_core_micro": {
+      "tp": 28,
+      "fp": 34,
+      "fn": 41,
+      "precision": 0.4516,
+      "recall": 0.4058,
+      "f1": 0.4275
+    },
+    "relation_full_micro": {
+      "tp": 28,
+      "fp": 34,
+      "fn": 41,
+      "precision": 0.4516,
+      "recall": 0.4058,
+      "f1": 0.4275
+    },
+    "relation_strict_micro": {
+      "tp": 28,
+      "fp": 34,
+      "fn": 41,
+      "precision": 0.4516,
+      "recall": 0.4058,
+      "f1": 0.4275
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.4516,
+      "recall": 0.4058,
+      "f1": 0.4275
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 31,
+      "fp": 30,
+      "fn": 37,
+      "precision": 0.5082,
+      "recall": 0.4559,
+      "f1": 0.4806
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 0,
+        "pred_total": 0,
+        "micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "CONTAINS": {
+        "gold_total": 32,
+        "pred_total": 37,
+        "micro": {
+          "tp": 20,
+          "fp": 17,
+          "fn": 12,
+          "precision": 0.5405,
+          "recall": 0.625,
+          "f1": 0.5797
+        },
+        "mean_document_f1": 0.5797,
+        "active_document_f1": 0.5797
+      },
+      "RELATED_TO": {
+        "gold_total": 35,
+        "pred_total": 17,
+        "micro": {
+          "tp": 7,
+          "fp": 10,
+          "fn": 28,
+          "precision": 0.4118,
+          "recall": 0.2,
+          "f1": 0.2692
+        },
+        "mean_document_f1": 0.2692,
+        "active_document_f1": 0.2692
+      },
+      "APPLIES_TO": {
+        "gold_total": 2,
+        "pred_total": 8,
+        "micro": {
+          "tp": 1,
+          "fp": 7,
+          "fn": 1,
+          "precision": 0.125,
+          "recall": 0.5,
+          "f1": 0.2
+        },
+        "mean_document_f1": 0.2,
+        "active_document_f1": 0.2
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.2622,
+      "active_types": 0.3496,
+      "active_type_names": [
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.0484,
+    "error_taxonomy_totals": {
+      "fabricated": 30,
+      "direction_reversed": 3,
+      "type_confused": 1,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 0,
+      "duplicate": 27,
+      "low_confidence": 0,
+      "missed_core": 41,
+      "pred_raw_total": 89,
+      "pred_total": 62,
+      "dropped_total": 27,
+      "core_total": 69,
+      "full_total": 69
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 89,
+      "scored": 62,
+      "dropped": 27,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 52,
+        "fp": 16,
+        "fn": 8,
+        "precision": 0.7647,
+        "recall": 0.8667,
+        "f1": 0.8125
+      },
+      "entity_macro": {
+        "precision": 0.7647,
+        "recall": 0.8667,
+        "f1": 0.8125
+      },
+      "entity_category_accuracy": 0.9231,
+      "relation_primary_micro": {
+        "pred_total": 62,
+        "core_total": 69,
+        "full_total": 69,
+        "hit_core": 28,
+        "hit_full": 28,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_core_micro": {
+        "tp": 28,
+        "fp": 34,
+        "fn": 41,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_full_micro": {
+        "tp": 28,
+        "fp": 34,
+        "fn": 41,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_strict_micro": {
+        "tp": 28,
+        "fp": 34,
+        "fn": 41,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 31,
+        "fp": 30,
+        "fn": 37,
+        "precision": 0.5082,
+        "recall": 0.4559,
+        "f1": 0.4806
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 32,
+          "pred_total": 37,
+          "micro": {
+            "tp": 20,
+            "fp": 17,
+            "fn": 12,
+            "precision": 0.5405,
+            "recall": 0.625,
+            "f1": 0.5797
+          },
+          "mean_document_f1": 0.5797,
+          "active_document_f1": 0.5797
+        },
+        "RELATED_TO": {
+          "gold_total": 35,
+          "pred_total": 17,
+          "micro": {
+            "tp": 7,
+            "fp": 10,
+            "fn": 28,
+            "precision": 0.4118,
+            "recall": 0.2,
+            "f1": 0.2692
+          },
+          "mean_document_f1": 0.2692,
+          "active_document_f1": 0.2692
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 8,
+          "micro": {
+            "tp": 1,
+            "fp": 7,
+            "fn": 1,
+            "precision": 0.125,
+            "recall": 0.5,
+            "f1": 0.2
+          },
+          "mean_document_f1": 0.2,
+          "active_document_f1": 0.2
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.2622,
+        "active_types": 0.3496,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0484,
+      "error_taxonomy_totals": {
+        "fabricated": 30,
+        "direction_reversed": 3,
+        "type_confused": 1,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 27,
+        "low_confidence": 0,
+        "missed_core": 41,
+        "pred_raw_total": 89,
+        "pred_total": 62,
+        "dropped_total": 27,
+        "core_total": 69,
+        "full_total": 69
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 89,
+        "scored": 62,
+        "dropped": 27,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 55,
+        "fp": 20,
+        "fn": 5,
+        "precision": 0.7333,
+        "recall": 0.9167,
+        "f1": 0.8148
+      },
+      "entity_macro": {
+        "precision": 0.7333,
+        "recall": 0.9167,
+        "f1": 0.8148
+      },
+      "entity_category_accuracy": 0.9455,
+      "relation_primary_micro": {
+        "pred_total": 78,
+        "core_total": 69,
+        "full_total": 69,
+        "hit_core": 30,
+        "hit_full": 30,
+        "precision": 0.3846,
+        "recall": 0.4348,
+        "f1": 0.4082
+      },
+      "relation_core_micro": {
+        "tp": 30,
+        "fp": 48,
+        "fn": 39,
+        "precision": 0.3846,
+        "recall": 0.4348,
+        "f1": 0.4082
+      },
+      "relation_full_micro": {
+        "tp": 30,
+        "fp": 48,
+        "fn": 39,
+        "precision": 0.3846,
+        "recall": 0.4348,
+        "f1": 0.4082
+      },
+      "relation_strict_micro": {
+        "tp": 30,
+        "fp": 48,
+        "fn": 39,
+        "precision": 0.3846,
+        "recall": 0.4348,
+        "f1": 0.4082
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.3846,
+        "recall": 0.4348,
+        "f1": 0.4082
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 35,
+        "fp": 38,
+        "fn": 33,
+        "precision": 0.4795,
+        "recall": 0.5147,
+        "f1": 0.4965
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 32,
+          "pred_total": 47,
+          "micro": {
+            "tp": 20,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.4255,
+            "recall": 0.625,
+            "f1": 0.5063
+          },
+          "mean_document_f1": 0.5063,
+          "active_document_f1": 0.5063
+        },
+        "RELATED_TO": {
+          "gold_total": 35,
+          "pred_total": 16,
+          "micro": {
+            "tp": 9,
+            "fp": 7,
+            "fn": 26,
+            "precision": 0.5625,
+            "recall": 0.2571,
+            "f1": 0.3529
+          },
+          "mean_document_f1": 0.3529,
+          "active_document_f1": 0.3529
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 15,
+          "micro": {
+            "tp": 1,
+            "fp": 14,
+            "fn": 1,
+            "precision": 0.0667,
+            "recall": 0.5,
+            "f1": 0.1176
+          },
+          "mean_document_f1": 0.1176,
+          "active_document_f1": 0.1176
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.2442,
+        "active_types": 0.3256,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0385,
+      "error_taxonomy_totals": {
+        "fabricated": 42,
+        "direction_reversed": 3,
+        "type_confused": 3,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 12,
+        "low_confidence": 0,
+        "missed_core": 39,
+        "pred_raw_total": 90,
+        "pred_total": 78,
+        "dropped_total": 12,
+        "core_total": 69,
+        "full_total": 69
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 90,
+        "scored": 78,
+        "dropped": 12,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 53,
+        "fp": 19,
+        "fn": 7,
+        "precision": 0.7361,
+        "recall": 0.8833,
+        "f1": 0.803
+      },
+      "entity_macro": {
+        "precision": 0.7361,
+        "recall": 0.8833,
+        "f1": 0.803
+      },
+      "entity_category_accuracy": 0.9245,
+      "relation_primary_micro": {
+        "pred_total": 79,
+        "core_total": 69,
+        "full_total": 69,
+        "hit_core": 25,
+        "hit_full": 25,
+        "precision": 0.3165,
+        "recall": 0.3623,
+        "f1": 0.3378
+      },
+      "relation_core_micro": {
+        "tp": 25,
+        "fp": 54,
+        "fn": 44,
+        "precision": 0.3165,
+        "recall": 0.3623,
+        "f1": 0.3378
+      },
+      "relation_full_micro": {
+        "tp": 25,
+        "fp": 54,
+        "fn": 44,
+        "precision": 0.3165,
+        "recall": 0.3623,
+        "f1": 0.3378
+      },
+      "relation_strict_micro": {
+        "tp": 25,
+        "fp": 54,
+        "fn": 44,
+        "precision": 0.3165,
+        "recall": 0.3623,
+        "f1": 0.3378
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.3165,
+        "recall": 0.3623,
+        "f1": 0.3378
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 29,
+        "fp": 41,
+        "fn": 39,
+        "precision": 0.4143,
+        "recall": 0.4265,
+        "f1": 0.4203
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 4,
+          "micro": {
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 32,
+          "pred_total": 47,
+          "micro": {
+            "tp": 20,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.4255,
+            "recall": 0.625,
+            "f1": 0.5063
+          },
+          "mean_document_f1": 0.5063,
+          "active_document_f1": 0.5063
+        },
+        "RELATED_TO": {
+          "gold_total": 35,
+          "pred_total": 13,
+          "micro": {
+            "tp": 4,
+            "fp": 9,
+            "fn": 31,
+            "precision": 0.3077,
+            "recall": 0.1143,
+            "f1": 0.1667
+          },
+          "mean_document_f1": 0.1667,
+          "active_document_f1": 0.1667
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 15,
+          "micro": {
+            "tp": 1,
+            "fp": 14,
+            "fn": 1,
+            "precision": 0.0667,
+            "recall": 0.5,
+            "f1": 0.1176
+          },
+          "mean_document_f1": 0.1176,
+          "active_document_f1": 0.1176
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.1976,
+        "active_types": 0.1976,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0759,
+      "error_taxonomy_totals": {
+        "fabricated": 47,
+        "direction_reversed": 6,
+        "type_confused": 1,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 7,
+        "duplicate": 10,
+        "low_confidence": 0,
+        "missed_core": 44,
+        "pred_raw_total": 96,
+        "pred_total": 79,
+        "dropped_total": 17,
+        "core_total": 69,
+        "full_total": 69
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 96,
+        "scored": 79,
+        "dropped": 17,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "化学_第2章_原子分子与离子",
+      "gold": {
+        "entity_count": 60,
+        "relation_core_count": 69,
+        "relation_full_count": 69
+      },
+      "entity": {
+        "tp": 52,
+        "fp": 16,
+        "fn": 8,
+        "precision": 0.7647,
+        "recall": 0.8667,
+        "f1": 0.8125
+      },
+      "entity_category": {
+        "gold_entity_count": 60,
+        "pred_entity_count": 68,
+        "evaluated_entity_count": 52,
+        "correct": 48,
+        "accuracy": 0.9231
+      },
+      "relation_primary": {
+        "pred_total": 62,
+        "core_total": 69,
+        "full_total": 69,
+        "hit_core": 28,
+        "hit_full": 28,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_core": {
+        "tp": 28,
+        "fp": 34,
+        "fn": 41,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_full": {
+        "tp": 28,
+        "fp": 34,
+        "fn": 41,
+        "precision": 0.4516,
+        "recall": 0.4058,
+        "f1": 0.4275
+      },
+      "relation_pair_auxiliary": {
+        "tp": 31,
+        "fp": 30,
+        "fn": 37,
+        "precision": 0.5082,
+        "recall": 0.4559,
+        "f1": 0.4806
+      },
+      "relation_direction_error_rate": 0.0484,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 0,
+          "pred": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "CONTAINS": {
+          "gold": 32,
+          "pred": 37,
+          "tp": 20,
+          "fp": 17,
+          "fn": 12,
+          "precision": 0.5405,
+          "recall": 0.625,
+          "f1": 0.5797
+        },
+        "RELATED_TO": {
+          "gold": 35,
+          "pred": 17,
+          "tp": 7,
+          "fp": 10,
+          "fn": 28,
+          "precision": 0.4118,
+          "recall": 0.2,
+          "f1": 0.2692
+        },
+        "APPLIES_TO": {
+          "gold": 2,
+          "pred": 8,
+          "tp": 1,
+          "fp": 7,
+          "fn": 1,
+          "precision": 0.125,
+          "recall": 0.5,
+          "f1": 0.2
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 30,
+          "direction_reversed": 3,
+          "type_confused": 1,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 0,
+          "duplicate": 27,
+          "low_confidence": 0,
+          "missed_core": 41,
+          "pred_raw_total": 89,
+          "pred_total": 62,
+          "dropped_total": 27,
+          "core_total": 69,
+          "full_total": 69
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "原子质量单位",
+            "type": "APPLIES_TO",
+            "target": "原子质量",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "type_confused": [
+          {
+            "source": "分子式",
+            "type": "CONTAINS",
+            "target": "实验式",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "单原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "多原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "化学符号"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "二元酸命名法",
+            "type": "APPLIES_TO",
+            "target": "二元酸"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "碱土金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "碱金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "稀有气体"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "共价化合物",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "分子化合物",
+            "type": "CONTAINS",
+            "target": "分子式"
+          },
+          {
+            "source": "化学命名法",
+            "type": "CONTAINS",
+            "target": "希腊语前缀命名法"
+          },
+          {
+            "source": "化学命名法",
+            "type": "CONTAINS",
+            "target": "罗马数字命名法"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "卢瑟福金箔实验",
+            "type": "APPLIES_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "周期律"
+          },
+          {
+            "source": "含氧酸命名法",
+            "type": "APPLIES_TO",
+            "target": "含氧酸"
+          },
+          {
+            "source": "平均原子质量",
+            "type": "RELATED_TO",
+            "target": "分数丰度"
+          },
+          {
+            "source": "平均原子质量",
+            "type": "RELATED_TO",
+            "target": "同位素"
+          },
+          {
+            "source": "平均质量公式",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "恒定组成定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "油滴实验",
+            "type": "APPLIES_TO",
+            "target": "电子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "平均原子质量"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "原子理论"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "定比定律"
+          },
+          {
+            "source": "阴极射线",
+            "type": "RELATED_TO",
+            "target": "电子"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "二元酸命名法",
+          "type": "APPLIES_TO",
+          "target": "二元酸"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "主族元素"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "内过渡金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "碱土金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "碱金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "稀有气体"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "类金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "过渡金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "CONTAINS",
+          "target": "非金属"
+        },
+        {
+          "source": "元素周期表",
+          "type": "RELATED_TO",
+          "target": "离子"
+        },
+        {
+          "source": "共价化合物",
+          "type": "CONTAINS",
+          "target": "共价键"
+        },
+        {
+          "source": "分子化合物",
+          "type": "CONTAINS",
+          "target": "分子式"
+        },
+        {
+          "source": "分子式",
+          "type": "CONTAINS",
+          "target": "实验式"
+        },
+        {
+          "source": "化学命名法",
+          "type": "CONTAINS",
+          "target": "希腊语前缀命名法"
+        },
+        {
+          "source": "化学命名法",
+          "type": "CONTAINS",
+          "target": "罗马数字命名法"
+        },
+        {
+          "source": "化学符号",
+          "type": "RELATED_TO",
+          "target": "元素周期表"
+        },
+        {
+          "source": "化学符号",
+          "type": "RELATED_TO",
+          "target": "分子式"
+        },
+        {
+          "source": "卢瑟福金箔实验",
+          "type": "APPLIES_TO",
+          "target": "原子核"
+        },
+        {
+          "source": "原子序数",
+          "type": "RELATED_TO",
+          "target": "周期律"
+        },
+        {
+          "source": "原子质量单位",
+          "type": "APPLIES_TO",
+          "target": "原子质量"
+        },
+        {
+          "source": "含氧酸命名法",
+          "type": "APPLIES_TO",
+          "target": "含氧酸"
+        },
+        {
+          "source": "平均原子质量",
+          "type": "RELATED_TO",
+          "target": "分数丰度"
+        },
+        {
+          "source": "平均原子质量",
+          "type": "RELATED_TO",
+          "target": "同位素"
+        },
+        {
+          "source": "平均质量公式",
+          "type": "APPLIES_TO",
+          "target": "原子质量"
+        },
+        {
+          "source": "恒定组成定律",
+          "type": "RELATED_TO",
+          "target": "倍比定律"
+        },
+        {
+          "source": "油滴实验",
+          "type": "APPLIES_TO",
+          "target": "电子"
+        },
+        {
+          "source": "离子化合物",
+          "type": "CONTAINS",
+          "target": "离子"
+        },
+        {
+          "source": "离子化合物",
+          "type": "CONTAINS",
+          "target": "离子键"
+        },
+        {
+          "source": "质谱法",
+          "type": "APPLIES_TO",
+          "target": "平均原子质量"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "CONTAINS",
+          "target": "原子理论"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "倍比定律"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "定比定律"
+        },
+        {
+          "source": "阴极射线",
+          "type": "RELATED_TO",
+          "target": "电子"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "α粒子",
+          "type": "RELATED_TO",
+          "target": "原子核"
+        },
+        {
+          "source": "倍比定律",
+          "type": "RELATED_TO",
+          "target": "化合物"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "主族元素"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "内过渡金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "同位素"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "类金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "过渡金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "非金属"
+        },
+        {
+          "source": "分子式",
+          "type": "RELATED_TO",
+          "target": "化学符号"
+        },
+        {
+          "source": "分子式",
+          "type": "RELATED_TO",
+          "target": "实验式"
+        },
+        {
+          "source": "化合物",
+          "type": "CONTAINS",
+          "target": "二元化合物"
+        },
+        {
+          "source": "化学符号",
+          "type": "RELATED_TO",
+          "target": "元素"
+        },
+        {
+          "source": "化学键",
+          "type": "CONTAINS",
+          "target": "共价键"
+        },
+        {
+          "source": "化学键",
+          "type": "CONTAINS",
+          "target": "离子键"
+        },
+        {
+          "source": "原子",
+          "type": "CONTAINS",
+          "target": "原子核"
+        },
+        {
+          "source": "原子",
+          "type": "CONTAINS",
+          "target": "电子"
+        },
+        {
+          "source": "原子",
+          "type": "RELATED_TO",
+          "target": "离子"
+        },
+        {
+          "source": "原子序数",
+          "type": "RELATED_TO",
+          "target": "元素"
+        },
+        {
+          "source": "原子核",
+          "type": "RELATED_TO",
+          "target": "电子"
+        },
+        {
+          "source": "原子质量",
+          "type": "RELATED_TO",
+          "target": "原子质量单位"
+        },
+        {
+          "source": "同位素",
+          "type": "RELATED_TO",
+          "target": "原子质量"
+        },
+        {
+          "source": "同分异构体",
+          "type": "RELATED_TO",
+          "target": "分子式"
+        },
+        {
+          "source": "含氧酸",
+          "type": "RELATED_TO",
+          "target": "含氧酸根阴离子"
+        },
+        {
+          "source": "周期律",
+          "type": "RELATED_TO",
+          "target": "元素周期表"
+        },
+        {
+          "source": "命名法",
+          "type": "APPLIES_TO",
+          "target": "化合物"
+        },
+        {
+          "source": "定比定律",
+          "type": "RELATED_TO",
+          "target": "倍比定律"
+        },
+        {
+          "source": "定比定律",
+          "type": "RELATED_TO",
+          "target": "化合物"
+        },
+        {
+          "source": "实验式",
+          "type": "RELATED_TO",
+          "target": "化合物"
+        },
+        {
+          "source": "电子",
+          "type": "RELATED_TO",
+          "target": "原子"
+        },
+        {
+          "source": "电子",
+          "type": "RELATED_TO",
+          "target": "基本电荷单位"
+        },
+        {
+          "source": "离子化合物",
+          "type": "RELATED_TO",
+          "target": "阳离子"
+        },
+        {
+          "source": "离子化合物",
+          "type": "RELATED_TO",
+          "target": "阴离子"
+        },
+        {
+          "source": "离子键",
+          "type": "RELATED_TO",
+          "target": "离子"
+        },
+        {
+          "source": "质谱法",
+          "type": "RELATED_TO",
+          "target": "阳离子"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "元素"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "化合物"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "原子"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "物质守恒定律"
+        },
+        {
+          "source": "金属",
+          "type": "RELATED_TO",
+          "target": "离子化合物"
+        },
+        {
+          "source": "非金属",
+          "type": "RELATED_TO",
+          "target": "分子化合物"
+        }
+      ],
+      "type_confusions": [
+        {
+          "source": "分子式",
+          "target": "实验式",
+          "gold_type": "RELATED_TO",
+          "pred_type": "CONTAINS"
+        }
+      ]
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "化学_第2章_原子分子与离子",
+        "gold": {
+          "entity_count": 60,
+          "relation_core_count": 69,
+          "relation_full_count": 69
+        },
+        "entity": {
+          "tp": 52,
+          "fp": 16,
+          "fn": 8,
+          "precision": 0.7647,
+          "recall": 0.8667,
+          "f1": 0.8125
+        },
+        "entity_category": {
+          "gold_entity_count": 60,
+          "pred_entity_count": 68,
+          "evaluated_entity_count": 52,
+          "correct": 48,
+          "accuracy": 0.9231
+        },
+        "relation_primary": {
+          "pred_total": 62,
+          "core_total": 69,
+          "full_total": 69,
+          "hit_core": 28,
+          "hit_full": 28,
+          "precision": 0.4516,
+          "recall": 0.4058,
+          "f1": 0.4275
+        },
+        "relation_core": {
+          "tp": 28,
+          "fp": 34,
+          "fn": 41,
+          "precision": 0.4516,
+          "recall": 0.4058,
+          "f1": 0.4275
+        },
+        "relation_full": {
+          "tp": 28,
+          "fp": 34,
+          "fn": 41,
+          "precision": 0.4516,
+          "recall": 0.4058,
+          "f1": 0.4275
+        },
+        "relation_pair_auxiliary": {
+          "tp": 31,
+          "fp": 30,
+          "fn": 37,
+          "precision": 0.5082,
+          "recall": 0.4559,
+          "f1": 0.4806
+        },
+        "relation_direction_error_rate": 0.0484,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 32,
+            "pred": 37,
+            "tp": 20,
+            "fp": 17,
+            "fn": 12,
+            "precision": 0.5405,
+            "recall": 0.625,
+            "f1": 0.5797
+          },
+          "RELATED_TO": {
+            "gold": 35,
+            "pred": 17,
+            "tp": 7,
+            "fp": 10,
+            "fn": 28,
+            "precision": 0.4118,
+            "recall": 0.2,
+            "f1": 0.2692
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 8,
+            "tp": 1,
+            "fp": 7,
+            "fn": 1,
+            "precision": 0.125,
+            "recall": 0.5,
+            "f1": 0.2
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 30,
+            "direction_reversed": 3,
+            "type_confused": 1,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 27,
+            "low_confidence": 0,
+            "missed_core": 41,
+            "pred_raw_total": 89,
+            "pred_total": 62,
+            "dropped_total": 27,
+            "core_total": 69,
+            "full_total": 69
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "化学符号",
+              "type": "RELATED_TO",
+              "target": "分子式",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "原子质量单位",
+              "type": "APPLIES_TO",
+              "target": "原子质量",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "离子化合物",
+              "type": "CONTAINS",
+              "target": "离子键",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "分子式",
+              "type": "CONTAINS",
+              "target": "实验式",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "过渡金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "二元酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "含氧酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "周期",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "族",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "族",
+              "type": "CONTAINS",
+              "target": "碱金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "族",
+              "type": "CONTAINS",
+              "target": "碱土金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "族",
+              "type": "CONTAINS",
+              "target": "卤素",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "族",
+              "type": "CONTAINS",
+              "target": "稀有气体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "主族元素",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "过渡金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "内过渡金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "非金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "类金属",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "单原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "多原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "结构异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "空间异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子核",
+              "type": "CONTAINS",
+              "target": "质子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子核",
+              "type": "CONTAINS",
+              "target": "中子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "α粒子",
+              "type": "RELATED_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "倍比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "同位素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "分子式",
+              "type": "RELATED_TO",
+              "target": "化学符号"
+            },
+            {
+              "source": "分子式",
+              "type": "RELATED_TO",
+              "target": "实验式"
+            },
+            {
+              "source": "化合物",
+              "type": "CONTAINS",
+              "target": "二元化合物"
+            },
+            {
+              "source": "化学符号",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "离子键"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "原子核"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "电子"
+            },
+            {
+              "source": "原子",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "原子序数",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "原子核",
+              "type": "RELATED_TO",
+              "target": "电子"
+            },
+            {
+              "source": "原子质量",
+              "type": "RELATED_TO",
+              "target": "原子质量单位"
+            },
+            {
+              "source": "同位素",
+              "type": "RELATED_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "同分异构体",
+              "type": "RELATED_TO",
+              "target": "分子式"
+            },
+            {
+              "source": "含氧酸",
+              "type": "RELATED_TO",
+              "target": "含氧酸根阴离子"
+            },
+            {
+              "source": "周期律",
+              "type": "RELATED_TO",
+              "target": "元素周期表"
+            },
+            {
+              "source": "命名法",
+              "type": "APPLIES_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "实验式",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "基本电荷单位"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阴离子"
+            },
+            {
+              "source": "离子键",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "质谱法",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "物质守恒定律"
+            },
+            {
+              "source": "金属",
+              "type": "RELATED_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "非金属",
+              "type": "RELATED_TO",
+              "target": "分子化合物"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "二元酸命名法",
+              "type": "APPLIES_TO",
+              "target": "二元酸"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "碱土金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "碱金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "稀有气体"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "共价化合物",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "分子化合物",
+              "type": "CONTAINS",
+              "target": "分子式"
+            },
+            {
+              "source": "化学命名法",
+              "type": "CONTAINS",
+              "target": "希腊语前缀命名法"
+            },
+            {
+              "source": "化学命名法",
+              "type": "CONTAINS",
+              "target": "罗马数字命名法"
+            },
+            {
+              "source": "化学符号",
+              "type": "RELATED_TO",
+              "target": "元素周期表"
+            },
+            {
+              "source": "卢瑟福金箔实验",
+              "type": "APPLIES_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "原子序数",
+              "type": "RELATED_TO",
+              "target": "周期律"
+            },
+            {
+              "source": "含氧酸命名法",
+              "type": "APPLIES_TO",
+              "target": "含氧酸"
+            },
+            {
+              "source": "平均原子质量",
+              "type": "RELATED_TO",
+              "target": "分数丰度"
+            },
+            {
+              "source": "平均原子质量",
+              "type": "RELATED_TO",
+              "target": "同位素"
+            },
+            {
+              "source": "平均质量公式",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "恒定组成定律",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "油滴实验",
+              "type": "APPLIES_TO",
+              "target": "电子"
+            },
+            {
+              "source": "离子化合物",
+              "type": "CONTAINS",
+              "target": "离子"
+            },
+            {
+              "source": "质谱法",
+              "type": "APPLIES_TO",
+              "target": "平均原子质量"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "CONTAINS",
+              "target": "原子理论"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "定比定律"
+            },
+            {
+              "source": "阴极射线",
+              "type": "RELATED_TO",
+              "target": "电子"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "二元酸命名法",
+            "type": "APPLIES_TO",
+            "target": "二元酸"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "碱土金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "碱金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "稀有气体"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "共价化合物",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "分子化合物",
+            "type": "CONTAINS",
+            "target": "分子式"
+          },
+          {
+            "source": "分子式",
+            "type": "CONTAINS",
+            "target": "实验式"
+          },
+          {
+            "source": "化学命名法",
+            "type": "CONTAINS",
+            "target": "希腊语前缀命名法"
+          },
+          {
+            "source": "化学命名法",
+            "type": "CONTAINS",
+            "target": "罗马数字命名法"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "卢瑟福金箔实验",
+            "type": "APPLIES_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "周期律"
+          },
+          {
+            "source": "原子质量单位",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "含氧酸命名法",
+            "type": "APPLIES_TO",
+            "target": "含氧酸"
+          },
+          {
+            "source": "平均原子质量",
+            "type": "RELATED_TO",
+            "target": "分数丰度"
+          },
+          {
+            "source": "平均原子质量",
+            "type": "RELATED_TO",
+            "target": "同位素"
+          },
+          {
+            "source": "平均质量公式",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "恒定组成定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "油滴实验",
+            "type": "APPLIES_TO",
+            "target": "电子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "平均原子质量"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "原子理论"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "定比定律"
+          },
+          {
+            "source": "阴极射线",
+            "type": "RELATED_TO",
+            "target": "电子"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "化学符号"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "分子式",
+            "target": "实验式",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "化学_第2章_原子分子与离子",
+        "gold": {
+          "entity_count": 60,
+          "relation_core_count": 69,
+          "relation_full_count": 69
+        },
+        "entity": {
+          "tp": 55,
+          "fp": 20,
+          "fn": 5,
+          "precision": 0.7333,
+          "recall": 0.9167,
+          "f1": 0.8148
+        },
+        "entity_category": {
+          "gold_entity_count": 60,
+          "pred_entity_count": 75,
+          "evaluated_entity_count": 55,
+          "correct": 52,
+          "accuracy": 0.9455
+        },
+        "relation_primary": {
+          "pred_total": 78,
+          "core_total": 69,
+          "full_total": 69,
+          "hit_core": 30,
+          "hit_full": 30,
+          "precision": 0.3846,
+          "recall": 0.4348,
+          "f1": 0.4082
+        },
+        "relation_core": {
+          "tp": 30,
+          "fp": 48,
+          "fn": 39,
+          "precision": 0.3846,
+          "recall": 0.4348,
+          "f1": 0.4082
+        },
+        "relation_full": {
+          "tp": 30,
+          "fp": 48,
+          "fn": 39,
+          "precision": 0.3846,
+          "recall": 0.4348,
+          "f1": 0.4082
+        },
+        "relation_pair_auxiliary": {
+          "tp": 35,
+          "fp": 38,
+          "fn": 33,
+          "precision": 0.4795,
+          "recall": 0.5147,
+          "f1": 0.4965
+        },
+        "relation_direction_error_rate": 0.0385,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 32,
+            "pred": 47,
+            "tp": 20,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.4255,
+            "recall": 0.625,
+            "f1": 0.5063
+          },
+          "RELATED_TO": {
+            "gold": 35,
+            "pred": 16,
+            "tp": 9,
+            "fp": 7,
+            "fn": 26,
+            "precision": 0.5625,
+            "recall": 0.2571,
+            "f1": 0.3529
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 15,
+            "tp": 1,
+            "fp": 14,
+            "fn": 1,
+            "precision": 0.0667,
+            "recall": 0.5,
+            "f1": 0.1176
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 42,
+            "direction_reversed": 3,
+            "type_confused": 3,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 12,
+            "low_confidence": 0,
+            "missed_core": 39,
+            "pred_raw_total": 90,
+            "pred_total": 78,
+            "dropped_total": 12,
+            "core_total": 69,
+            "full_total": 69
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "原子质量单位",
+              "type": "RELATED_TO",
+              "target": "原子质量",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "实验式",
+              "type": "RELATED_TO",
+              "target": "分子式",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "离子化合物",
+              "type": "CONTAINS",
+              "target": "离子键",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "道尔顿原子理论",
+              "type": "CONTAINS",
+              "target": "元素",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "CONTAINS",
+              "target": "化合物",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "CONTAINS",
+              "target": "原子",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "二元酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "含氧酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "单原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "多原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "结构异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "空间异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "α粒子",
+              "type": "RELATED_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "倍比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "同位素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "分子式",
+              "type": "RELATED_TO",
+              "target": "实验式"
+            },
+            {
+              "source": "化合物",
+              "type": "CONTAINS",
+              "target": "二元化合物"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "离子键"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "原子核"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "电子"
+            },
+            {
+              "source": "原子",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "原子序数",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "原子核",
+              "type": "RELATED_TO",
+              "target": "电子"
+            },
+            {
+              "source": "原子质量",
+              "type": "RELATED_TO",
+              "target": "原子质量单位"
+            },
+            {
+              "source": "同位素",
+              "type": "RELATED_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "同分异构体",
+              "type": "RELATED_TO",
+              "target": "分子式"
+            },
+            {
+              "source": "含氧酸",
+              "type": "RELATED_TO",
+              "target": "含氧酸根阴离子"
+            },
+            {
+              "source": "周期律",
+              "type": "RELATED_TO",
+              "target": "元素周期表"
+            },
+            {
+              "source": "命名法",
+              "type": "APPLIES_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "实验式",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "基本电荷单位"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阴离子"
+            },
+            {
+              "source": "离子键",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "质谱法",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "物质守恒定律"
+            },
+            {
+              "source": "金属",
+              "type": "RELATED_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "非金属",
+              "type": "RELATED_TO",
+              "target": "分子化合物"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "卤素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "氧族元素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "氮族元素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "碱土金属"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "碱金属"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "稀有气体"
+            },
+            {
+              "source": "书写离子化合物化学式",
+              "type": "APPLIES_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "二元酸命名法",
+              "type": "APPLIES_TO",
+              "target": "二元酸"
+            },
+            {
+              "source": "元素周期表",
+              "type": "APPLIES_TO",
+              "target": "预测离子电荷"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "化学符号"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "共价化合物",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "卢瑟福金箔实验",
+              "type": "APPLIES_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "卤素",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "同位素",
+              "type": "RELATED_TO",
+              "target": "化学符号"
+            },
+            {
+              "source": "含氧酸命名法",
+              "type": "APPLIES_TO",
+              "target": "含氧酸"
+            },
+            {
+              "source": "命名二元酸",
+              "type": "APPLIES_TO",
+              "target": "二元酸"
+            },
+            {
+              "source": "命名分子化合物",
+              "type": "APPLIES_TO",
+              "target": "分子化合物"
+            },
+            {
+              "source": "命名含氧酸",
+              "type": "APPLIES_TO",
+              "target": "含氧酸"
+            },
+            {
+              "source": "命名水合物",
+              "type": "APPLIES_TO",
+              "target": "水合物"
+            },
+            {
+              "source": "命名法",
+              "type": "CONTAINS",
+              "target": "二元离子化合物命名法"
+            },
+            {
+              "source": "命名法",
+              "type": "CONTAINS",
+              "target": "二元酸命名法"
+            },
+            {
+              "source": "命名法",
+              "type": "CONTAINS",
+              "target": "分子化合物命名法"
+            },
+            {
+              "source": "命名法",
+              "type": "CONTAINS",
+              "target": "含氧酸命名法"
+            },
+            {
+              "source": "命名离子化合物",
+              "type": "APPLIES_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "平均原子质量的计算",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "平均质量公式",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "油滴实验",
+              "type": "APPLIES_TO",
+              "target": "电子"
+            },
+            {
+              "source": "百分丰度的计算",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "碱土金属",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "碱金属",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "稀有气体",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "过渡金属",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "定比定律"
+            },
+            {
+              "source": "阴极射线",
+              "type": "RELATED_TO",
+              "target": "电子"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "卤素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "氧族元素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "氮族元素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "碱土金属"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "碱金属"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "稀有气体"
+          },
+          {
+            "source": "书写离子化合物化学式",
+            "type": "APPLIES_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "二元酸命名法",
+            "type": "APPLIES_TO",
+            "target": "二元酸"
+          },
+          {
+            "source": "元素周期表",
+            "type": "APPLIES_TO",
+            "target": "预测离子电荷"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "化学符号"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "共价化合物",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "卢瑟福金箔实验",
+            "type": "APPLIES_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "卤素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "原子质量单位",
+            "type": "RELATED_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "化学符号"
+          },
+          {
+            "source": "含氧酸命名法",
+            "type": "APPLIES_TO",
+            "target": "含氧酸"
+          },
+          {
+            "source": "命名二元酸",
+            "type": "APPLIES_TO",
+            "target": "二元酸"
+          },
+          {
+            "source": "命名分子化合物",
+            "type": "APPLIES_TO",
+            "target": "分子化合物"
+          },
+          {
+            "source": "命名含氧酸",
+            "type": "APPLIES_TO",
+            "target": "含氧酸"
+          },
+          {
+            "source": "命名水合物",
+            "type": "APPLIES_TO",
+            "target": "水合物"
+          },
+          {
+            "source": "命名法",
+            "type": "CONTAINS",
+            "target": "二元离子化合物命名法"
+          },
+          {
+            "source": "命名法",
+            "type": "CONTAINS",
+            "target": "二元酸命名法"
+          },
+          {
+            "source": "命名法",
+            "type": "CONTAINS",
+            "target": "分子化合物命名法"
+          },
+          {
+            "source": "命名法",
+            "type": "CONTAINS",
+            "target": "含氧酸命名法"
+          },
+          {
+            "source": "命名离子化合物",
+            "type": "APPLIES_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "平均原子质量的计算",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "平均质量公式",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "油滴实验",
+            "type": "APPLIES_TO",
+            "target": "电子"
+          },
+          {
+            "source": "百分丰度的计算",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "碱土金属",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "碱金属",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "稀有气体",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "过渡金属",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "化合物"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "原子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "定比定律"
+          },
+          {
+            "source": "阴极射线",
+            "type": "RELATED_TO",
+            "target": "电子"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "道尔顿原子理论",
+            "target": "元素",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "化合物",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "原子",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "化学_第2章_原子分子与离子",
+        "gold": {
+          "entity_count": 60,
+          "relation_core_count": 69,
+          "relation_full_count": 69
+        },
+        "entity": {
+          "tp": 53,
+          "fp": 19,
+          "fn": 7,
+          "precision": 0.7361,
+          "recall": 0.8833,
+          "f1": 0.803
+        },
+        "entity_category": {
+          "gold_entity_count": 60,
+          "pred_entity_count": 72,
+          "evaluated_entity_count": 53,
+          "correct": 49,
+          "accuracy": 0.9245
+        },
+        "relation_primary": {
+          "pred_total": 79,
+          "core_total": 69,
+          "full_total": 69,
+          "hit_core": 25,
+          "hit_full": 25,
+          "precision": 0.3165,
+          "recall": 0.3623,
+          "f1": 0.3378
+        },
+        "relation_core": {
+          "tp": 25,
+          "fp": 54,
+          "fn": 44,
+          "precision": 0.3165,
+          "recall": 0.3623,
+          "f1": 0.3378
+        },
+        "relation_full": {
+          "tp": 25,
+          "fp": 54,
+          "fn": 44,
+          "precision": 0.3165,
+          "recall": 0.3623,
+          "f1": 0.3378
+        },
+        "relation_pair_auxiliary": {
+          "tp": 29,
+          "fp": 41,
+          "fn": 39,
+          "precision": 0.4143,
+          "recall": 0.4265,
+          "f1": 0.4203
+        },
+        "relation_direction_error_rate": 0.0759,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 4,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 32,
+            "pred": 47,
+            "tp": 20,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.4255,
+            "recall": 0.625,
+            "f1": 0.5063
+          },
+          "RELATED_TO": {
+            "gold": 35,
+            "pred": 13,
+            "tp": 4,
+            "fp": 9,
+            "fn": 31,
+            "precision": 0.3077,
+            "recall": 0.1143,
+            "f1": 0.1667
+          },
+          "APPLIES_TO": {
+            "gold": 2,
+            "pred": 15,
+            "tp": 1,
+            "fp": 14,
+            "fn": 1,
+            "precision": 0.0667,
+            "recall": 0.5,
+            "f1": 0.1176
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 47,
+            "direction_reversed": 6,
+            "type_confused": 1,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 7,
+            "duplicate": 10,
+            "low_confidence": 0,
+            "missed_core": 44,
+            "pred_raw_total": 96,
+            "pred_total": 79,
+            "dropped_total": 17,
+            "core_total": 69,
+            "full_total": 69
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "元素周期表",
+              "type": "RELATED_TO",
+              "target": "周期律",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "原子质量单位",
+              "type": "PRECEDES",
+              "target": "原子质量",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "实验式",
+              "type": "RELATED_TO",
+              "target": "分子式",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "离子化合物",
+              "type": "CONTAINS",
+              "target": "离子键",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "阳离子",
+              "type": "CONTAINS",
+              "target": "离子",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "阴离子",
+              "type": "CONTAINS",
+              "target": "离子",
+              "gold_type": "CONTAINS"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "同位素",
+              "type": "PRECEDES",
+              "target": "原子质量",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "二元酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "含氧酸",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "内过渡金属",
+              "type": "CONTAINS",
+              "target": "镧系元素",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "内过渡金属",
+              "type": "CONTAINS",
+              "target": "锕系元素",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阳离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "阴离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "单原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "离子",
+              "type": "CONTAINS",
+              "target": "多原子离子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "结构异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "同分异构体",
+              "type": "CONTAINS",
+              "target": "空间异构体",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子质量单位",
+              "type": "CONTAINS",
+              "target": "道尔顿",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "原子质量单位",
+              "type": "CONTAINS",
+              "target": "统一原子质量单位",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "稀有气体",
+              "type": "CONTAINS",
+              "target": "惰性气体",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "代表性元素",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "周期",
+              "type": "CONTAINS",
+              "target": "系列",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "α粒子",
+              "type": "RELATED_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "倍比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "同位素"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "共价键",
+              "type": "RELATED_TO",
+              "target": "分子化合物"
+            },
+            {
+              "source": "分子式",
+              "type": "RELATED_TO",
+              "target": "实验式"
+            },
+            {
+              "source": "化合物",
+              "type": "CONTAINS",
+              "target": "二元化合物"
+            },
+            {
+              "source": "化学符号",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "化学键",
+              "type": "CONTAINS",
+              "target": "离子键"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "原子核"
+            },
+            {
+              "source": "原子",
+              "type": "CONTAINS",
+              "target": "电子"
+            },
+            {
+              "source": "原子",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "原子序数",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "原子序数",
+              "type": "RELATED_TO",
+              "target": "质子"
+            },
+            {
+              "source": "原子核",
+              "type": "RELATED_TO",
+              "target": "电子"
+            },
+            {
+              "source": "原子质量",
+              "type": "RELATED_TO",
+              "target": "原子质量单位"
+            },
+            {
+              "source": "同位素",
+              "type": "RELATED_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "同分异构体",
+              "type": "RELATED_TO",
+              "target": "分子式"
+            },
+            {
+              "source": "含氧酸",
+              "type": "RELATED_TO",
+              "target": "含氧酸根阴离子"
+            },
+            {
+              "source": "周期律",
+              "type": "RELATED_TO",
+              "target": "元素周期表"
+            },
+            {
+              "source": "命名法",
+              "type": "APPLIES_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "定比定律",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "实验式",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "电子",
+              "type": "RELATED_TO",
+              "target": "基本电荷单位"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "阴离子"
+            },
+            {
+              "source": "离子键",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "质谱法",
+              "type": "RELATED_TO",
+              "target": "阳离子"
+            },
+            {
+              "source": "质量数",
+              "type": "RELATED_TO",
+              "target": "中子"
+            },
+            {
+              "source": "质量数",
+              "type": "RELATED_TO",
+              "target": "质子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "元素"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "化合物"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "物质守恒定律"
+            },
+            {
+              "source": "金属",
+              "type": "RELATED_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "非金属",
+              "type": "RELATED_TO",
+              "target": "分子化合物"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "卤素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "氧族元素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "氮族元素"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "碱土金属"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "碱金属"
+            },
+            {
+              "source": "主族元素",
+              "type": "CONTAINS",
+              "target": "稀有气体"
+            },
+            {
+              "source": "书写离子化合物化学式",
+              "type": "APPLIES_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "二元酸命名法",
+              "type": "APPLIES_TO",
+              "target": "二元酸"
+            },
+            {
+              "source": "元素周期表",
+              "type": "APPLIES_TO",
+              "target": "预测离子电荷"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "内过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "类金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "过渡金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "元素周期表",
+              "type": "RELATED_TO",
+              "target": "元素周期律"
+            },
+            {
+              "source": "共价化合物",
+              "type": "CONTAINS",
+              "target": "共价键"
+            },
+            {
+              "source": "共价化合物",
+              "type": "CONTAINS",
+              "target": "分子化合物"
+            },
+            {
+              "source": "共价键",
+              "type": "RELATED_TO",
+              "target": "共价化合物"
+            },
+            {
+              "source": "分子化合物",
+              "type": "RELATED_TO",
+              "target": "分子式"
+            },
+            {
+              "source": "化学式",
+              "type": "CONTAINS",
+              "target": "分子式"
+            },
+            {
+              "source": "化学式",
+              "type": "CONTAINS",
+              "target": "实验式"
+            },
+            {
+              "source": "化学式",
+              "type": "CONTAINS",
+              "target": "结构式"
+            },
+            {
+              "source": "卢瑟福金箔实验",
+              "type": "APPLIES_TO",
+              "target": "原子核"
+            },
+            {
+              "source": "卤素",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "原子序数",
+              "type": "PRECEDES",
+              "target": "元素周期律"
+            },
+            {
+              "source": "原子序数",
+              "type": "PRECEDES",
+              "target": "元素周期表"
+            },
+            {
+              "source": "同位素",
+              "type": "RELATED_TO",
+              "target": "化学符号"
+            },
+            {
+              "source": "含氧酸命名法",
+              "type": "APPLIES_TO",
+              "target": "含氧酸"
+            },
+            {
+              "source": "命名分子化合物",
+              "type": "APPLIES_TO",
+              "target": "分子化合物"
+            },
+            {
+              "source": "命名离子化合物",
+              "type": "APPLIES_TO",
+              "target": "离子化合物"
+            },
+            {
+              "source": "命名酸",
+              "type": "APPLIES_TO",
+              "target": "酸"
+            },
+            {
+              "source": "平均原子质量的计算",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "平均质量公式",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "恒定组成定律",
+              "type": "CONTAINS",
+              "target": "定比定律"
+            },
+            {
+              "source": "油滴实验",
+              "type": "APPLIES_TO",
+              "target": "电子"
+            },
+            {
+              "source": "百分丰度的计算",
+              "type": "APPLIES_TO",
+              "target": "原子质量"
+            },
+            {
+              "source": "碱土金属",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "碱金属",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "离子化合物",
+              "type": "RELATED_TO",
+              "target": "离子"
+            },
+            {
+              "source": "稀有气体",
+              "type": "CONTAINS",
+              "target": "主族元素"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "APPLIES_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "APPLIES_TO",
+              "target": "定比定律"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "CONTAINS",
+              "target": "原子理论"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "倍比定律"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "恒定组成定律"
+            },
+            {
+              "source": "阴极射线",
+              "type": "CONTAINS",
+              "target": "电子"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "卤素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "氧族元素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "氮族元素"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "碱土金属"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "碱金属"
+          },
+          {
+            "source": "主族元素",
+            "type": "CONTAINS",
+            "target": "稀有气体"
+          },
+          {
+            "source": "书写离子化合物化学式",
+            "type": "APPLIES_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "二元酸命名法",
+            "type": "APPLIES_TO",
+            "target": "二元酸"
+          },
+          {
+            "source": "元素周期表",
+            "type": "APPLIES_TO",
+            "target": "预测离子电荷"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "元素周期表",
+            "type": "RELATED_TO",
+            "target": "元素周期律"
+          },
+          {
+            "source": "元素周期表",
+            "type": "RELATED_TO",
+            "target": "周期律"
+          },
+          {
+            "source": "共价化合物",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "共价化合物",
+            "type": "CONTAINS",
+            "target": "分子化合物"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "共价化合物"
+          },
+          {
+            "source": "分子化合物",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "化学式",
+            "type": "CONTAINS",
+            "target": "分子式"
+          },
+          {
+            "source": "化学式",
+            "type": "CONTAINS",
+            "target": "实验式"
+          },
+          {
+            "source": "化学式",
+            "type": "CONTAINS",
+            "target": "结构式"
+          },
+          {
+            "source": "卢瑟福金箔实验",
+            "type": "APPLIES_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "卤素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "原子序数",
+            "type": "PRECEDES",
+            "target": "元素周期律"
+          },
+          {
+            "source": "原子序数",
+            "type": "PRECEDES",
+            "target": "元素周期表"
+          },
+          {
+            "source": "原子质量单位",
+            "type": "PRECEDES",
+            "target": "原子质量"
+          },
+          {
+            "source": "同位素",
+            "type": "PRECEDES",
+            "target": "原子质量"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "化学符号"
+          },
+          {
+            "source": "含氧酸命名法",
+            "type": "APPLIES_TO",
+            "target": "含氧酸"
+          },
+          {
+            "source": "命名分子化合物",
+            "type": "APPLIES_TO",
+            "target": "分子化合物"
+          },
+          {
+            "source": "命名离子化合物",
+            "type": "APPLIES_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "命名酸",
+            "type": "APPLIES_TO",
+            "target": "酸"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "平均原子质量的计算",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "平均质量公式",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "恒定组成定律",
+            "type": "CONTAINS",
+            "target": "定比定律"
+          },
+          {
+            "source": "油滴实验",
+            "type": "APPLIES_TO",
+            "target": "电子"
+          },
+          {
+            "source": "百分丰度的计算",
+            "type": "APPLIES_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "碱土金属",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "碱金属",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "稀有气体",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "APPLIES_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "APPLIES_TO",
+            "target": "定比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "CONTAINS",
+            "target": "原子理论"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "恒定组成定律"
+          },
+          {
+            "source": "阳离子",
+            "type": "CONTAINS",
+            "target": "离子"
+          },
+          {
+            "source": "阴极射线",
+            "type": "CONTAINS",
+            "target": "电子"
+          },
+          {
+            "source": "阴离子",
+            "type": "CONTAINS",
+            "target": "离子"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "同位素",
+            "target": "原子质量",
+            "gold_type": "RELATED_TO",
+            "pred_type": "PRECEDES"
+          }
+        ]
+      }
+    ]
+  ]
+}

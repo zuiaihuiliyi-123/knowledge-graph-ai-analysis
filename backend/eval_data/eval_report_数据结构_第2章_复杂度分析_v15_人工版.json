@@ -1,0 +1,3381 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "数据结构_第2章_复杂度分析": "498fc32f7ce506324dba907895e7744be9c60fc3f797708f5b031a1a21fc56d6"
+  },
+  "runs": 3,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.8031,
+      "std": 0.0676,
+      "min": 0.725,
+      "max": 0.8421,
+      "values": [
+        0.725,
+        0.8421,
+        0.8421
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.8158,
+      "std": 0.0456,
+      "min": 0.7632,
+      "max": 0.8421,
+      "values": [
+        0.7632,
+        0.8421,
+        0.8421
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.8093,
+      "std": 0.0569,
+      "min": 0.7436,
+      "max": 0.8421,
+      "values": [
+        0.7436,
+        0.8421,
+        0.8421
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.829,
+      "std": 0.0286,
+      "min": 0.8125,
+      "max": 0.8621,
+      "values": [
+        0.8621,
+        0.8125,
+        0.8125
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.5618,
+      "std": 0.054,
+      "min": 0.5,
+      "max": 0.6,
+      "values": [
+        0.5,
+        0.5854,
+        0.6
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.5529,
+      "std": 0.0563,
+      "min": 0.4878,
+      "max": 0.5854,
+      "values": [
+        0.4878,
+        0.5854,
+        0.5854
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.5573,
+      "std": 0.0551,
+      "min": 0.4938,
+      "max": 0.5926,
+      "values": [
+        0.4938,
+        0.5854,
+        0.5926
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.5618,
+      "std": 0.054,
+      "min": 0.5,
+      "max": 0.6,
+      "values": [
+        0.5,
+        0.5854,
+        0.6
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.5529,
+      "std": 0.0563,
+      "min": 0.4878,
+      "max": 0.5854,
+      "values": [
+        0.4878,
+        0.5854,
+        0.5854
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.5573,
+      "std": 0.0551,
+      "min": 0.4938,
+      "max": 0.5926,
+      "values": [
+        0.4938,
+        0.5854,
+        0.5926
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.5618,
+      "std": 0.054,
+      "min": 0.5,
+      "max": 0.6,
+      "values": [
+        0.5,
+        0.5854,
+        0.6
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.5397,
+      "std": 0.055,
+      "min": 0.4762,
+      "max": 0.5714,
+      "values": [
+        0.4762,
+        0.5714,
+        0.5714
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.5505,
+      "std": 0.0544,
+      "min": 0.4878,
+      "max": 0.5854,
+      "values": [
+        0.4878,
+        0.5783,
+        0.5854
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.675,
+      "std": 0.0433,
+      "min": 0.625,
+      "max": 0.7,
+      "values": [
+        0.625,
+        0.7,
+        0.7
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.6429,
+      "std": 0.0413,
+      "min": 0.5952,
+      "max": 0.6667,
+      "values": [
+        0.5952,
+        0.6667,
+        0.6667
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.6585,
+      "std": 0.0422,
+      "min": 0.6098,
+      "max": 0.6829,
+      "values": [
+        0.6098,
+        0.6829,
+        0.6829
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.2943,
+      "std": 0.0561,
+      "min": 0.2299,
+      "max": 0.3322,
+      "values": [
+        0.2299,
+        0.3208,
+        0.3322
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0248,
+      "std": 0.0003,
+      "min": 0.0244,
+      "max": 0.025,
+      "values": [
+        0.025,
+        0.0244,
+        0.025
+      ]
+    }
+  },
+  "entity_frequency": {
+    "Θ记号": 3,
+    "以时间换空间": 3,
+    "以空间换时间": 3,
+    "分治": 3,
+    "大O符号": 3,
+    "实际测试": 3,
+    "对数阶": 3,
+    "尾递归": 3,
+    "嵌套循环": 3,
+    "常数阶": 3,
+    "平均时间复杂度": 3,
+    "平方阶": 3,
+    "归并排序": 3,
+    "指令空间": 3,
+    "指数阶": 3,
+    "时间复杂度": 3,
+    "暂存数据": 3,
+    "暂存空间": 3,
+    "最佳时间复杂度": 3,
+    "最差时间复杂度": 3,
+    "栈帧空间": 3,
+    "渐近上界": 3,
+    "渐近复杂度分析": 3,
+    "理论估算": 3,
+    "空间复杂度": 3,
+    "算法效率评估": 3,
+    "线性对数阶": 3,
+    "线性阶": 3,
+    "调用栈": 3,
+    "输入空间": 3,
+    "输出空间": 3,
+    "迭代": 3,
+    "递归": 3,
+    "递归树": 3,
+    "阶乘阶": 3,
+    "for 循环": 2,
+    "while 循环": 2,
+    "大 O 记号": 2,
+    "for循环": 1,
+    "while循环": 1,
+    "函数": 1,
+    "大O记号": 1,
+    "方法": 1
+  },
+  "relation_frequency": {
+    "分治 -[APPLIES_TO]-> 归并排序": 3,
+    "时间复杂度 -[CONTAINS]-> 对数阶": 3,
+    "时间复杂度 -[CONTAINS]-> 常数阶": 3,
+    "时间复杂度 -[CONTAINS]-> 平均时间复杂度": 3,
+    "时间复杂度 -[CONTAINS]-> 平方阶": 3,
+    "时间复杂度 -[CONTAINS]-> 指数阶": 3,
+    "时间复杂度 -[CONTAINS]-> 最佳时间复杂度": 3,
+    "时间复杂度 -[CONTAINS]-> 最差时间复杂度": 3,
+    "时间复杂度 -[CONTAINS]-> 线性对数阶": 3,
+    "时间复杂度 -[CONTAINS]-> 线性阶": 3,
+    "时间复杂度 -[CONTAINS]-> 阶乘阶": 3,
+    "暂存空间 -[CONTAINS]-> 指令空间": 3,
+    "暂存空间 -[CONTAINS]-> 暂存数据": 3,
+    "暂存空间 -[CONTAINS]-> 栈帧空间": 3,
+    "空间复杂度 -[CONTAINS]-> 对数阶": 3,
+    "空间复杂度 -[CONTAINS]-> 常数阶": 3,
+    "空间复杂度 -[CONTAINS]-> 平方阶": 3,
+    "空间复杂度 -[CONTAINS]-> 指数阶": 3,
+    "空间复杂度 -[CONTAINS]-> 暂存空间": 3,
+    "空间复杂度 -[CONTAINS]-> 线性阶": 3,
+    "空间复杂度 -[CONTAINS]-> 输入空间": 3,
+    "空间复杂度 -[CONTAINS]-> 输出空间": 3,
+    "算法效率评估 -[CONTAINS]-> 时间复杂度": 3,
+    "算法效率评估 -[CONTAINS]-> 空间复杂度": 3,
+    "迭代 -[CONTAINS]-> 嵌套循环": 3,
+    "递归 -[CONTAINS]-> 尾递归": 3,
+    "递归 -[CONTAINS]-> 递归树": 3,
+    "递归 -[RELATED_TO]-> 栈帧空间": 3,
+    "以空间换时间 -[RELATED_TO]-> 以时间换空间": 2,
+    "时间复杂度 -[RELATED_TO]-> 大 O 记号": 2,
+    "时间复杂度 -[RELATED_TO]-> 渐近上界": 2,
+    "渐近复杂度分析 -[RELATED_TO]-> 时间复杂度": 2,
+    "渐近复杂度分析 -[RELATED_TO]-> 空间复杂度": 2,
+    "理论估算 -[CONTAINS]-> 渐近复杂度分析": 2,
+    "算法效率评估 -[CONTAINS]-> 实际测试": 2,
+    "算法效率评估 -[CONTAINS]-> 理论估算": 2,
+    "迭代 -[CONTAINS]-> for 循环": 2,
+    "迭代 -[CONTAINS]-> while 循环": 2,
+    "递归 -[RELATED_TO]-> 分治": 2,
+    "递归 -[RELATED_TO]-> 调用栈": 2,
+    "以时间换空间 -[RELATED_TO]-> 空间复杂度": 1,
+    "以空间换时间 -[RELATED_TO]-> 时间复杂度": 1,
+    "函数 -[RELATED_TO]-> 方法": 1,
+    "分治 -[APPLIES_TO]-> 递归": 1,
+    "分治 -[APPLIES_TO]-> 递归树": 1,
+    "分治 -[RELATED_TO]-> 递归": 1,
+    "实际测试 -[APPLIES_TO]-> 算法效率评估": 1,
+    "渐近上界 -[CONTAINS]-> 大O记号": 1,
+    "理论估算 -[APPLIES_TO]-> 算法效率评估": 1,
+    "理论估算 -[RELATED_TO]-> 渐近复杂度分析": 1,
+    "调用栈 -[RELATED_TO]-> 递归": 1,
+    "迭代 -[CONTAINS]-> for循环": 1,
+    "迭代 -[CONTAINS]-> while循环": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 13.0,
+      "values": [
+        15,
+        12,
+        12
+      ]
+    },
+    "direction_reversed": {
+      "mean": 1.0,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    "type_confused": {
+      "mean": 3.6667,
+      "values": [
+        4,
+        4,
+        3
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 18.3333,
+      "values": [
+        21,
+        17,
+        17
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "duplicate": {
+      "mean": 3.0,
+      "values": [
+        3,
+        3,
+        3
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 3.0,
+      "values": [
+        3,
+        3,
+        3
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 43.3333,
+      "values": [
+        43,
+        44,
+        43
+      ]
+    },
+    "pred_total": {
+      "mean": 40.3333,
+      "values": [
+        40,
+        41,
+        40
+      ]
+    },
+    "core_total": {
+      "mean": 41.0,
+      "values": [
+        41,
+        41,
+        41
+      ]
+    },
+    "full_total": {
+      "mean": 42.0,
+      "values": [
+        42,
+        42,
+        42
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "reconciles": true
+      },
+      {
+        "raw": 44,
+        "scored": 41,
+        "dropped": 3,
+        "reconciles": true
+      },
+      {
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 29,
+      "fp": 11,
+      "fn": 9,
+      "precision": 0.725,
+      "recall": 0.7632,
+      "f1": 0.7436
+    },
+    "entity_macro": {
+      "precision": 0.725,
+      "recall": 0.7632,
+      "f1": 0.7436
+    },
+    "entity_category_accuracy": 0.8621,
+    "relation_primary_micro": {
+      "pred_total": 40,
+      "core_total": 41,
+      "full_total": 42,
+      "hit_core": 20,
+      "hit_full": 20,
+      "precision": 0.5,
+      "recall": 0.4878,
+      "f1": 0.4938
+    },
+    "relation_core_micro": {
+      "tp": 20,
+      "fp": 20,
+      "fn": 21,
+      "precision": 0.5,
+      "recall": 0.4878,
+      "f1": 0.4938
+    },
+    "relation_full_micro": {
+      "tp": 20,
+      "fp": 20,
+      "fn": 22,
+      "precision": 0.5,
+      "recall": 0.4762,
+      "f1": 0.4878
+    },
+    "relation_strict_micro": {
+      "tp": 20,
+      "fp": 20,
+      "fn": 22,
+      "precision": 0.5,
+      "recall": 0.4762,
+      "f1": 0.4878
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.5,
+      "recall": 0.4762,
+      "f1": 0.4878
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 25,
+      "fp": 15,
+      "fn": 17,
+      "precision": 0.625,
+      "recall": 0.5952,
+      "f1": 0.6098
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 0,
+        "pred_total": 0,
+        "micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "CONTAINS": {
+        "gold_total": 26,
+        "pred_total": 32,
+        "micro": {
+          "tp": 20,
+          "fp": 12,
+          "fn": 6,
+          "precision": 0.625,
+          "recall": 0.7692,
+          "f1": 0.6897
+        },
+        "mean_document_f1": 0.6897,
+        "active_document_f1": 0.6897
+      },
+      "RELATED_TO": {
+        "gold_total": 13,
+        "pred_total": 6,
+        "micro": {
+          "tp": 0,
+          "fp": 6,
+          "fn": 13,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "APPLIES_TO": {
+        "gold_total": 3,
+        "pred_total": 2,
+        "micro": {
+          "tp": 0,
+          "fp": 2,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.1724,
+      "active_types": 0.2299,
+      "active_type_names": [
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.025,
+    "error_taxonomy_totals": {
+      "fabricated": 15,
+      "direction_reversed": 1,
+      "type_confused": 4,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 0,
+      "duplicate": 3,
+      "low_confidence": 0,
+      "missed_core": 21,
+      "pred_raw_total": 43,
+      "pred_total": 40,
+      "dropped_total": 3,
+      "core_total": 41,
+      "full_total": 42
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 43,
+      "scored": 40,
+      "dropped": 3,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 9,
+        "precision": 0.725,
+        "recall": 0.7632,
+        "f1": 0.7436
+      },
+      "entity_macro": {
+        "precision": 0.725,
+        "recall": 0.7632,
+        "f1": 0.7436
+      },
+      "entity_category_accuracy": 0.8621,
+      "relation_primary_micro": {
+        "pred_total": 40,
+        "core_total": 41,
+        "full_total": 42,
+        "hit_core": 20,
+        "hit_full": 20,
+        "precision": 0.5,
+        "recall": 0.4878,
+        "f1": 0.4938
+      },
+      "relation_core_micro": {
+        "tp": 20,
+        "fp": 20,
+        "fn": 21,
+        "precision": 0.5,
+        "recall": 0.4878,
+        "f1": 0.4938
+      },
+      "relation_full_micro": {
+        "tp": 20,
+        "fp": 20,
+        "fn": 22,
+        "precision": 0.5,
+        "recall": 0.4762,
+        "f1": 0.4878
+      },
+      "relation_strict_micro": {
+        "tp": 20,
+        "fp": 20,
+        "fn": 22,
+        "precision": 0.5,
+        "recall": 0.4762,
+        "f1": 0.4878
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.5,
+        "recall": 0.4762,
+        "f1": 0.4878
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 25,
+        "fp": 15,
+        "fn": 17,
+        "precision": 0.625,
+        "recall": 0.5952,
+        "f1": 0.6098
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 26,
+          "pred_total": 32,
+          "micro": {
+            "tp": 20,
+            "fp": 12,
+            "fn": 6,
+            "precision": 0.625,
+            "recall": 0.7692,
+            "f1": 0.6897
+          },
+          "mean_document_f1": 0.6897,
+          "active_document_f1": 0.6897
+        },
+        "RELATED_TO": {
+          "gold_total": 13,
+          "pred_total": 6,
+          "micro": {
+            "tp": 0,
+            "fp": 6,
+            "fn": 13,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 2,
+          "micro": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.1724,
+        "active_types": 0.2299,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.025,
+      "error_taxonomy_totals": {
+        "fabricated": 15,
+        "direction_reversed": 1,
+        "type_confused": 4,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 21,
+        "pred_raw_total": 43,
+        "pred_total": 40,
+        "dropped_total": 3,
+        "core_total": 41,
+        "full_total": 42
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 32,
+        "fp": 6,
+        "fn": 6,
+        "precision": 0.8421,
+        "recall": 0.8421,
+        "f1": 0.8421
+      },
+      "entity_macro": {
+        "precision": 0.8421,
+        "recall": 0.8421,
+        "f1": 0.8421
+      },
+      "entity_category_accuracy": 0.8125,
+      "relation_primary_micro": {
+        "pred_total": 41,
+        "core_total": 41,
+        "full_total": 42,
+        "hit_core": 24,
+        "hit_full": 24,
+        "precision": 0.5854,
+        "recall": 0.5854,
+        "f1": 0.5854
+      },
+      "relation_core_micro": {
+        "tp": 24,
+        "fp": 17,
+        "fn": 17,
+        "precision": 0.5854,
+        "recall": 0.5854,
+        "f1": 0.5854
+      },
+      "relation_full_micro": {
+        "tp": 24,
+        "fp": 17,
+        "fn": 18,
+        "precision": 0.5854,
+        "recall": 0.5714,
+        "f1": 0.5783
+      },
+      "relation_strict_micro": {
+        "tp": 24,
+        "fp": 17,
+        "fn": 18,
+        "precision": 0.5854,
+        "recall": 0.5714,
+        "f1": 0.5783
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.5854,
+        "recall": 0.5714,
+        "f1": 0.5783
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 28,
+        "fp": 12,
+        "fn": 14,
+        "precision": 0.7,
+        "recall": 0.6667,
+        "f1": 0.6829
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 26,
+          "pred_total": 31,
+          "micro": {
+            "tp": 22,
+            "fp": 9,
+            "fn": 4,
+            "precision": 0.7097,
+            "recall": 0.8462,
+            "f1": 0.7719
+          },
+          "mean_document_f1": 0.7719,
+          "active_document_f1": 0.7719
+        },
+        "RELATED_TO": {
+          "gold_total": 13,
+          "pred_total": 8,
+          "micro": {
+            "tp": 2,
+            "fp": 6,
+            "fn": 11,
+            "precision": 0.25,
+            "recall": 0.1538,
+            "f1": 0.1905
+          },
+          "mean_document_f1": 0.1905,
+          "active_document_f1": 0.1905
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 2,
+          "micro": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.2406,
+        "active_types": 0.3208,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0244,
+      "error_taxonomy_totals": {
+        "fabricated": 12,
+        "direction_reversed": 1,
+        "type_confused": 4,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 17,
+        "pred_raw_total": 44,
+        "pred_total": 41,
+        "dropped_total": 3,
+        "core_total": 41,
+        "full_total": 42
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 44,
+        "scored": 41,
+        "dropped": 3,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 32,
+        "fp": 6,
+        "fn": 6,
+        "precision": 0.8421,
+        "recall": 0.8421,
+        "f1": 0.8421
+      },
+      "entity_macro": {
+        "precision": 0.8421,
+        "recall": 0.8421,
+        "f1": 0.8421
+      },
+      "entity_category_accuracy": 0.8125,
+      "relation_primary_micro": {
+        "pred_total": 40,
+        "core_total": 41,
+        "full_total": 42,
+        "hit_core": 24,
+        "hit_full": 24,
+        "precision": 0.6,
+        "recall": 0.5854,
+        "f1": 0.5926
+      },
+      "relation_core_micro": {
+        "tp": 24,
+        "fp": 16,
+        "fn": 17,
+        "precision": 0.6,
+        "recall": 0.5854,
+        "f1": 0.5926
+      },
+      "relation_full_micro": {
+        "tp": 24,
+        "fp": 16,
+        "fn": 18,
+        "precision": 0.6,
+        "recall": 0.5714,
+        "f1": 0.5854
+      },
+      "relation_strict_micro": {
+        "tp": 24,
+        "fp": 16,
+        "fn": 18,
+        "precision": 0.6,
+        "recall": 0.5714,
+        "f1": 0.5854
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.6,
+        "recall": 0.5714,
+        "f1": 0.5854
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 28,
+        "fp": 12,
+        "fn": 14,
+        "precision": 0.7,
+        "recall": 0.6667,
+        "f1": 0.6829
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 26,
+          "pred_total": 28,
+          "micro": {
+            "tp": 22,
+            "fp": 6,
+            "fn": 4,
+            "precision": 0.7857,
+            "recall": 0.8462,
+            "f1": 0.8148
+          },
+          "mean_document_f1": 0.8148,
+          "active_document_f1": 0.8148
+        },
+        "RELATED_TO": {
+          "gold_total": 13,
+          "pred_total": 9,
+          "micro": {
+            "tp": 2,
+            "fp": 7,
+            "fn": 11,
+            "precision": 0.2222,
+            "recall": 0.1538,
+            "f1": 0.1818
+          },
+          "mean_document_f1": 0.1818,
+          "active_document_f1": 0.1818
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 3,
+          "micro": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.2491,
+        "active_types": 0.3322,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.025,
+      "error_taxonomy_totals": {
+        "fabricated": 12,
+        "direction_reversed": 1,
+        "type_confused": 3,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 17,
+        "pred_raw_total": 43,
+        "pred_total": 40,
+        "dropped_total": 3,
+        "core_total": 41,
+        "full_total": 42
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "数据结构_第2章_复杂度分析",
+      "gold": {
+        "entity_count": 38,
+        "relation_core_count": 41,
+        "relation_full_count": 42
+      },
+      "entity": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 9,
+        "precision": 0.725,
+        "recall": 0.7632,
+        "f1": 0.7436
+      },
+      "entity_category": {
+        "gold_entity_count": 38,
+        "pred_entity_count": 40,
+        "evaluated_entity_count": 29,
+        "correct": 25,
+        "accuracy": 0.8621
+      },
+      "relation_primary": {
+        "pred_total": 40,
+        "core_total": 41,
+        "full_total": 42,
+        "hit_core": 20,
+        "hit_full": 20,
+        "precision": 0.5,
+        "recall": 0.4878,
+        "f1": 0.4938
+      },
+      "relation_core": {
+        "tp": 20,
+        "fp": 20,
+        "fn": 21,
+        "precision": 0.5,
+        "recall": 0.4878,
+        "f1": 0.4938
+      },
+      "relation_full": {
+        "tp": 20,
+        "fp": 20,
+        "fn": 22,
+        "precision": 0.5,
+        "recall": 0.4762,
+        "f1": 0.4878
+      },
+      "relation_pair_auxiliary": {
+        "tp": 25,
+        "fp": 15,
+        "fn": 17,
+        "precision": 0.625,
+        "recall": 0.5952,
+        "f1": 0.6098
+      },
+      "relation_direction_error_rate": 0.025,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 0,
+          "pred": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "CONTAINS": {
+          "gold": 26,
+          "pred": 32,
+          "tp": 20,
+          "fp": 12,
+          "fn": 6,
+          "precision": 0.625,
+          "recall": 0.7692,
+          "f1": 0.6897
+        },
+        "RELATED_TO": {
+          "gold": 13,
+          "pred": 6,
+          "tp": 0,
+          "fp": 6,
+          "fn": 13,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "APPLIES_TO": {
+          "gold": 3,
+          "pred": 2,
+          "tp": 0,
+          "fp": 2,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 15,
+          "direction_reversed": 1,
+          "type_confused": 4,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 0,
+          "duplicate": 3,
+          "low_confidence": 0,
+          "missed_core": 21,
+          "pred_raw_total": 43,
+          "pred_total": 40,
+          "dropped_total": 3,
+          "core_total": 41,
+          "full_total": 42
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "递归",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "type_confused": [
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "暂存空间",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输出空间",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "递归树",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "分治",
+            "gold_type": "APPLIES_TO"
+          }
+        ],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最差时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最佳时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "平均时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "以空间换时间",
+            "type": "RELATED_TO",
+            "target": "以时间换空间"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "大 O 记号",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "尾递归",
+            "type": "RELATED_TO",
+            "target": "迭代"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "for 循环"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "while 循环"
+          },
+          {
+            "source": "迭代",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "调用栈"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "以时间换空间",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "以空间换时间",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "函数",
+            "type": "RELATED_TO",
+            "target": "方法"
+          },
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "归并排序"
+          },
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "递归树"
+          },
+          {
+            "source": "渐近上界",
+            "type": "CONTAINS",
+            "target": "大O记号"
+          },
+          {
+            "source": "理论估算",
+            "type": "CONTAINS",
+            "target": "渐近复杂度分析"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输入空间"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "实际测试"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "理论估算"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "for循环"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "while循环"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "以时间换空间",
+          "type": "RELATED_TO",
+          "target": "空间复杂度"
+        },
+        {
+          "source": "以空间换时间",
+          "type": "RELATED_TO",
+          "target": "时间复杂度"
+        },
+        {
+          "source": "函数",
+          "type": "RELATED_TO",
+          "target": "方法"
+        },
+        {
+          "source": "分治",
+          "type": "APPLIES_TO",
+          "target": "归并排序"
+        },
+        {
+          "source": "分治",
+          "type": "APPLIES_TO",
+          "target": "递归树"
+        },
+        {
+          "source": "渐近上界",
+          "type": "CONTAINS",
+          "target": "大O记号"
+        },
+        {
+          "source": "理论估算",
+          "type": "CONTAINS",
+          "target": "渐近复杂度分析"
+        },
+        {
+          "source": "空间复杂度",
+          "type": "CONTAINS",
+          "target": "暂存空间"
+        },
+        {
+          "source": "空间复杂度",
+          "type": "CONTAINS",
+          "target": "输入空间"
+        },
+        {
+          "source": "空间复杂度",
+          "type": "CONTAINS",
+          "target": "输出空间"
+        },
+        {
+          "source": "算法效率评估",
+          "type": "CONTAINS",
+          "target": "实际测试"
+        },
+        {
+          "source": "算法效率评估",
+          "type": "CONTAINS",
+          "target": "时间复杂度"
+        },
+        {
+          "source": "算法效率评估",
+          "type": "CONTAINS",
+          "target": "理论估算"
+        },
+        {
+          "source": "算法效率评估",
+          "type": "CONTAINS",
+          "target": "空间复杂度"
+        },
+        {
+          "source": "调用栈",
+          "type": "RELATED_TO",
+          "target": "递归"
+        },
+        {
+          "source": "迭代",
+          "type": "CONTAINS",
+          "target": "for循环"
+        },
+        {
+          "source": "迭代",
+          "type": "CONTAINS",
+          "target": "while循环"
+        },
+        {
+          "source": "递归",
+          "type": "CONTAINS",
+          "target": "递归树"
+        },
+        {
+          "source": "递归",
+          "type": "RELATED_TO",
+          "target": "分治"
+        },
+        {
+          "source": "递归",
+          "type": "RELATED_TO",
+          "target": "栈帧空间"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "以空间换时间",
+          "type": "RELATED_TO",
+          "target": "以时间换空间"
+        },
+        {
+          "source": "复杂度分析",
+          "type": "APPLIES_TO",
+          "target": "算法效率"
+        },
+        {
+          "source": "复杂度分析",
+          "type": "CONTAINS",
+          "target": "时间复杂度"
+        },
+        {
+          "source": "复杂度分析",
+          "type": "CONTAINS",
+          "target": "空间复杂度"
+        },
+        {
+          "source": "大 O 记号",
+          "type": "RELATED_TO",
+          "target": "渐近上界"
+        },
+        {
+          "source": "实际测试",
+          "type": "APPLIES_TO",
+          "target": "算法效率"
+        },
+        {
+          "source": "尾递归",
+          "type": "RELATED_TO",
+          "target": "迭代"
+        },
+        {
+          "source": "操作数量",
+          "type": "RELATED_TO",
+          "target": "时间复杂度"
+        },
+        {
+          "source": "时间复杂度",
+          "type": "RELATED_TO",
+          "target": "空间复杂度"
+        },
+        {
+          "source": "最差时间复杂度",
+          "type": "RELATED_TO",
+          "target": "渐近上界"
+        },
+        {
+          "source": "空间复杂度",
+          "type": "RELATED_TO",
+          "target": "暂存空间"
+        },
+        {
+          "source": "空间复杂度",
+          "type": "RELATED_TO",
+          "target": "输出空间"
+        },
+        {
+          "source": "算法效率",
+          "type": "CONTAINS",
+          "target": "时间效率"
+        },
+        {
+          "source": "算法效率",
+          "type": "CONTAINS",
+          "target": "空间效率"
+        },
+        {
+          "source": "调用栈",
+          "type": "RELATED_TO",
+          "target": "栈帧空间"
+        },
+        {
+          "source": "迭代",
+          "type": "CONTAINS",
+          "target": "for 循环"
+        },
+        {
+          "source": "迭代",
+          "type": "CONTAINS",
+          "target": "while 循环"
+        },
+        {
+          "source": "迭代",
+          "type": "RELATED_TO",
+          "target": "递归"
+        },
+        {
+          "source": "递归",
+          "type": "APPLIES_TO",
+          "target": "分治"
+        },
+        {
+          "source": "递归",
+          "type": "RELATED_TO",
+          "target": "调用栈"
+        },
+        {
+          "source": "递归",
+          "type": "RELATED_TO",
+          "target": "递归树"
+        }
+      ],
+      "type_confusions": [
+        {
+          "source": "空间复杂度",
+          "target": "暂存空间",
+          "gold_type": "RELATED_TO",
+          "pred_type": "CONTAINS"
+        },
+        {
+          "source": "空间复杂度",
+          "target": "输出空间",
+          "gold_type": "RELATED_TO",
+          "pred_type": "CONTAINS"
+        },
+        {
+          "source": "递归",
+          "target": "分治",
+          "gold_type": "APPLIES_TO",
+          "pred_type": "RELATED_TO"
+        },
+        {
+          "source": "递归",
+          "target": "递归树",
+          "gold_type": "RELATED_TO",
+          "pred_type": "CONTAINS"
+        }
+      ]
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "数据结构_第2章_复杂度分析",
+        "gold": {
+          "entity_count": 38,
+          "relation_core_count": 41,
+          "relation_full_count": 42
+        },
+        "entity": {
+          "tp": 29,
+          "fp": 11,
+          "fn": 9,
+          "precision": 0.725,
+          "recall": 0.7632,
+          "f1": 0.7436
+        },
+        "entity_category": {
+          "gold_entity_count": 38,
+          "pred_entity_count": 40,
+          "evaluated_entity_count": 29,
+          "correct": 25,
+          "accuracy": 0.8621
+        },
+        "relation_primary": {
+          "pred_total": 40,
+          "core_total": 41,
+          "full_total": 42,
+          "hit_core": 20,
+          "hit_full": 20,
+          "precision": 0.5,
+          "recall": 0.4878,
+          "f1": 0.4938
+        },
+        "relation_core": {
+          "tp": 20,
+          "fp": 20,
+          "fn": 21,
+          "precision": 0.5,
+          "recall": 0.4878,
+          "f1": 0.4938
+        },
+        "relation_full": {
+          "tp": 20,
+          "fp": 20,
+          "fn": 22,
+          "precision": 0.5,
+          "recall": 0.4762,
+          "f1": 0.4878
+        },
+        "relation_pair_auxiliary": {
+          "tp": 25,
+          "fp": 15,
+          "fn": 17,
+          "precision": 0.625,
+          "recall": 0.5952,
+          "f1": 0.6098
+        },
+        "relation_direction_error_rate": 0.025,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 26,
+            "pred": 32,
+            "tp": 20,
+            "fp": 12,
+            "fn": 6,
+            "precision": 0.625,
+            "recall": 0.7692,
+            "f1": 0.6897
+          },
+          "RELATED_TO": {
+            "gold": 13,
+            "pred": 6,
+            "tp": 0,
+            "fp": 6,
+            "fn": 13,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 2,
+            "tp": 0,
+            "fp": 2,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 15,
+            "direction_reversed": 1,
+            "type_confused": 4,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 3,
+            "low_confidence": 0,
+            "missed_core": 21,
+            "pred_raw_total": 43,
+            "pred_total": 40,
+            "dropped_total": 3,
+            "core_total": 41,
+            "full_total": 42
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "调用栈",
+              "type": "RELATED_TO",
+              "target": "递归",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "暂存空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输出空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "递归",
+              "type": "CONTAINS",
+              "target": "递归树",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "分治",
+              "gold_type": "APPLIES_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最差时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最佳时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "平均时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "以空间换时间",
+              "type": "RELATED_TO",
+              "target": "以时间换空间"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "大 O 记号",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "实际测试",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "尾递归",
+              "type": "RELATED_TO",
+              "target": "迭代"
+            },
+            {
+              "source": "操作数量",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "最差时间复杂度",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "暂存空间"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "输出空间"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "时间效率"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "空间效率"
+            },
+            {
+              "source": "调用栈",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            },
+            {
+              "source": "迭代",
+              "type": "CONTAINS",
+              "target": "for 循环"
+            },
+            {
+              "source": "迭代",
+              "type": "CONTAINS",
+              "target": "while 循环"
+            },
+            {
+              "source": "迭代",
+              "type": "RELATED_TO",
+              "target": "递归"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "分治"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "调用栈"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "递归树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "以时间换空间",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "以空间换时间",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "函数",
+              "type": "RELATED_TO",
+              "target": "方法"
+            },
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "归并排序"
+            },
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "递归树"
+            },
+            {
+              "source": "渐近上界",
+              "type": "CONTAINS",
+              "target": "大O记号"
+            },
+            {
+              "source": "理论估算",
+              "type": "CONTAINS",
+              "target": "渐近复杂度分析"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输入空间"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "实际测试"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "理论估算"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "迭代",
+              "type": "CONTAINS",
+              "target": "for循环"
+            },
+            {
+              "source": "迭代",
+              "type": "CONTAINS",
+              "target": "while循环"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "以时间换空间",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "以空间换时间",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "函数",
+            "type": "RELATED_TO",
+            "target": "方法"
+          },
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "归并排序"
+          },
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "递归树"
+          },
+          {
+            "source": "渐近上界",
+            "type": "CONTAINS",
+            "target": "大O记号"
+          },
+          {
+            "source": "理论估算",
+            "type": "CONTAINS",
+            "target": "渐近复杂度分析"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输入空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "实际测试"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "理论估算"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "for循环"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "while循环"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "递归树"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "以空间换时间",
+            "type": "RELATED_TO",
+            "target": "以时间换空间"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "大 O 记号",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "尾递归",
+            "type": "RELATED_TO",
+            "target": "迭代"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "for 循环"
+          },
+          {
+            "source": "迭代",
+            "type": "CONTAINS",
+            "target": "while 循环"
+          },
+          {
+            "source": "迭代",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "调用栈"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "递归",
+            "target": "分治",
+            "gold_type": "APPLIES_TO",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "数据结构_第2章_复杂度分析",
+        "gold": {
+          "entity_count": 38,
+          "relation_core_count": 41,
+          "relation_full_count": 42
+        },
+        "entity": {
+          "tp": 32,
+          "fp": 6,
+          "fn": 6,
+          "precision": 0.8421,
+          "recall": 0.8421,
+          "f1": 0.8421
+        },
+        "entity_category": {
+          "gold_entity_count": 38,
+          "pred_entity_count": 38,
+          "evaluated_entity_count": 32,
+          "correct": 26,
+          "accuracy": 0.8125
+        },
+        "relation_primary": {
+          "pred_total": 41,
+          "core_total": 41,
+          "full_total": 42,
+          "hit_core": 24,
+          "hit_full": 24,
+          "precision": 0.5854,
+          "recall": 0.5854,
+          "f1": 0.5854
+        },
+        "relation_core": {
+          "tp": 24,
+          "fp": 17,
+          "fn": 17,
+          "precision": 0.5854,
+          "recall": 0.5854,
+          "f1": 0.5854
+        },
+        "relation_full": {
+          "tp": 24,
+          "fp": 17,
+          "fn": 18,
+          "precision": 0.5854,
+          "recall": 0.5714,
+          "f1": 0.5783
+        },
+        "relation_pair_auxiliary": {
+          "tp": 28,
+          "fp": 12,
+          "fn": 14,
+          "precision": 0.7,
+          "recall": 0.6667,
+          "f1": 0.6829
+        },
+        "relation_direction_error_rate": 0.0244,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 26,
+            "pred": 31,
+            "tp": 22,
+            "fp": 9,
+            "fn": 4,
+            "precision": 0.7097,
+            "recall": 0.8462,
+            "f1": 0.7719
+          },
+          "RELATED_TO": {
+            "gold": 13,
+            "pred": 8,
+            "tp": 2,
+            "fp": 6,
+            "fn": 11,
+            "precision": 0.25,
+            "recall": 0.1538,
+            "f1": 0.1905
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 2,
+            "tp": 0,
+            "fp": 2,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 12,
+            "direction_reversed": 1,
+            "type_confused": 4,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 3,
+            "low_confidence": 0,
+            "missed_core": 17,
+            "pred_raw_total": 44,
+            "pred_total": 41,
+            "dropped_total": 3,
+            "core_total": 41,
+            "full_total": 42
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "递归",
+              "gold_type": "APPLIES_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "暂存空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输出空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "递归",
+              "type": "CONTAINS",
+              "target": "递归树",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "分治",
+              "gold_type": "APPLIES_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最差时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最佳时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "平均时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "复杂度分析",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "大 O 记号",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "实际测试",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "尾递归",
+              "type": "RELATED_TO",
+              "target": "迭代"
+            },
+            {
+              "source": "操作数量",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "最差时间复杂度",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "暂存空间"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "输出空间"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "时间效率"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "空间效率"
+            },
+            {
+              "source": "调用栈",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            },
+            {
+              "source": "迭代",
+              "type": "RELATED_TO",
+              "target": "递归"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "分治"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "递归树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "归并排序"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "大 O 记号"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "渐近复杂度分析",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "渐近复杂度分析",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "理论估算",
+              "type": "CONTAINS",
+              "target": "渐近复杂度分析"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输入空间"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "实际测试"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "理论估算"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "归并排序"
+          },
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "递归"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "大 O 记号"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "渐近复杂度分析",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "渐近复杂度分析",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "理论估算",
+            "type": "CONTAINS",
+            "target": "渐近复杂度分析"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输入空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "实际测试"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "理论估算"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "递归树"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "大 O 记号",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "尾递归",
+            "type": "RELATED_TO",
+            "target": "迭代"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          },
+          {
+            "source": "迭代",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "递归",
+            "target": "分治",
+            "gold_type": "APPLIES_TO",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "text_id": "数据结构_第2章_复杂度分析",
+        "gold": {
+          "entity_count": 38,
+          "relation_core_count": 41,
+          "relation_full_count": 42
+        },
+        "entity": {
+          "tp": 32,
+          "fp": 6,
+          "fn": 6,
+          "precision": 0.8421,
+          "recall": 0.8421,
+          "f1": 0.8421
+        },
+        "entity_category": {
+          "gold_entity_count": 38,
+          "pred_entity_count": 38,
+          "evaluated_entity_count": 32,
+          "correct": 26,
+          "accuracy": 0.8125
+        },
+        "relation_primary": {
+          "pred_total": 40,
+          "core_total": 41,
+          "full_total": 42,
+          "hit_core": 24,
+          "hit_full": 24,
+          "precision": 0.6,
+          "recall": 0.5854,
+          "f1": 0.5926
+        },
+        "relation_core": {
+          "tp": 24,
+          "fp": 16,
+          "fn": 17,
+          "precision": 0.6,
+          "recall": 0.5854,
+          "f1": 0.5926
+        },
+        "relation_full": {
+          "tp": 24,
+          "fp": 16,
+          "fn": 18,
+          "precision": 0.6,
+          "recall": 0.5714,
+          "f1": 0.5854
+        },
+        "relation_pair_auxiliary": {
+          "tp": 28,
+          "fp": 12,
+          "fn": 14,
+          "precision": 0.7,
+          "recall": 0.6667,
+          "f1": 0.6829
+        },
+        "relation_direction_error_rate": 0.025,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 26,
+            "pred": 28,
+            "tp": 22,
+            "fp": 6,
+            "fn": 4,
+            "precision": 0.7857,
+            "recall": 0.8462,
+            "f1": 0.8148
+          },
+          "RELATED_TO": {
+            "gold": 13,
+            "pred": 9,
+            "tp": 2,
+            "fp": 7,
+            "fn": 11,
+            "precision": 0.2222,
+            "recall": 0.1538,
+            "f1": 0.1818
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 3,
+            "tp": 0,
+            "fp": 3,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 12,
+            "direction_reversed": 1,
+            "type_confused": 3,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 3,
+            "low_confidence": 0,
+            "missed_core": 17,
+            "pred_raw_total": 43,
+            "pred_total": 40,
+            "dropped_total": 3,
+            "core_total": 41,
+            "full_total": 42
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "分治",
+              "type": "RELATED_TO",
+              "target": "递归",
+              "gold_type": "APPLIES_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "暂存空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输出空间",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "递归",
+              "type": "CONTAINS",
+              "target": "递归树",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最差时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "最佳时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "CONTAINS",
+              "target": "平均时间复杂度",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "复杂度分析",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "复杂度分析",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "大 O 记号",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "实际测试",
+              "type": "APPLIES_TO",
+              "target": "算法效率"
+            },
+            {
+              "source": "尾递归",
+              "type": "RELATED_TO",
+              "target": "迭代"
+            },
+            {
+              "source": "操作数量",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "最差时间复杂度",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "暂存空间"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "RELATED_TO",
+              "target": "输出空间"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "时间效率"
+            },
+            {
+              "source": "算法效率",
+              "type": "CONTAINS",
+              "target": "空间效率"
+            },
+            {
+              "source": "调用栈",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            },
+            {
+              "source": "迭代",
+              "type": "RELATED_TO",
+              "target": "递归"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "分治"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "递归树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "分治",
+              "type": "APPLIES_TO",
+              "target": "归并排序"
+            },
+            {
+              "source": "实际测试",
+              "type": "APPLIES_TO",
+              "target": "算法效率评估"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "大 O 记号"
+            },
+            {
+              "source": "时间复杂度",
+              "type": "RELATED_TO",
+              "target": "渐近上界"
+            },
+            {
+              "source": "渐近复杂度分析",
+              "type": "RELATED_TO",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "渐近复杂度分析",
+              "type": "RELATED_TO",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "理论估算",
+              "type": "APPLIES_TO",
+              "target": "算法效率评估"
+            },
+            {
+              "source": "理论估算",
+              "type": "RELATED_TO",
+              "target": "渐近复杂度分析"
+            },
+            {
+              "source": "空间复杂度",
+              "type": "CONTAINS",
+              "target": "输入空间"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "时间复杂度"
+            },
+            {
+              "source": "算法效率评估",
+              "type": "CONTAINS",
+              "target": "空间复杂度"
+            },
+            {
+              "source": "递归",
+              "type": "RELATED_TO",
+              "target": "栈帧空间"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "分治",
+            "type": "APPLIES_TO",
+            "target": "归并排序"
+          },
+          {
+            "source": "分治",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率评估"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "大 O 记号"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "渐近复杂度分析",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "渐近复杂度分析",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "理论估算",
+            "type": "APPLIES_TO",
+            "target": "算法效率评估"
+          },
+          {
+            "source": "理论估算",
+            "type": "RELATED_TO",
+            "target": "渐近复杂度分析"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输入空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "CONTAINS",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "算法效率评估",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "递归树"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "CONTAINS",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "大 O 记号",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率"
+          },
+          {
+            "source": "尾递归",
+            "type": "RELATED_TO",
+            "target": "迭代"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "RELATED_TO",
+            "target": "空间复杂度"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "暂存空间"
+          },
+          {
+            "source": "空间复杂度",
+            "type": "RELATED_TO",
+            "target": "输出空间"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "栈帧空间"
+          },
+          {
+            "source": "迭代",
+            "type": "RELATED_TO",
+            "target": "递归"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "gold_type": "RELATED_TO",
+            "pred_type": "CONTAINS"
+          }
+        ]
+      }
+    ]
+  ]
+}
