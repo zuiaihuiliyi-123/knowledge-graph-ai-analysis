@@ -191,6 +191,16 @@
    "name": "以时间换空间",
    "category": "方法",
    "description": "牺牲运行速度来节省内存空间的思路"
+  },
+  {
+   "name": "Ω 记号",
+   "category": "概念",
+   "description": "表示函数渐近下界的数学记号"
+  },
+  {
+   "name": "Θ 记号",
+   "category": "概念",
+   "description": "表示函数渐近紧致界（平均）的数学记号"
   }
  ],
  "relations": [
@@ -528,6 +538,46 @@
    "type": "RELATED_TO",
    "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”；反之，则称为“以时间换空间”",
    "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "尾递归",
+   "target": "空间效率",
+   "type": "RELATED_TO",
+   "evidence": "使其在空间效率上与迭代相当",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "最佳时间复杂度",
+   "target": "Ω 记号",
+   "type": "RELATED_TO",
+   "evidence": "“最佳时间复杂度”对应函数渐近下界，用 $\\Omega$ 记号表示",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "平均时间复杂度",
+   "target": "Θ 记号",
+   "type": "RELATED_TO",
+   "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 $\\Theta$ 记号来表示",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "以空间换时间",
+   "target": "时间复杂度",
+   "type": "RELATED_TO",
+   "evidence": "降低时间复杂度通常需要以提升空间复杂度为代价，反之亦然。我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "以时间换空间",
+   "target": "空间复杂度",
+   "type": "RELATED_TO",
+   "evidence": "降低时间复杂度通常需要以提升空间复杂度为代价，反之亦然。我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”；反之，则称为“以时间换空间”",
+   "confidence": 0.9,
    "core": true
   }
  ]

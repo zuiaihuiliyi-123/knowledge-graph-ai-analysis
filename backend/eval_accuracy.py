@@ -1472,7 +1472,7 @@ def evaluate_all(
 async def run_live_extraction(
     text: str,
     runs: int = 3,
-    temperature: float = 0.0,
+    temperature: float = 0.3,
     overlap_tokens: int | None = None,
 ) -> list[dict[str, Any]]:
     """
@@ -2009,7 +2009,7 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--temperature", type=float, default=0.0,
+        "--temperature", type=float, default=0.3,
         help="--live 模式的温度（正式评测用 0）",
     )
 

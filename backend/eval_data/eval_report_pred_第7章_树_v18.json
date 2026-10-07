@@ -1,0 +1,2169 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "Hello算法_第7章_树": "50f316ce7bea6690dfdaad129ea83e77d8ac80b72065d32b0f6ce999df62c20e"
+  },
+  "runs": 3,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.8775,
+      "std": 0.0617,
+      "min": 0.807,
+      "max": 0.9216,
+      "values": [
+        0.9216,
+        0.9038,
+        0.807
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.9524,
+      "std": 0.0118,
+      "min": 0.9388,
+      "max": 0.9592,
+      "values": [
+        0.9592,
+        0.9592,
+        0.9388
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.9129,
+      "std": 0.0392,
+      "min": 0.8679,
+      "max": 0.94,
+      "values": [
+        0.94,
+        0.9307,
+        0.8679
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.9786,
+      "std": 0.0002,
+      "min": 0.9783,
+      "max": 0.9787,
+      "values": [
+        0.9787,
+        0.9787,
+        0.9783
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.8137,
+      "std": 0.1132,
+      "min": 0.725,
+      "max": 0.9412,
+      "values": [
+        0.775,
+        0.9412,
+        0.725
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.9293,
+      "std": 0.0463,
+      "min": 0.8788,
+      "max": 0.9697,
+      "values": [
+        0.9394,
+        0.9697,
+        0.8788
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.8663,
+      "std": 0.0817,
+      "min": 0.7945,
+      "max": 0.9552,
+      "values": [
+        0.8493,
+        0.9552,
+        0.7945
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.8137,
+      "std": 0.1132,
+      "min": 0.725,
+      "max": 0.9412,
+      "values": [
+        0.775,
+        0.9412,
+        0.725
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.9293,
+      "std": 0.0463,
+      "min": 0.8788,
+      "max": 0.9697,
+      "values": [
+        0.9394,
+        0.9697,
+        0.8788
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.8663,
+      "std": 0.0817,
+      "min": 0.7945,
+      "max": 0.9552,
+      "values": [
+        0.8493,
+        0.9552,
+        0.7945
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.8137,
+      "std": 0.1132,
+      "min": 0.725,
+      "max": 0.9412,
+      "values": [
+        0.775,
+        0.9412,
+        0.725
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.9293,
+      "std": 0.0463,
+      "min": 0.8788,
+      "max": 0.9697,
+      "values": [
+        0.9394,
+        0.9697,
+        0.8788
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.8663,
+      "std": 0.0817,
+      "min": 0.7945,
+      "max": 0.9552,
+      "values": [
+        0.8493,
+        0.9552,
+        0.7945
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.8137,
+      "std": 0.1132,
+      "min": 0.725,
+      "max": 0.9412,
+      "values": [
+        0.775,
+        0.9412,
+        0.725
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.9293,
+      "std": 0.0463,
+      "min": 0.8788,
+      "max": 0.9697,
+      "values": [
+        0.9394,
+        0.9697,
+        0.8788
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.8663,
+      "std": 0.0817,
+      "min": 0.7945,
+      "max": 0.9552,
+      "values": [
+        0.8493,
+        0.9552,
+        0.7945
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.7984,
+      "std": 0.0843,
+      "min": 0.7113,
+      "max": 0.8796,
+      "values": [
+        0.8042,
+        0.8796,
+        0.7113
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "entity_frequency": {
+    "完美二叉树": 6,
+    "高度": 4,
+    "AVL 树": 3,
+    "中序遍历": 3,
+    "二分查找": 3,
+    "二叉搜索树": 3,
+    "二叉树": 3,
+    "先右旋后左旋": 3,
+    "先左旋后右旋": 3,
+    "分治": 3,
+    "初始化二叉树": 3,
+    "删除节点": 3,
+    "前序遍历": 3,
+    "右子树": 3,
+    "右子节点": 3,
+    "右旋": 3,
+    "叶节点": 3,
+    "后序遍历": 3,
+    "完全二叉树": 3,
+    "完满二叉树": 3,
+    "层": 3,
+    "层序遍历": 3,
+    "左子树": 3,
+    "左子节点": 3,
+    "左旋": 3,
+    "平衡二叉搜索树": 3,
+    "平衡二叉树": 3,
+    "平衡因子": 3,
+    "广度优先遍历": 3,
+    "度": 3,
+    "插入节点": 3,
+    "数组表示": 3,
+    "旋转": 3,
+    "映射公式": 3,
+    "查找节点": 3,
+    "根节点": 3,
+    "深度": 3,
+    "深度优先遍历": 3,
+    "父节点": 3,
+    "红黑树": 3,
+    "节点": 3,
+    "边": 3,
+    "迭代": 3,
+    "递归": 3,
+    "遍历": 3,
+    "链表": 3,
+    "队列": 3,
+    "非线性数据结构": 3,
+    "多级索引": 2,
+    "平衡性": 2,
+    "构建二叉搜索树": 2,
+    "节点数量": 2,
+    "JAVA": 1,
+    "中序遍历序列": 1,
+    "删除": 1,
+    "基本数据类型": 1,
+    "字符串常量池": 1,
+    "底层节点数量": 1,
+    "引用类型": 1,
+    "插入": 1
+  },
+  "relation_frequency": {
+    "AVL 树 -[RELATED_TO]-> 红黑树": 3,
+    "二叉搜索树 -[CONTAINS]-> 删除节点": 3,
+    "二叉搜索树 -[CONTAINS]-> 插入节点": 3,
+    "二叉搜索树 -[CONTAINS]-> 查找节点": 3,
+    "二叉搜索树 -[RELATED_TO]-> 二分查找": 3,
+    "二叉树 -[CONTAINS]-> 完全二叉树": 3,
+    "二叉树 -[CONTAINS]-> 完满二叉树": 3,
+    "二叉树 -[CONTAINS]-> 完美二叉树": 3,
+    "二叉树 -[CONTAINS]-> 平衡二叉树": 3,
+    "分治 -[APPLIES_TO]-> 二叉树": 3,
+    "右旋 -[RELATED_TO]-> 左旋": 3,
+    "完全二叉树 -[CONTAINS]-> 完美二叉树": 3,
+    "平衡二叉搜索树 -[CONTAINS]-> AVL 树": 3,
+    "广度优先遍历 -[CONTAINS]-> 层序遍历": 3,
+    "旋转 -[CONTAINS]-> 先右旋后左旋": 3,
+    "旋转 -[CONTAINS]-> 先左旋后右旋": 3,
+    "旋转 -[CONTAINS]-> 右旋": 3,
+    "旋转 -[CONTAINS]-> 左旋": 3,
+    "深度优先遍历 -[CONTAINS]-> 中序遍历": 3,
+    "深度优先遍历 -[CONTAINS]-> 前序遍历": 3,
+    "深度优先遍历 -[CONTAINS]-> 后序遍历": 3,
+    "递归 -[APPLIES_TO]-> 深度优先遍历": 3,
+    "遍历 -[CONTAINS]-> 中序遍历": 3,
+    "遍历 -[CONTAINS]-> 前序遍历": 3,
+    "遍历 -[CONTAINS]-> 后序遍历": 3,
+    "遍历 -[CONTAINS]-> 层序遍历": 3,
+    "队列 -[RELATED_TO]-> 广度优先遍历": 3,
+    "非线性数据结构 -[CONTAINS]-> 二叉树": 3,
+    "二叉搜索树 -[APPLIES_TO]-> 多级索引": 2,
+    "二叉搜索树 -[CONTAINS]-> AVL 树": 2,
+    "二叉树 -[CONTAINS]-> 初始化二叉树": 2,
+    "二叉树 -[CONTAINS]-> 删除节点": 2,
+    "二叉树 -[CONTAINS]-> 插入节点": 2,
+    "二叉树 -[CONTAINS]-> 节点": 2,
+    "平衡二叉搜索树 -[CONTAINS]-> 红黑树": 2,
+    "平衡二叉树 -[CONTAINS]-> AVL 树": 2,
+    "递归 -[APPLIES_TO]-> 构建二叉搜索树": 2,
+    "AVL 树 -[RELATED_TO]-> 旋转": 1,
+    "二叉搜索树 -[CONTAINS]-> 删除": 1,
+    "二叉搜索树 -[CONTAINS]-> 插入": 1,
+    "二叉树 -[CONTAINS]-> 遍历": 1,
+    "完美二叉树 -[RELATED_TO]-> 底层节点数量": 1,
+    "完美二叉树 -[RELATED_TO]-> 节点数量": 1,
+    "数组表示 -[APPLIES_TO]-> 完全二叉树": 1,
+    "数组表示 -[RELATED_TO]-> 二叉树": 1,
+    "数组表示 -[RELATED_TO]-> 完全二叉树": 1,
+    "数组表示 -[RELATED_TO]-> 映射公式": 1,
+    "映射公式 -[RELATED_TO]-> 数组表示": 1,
+    "递归 -[APPLIES_TO]-> 二叉搜索树": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 7.3333,
+      "values": [
+        9,
+        2,
+        11
+      ]
+    },
+    "direction_reversed": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "type_confused": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 2.3333,
+      "values": [
+        2,
+        1,
+        4
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "duplicate": {
+      "mean": 2.3333,
+      "values": [
+        3,
+        3,
+        1
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 2.3333,
+      "values": [
+        3,
+        3,
+        1
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 40.3333,
+      "values": [
+        43,
+        37,
+        41
+      ]
+    },
+    "pred_total": {
+      "mean": 38.0,
+      "values": [
+        40,
+        34,
+        40
+      ]
+    },
+    "core_total": {
+      "mean": 33.0,
+      "values": [
+        33,
+        33,
+        33
+      ]
+    },
+    "full_total": {
+      "mean": 33.0,
+      "values": [
+        33,
+        33,
+        33
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "reconciles": true
+      },
+      {
+        "raw": 37,
+        "scored": 34,
+        "dropped": 3,
+        "reconciles": true
+      },
+      {
+        "raw": 41,
+        "scored": 40,
+        "dropped": 1,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 47,
+      "fp": 4,
+      "fn": 2,
+      "precision": 0.9216,
+      "recall": 0.9592,
+      "f1": 0.94
+    },
+    "entity_macro": {
+      "precision": 0.9216,
+      "recall": 0.9592,
+      "f1": 0.94
+    },
+    "entity_category_accuracy": 0.9787,
+    "relation_primary_micro": {
+      "pred_total": 40,
+      "core_total": 33,
+      "full_total": 33,
+      "hit_core": 31,
+      "hit_full": 31,
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_core_micro": {
+      "tp": 31,
+      "fp": 9,
+      "fn": 2,
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_full_micro": {
+      "tp": 31,
+      "fp": 9,
+      "fn": 2,
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_strict_micro": {
+      "tp": 31,
+      "fp": 9,
+      "fn": 2,
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 31,
+      "fp": 9,
+      "fn": 2,
+      "precision": 0.775,
+      "recall": 0.9394,
+      "f1": 0.8493
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 0,
+        "pred_total": 0,
+        "micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "CONTAINS": {
+        "gold_total": 25,
+        "pred_total": 29,
+        "micro": {
+          "tp": 24,
+          "fp": 5,
+          "fn": 1,
+          "precision": 0.8276,
+          "recall": 0.96,
+          "f1": 0.8889
+        },
+        "mean_document_f1": 0.8889,
+        "active_document_f1": 0.8889
+      },
+      "RELATED_TO": {
+        "gold_total": 5,
+        "pred_total": 7,
+        "micro": {
+          "tp": 4,
+          "fp": 3,
+          "fn": 1,
+          "precision": 0.5714,
+          "recall": 0.8,
+          "f1": 0.6667
+        },
+        "mean_document_f1": 0.6667,
+        "active_document_f1": 0.6667
+      },
+      "APPLIES_TO": {
+        "gold_total": 3,
+        "pred_total": 4,
+        "micro": {
+          "tp": 3,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        },
+        "mean_document_f1": 0.8571,
+        "active_document_f1": 0.8571
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.6032,
+      "active_types": 0.8042,
+      "active_type_names": [
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.0,
+    "error_taxonomy_totals": {
+      "fabricated": 9,
+      "direction_reversed": 0,
+      "type_confused": 0,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 0,
+      "duplicate": 3,
+      "low_confidence": 0,
+      "missed_core": 2,
+      "pred_raw_total": 43,
+      "pred_total": 40,
+      "dropped_total": 3,
+      "core_total": 33,
+      "full_total": 33
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 43,
+      "scored": 40,
+      "dropped": 3,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 47,
+        "fp": 4,
+        "fn": 2,
+        "precision": 0.9216,
+        "recall": 0.9592,
+        "f1": 0.94
+      },
+      "entity_macro": {
+        "precision": 0.9216,
+        "recall": 0.9592,
+        "f1": 0.94
+      },
+      "entity_category_accuracy": 0.9787,
+      "relation_primary_micro": {
+        "pred_total": 40,
+        "core_total": 33,
+        "full_total": 33,
+        "hit_core": 31,
+        "hit_full": 31,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_core_micro": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_full_micro": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_strict_micro": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 25,
+          "pred_total": 29,
+          "micro": {
+            "tp": 24,
+            "fp": 5,
+            "fn": 1,
+            "precision": 0.8276,
+            "recall": 0.96,
+            "f1": 0.8889
+          },
+          "mean_document_f1": 0.8889,
+          "active_document_f1": 0.8889
+        },
+        "RELATED_TO": {
+          "gold_total": 5,
+          "pred_total": 7,
+          "micro": {
+            "tp": 4,
+            "fp": 3,
+            "fn": 1,
+            "precision": 0.5714,
+            "recall": 0.8,
+            "f1": 0.6667
+          },
+          "mean_document_f1": 0.6667,
+          "active_document_f1": 0.6667
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 4,
+          "micro": {
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          },
+          "mean_document_f1": 0.8571,
+          "active_document_f1": 0.8571
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.6032,
+        "active_types": 0.8042,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0,
+      "error_taxonomy_totals": {
+        "fabricated": 9,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 2,
+        "pred_raw_total": 43,
+        "pred_total": 40,
+        "dropped_total": 3,
+        "core_total": 33,
+        "full_total": 33
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 43,
+        "scored": 40,
+        "dropped": 3,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 47,
+        "fp": 5,
+        "fn": 2,
+        "precision": 0.9038,
+        "recall": 0.9592,
+        "f1": 0.9307
+      },
+      "entity_macro": {
+        "precision": 0.9038,
+        "recall": 0.9592,
+        "f1": 0.9307
+      },
+      "entity_category_accuracy": 0.9787,
+      "relation_primary_micro": {
+        "pred_total": 34,
+        "core_total": 33,
+        "full_total": 33,
+        "hit_core": 32,
+        "hit_full": 32,
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_core_micro": {
+        "tp": 32,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_full_micro": {
+        "tp": 32,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_strict_micro": {
+        "tp": 32,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 32,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.9412,
+        "recall": 0.9697,
+        "f1": 0.9552
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 25,
+          "pred_total": 25,
+          "micro": {
+            "tp": 25,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        },
+        "RELATED_TO": {
+          "gold_total": 5,
+          "pred_total": 4,
+          "micro": {
+            "tp": 4,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889
+          },
+          "mean_document_f1": 0.8889,
+          "active_document_f1": 0.8889
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 5,
+          "micro": {
+            "tp": 3,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75
+          },
+          "mean_document_f1": 0.75,
+          "active_document_f1": 0.75
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.6597,
+        "active_types": 0.8796,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0,
+      "error_taxonomy_totals": {
+        "fabricated": 2,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 1,
+        "pred_raw_total": 37,
+        "pred_total": 34,
+        "dropped_total": 3,
+        "core_total": 33,
+        "full_total": 33
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 37,
+        "scored": 34,
+        "dropped": 3,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 46,
+        "fp": 11,
+        "fn": 3,
+        "precision": 0.807,
+        "recall": 0.9388,
+        "f1": 0.8679
+      },
+      "entity_macro": {
+        "precision": 0.807,
+        "recall": 0.9388,
+        "f1": 0.8679
+      },
+      "entity_category_accuracy": 0.9783,
+      "relation_primary_micro": {
+        "pred_total": 40,
+        "core_total": 33,
+        "full_total": 33,
+        "hit_core": 29,
+        "hit_full": 29,
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_core_micro": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_full_micro": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_strict_micro": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 29,
+        "fp": 11,
+        "fn": 4,
+        "precision": 0.725,
+        "recall": 0.8788,
+        "f1": 0.7945
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 25,
+          "pred_total": 29,
+          "micro": {
+            "tp": 23,
+            "fp": 6,
+            "fn": 2,
+            "precision": 0.7931,
+            "recall": 0.92,
+            "f1": 0.8519
+          },
+          "mean_document_f1": 0.8519,
+          "active_document_f1": 0.8519
+        },
+        "RELATED_TO": {
+          "gold_total": 5,
+          "pred_total": 8,
+          "micro": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 1,
+            "precision": 0.5,
+            "recall": 0.8,
+            "f1": 0.6154
+          },
+          "mean_document_f1": 0.6154,
+          "active_document_f1": 0.6154
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 3,
+          "micro": {
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667
+          },
+          "mean_document_f1": 0.6667,
+          "active_document_f1": 0.6667
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.5335,
+        "active_types": 0.7113,
+        "active_type_names": [
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0,
+      "error_taxonomy_totals": {
+        "fabricated": 11,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 1,
+        "low_confidence": 0,
+        "missed_core": 4,
+        "pred_raw_total": 41,
+        "pred_total": 40,
+        "dropped_total": 1,
+        "core_total": 33,
+        "full_total": 33
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 41,
+        "scored": 40,
+        "dropped": 1,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "Hello算法_第7章_树",
+      "gold": {
+        "entity_count": 49,
+        "relation_core_count": 33,
+        "relation_full_count": 33
+      },
+      "entity": {
+        "tp": 47,
+        "fp": 4,
+        "fn": 2,
+        "precision": 0.9216,
+        "recall": 0.9592,
+        "f1": 0.94
+      },
+      "entity_category": {
+        "gold_entity_count": 49,
+        "pred_entity_count": 51,
+        "evaluated_entity_count": 47,
+        "correct": 46,
+        "accuracy": 0.9787
+      },
+      "relation_primary": {
+        "pred_total": 40,
+        "core_total": 33,
+        "full_total": 33,
+        "hit_core": 31,
+        "hit_full": 31,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_core": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_full": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_pair_auxiliary": {
+        "tp": 31,
+        "fp": 9,
+        "fn": 2,
+        "precision": 0.775,
+        "recall": 0.9394,
+        "f1": 0.8493
+      },
+      "relation_direction_error_rate": 0.0,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 0,
+          "pred": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "CONTAINS": {
+          "gold": 25,
+          "pred": 29,
+          "tp": 24,
+          "fp": 5,
+          "fn": 1,
+          "precision": 0.8276,
+          "recall": 0.96,
+          "f1": 0.8889
+        },
+        "RELATED_TO": {
+          "gold": 5,
+          "pred": 7,
+          "tp": 4,
+          "fp": 3,
+          "fn": 1,
+          "precision": 0.5714,
+          "recall": 0.8,
+          "f1": 0.6667
+        },
+        "APPLIES_TO": {
+          "gold": 3,
+          "pred": 4,
+          "tp": 3,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 9,
+          "direction_reversed": 0,
+          "type_confused": 0,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 0,
+          "duplicate": 3,
+          "low_confidence": 0,
+          "missed_core": 2,
+          "pred_raw_total": 43,
+          "pred_total": 40,
+          "dropped_total": 3,
+          "core_total": 33,
+          "full_total": 33
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [],
+        "type_confused": [],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "二叉搜索树",
+            "type": "CONTAINS",
+            "target": "插入节点",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "二叉搜索树",
+            "type": "CONTAINS",
+            "target": "删除节点",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "队列",
+            "type": "RELATED_TO",
+            "target": "广度优先遍历",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "平衡二叉搜索树",
+            "type": "CONTAINS",
+            "target": "红黑树"
+          },
+          {
+            "source": "链表",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "AVL 树",
+            "type": "RELATED_TO",
+            "target": "旋转"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "初始化二叉树"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "删除节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "插入节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "遍历"
+          },
+          {
+            "source": "数组表示",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          },
+          {
+            "source": "映射公式",
+            "type": "RELATED_TO",
+            "target": "数组表示"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "构建二叉搜索树"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "AVL 树",
+          "type": "RELATED_TO",
+          "target": "旋转"
+        },
+        {
+          "source": "二叉树",
+          "type": "CONTAINS",
+          "target": "初始化二叉树"
+        },
+        {
+          "source": "二叉树",
+          "type": "CONTAINS",
+          "target": "删除节点"
+        },
+        {
+          "source": "二叉树",
+          "type": "CONTAINS",
+          "target": "插入节点"
+        },
+        {
+          "source": "二叉树",
+          "type": "CONTAINS",
+          "target": "节点"
+        },
+        {
+          "source": "二叉树",
+          "type": "CONTAINS",
+          "target": "遍历"
+        },
+        {
+          "source": "数组表示",
+          "type": "RELATED_TO",
+          "target": "二叉树"
+        },
+        {
+          "source": "映射公式",
+          "type": "RELATED_TO",
+          "target": "数组表示"
+        },
+        {
+          "source": "递归",
+          "type": "APPLIES_TO",
+          "target": "构建二叉搜索树"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "平衡二叉搜索树",
+          "type": "CONTAINS",
+          "target": "红黑树"
+        },
+        {
+          "source": "链表",
+          "type": "RELATED_TO",
+          "target": "二叉树"
+        }
+      ],
+      "type_confusions": []
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "Hello算法_第7章_树",
+        "gold": {
+          "entity_count": 49,
+          "relation_core_count": 33,
+          "relation_full_count": 33
+        },
+        "entity": {
+          "tp": 47,
+          "fp": 4,
+          "fn": 2,
+          "precision": 0.9216,
+          "recall": 0.9592,
+          "f1": 0.94
+        },
+        "entity_category": {
+          "gold_entity_count": 49,
+          "pred_entity_count": 51,
+          "evaluated_entity_count": 47,
+          "correct": 46,
+          "accuracy": 0.9787
+        },
+        "relation_primary": {
+          "pred_total": 40,
+          "core_total": 33,
+          "full_total": 33,
+          "hit_core": 31,
+          "hit_full": 31,
+          "precision": 0.775,
+          "recall": 0.9394,
+          "f1": 0.8493
+        },
+        "relation_core": {
+          "tp": 31,
+          "fp": 9,
+          "fn": 2,
+          "precision": 0.775,
+          "recall": 0.9394,
+          "f1": 0.8493
+        },
+        "relation_full": {
+          "tp": 31,
+          "fp": 9,
+          "fn": 2,
+          "precision": 0.775,
+          "recall": 0.9394,
+          "f1": 0.8493
+        },
+        "relation_pair_auxiliary": {
+          "tp": 31,
+          "fp": 9,
+          "fn": 2,
+          "precision": 0.775,
+          "recall": 0.9394,
+          "f1": 0.8493
+        },
+        "relation_direction_error_rate": 0.0,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 25,
+            "pred": 29,
+            "tp": 24,
+            "fp": 5,
+            "fn": 1,
+            "precision": 0.8276,
+            "recall": 0.96,
+            "f1": 0.8889
+          },
+          "RELATED_TO": {
+            "gold": 5,
+            "pred": 7,
+            "tp": 4,
+            "fp": 3,
+            "fn": 1,
+            "precision": 0.5714,
+            "recall": 0.8,
+            "f1": 0.6667
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 4,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 9,
+            "direction_reversed": 0,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 3,
+            "low_confidence": 0,
+            "missed_core": 2,
+            "pred_raw_total": 43,
+            "pred_total": 40,
+            "dropped_total": 3,
+            "core_total": 33,
+            "full_total": 33
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "插入节点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "删除节点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "队列",
+              "type": "RELATED_TO",
+              "target": "广度优先遍历",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "平衡二叉搜索树",
+              "type": "CONTAINS",
+              "target": "红黑树"
+            },
+            {
+              "source": "链表",
+              "type": "RELATED_TO",
+              "target": "二叉树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "AVL 树",
+              "type": "RELATED_TO",
+              "target": "旋转"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "初始化二叉树"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "删除节点"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "插入节点"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "节点"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "遍历"
+            },
+            {
+              "source": "数组表示",
+              "type": "RELATED_TO",
+              "target": "二叉树"
+            },
+            {
+              "source": "映射公式",
+              "type": "RELATED_TO",
+              "target": "数组表示"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "构建二叉搜索树"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "AVL 树",
+            "type": "RELATED_TO",
+            "target": "旋转"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "初始化二叉树"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "删除节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "插入节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "遍历"
+          },
+          {
+            "source": "数组表示",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          },
+          {
+            "source": "映射公式",
+            "type": "RELATED_TO",
+            "target": "数组表示"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "构建二叉搜索树"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "平衡二叉搜索树",
+            "type": "CONTAINS",
+            "target": "红黑树"
+          },
+          {
+            "source": "链表",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          }
+        ],
+        "type_confusions": []
+      }
+    ],
+    [
+      {
+        "text_id": "Hello算法_第7章_树",
+        "gold": {
+          "entity_count": 49,
+          "relation_core_count": 33,
+          "relation_full_count": 33
+        },
+        "entity": {
+          "tp": 47,
+          "fp": 5,
+          "fn": 2,
+          "precision": 0.9038,
+          "recall": 0.9592,
+          "f1": 0.9307
+        },
+        "entity_category": {
+          "gold_entity_count": 49,
+          "pred_entity_count": 52,
+          "evaluated_entity_count": 47,
+          "correct": 46,
+          "accuracy": 0.9787
+        },
+        "relation_primary": {
+          "pred_total": 34,
+          "core_total": 33,
+          "full_total": 33,
+          "hit_core": 32,
+          "hit_full": 32,
+          "precision": 0.9412,
+          "recall": 0.9697,
+          "f1": 0.9552
+        },
+        "relation_core": {
+          "tp": 32,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.9412,
+          "recall": 0.9697,
+          "f1": 0.9552
+        },
+        "relation_full": {
+          "tp": 32,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.9412,
+          "recall": 0.9697,
+          "f1": 0.9552
+        },
+        "relation_pair_auxiliary": {
+          "tp": 32,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.9412,
+          "recall": 0.9697,
+          "f1": 0.9552
+        },
+        "relation_direction_error_rate": 0.0,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 25,
+            "pred": 25,
+            "tp": 25,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "RELATED_TO": {
+            "gold": 5,
+            "pred": 4,
+            "tp": 4,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.8889
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 5,
+            "tp": 3,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.6,
+            "recall": 1.0,
+            "f1": 0.75
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 2,
+            "direction_reversed": 0,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 3,
+            "low_confidence": 0,
+            "missed_core": 1,
+            "pred_raw_total": 37,
+            "pred_total": 34,
+            "dropped_total": 3,
+            "core_total": 33,
+            "full_total": 33
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "插入节点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "删除节点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "队列",
+              "type": "RELATED_TO",
+              "target": "广度优先遍历",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "链表",
+              "type": "RELATED_TO",
+              "target": "二叉树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "数组表示",
+              "type": "APPLIES_TO",
+              "target": "完全二叉树"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "构建二叉搜索树"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "数组表示",
+            "type": "APPLIES_TO",
+            "target": "完全二叉树"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "构建二叉搜索树"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "链表",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          }
+        ],
+        "type_confusions": []
+      }
+    ],
+    [
+      {
+        "text_id": "Hello算法_第7章_树",
+        "gold": {
+          "entity_count": 49,
+          "relation_core_count": 33,
+          "relation_full_count": 33
+        },
+        "entity": {
+          "tp": 46,
+          "fp": 11,
+          "fn": 3,
+          "precision": 0.807,
+          "recall": 0.9388,
+          "f1": 0.8679
+        },
+        "entity_category": {
+          "gold_entity_count": 49,
+          "pred_entity_count": 57,
+          "evaluated_entity_count": 46,
+          "correct": 45,
+          "accuracy": 0.9783
+        },
+        "relation_primary": {
+          "pred_total": 40,
+          "core_total": 33,
+          "full_total": 33,
+          "hit_core": 29,
+          "hit_full": 29,
+          "precision": 0.725,
+          "recall": 0.8788,
+          "f1": 0.7945
+        },
+        "relation_core": {
+          "tp": 29,
+          "fp": 11,
+          "fn": 4,
+          "precision": 0.725,
+          "recall": 0.8788,
+          "f1": 0.7945
+        },
+        "relation_full": {
+          "tp": 29,
+          "fp": 11,
+          "fn": 4,
+          "precision": 0.725,
+          "recall": 0.8788,
+          "f1": 0.7945
+        },
+        "relation_pair_auxiliary": {
+          "tp": 29,
+          "fp": 11,
+          "fn": 4,
+          "precision": 0.725,
+          "recall": 0.8788,
+          "f1": 0.7945
+        },
+        "relation_direction_error_rate": 0.0,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 0,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 25,
+            "pred": 29,
+            "tp": 23,
+            "fp": 6,
+            "fn": 2,
+            "precision": 0.7931,
+            "recall": 0.92,
+            "f1": 0.8519
+          },
+          "RELATED_TO": {
+            "gold": 5,
+            "pred": 8,
+            "tp": 4,
+            "fp": 4,
+            "fn": 1,
+            "precision": 0.5,
+            "recall": 0.8,
+            "f1": 0.6154
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 3,
+            "tp": 2,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 11,
+            "direction_reversed": 0,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 1,
+            "low_confidence": 0,
+            "missed_core": 4,
+            "pred_raw_total": 41,
+            "pred_total": 40,
+            "dropped_total": 1,
+            "core_total": 33,
+            "full_total": 33
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "队列",
+              "type": "RELATED_TO",
+              "target": "广度优先遍历",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "二叉搜索树",
+              "type": "APPLIES_TO",
+              "target": "多级索引"
+            },
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "AVL 树"
+            },
+            {
+              "source": "平衡二叉树",
+              "type": "CONTAINS",
+              "target": "AVL 树"
+            },
+            {
+              "source": "链表",
+              "type": "RELATED_TO",
+              "target": "二叉树"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "删除"
+            },
+            {
+              "source": "二叉搜索树",
+              "type": "CONTAINS",
+              "target": "插入"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "初始化二叉树"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "删除节点"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "插入节点"
+            },
+            {
+              "source": "二叉树",
+              "type": "CONTAINS",
+              "target": "节点"
+            },
+            {
+              "source": "完美二叉树",
+              "type": "RELATED_TO",
+              "target": "底层节点数量"
+            },
+            {
+              "source": "完美二叉树",
+              "type": "RELATED_TO",
+              "target": "节点数量"
+            },
+            {
+              "source": "数组表示",
+              "type": "RELATED_TO",
+              "target": "完全二叉树"
+            },
+            {
+              "source": "数组表示",
+              "type": "RELATED_TO",
+              "target": "映射公式"
+            },
+            {
+              "source": "递归",
+              "type": "APPLIES_TO",
+              "target": "二叉搜索树"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "二叉搜索树",
+            "type": "CONTAINS",
+            "target": "删除"
+          },
+          {
+            "source": "二叉搜索树",
+            "type": "CONTAINS",
+            "target": "插入"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "初始化二叉树"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "删除节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "插入节点"
+          },
+          {
+            "source": "二叉树",
+            "type": "CONTAINS",
+            "target": "节点"
+          },
+          {
+            "source": "完美二叉树",
+            "type": "RELATED_TO",
+            "target": "底层节点数量"
+          },
+          {
+            "source": "完美二叉树",
+            "type": "RELATED_TO",
+            "target": "节点数量"
+          },
+          {
+            "source": "数组表示",
+            "type": "RELATED_TO",
+            "target": "完全二叉树"
+          },
+          {
+            "source": "数组表示",
+            "type": "RELATED_TO",
+            "target": "映射公式"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "二叉搜索树"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "二叉搜索树",
+            "type": "APPLIES_TO",
+            "target": "多级索引"
+          },
+          {
+            "source": "二叉搜索树",
+            "type": "CONTAINS",
+            "target": "AVL 树"
+          },
+          {
+            "source": "平衡二叉树",
+            "type": "CONTAINS",
+            "target": "AVL 树"
+          },
+          {
+            "source": "链表",
+            "type": "RELATED_TO",
+            "target": "二叉树"
+          }
+        ],
+        "type_confusions": []
+      }
+    ]
+  ]
+}

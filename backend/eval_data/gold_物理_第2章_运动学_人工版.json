@@ -181,6 +181,16 @@
    "name": "模型",
    "category": "概念",
    "description": "只包含描述物理情境所需元素的简化描述"
+  },
+  {
+   "name": "引力",
+   "category": "概念",
+   "description": "使物体相互吸引、使物体落向地球的力"
+  },
+  {
+   "name": "空气阻力",
+   "category": "概念",
+   "description": "空气对运动物体产生的阻碍作用"
   }
  ],
  "relations": [
@@ -557,6 +567,110 @@
    "target": "因变量",
    "type": "RELATED_TO",
    "evidence": "横轴通常被认为是自变量（independent variable），纵轴是因变量（dependent variable）",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "矢量",
+   "target": "加速度",
+   "type": "CONTAINS",
+   "evidence": "加速度是与速度变化 Δv 同方向的矢量",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "引力",
+   "target": "重力加速度",
+   "type": "RELATED_TO",
+   "evidence": "引力使物体落向地球中心。自由落体物体的加速度因此被称为重力加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "自由落体",
+   "target": "空气阻力",
+   "type": "RELATED_TO",
+   "evidence": "在没有空气阻力或摩擦的情况下下落的物体被定义为处于自由落体（free-fall）状态",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "自由落体",
+   "target": "引力",
+   "type": "RELATED_TO",
+   "evidence": "仅由引力作用产生的运动状态",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "斜率",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图的斜率是速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "斜率",
+   "target": "加速度",
+   "type": "RELATED_TO",
+   "evidence": "速度-时间图的斜率是加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "减速",
+   "target": "速率",
+   "type": "RELATED_TO",
+   "evidence": "减速总是降低速率",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "减速",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "减速总是指与速度方向相反的加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "解题步骤",
+   "target": "运动学方程",
+   "type": "APPLIES_TO",
+   "evidence": "找到并应用表示这些原理的方程",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "速度",
+   "type": "APPLIES_TO",
+   "evidence": "从位置-时间图确定平均速度或瞬时速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "图像分析",
+   "target": "加速度",
+   "type": "APPLIES_TO",
+   "evidence": "从速度-时间图确定平均加速度或瞬时加速度",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "加速度",
+   "target": "速率",
+   "type": "RELATED_TO",
+   "evidence": "加速度是速率或方向的变化，或两者兼有",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "y截距",
+   "target": "位置",
+   "type": "RELATED_TO",
+   "evidence": "截距是零时刻的位置——即 x_0",
    "confidence": 0.9,
    "core": true
   }

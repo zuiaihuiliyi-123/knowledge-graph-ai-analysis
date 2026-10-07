@@ -301,6 +301,16 @@
    "name": "含氧酸",
    "category": "概念",
    "description": "含有氢、氧和另一种元素、以赋予化合物酸性的方式键合的化合物"
+  },
+  {
+   "name": "分数丰度",
+   "category": "概念",
+   "description": "某同位素在元素天然样品中所占的比例"
+  },
+  {
+   "name": "葡萄干布丁模型",
+   "category": "概念",
+   "description": "汤姆森提出的、正电质量体中嵌入电子的原子模型"
   }
  ],
  "relations": [
@@ -854,6 +864,46 @@
    "type": "RELATED_TO",
    "evidence": "典型的含氧酸由氢与含氧多原子离子结合组成",
    "confidence": 0.85,
+   "core": true
+  },
+  {
+   "source": "分子化合物",
+   "target": "分子式",
+   "type": "RELATED_TO",
+   "evidence": "分子式（molecular formula）是分子的表示方式",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "原子序数",
+   "target": "周期律",
+   "type": "RELATED_TO",
+   "evidence": "周期关系涉及的是原子序数而非原子质量",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "双原子分子",
+   "target": "元素",
+   "type": "RELATED_TO",
+   "evidence": "氢、氧和氮元素的大多数样品由每个含两个原子的分子（称为双原子分子）组成",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "分数丰度",
+   "target": "同位素",
+   "type": "RELATED_TO",
+   "evidence": "它等于每种同位素的质量乘以其分数丰度之和",
+   "confidence": 0.9,
+   "core": true
+  },
+  {
+   "source": "葡萄干布丁模型",
+   "target": "电子",
+   "type": "RELATED_TO",
+   "evidence": "汤姆森提出了原子的“葡萄干布丁”模型，它描述了一个带正电的质量体，其中嵌入了等量的负电荷（电子形式）",
+   "confidence": 0.9,
    "core": true
   }
  ]

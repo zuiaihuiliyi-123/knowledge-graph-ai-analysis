@@ -1,0 +1,5490 @@
+[
+  {
+    "text_id": "化学_第2章_原子分子与离子",
+    "runs": [
+      {
+        "entities": [
+          {
+            "name": "原子",
+            "category": "概念",
+            "description": "物质由称为原子的极其微小的粒子组成，是能够参与化学变化的元素的最小单元。"
+          },
+          {
+            "name": "元素",
+            "category": "概念",
+            "description": "只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。"
+          },
+          {
+            "name": "化合物",
+            "category": "概念",
+            "description": "由两种或更多种元素的原子以小的整数比结合而成的物质。"
+          },
+          {
+            "name": "物质守恒定律",
+            "category": "概念",
+            "description": "在化学变化过程中，原子既不会被创造也不会被消灭，而是被重新排列，因此物质总质量保持不变。"
+          },
+          {
+            "name": "定比定律",
+            "category": "概念",
+            "description": "纯化合物的所有样品都含有相同比例（按质量）的相同元素。"
+          },
+          {
+            "name": "倍比定律",
+            "category": "概念",
+            "description": "当两种元素反应形成不止一种化合物时，固定质量的一种元素将与另一种元素的质量以小的整数比反应。"
+          },
+          {
+            "name": "道尔顿原子理论",
+            "category": "概念",
+            "description": "道尔顿提出的关于物质微观特征的假说，包括原子是元素的最小单元、元素由一种原子组成、化合物由原子以整数比结合、原子在化学变化中不被创造或消灭等公设。"
+          },
+          {
+            "name": "电子",
+            "category": "概念",
+            "description": "一种带负电的亚原子粒子，其质量不到原子的千分之一。"
+          },
+          {
+            "name": "阴极射线管",
+            "category": "概念",
+            "description": "一个密封的玻璃管，管中空气几乎全部被抽走，管内有两个金属电极，用于产生阴极射线。"
+          },
+          {
+            "name": "阴极射线",
+            "category": "概念",
+            "description": "在阴极射线管中，当在电极两端施加高电压时，电极之间出现的一束可见的光束。"
+          },
+          {
+            "name": "原子核",
+            "category": "概念",
+            "description": "原子中心的一个小的、相对较重的、带正电的物体，原子的大部分质量集中于此。"
+          },
+          {
+            "name": "质子",
+            "category": "概念",
+            "description": "在原子核中发现的带正电的亚原子粒子。"
+          },
+          {
+            "name": "中子",
+            "category": "概念",
+            "description": "不带电的亚原子粒子，质量与质子大致相同。"
+          },
+          {
+            "name": "同位素",
+            "category": "概念",
+            "description": "同一元素中质量不同但在化学上无法区分的原子类型。"
+          },
+          {
+            "name": "原子序数",
+            "category": "概念",
+            "description": "原子核中的质子数，是元素的规定性特征，决定了原子的身份。"
+          },
+          {
+            "name": "质量数",
+            "category": "概念",
+            "description": "原子中质子数和中子数的总和。"
+          },
+          {
+            "name": "离子",
+            "category": "概念",
+            "description": "当原子中带正电质子和带负电电子的数量不相等时，原子就带电，被称为离子。"
+          },
+          {
+            "name": "阴离子",
+            "category": "概念",
+            "description": "获得一个或多个电子的原子将表现出负电荷，称为阴离子。"
+          },
+          {
+            "name": "阳离子",
+            "category": "概念",
+            "description": "当一个原子失去一个或多个电子时，就形成带正电的原子，称为阳离子。"
+          },
+          {
+            "name": "原子质量单位",
+            "category": "概念",
+            "description": "用于描述原子等微小物体质量的单位，1 amu恰好是一个碳-12原子质量的1/12。"
+          },
+          {
+            "name": "基本电荷单位",
+            "category": "概念",
+            "description": "也称为元电荷，等于一个电子电荷的大小（e），其中e = 1.602 × 10−19 C。"
+          },
+          {
+            "name": "化学符号",
+            "category": "概念",
+            "description": "用来表示元素或元素原子的缩写。"
+          },
+          {
+            "name": "元素周期表",
+            "category": "概念",
+            "description": "所有已知元素及其符号的表格，按原子序数排列。"
+          },
+          {
+            "name": "周期",
+            "category": "概念",
+            "description": "元素周期表中的横行。"
+          },
+          {
+            "name": "族",
+            "category": "概念",
+            "description": "元素周期表中的纵列。"
+          },
+          {
+            "name": "金属",
+            "category": "概念",
+            "description": "元素的一类，具有金属光泽、导电导热等性质。"
+          },
+          {
+            "name": "非金属",
+            "category": "概念",
+            "description": "元素的一类，通常缺乏金属性质。"
+          },
+          {
+            "name": "类金属",
+            "category": "概念",
+            "description": "性质介于金属和非金属之间的元素。"
+          },
+          {
+            "name": "主族元素",
+            "category": "概念",
+            "description": "元素周期表中s区和p区的元素。"
+          },
+          {
+            "name": "过渡金属",
+            "category": "概念",
+            "description": "元素周期表中d区的金属元素。"
+          },
+          {
+            "name": "内过渡金属",
+            "category": "概念",
+            "description": "元素周期表中f区的金属元素。"
+          },
+          {
+            "name": "碱金属",
+            "category": "概念",
+            "description": "第1族（氢除外）元素，包括锂、钠、钾等。"
+          },
+          {
+            "name": "碱土金属",
+            "category": "概念",
+            "description": "第2族元素，包括铍、镁、钙等。"
+          },
+          {
+            "name": "卤素",
+            "category": "概念",
+            "description": "第17族元素，包括氟、氯、溴、碘等。"
+          },
+          {
+            "name": "氧族元素",
+            "category": "概念",
+            "description": "第16族元素，包括氧、硫、硒等。"
+          },
+          {
+            "name": "氮族元素",
+            "category": "概念",
+            "description": "第15族元素，包括氮、磷、砷等。"
+          },
+          {
+            "name": "稀有气体",
+            "category": "概念",
+            "description": "第18族元素，包括氦、氖、氩等。"
+          },
+          {
+            "name": "化学键",
+            "category": "概念",
+            "description": "原子间强烈的相互作用，包括共价键和离子键等。"
+          },
+          {
+            "name": "共价键",
+            "category": "概念",
+            "description": "原子间通过共用电子对形成的化学键。"
+          },
+          {
+            "name": "离子键",
+            "category": "概念",
+            "description": "带相反电荷的离子之间的静电吸引力。"
+          },
+          {
+            "name": "分子化合物",
+            "category": "概念",
+            "description": "由分子构成的化合物，通常由非金属元素通过共价键结合。"
+          },
+          {
+            "name": "离子化合物",
+            "category": "概念",
+            "description": "由离子构成的化合物，通常由金属和非金属元素通过离子键结合。"
+          },
+          {
+            "name": "二元化合物",
+            "category": "概念",
+            "description": "由两种元素组成的化合物。"
+          },
+          {
+            "name": "酸",
+            "category": "概念",
+            "description": "在水溶液中能电离出氢离子的化合物。"
+          },
+          {
+            "name": "二元酸",
+            "category": "概念",
+            "description": "由氢和另一种非金属元素组成的酸。"
+          },
+          {
+            "name": "含氧酸",
+            "category": "概念",
+            "description": "由氢、氧和另一种元素组成的酸。"
+          },
+          {
+            "name": "含氧酸根阴离子",
+            "category": "概念",
+            "description": "含氧酸失去氢离子后形成的多原子阴离子。"
+          },
+          {
+            "name": "多原子离子",
+            "category": "概念",
+            "description": "由两个或多个原子通过共价键结合而成的离子。"
+          },
+          {
+            "name": "单原子离子",
+            "category": "概念",
+            "description": "由单个原子得失电子形成的离子。"
+          },
+          {
+            "name": "水合物",
+            "category": "概念",
+            "description": "含有水分子作为其结构一部分的离子化合物。"
+          },
+          {
+            "name": "同分异构体",
+            "category": "概念",
+            "description": "具有相同分子式但原子排列不同的化合物。"
+          },
+          {
+            "name": "结构异构体",
+            "category": "概念",
+            "description": "原子连接顺序不同的同分异构体。"
+          },
+          {
+            "name": "空间异构体",
+            "category": "概念",
+            "description": "原子空间排列不同的同分异构体。"
+          },
+          {
+            "name": "分子式",
+            "category": "概念",
+            "description": "用元素符号表示分子中原子种类和数目的化学式。"
+          },
+          {
+            "name": "实验式",
+            "category": "概念",
+            "description": "表示化合物中原子最简单整数比的化学式。"
+          },
+          {
+            "name": "结构式",
+            "category": "概念",
+            "description": "用短线表示原子间成键情况的化学式。"
+          },
+          {
+            "name": "命名法",
+            "category": "方法",
+            "description": "用于命名化合物的系统方法。"
+          },
+          {
+            "name": "质谱法",
+            "category": "方法",
+            "description": "一种用于确定同位素和分子质量的分析方法。"
+          },
+          {
+            "name": "α粒子",
+            "category": "概念",
+            "description": "由两个质子和两个中子组成的高速、带正电的粒子。"
+          },
+          {
+            "name": "卢瑟福金箔实验",
+            "category": "方法",
+            "description": "用α粒子轰击金箔并观察散射的实验，用于探究原子结构。"
+          },
+          {
+            "name": "油滴实验",
+            "category": "方法",
+            "description": "密立根用于测量单个电子电荷的实验。"
+          },
+          {
+            "name": "葡萄干布丁模型",
+            "category": "概念",
+            "description": "汤姆森提出的原子模型，描述了一个带正电的质量体，其中嵌入了等量的负电荷。"
+          },
+          {
+            "name": "类土星原子模型",
+            "category": "概念",
+            "description": "长冈半太郎提出的原子模型，由一个带正电的球体被一圈电子环绕组成。"
+          },
+          {
+            "name": "原子质量",
+            "category": "概念",
+            "description": "原子的质量，通常以原子质量单位表示。"
+          },
+          {
+            "name": "平均原子质量",
+            "category": "概念",
+            "description": "考虑同位素丰度后元素的平均原子质量。"
+          },
+          {
+            "name": "同位素丰度",
+            "category": "概念",
+            "description": "某种同位素在元素中所占的百分比。"
+          },
+          {
+            "name": "电荷",
+            "category": "概念",
+            "description": "原子或离子所带的正负电荷量。"
+          },
+          {
+            "name": "原子结构",
+            "category": "概念",
+            "description": "原子由原子核和核外电子构成的内部结构。"
+          },
+          {
+            "name": "原子理论",
+            "category": "概念",
+            "description": "关于物质由原子组成的理论。"
+          },
+          {
+            "name": "元素符号",
+            "category": "概念",
+            "description": "表示元素的缩写符号。"
+          },
+          {
+            "name": "化学式",
+            "category": "概念",
+            "description": "用元素符号表示物质组成的式子。"
+          },
+          {
+            "name": "离子电荷",
+            "category": "概念",
+            "description": "离子所带的电荷数。"
+          },
+          {
+            "name": "质量亏损",
+            "category": "概念",
+            "description": "原子亚原子粒子的总和与实际原子质量之间的差值。"
+          },
+          {
+            "name": "双原子分子",
+            "category": "概念",
+            "description": "由两个化学键合的原子组成的分子，如H2、O2。"
+          },
+          {
+            "name": "周期律",
+            "category": "概念",
+            "description": "元素的性质是它们原子序数的周期函数。"
+          }
+        ],
+        "relations": [
+          {
+            "source": "原子",
+            "target": "原子核",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核，由带正电的质子和不带电的中子组成，周围是一个大得多的空间区域，其中含有带负电的电子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子",
+            "target": "电子",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核，由带正电的质子和不带电的中子组成，周围是一个大得多的空间区域，其中含有带负电的电子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子核",
+            "target": "质子",
+            "type": "CONTAINS",
+            "evidence": "原子核含有原子的大部分质量，因为质子和中子比电子重得多",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子核",
+            "target": "中子",
+            "type": "CONTAINS",
+            "evidence": "原子核含有原子的大部分质量，因为质子和中子比电子重得多",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "金属",
+            "type": "CONTAINS",
+            "evidence": "元素可以分为金属、非金属和类金属。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "非金属",
+            "type": "CONTAINS",
+            "evidence": "元素可以分为金属、非金属和类金属。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "类金属",
+            "type": "CONTAINS",
+            "evidence": "元素可以分为金属、非金属和类金属。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "主族元素",
+            "type": "CONTAINS",
+            "evidence": "主族元素包括第1、2和13-18族元素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "过渡金属",
+            "type": "CONTAINS",
+            "evidence": "过渡金属包括第3-12族元素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "内过渡金属",
+            "type": "CONTAINS",
+            "evidence": "内过渡金属包括镧系和锕系元素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素",
+            "target": "同位素",
+            "type": "CONTAINS",
+            "evidence": "同位素是同一元素中质量不同的原子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素周期表",
+            "target": "周期",
+            "type": "CONTAINS",
+            "evidence": "元素周期表按原子序数排列，分为周期和族。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素周期表",
+            "target": "族",
+            "type": "CONTAINS",
+            "evidence": "元素周期表按原子序数排列，分为周期和族。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "碱金属",
+            "type": "CONTAINS",
+            "evidence": "第1族（氢除外）被称为碱金属。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "碱土金属",
+            "type": "CONTAINS",
+            "evidence": "第2族被称为碱土金属。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "卤素",
+            "type": "CONTAINS",
+            "evidence": "第17族被称为卤素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "氧族元素",
+            "type": "CONTAINS",
+            "evidence": "第16族被称为氧族元素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "氮族元素",
+            "type": "CONTAINS",
+            "evidence": "第15族被称为氮族元素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "稀有气体",
+            "type": "CONTAINS",
+            "evidence": "第18族被称为稀有气体。",
+            "confidence": 0.95
+          },
+          {
+            "source": "化学键",
+            "target": "共价键",
+            "type": "CONTAINS",
+            "evidence": "化学键包括共价键和离子键。",
+            "confidence": 0.95
+          },
+          {
+            "source": "化学键",
+            "target": "离子键",
+            "type": "CONTAINS",
+            "evidence": "化学键包括共价键和离子键。",
+            "confidence": 0.95
+          },
+          {
+            "source": "化合物",
+            "target": "二元化合物",
+            "type": "CONTAINS",
+            "evidence": "二元化合物是由两种元素组成的化合物。",
+            "confidence": 0.95
+          },
+          {
+            "source": "酸",
+            "target": "二元酸",
+            "type": "CONTAINS",
+            "evidence": "酸可以分为二元酸和含氧酸。",
+            "confidence": 0.95
+          },
+          {
+            "source": "酸",
+            "target": "含氧酸",
+            "type": "CONTAINS",
+            "evidence": "酸可以分为二元酸和含氧酸。",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子",
+            "target": "单原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括单原子离子和多原子离子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子",
+            "target": "多原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括单原子离子和多原子离子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子",
+            "target": "阳离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括阳离子和阴离子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子",
+            "target": "阴离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括阳离子和阴离子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子化合物",
+            "target": "水合物",
+            "type": "CONTAINS",
+            "evidence": "离子化合物包括水合物。",
+            "confidence": 0.95
+          },
+          {
+            "source": "多原子离子",
+            "target": "含氧酸根阴离子",
+            "type": "CONTAINS",
+            "evidence": "多原子离子包括含氧酸根阴离子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "同分异构体",
+            "target": "结构异构体",
+            "type": "CONTAINS",
+            "evidence": "同分异构体包括结构异构体和空间异构体。",
+            "confidence": 0.95
+          },
+          {
+            "source": "同分异构体",
+            "target": "空间异构体",
+            "type": "CONTAINS",
+            "evidence": "同分异构体包括结构异构体和空间异构体。",
+            "confidence": 0.95
+          },
+          {
+            "source": "命名法",
+            "target": "化合物",
+            "type": "APPLIES_TO",
+            "evidence": "化学命名法用于命名化合物。",
+            "confidence": 0.95
+          },
+          {
+            "source": "质谱法",
+            "target": "同位素",
+            "type": "APPLIES_TO",
+            "evidence": "质谱法用于确定同位素。",
+            "confidence": 0.95
+          },
+          {
+            "source": "质谱法",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "质谱法涉及阳离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子构成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子构成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子键",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "离子键是离子之间的静电吸引力。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子键",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "离子键存在于离子化合物中。",
+            "confidence": 0.9
+          },
+          {
+            "source": "共价键",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "共价键存在于分子化合物中。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子核",
+            "target": "电子",
+            "type": "RELATED_TO",
+            "evidence": "原子核带正电，电子带负电，二者相互吸引。",
+            "confidence": 0.9
+          },
+          {
+            "source": "含氧酸",
+            "target": "含氧酸根阴离子",
+            "type": "RELATED_TO",
+            "evidence": "含氧酸失去氢离子后形成含氧酸根阴离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "电子",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "电子是原子的组成部分。",
+            "confidence": 0.9
+          },
+          {
+            "source": "电子",
+            "target": "基本电荷单位",
+            "type": "RELATED_TO",
+            "evidence": "基本电荷单位等于一个电子电荷的大小。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "原子得失电子后形成离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "化学符号",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "化学符号用来表示元素或元素原子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "实验式",
+            "type": "RELATED_TO",
+            "evidence": "分子式和实验式都是表示化合物组成的化学式。",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "化学符号",
+            "type": "RELATED_TO",
+            "evidence": "分子式使用化学符号表示。",
+            "confidence": 0.9
+          },
+          {
+            "source": "实验式",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "实验式表示化合物中原子最简单整数比。",
+            "confidence": 0.9
+          },
+          {
+            "source": "结构式",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "结构式是分子式的一种更详细表示。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同分异构体",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "同分异构体具有相同分子式但结构不同。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论认为元素只由一种类型的原子组成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论认为化合物由两种或更多种元素的原子以小的整数比结合而成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论认为物质由称为原子的极其微小的粒子组成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "物质守恒定律",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论解释了物质守恒定律。",
+            "confidence": 0.9
+          },
+          {
+            "source": "定比定律",
+            "target": "倍比定律",
+            "type": "RELATED_TO",
+            "evidence": "定比定律和倍比定律都是关于化合物组成的定律。",
+            "confidence": 0.9
+          },
+          {
+            "source": "定比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "定比定律指出纯化合物的所有样品都含有相同比例的元素。",
+            "confidence": 0.9
+          },
+          {
+            "source": "倍比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "倍比定律指出当两种元素形成不止一种化合物时，质量比成小整数比。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子序数",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "原子序数是元素的规定性特征。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子序数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "原子序数等于原子核中的质子数。",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "质量数是质子数和中子数的总和。",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "质量数是质子数和中子数的总和。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子质量",
+            "target": "原子质量单位",
+            "type": "RELATED_TO",
+            "evidence": "原子质量通常以原子质量单位表示。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "同位素质量不同是因为它们的中子数不同。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "原子质量",
+            "type": "RELATED_TO",
+            "evidence": "同位素具有不同的原子质量。",
+            "confidence": 0.9
+          },
+          {
+            "source": "α粒子",
+            "target": "原子核",
+            "type": "RELATED_TO",
+            "evidence": "α粒子被原子核散射。",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "金属元素倾向于形成阳离子，与阴离子形成离子化合物。",
+            "confidence": 0.9
+          },
+          {
+            "source": "非金属",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "非金属元素倾向于形成分子化合物。",
+            "confidence": 0.9
+          },
+          {
+            "source": "周期律",
+            "target": "元素周期表",
+            "type": "RELATED_TO",
+            "evidence": "周期律（periodic law）——如下：元素的性质是它们原子序数的周期函数。现代元素周期表按原子序数递增的顺序排列元素",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "结构式",
+            "type": "RELATED_TO",
+            "evidence": "化合物的结构式给出与分子式相同的信息",
+            "confidence": 0.9
+          },
+          {
+            "source": "化合物",
+            "target": "离子化合物",
+            "type": "CONTAINS",
+            "evidence": "含有离子并由离子键结合的化合物称为离子化合物（ionic compound）。",
+            "confidence": 0.95
+          },
+          {
+            "source": "化合物",
+            "target": "分子化合物",
+            "type": "CONTAINS",
+            "evidence": "这些分子化合物（共价化合物）在原子共享而不是转移（获得或失去）电子时产生。",
+            "confidence": 0.95
+          },
+          {
+            "source": "命名法",
+            "target": "离子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "要命名一种无机化合物，我们需要考虑几个问题的答案。首先，这种化合物是离子的还是分子的？",
+            "confidence": 0.9
+          },
+          {
+            "source": "命名法",
+            "target": "分子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "本模块描述了一种用于命名简单离子和分子化合物（如NaCl、CaCO3和N2O4）的方法。",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期表",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "你可以用元素周期表预测原子会形成阴离子还是阳离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期表",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "你可以用元素周期表预测原子会形成阴离子还是阳离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "金属形成正离子（阳离子）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "非金属",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "非金属形成负离子（阴离子）。",
+            "confidence": 0.9
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 216,
+        "dropped_counts": {
+          "duplicate": 138
+        },
+        "dropped_relations": [
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氧族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氮族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "单原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "多原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氧族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氮族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "单原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "多原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "化学符号",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "结构式",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "原子",
+            "category": "概念",
+            "description": "物质由称为原子的极其微小的粒子组成，是能够参与化学变化的元素的最小单元。"
+          },
+          {
+            "name": "元素",
+            "category": "概念",
+            "description": "只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。"
+          },
+          {
+            "name": "化合物",
+            "category": "概念",
+            "description": "由两种或更多种元素的原子以小的整数比结合而成。"
+          },
+          {
+            "name": "物质守恒定律",
+            "category": "概念",
+            "description": "在化学变化过程中，原子既不会被创造也不会被消灭，而是被重新排列，因此物质总质量保持不变。"
+          },
+          {
+            "name": "定比定律",
+            "category": "概念",
+            "description": "纯化合物的所有样品都含有相同比例（按质量）的相同元素。"
+          },
+          {
+            "name": "倍比定律",
+            "category": "概念",
+            "description": "当两种元素反应形成不止一种化合物时，固定质量的一种元素将与另一种元素的质量以小的整数比反应。"
+          },
+          {
+            "name": "道尔顿原子理论",
+            "category": "概念",
+            "description": "道尔顿提出的关于物质微观特征的假说，包括物质由原子组成、元素由一种原子组成、化合物由原子以整数比结合、原子在化学变化中不被创造或消灭等公设。"
+          },
+          {
+            "name": "电子",
+            "category": "概念",
+            "description": "一种带负电的亚原子粒子，其质量不到原子的千分之一。"
+          },
+          {
+            "name": "阴极射线",
+            "category": "概念",
+            "description": "在低压气体中放电时产生的可见光束，向正电荷偏转、远离负电荷。"
+          },
+          {
+            "name": "原子核",
+            "category": "概念",
+            "description": "原子中心一个小的、相对较重的、带正电的物体，原子的大部分质量集中于此。"
+          },
+          {
+            "name": "质子",
+            "category": "概念",
+            "description": "在原子核中发现的带正电的亚原子粒子。"
+          },
+          {
+            "name": "中子",
+            "category": "概念",
+            "description": "不带电的亚原子粒子，质量与质子大致相同。"
+          },
+          {
+            "name": "同位素",
+            "category": "概念",
+            "description": "同一元素中质量不同的原子，它们化学性质相同但中子数不同。"
+          },
+          {
+            "name": "原子序数",
+            "category": "概念",
+            "description": "原子核中的质子数，是元素的规定性特征，决定了原子的身份。"
+          },
+          {
+            "name": "质量数",
+            "category": "概念",
+            "description": "原子中质子数和中子数的总和。"
+          },
+          {
+            "name": "离子",
+            "category": "概念",
+            "description": "当原子中质子数和电子数不相等时，原子就带电，被称为离子。"
+          },
+          {
+            "name": "阴离子",
+            "category": "概念",
+            "description": "获得一个或多个电子的原子，表现出负电荷。"
+          },
+          {
+            "name": "阳离子",
+            "category": "概念",
+            "description": "失去一个或多个电子的原子，带正电。"
+          },
+          {
+            "name": "原子质量单位",
+            "category": "概念",
+            "description": "用于描述原子等微小物体质量的单位，1 amu恰好是一个碳-12原子质量的1/12。"
+          },
+          {
+            "name": "基本电荷单位",
+            "category": "概念",
+            "description": "等于一个电子电荷的大小（e），其中e = 1.602 × 10−19 C。"
+          },
+          {
+            "name": "化学符号",
+            "category": "概念",
+            "description": "用来表示元素或元素原子的缩写。"
+          },
+          {
+            "name": "元素周期表",
+            "category": "概念",
+            "description": "所有已知元素及其符号的表格，按原子序数排列。"
+          },
+          {
+            "name": "周期",
+            "category": "概念",
+            "description": "元素周期表中的横行。"
+          },
+          {
+            "name": "族",
+            "category": "概念",
+            "description": "元素周期表中的纵列。"
+          },
+          {
+            "name": "碱金属",
+            "category": "概念",
+            "description": "第1族（氢除外）元素。"
+          },
+          {
+            "name": "碱土金属",
+            "category": "概念",
+            "description": "第2族元素。"
+          },
+          {
+            "name": "卤素",
+            "category": "概念",
+            "description": "第17族元素。"
+          },
+          {
+            "name": "稀有气体",
+            "category": "概念",
+            "description": "第18族元素。"
+          },
+          {
+            "name": "金属",
+            "category": "概念",
+            "description": "元素的一类，具有金属光泽、导电导热等性质。"
+          },
+          {
+            "name": "非金属",
+            "category": "概念",
+            "description": "元素的一类，通常缺乏金属性质。"
+          },
+          {
+            "name": "类金属",
+            "category": "概念",
+            "description": "性质介于金属和非金属之间的元素。"
+          },
+          {
+            "name": "主族元素",
+            "category": "概念",
+            "description": "元素周期表中s区和p区的元素。"
+          },
+          {
+            "name": "过渡金属",
+            "category": "概念",
+            "description": "元素周期表中d区的元素。"
+          },
+          {
+            "name": "内过渡金属",
+            "category": "概念",
+            "description": "元素周期表中f区的元素。"
+          },
+          {
+            "name": "分子化合物",
+            "category": "概念",
+            "description": "由分子组成的化合物，通常由非金属元素通过共价键结合。"
+          },
+          {
+            "name": "离子化合物",
+            "category": "概念",
+            "description": "由离子组成的化合物，通常由金属和非金属元素通过离子键结合。"
+          },
+          {
+            "name": "化学键",
+            "category": "概念",
+            "description": "原子间强烈的相互作用，包括共价键和离子键等。"
+          },
+          {
+            "name": "共价键",
+            "category": "概念",
+            "description": "原子间通过共享电子对形成的化学键。"
+          },
+          {
+            "name": "离子键",
+            "category": "概念",
+            "description": "带相反电荷的离子之间的静电吸引力。"
+          },
+          {
+            "name": "分子式",
+            "category": "概念",
+            "description": "用元素符号表示分子中原子种类和数目的式子。"
+          },
+          {
+            "name": "实验式",
+            "category": "概念",
+            "description": "用元素符号表示化合物中原子最简单整数比的式子。"
+          },
+          {
+            "name": "结构式",
+            "category": "概念",
+            "description": "用元素符号和短线表示分子中原子间连接方式的式子。"
+          },
+          {
+            "name": "同分异构体",
+            "category": "概念",
+            "description": "分子式相同但结构不同的化合物。"
+          },
+          {
+            "name": "结构异构体",
+            "category": "概念",
+            "description": "原子连接顺序不同导致的异构体。"
+          },
+          {
+            "name": "空间异构体",
+            "category": "概念",
+            "description": "原子空间排列不同导致的异构体。"
+          },
+          {
+            "name": "酸",
+            "category": "概念",
+            "description": "在水溶液中能电离出氢离子的化合物。"
+          },
+          {
+            "name": "二元酸",
+            "category": "概念",
+            "description": "由氢和另一种元素组成的酸。"
+          },
+          {
+            "name": "含氧酸",
+            "category": "概念",
+            "description": "由氢、氧和另一种元素组成的酸。"
+          },
+          {
+            "name": "含氧酸根阴离子",
+            "category": "概念",
+            "description": "含氧酸失去氢离子后形成的多原子阴离子。"
+          },
+          {
+            "name": "命名法",
+            "category": "方法",
+            "description": "用于命名化合物的系统方法。"
+          },
+          {
+            "name": "质谱法",
+            "category": "方法",
+            "description": "一种用于确定同位素和分子质量的分析方法。"
+          },
+          {
+            "name": "α粒子",
+            "category": "概念",
+            "description": "由两个质子和两个中子组成的高速、带正电的粒子。"
+          },
+          {
+            "name": "卢瑟福金箔实验",
+            "category": "方法",
+            "description": "用α粒子轰击金箔并观察散射的实验，揭示了原子核的存在。"
+          },
+          {
+            "name": "阴极射线管",
+            "category": "概念",
+            "description": "一个密封的玻璃管，管中空气几乎全部被抽走，管内有两个金属电极，用于产生阴极射线。"
+          },
+          {
+            "name": "油滴实验",
+            "category": "方法",
+            "description": "密立根用于测量单个电子电荷的实验。"
+          },
+          {
+            "name": "葡萄干布丁模型",
+            "category": "概念",
+            "description": "汤姆森提出的原子模型，描述了一个带正电的质量体，其中嵌入了等量的负电荷。"
+          },
+          {
+            "name": "类土星原子模型",
+            "category": "概念",
+            "description": "长冈半太郎提出的原子模型，由一个带正电的球体被一圈电子环绕组成。"
+          },
+          {
+            "name": "原子理论",
+            "category": "概念",
+            "description": "关于物质由原子组成的理论。"
+          },
+          {
+            "name": "元素周期律",
+            "category": "概念",
+            "description": "元素的性质随原子序数的增加而呈周期性变化的规律。"
+          },
+          {
+            "name": "原子质量",
+            "category": "概念",
+            "description": "元素的平均原子质量，按天然同位素丰度加权平均。"
+          },
+          {
+            "name": "平均质量",
+            "category": "公式",
+            "description": "元素天然样品中所有同位素的加权平均质量，等于各同位素质量乘以其分数丰度之和。"
+          },
+          {
+            "name": "质谱仪",
+            "category": "概念",
+            "description": "用于质谱分析的仪器，通过电场或磁场分离阳离子并检测其质荷比。"
+          },
+          {
+            "name": "双原子分子",
+            "category": "概念",
+            "description": "由两个原子通过化学键结合而成的分子，如H2、O2。"
+          },
+          {
+            "name": "周期律",
+            "category": "概念",
+            "description": "元素的性质是它们原子序数的周期函数。"
+          },
+          {
+            "name": "氧族元素",
+            "category": "概念",
+            "description": "第16族元素，包括氧、硫、硒等。"
+          },
+          {
+            "name": "氮族元素",
+            "category": "概念",
+            "description": "第15族元素，包括氮、磷等。"
+          },
+          {
+            "name": "单原子离子",
+            "category": "概念",
+            "description": "只由一个原子形成的离子。"
+          },
+          {
+            "name": "多原子离子",
+            "category": "概念",
+            "description": "作为离散单元起作用的带电分子，由多个原子组成。"
+          },
+          {
+            "name": "水合物",
+            "category": "概念",
+            "description": "晶体中含有水分子作为组成部分的离子化合物。"
+          },
+          {
+            "name": "二元化合物",
+            "category": "概念",
+            "description": "只含有两种元素的化合物。"
+          },
+          {
+            "name": "化学式",
+            "category": "概念",
+            "description": "表示化合物组成离子相对数量的式子。"
+          }
+        ],
+        "relations": [
+          {
+            "source": "道尔顿原子理论",
+            "target": "物质守恒定律",
+            "type": "RELATED_TO",
+            "evidence": "如果在化学变化过程中原子既不被创造也不被消灭，那么当物质从一种类型转变为另一种类型时，存在的物质总质量将保持不变（物质守恒定律）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "定比定律",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论为物质（你所了解到的）的许多宏观性质提供了微观解释。例如，如果铜这样的元素只由一种原子组成，那么它就不能被分解成更简单的物质，即不能分解成由更少类型原子组成的物质。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "倍比定律",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿还利用普鲁斯特的数据以及他自己实验的结果，阐述了一条有趣的定律。倍比定律（law of multiple proportions）指出，当两种元素反应形成不止一种化合物时，固定质量的一种元素将与另一种元素的质量以小的整数比反应。",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素",
+            "target": "金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "非金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "类金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "主族元素",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "过渡金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "内过渡金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "同位素",
+            "type": "CONTAINS",
+            "evidence": "同一元素中质量不同的原子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期表",
+            "target": "周期",
+            "type": "CONTAINS",
+            "evidence": "元素周期表（The Periodic Table）",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期表",
+            "target": "族",
+            "type": "CONTAINS",
+            "evidence": "元素周期表（The Periodic Table）",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "碱金属",
+            "type": "CONTAINS",
+            "evidence": "第1族（氢除外）被称为碱金属",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "碱土金属",
+            "type": "CONTAINS",
+            "evidence": "第2族元素被称为碱土金属",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "卤素",
+            "type": "CONTAINS",
+            "evidence": "第17族元素被称为卤素",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "稀有气体",
+            "type": "CONTAINS",
+            "evidence": "第18族元素被称为稀有气体",
+            "confidence": 0.9
+          },
+          {
+            "source": "化合物",
+            "target": "分子化合物",
+            "type": "CONTAINS",
+            "evidence": "分子化合物（共价化合物）",
+            "confidence": 0.9
+          },
+          {
+            "source": "化合物",
+            "target": "离子化合物",
+            "type": "CONTAINS",
+            "evidence": "离子化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "化学键",
+            "target": "共价键",
+            "type": "CONTAINS",
+            "evidence": "共价键",
+            "confidence": 0.9
+          },
+          {
+            "source": "化学键",
+            "target": "离子键",
+            "type": "CONTAINS",
+            "evidence": "离子键",
+            "confidence": 0.9
+          },
+          {
+            "source": "酸",
+            "target": "二元酸",
+            "type": "CONTAINS",
+            "evidence": "二元酸",
+            "confidence": 0.9
+          },
+          {
+            "source": "酸",
+            "target": "含氧酸",
+            "type": "CONTAINS",
+            "evidence": "含氧酸",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "阳离子",
+            "type": "CONTAINS",
+            "evidence": "阳离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "阴离子",
+            "type": "CONTAINS",
+            "evidence": "阴离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "多原子离子",
+            "target": "含氧酸根阴离子",
+            "type": "CONTAINS",
+            "evidence": "含氧酸根阴离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "同分异构体",
+            "target": "结构异构体",
+            "type": "CONTAINS",
+            "evidence": "结构异构体",
+            "confidence": 0.9
+          },
+          {
+            "source": "同分异构体",
+            "target": "空间异构体",
+            "type": "CONTAINS",
+            "evidence": "空间异构体",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "原子核",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "电子",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核，由带正电的质子和不带电的中子组成，周围是一个大得多的空间区域，其中含有带负电的电子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子核",
+            "target": "质子",
+            "type": "CONTAINS",
+            "evidence": "原子核由带正电的质子和不带电的中子组成",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子核",
+            "target": "中子",
+            "type": "CONTAINS",
+            "evidence": "原子核由带正电的质子和不带电的中子组成",
+            "confidence": 0.9
+          },
+          {
+            "source": "命名法",
+            "target": "化合物",
+            "type": "APPLIES_TO",
+            "evidence": "化学命名法（Chemical Nomenclature）",
+            "confidence": 0.9
+          },
+          {
+            "source": "质谱法",
+            "target": "同位素",
+            "type": "APPLIES_TO",
+            "evidence": "质谱法用于确定同位素",
+            "confidence": 0.9
+          },
+          {
+            "source": "质谱法",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "质谱法涉及阳离子",
+            "confidence": 0.8
+          },
+          {
+            "source": "离子化合物",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子组成",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子组成",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子键",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "离子键涉及离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子键",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "离子键存在于离子化合物中",
+            "confidence": 0.9
+          },
+          {
+            "source": "共价键",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "共价键存在于分子化合物中",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子核",
+            "target": "电子",
+            "type": "RELATED_TO",
+            "evidence": "原子核周围环绕着带负电的电子",
+            "confidence": 0.9
+          },
+          {
+            "source": "含氧酸",
+            "target": "含氧酸根阴离子",
+            "type": "RELATED_TO",
+            "evidence": "含氧酸失去氢离子后形成含氧酸根阴离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "电子",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "电子是原子的组成部分",
+            "confidence": 0.9
+          },
+          {
+            "source": "电子",
+            "target": "基本电荷单位",
+            "type": "RELATED_TO",
+            "evidence": "基本电荷单位等于一个电子电荷的大小",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "原子获得或失去电子形成离子",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期律",
+            "target": "元素周期表",
+            "type": "RELATED_TO",
+            "evidence": "元素周期律与元素周期表相关",
+            "confidence": 0.9
+          },
+          {
+            "source": "化学符号",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "化学符号用来表示元素",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "实验式",
+            "type": "RELATED_TO",
+            "evidence": "分子式与实验式相关",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "化学符号",
+            "type": "RELATED_TO",
+            "evidence": "分子式使用化学符号",
+            "confidence": 0.9
+          },
+          {
+            "source": "实验式",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "实验式表示化合物中原子最简单整数比",
+            "confidence": 0.9
+          },
+          {
+            "source": "结构式",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "结构式与分子式相关",
+            "confidence": 0.9
+          },
+          {
+            "source": "同分异构体",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "同分异构体具有相同分子式",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及元素",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及原子",
+            "confidence": 0.9
+          },
+          {
+            "source": "定比定律",
+            "target": "倍比定律",
+            "type": "RELATED_TO",
+            "evidence": "定比定律与倍比定律相关",
+            "confidence": 0.9
+          },
+          {
+            "source": "定比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "定比定律涉及化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "倍比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "倍比定律涉及化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子序数",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "原子序数决定元素的身份",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子序数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "原子序数等于质子数",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "质量数等于质子数加中子数",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "质量数等于质子数加中子数",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子质量",
+            "target": "原子质量单位",
+            "type": "RELATED_TO",
+            "evidence": "原子质量以原子质量单位表示",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "同位素中子数不同",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "原子质量",
+            "type": "RELATED_TO",
+            "evidence": "同位素原子质量不同",
+            "confidence": 0.9
+          },
+          {
+            "source": "α粒子",
+            "target": "原子核",
+            "type": "RELATED_TO",
+            "evidence": "α粒子与原子核相互作用",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "金属倾向于形成离子化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "非金属",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "非金属倾向于形成分子化合物",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "氧族元素",
+            "type": "CONTAINS",
+            "evidence": "其他有特定名称的族有……氧族元素（第16族）",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "氮族元素",
+            "type": "CONTAINS",
+            "evidence": "其他有特定名称的族有氮族元素（第15族）",
+            "confidence": 0.95
+          },
+          {
+            "source": "周期律",
+            "target": "元素周期表",
+            "type": "RELATED_TO",
+            "evidence": "周期律：元素的性质是它们原子序数的周期函数。现代元素周期表按原子序数递增的顺序排列元素",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "金属形成正离子（阳离子）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "非金属",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "非金属形成负离子（阴离子）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "水合物",
+            "type": "CONTAINS",
+            "evidence": "晶体中含有水分子作为组成部分的离子化合物称为水合物。",
+            "confidence": 0.95
+          },
+          {
+            "source": "化合物",
+            "target": "二元化合物",
+            "type": "CONTAINS",
+            "evidence": "其中最简单的是二元化合物——只含有两种元素的化合物。",
+            "confidence": 0.9
+          },
+          {
+            "source": "命名法",
+            "target": "离子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "要命名一种无机化合物，我们需要考虑几个问题的答案。首先，这种化合物是离子的还是分子的？",
+            "confidence": 0.8
+          },
+          {
+            "source": "命名法",
+            "target": "分子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "本模块描述了一种用于命名简单离子和分子化合物的方法。",
+            "confidence": 0.8
+          },
+          {
+            "source": "离子",
+            "target": "单原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子可以是单原子的（只含一个原子）或多原子的（含一个以上原子）",
+            "confidence": 0.95
+          },
+          {
+            "source": "离子",
+            "target": "多原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子可以是单原子的（只含一个原子）或多原子的（含一个以上原子）",
+            "confidence": 0.95
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 202,
+        "dropped_counts": {
+          "duplicate": 124
+        },
+        "dropped_relations": [
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "结构式",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氧族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氮族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "化学符号",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "结构式",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "原子",
+            "category": "概念",
+            "description": "物质由称为原子的极其微小的粒子组成，是能够参与化学变化的元素的最小单元。"
+          },
+          {
+            "name": "元素",
+            "category": "概念",
+            "description": "只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。"
+          },
+          {
+            "name": "化合物",
+            "category": "概念",
+            "description": "由两种或更多种元素的原子以小的整数比结合而成的物质。"
+          },
+          {
+            "name": "物质守恒定律",
+            "category": "概念",
+            "description": "在化学变化过程中，原子既不会被创造也不会被消灭，而是被重新排列，因此物质总质量保持不变。"
+          },
+          {
+            "name": "定比定律",
+            "category": "概念",
+            "description": "纯化合物的所有样品都含有相同比例（按质量）的相同元素。"
+          },
+          {
+            "name": "倍比定律",
+            "category": "概念",
+            "description": "当两种元素反应形成不止一种化合物时，固定质量的一种元素将与另一种元素的质量以小的整数比反应。"
+          },
+          {
+            "name": "道尔顿原子理论",
+            "category": "概念",
+            "description": "道尔顿提出的关于物质微观特征的假说，包括物质由原子组成、元素由一种原子组成、原子在化学变化中不灭等公设。"
+          },
+          {
+            "name": "电子",
+            "category": "概念",
+            "description": "一种带负电的亚原子粒子，其质量不到原子的千分之一，存在于原子核外。"
+          },
+          {
+            "name": "原子核",
+            "category": "概念",
+            "description": "原子中心的一个小的、相对较重的、带正电的物体，集中了原子的大部分质量。"
+          },
+          {
+            "name": "质子",
+            "category": "概念",
+            "description": "在原子核中发现的带正电的亚原子粒子。"
+          },
+          {
+            "name": "中子",
+            "category": "概念",
+            "description": "不带电的亚原子粒子，质量与质子大致相同，存在于原子核中。"
+          },
+          {
+            "name": "同位素",
+            "category": "概念",
+            "description": "同一元素中质量不同的原子，它们化学性质相同但中子数不同。"
+          },
+          {
+            "name": "原子序数",
+            "category": "概念",
+            "description": "原子核中的质子数，是元素的规定性特征，决定了原子的身份。"
+          },
+          {
+            "name": "质量数",
+            "category": "概念",
+            "description": "原子中质子数和中子数的总和。"
+          },
+          {
+            "name": "离子",
+            "category": "概念",
+            "description": "当原子中质子数和电子数不相等时，原子就带电，被称为离子。"
+          },
+          {
+            "name": "阴离子",
+            "category": "概念",
+            "description": "获得一个或多个电子的原子，表现出负电荷。"
+          },
+          {
+            "name": "阳离子",
+            "category": "概念",
+            "description": "失去一个或多个电子的原子，表现出正电荷。"
+          },
+          {
+            "name": "原子质量单位",
+            "category": "概念",
+            "description": "用于描述原子等微小物体质量的单位，1 amu恰好是一个碳-12原子质量的1/12。"
+          },
+          {
+            "name": "基本电荷单位",
+            "category": "概念",
+            "description": "等于一个电子电荷的大小（e），其中e = 1.602 × 10−19 C。"
+          },
+          {
+            "name": "化学符号",
+            "category": "概念",
+            "description": "用来表示元素或元素原子的缩写。"
+          },
+          {
+            "name": "阴极射线",
+            "category": "概念",
+            "description": "在低压气体中产生的放电，由汤姆森用阴极射线管发现，向正电荷偏转、远离负电荷。"
+          },
+          {
+            "name": "α粒子",
+            "category": "概念",
+            "description": "由两个质子和两个中子组成的高速、带正电的粒子，由镭的放射性衰变产生。"
+          },
+          {
+            "name": "卢瑟福金箔实验",
+            "category": "方法",
+            "description": "卢瑟福等人用α粒子轰击金箔，通过观察散射情况推断原子内部结构的实验。"
+          },
+          {
+            "name": "油滴实验",
+            "category": "方法",
+            "description": "密立根通过测量油滴电荷确定基本电荷的实验。"
+          },
+          {
+            "name": "元素周期表",
+            "category": "概念",
+            "description": "所有已知元素及其符号的表格，按原子序数排列。"
+          },
+          {
+            "name": "周期",
+            "category": "概念",
+            "description": "元素周期表中的横行。"
+          },
+          {
+            "name": "族",
+            "category": "概念",
+            "description": "元素周期表中的纵列。"
+          },
+          {
+            "name": "金属",
+            "category": "概念",
+            "description": "元素的一类，具有金属光泽、导电导热等性质。"
+          },
+          {
+            "name": "非金属",
+            "category": "概念",
+            "description": "元素的一类，通常缺乏金属性质。"
+          },
+          {
+            "name": "类金属",
+            "category": "概念",
+            "description": "性质介于金属和非金属之间的元素。"
+          },
+          {
+            "name": "主族元素",
+            "category": "概念",
+            "description": "元素周期表中s区和p区的元素。"
+          },
+          {
+            "name": "过渡金属",
+            "category": "概念",
+            "description": "元素周期表中d区的金属元素。"
+          },
+          {
+            "name": "内过渡金属",
+            "category": "概念",
+            "description": "元素周期表中f区的金属元素。"
+          },
+          {
+            "name": "碱金属",
+            "category": "概念",
+            "description": "第1族（氢除外）元素，包括锂、钠、钾等。"
+          },
+          {
+            "name": "碱土金属",
+            "category": "概念",
+            "description": "第2族元素，包括铍、镁、钙等。"
+          },
+          {
+            "name": "卤素",
+            "category": "概念",
+            "description": "第17族元素，包括氟、氯、溴、碘等。"
+          },
+          {
+            "name": "氧族元素",
+            "category": "概念",
+            "description": "第16族元素，包括氧、硫、硒等。"
+          },
+          {
+            "name": "氮族元素",
+            "category": "概念",
+            "description": "第15族元素，包括氮、磷、砷等。"
+          },
+          {
+            "name": "稀有气体",
+            "category": "概念",
+            "description": "第18族元素，包括氦、氖、氩等。"
+          },
+          {
+            "name": "分子化合物",
+            "category": "概念",
+            "description": "由分子构成的化合物，通常由非金属元素通过共价键结合。"
+          },
+          {
+            "name": "离子化合物",
+            "category": "概念",
+            "description": "由离子构成的化合物，通常由金属和非金属元素通过离子键结合。"
+          },
+          {
+            "name": "化学键",
+            "category": "概念",
+            "description": "原子间强烈的相互作用，包括共价键和离子键等。"
+          },
+          {
+            "name": "共价键",
+            "category": "概念",
+            "description": "原子间通过共享电子对形成的化学键。"
+          },
+          {
+            "name": "离子键",
+            "category": "概念",
+            "description": "带相反电荷的离子之间的静电吸引力。"
+          },
+          {
+            "name": "化学命名法",
+            "category": "方法",
+            "description": "用于命名化合物的系统方法。"
+          },
+          {
+            "name": "分子式",
+            "category": "概念",
+            "description": "用元素符号表示分子中原子种类和数目的式子。"
+          },
+          {
+            "name": "实验式",
+            "category": "概念",
+            "description": "用元素符号表示化合物中原子最简单整数比的式子。"
+          },
+          {
+            "name": "结构式",
+            "category": "概念",
+            "description": "用元素符号和短线表示分子中原子间连接顺序和方式的式子。"
+          },
+          {
+            "name": "同分异构体",
+            "category": "概念",
+            "description": "分子式相同但结构不同的化合物。"
+          },
+          {
+            "name": "结构异构体",
+            "category": "概念",
+            "description": "由于原子连接顺序不同而产生的同分异构体。"
+          },
+          {
+            "name": "空间异构体",
+            "category": "概念",
+            "description": "由于原子在空间排列不同而产生的同分异构体。"
+          },
+          {
+            "name": "酸",
+            "category": "概念",
+            "description": "在水溶液中能电离出氢离子的化合物。"
+          },
+          {
+            "name": "二元酸",
+            "category": "概念",
+            "description": "由氢和另一种元素组成的酸。"
+          },
+          {
+            "name": "含氧酸",
+            "category": "概念",
+            "description": "由氢、氧和另一种元素组成的酸。"
+          },
+          {
+            "name": "含氧酸根阴离子",
+            "category": "概念",
+            "description": "含氧酸失去氢离子后形成的多原子阴离子。"
+          },
+          {
+            "name": "多原子离子",
+            "category": "概念",
+            "description": "由两个或多个原子通过共价键结合而成的离子。"
+          },
+          {
+            "name": "单原子离子",
+            "category": "概念",
+            "description": "由单个原子得失电子形成的离子。"
+          },
+          {
+            "name": "水合物",
+            "category": "概念",
+            "description": "含有结晶水的离子化合物。"
+          },
+          {
+            "name": "二元化合物",
+            "category": "概念",
+            "description": "由两种元素组成的化合物。"
+          },
+          {
+            "name": "周期律",
+            "category": "概念",
+            "description": "元素的性质随原子序数增加而呈周期性变化的规律。"
+          },
+          {
+            "name": "原子质量",
+            "category": "概念",
+            "description": "原子的质量，通常以原子质量单位表示。"
+          },
+          {
+            "name": "平均原子质量",
+            "category": "概念",
+            "description": "考虑同位素丰度后元素的平均原子质量。"
+          },
+          {
+            "name": "质谱法",
+            "category": "方法",
+            "description": "用于确定同位素和原子质量的分析方法。"
+          },
+          {
+            "name": "命名法",
+            "category": "方法",
+            "description": "用于命名化合物的系统方法。"
+          },
+          {
+            "name": "双原子分子",
+            "category": "概念",
+            "description": "由两个原子通过化学键结合而成的分子。"
+          }
+        ],
+        "relations": [
+          {
+            "source": "道尔顿原子理论",
+            "target": "物质守恒定律",
+            "type": "RELATED_TO",
+            "evidence": "如果在化学变化过程中原子既不被创造也不被消灭，那么当物质从一种类型转变为另一种类型时，存在的物质总质量将保持不变（物质守恒定律）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "定比定律",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论为物质（你所了解到的）的许多宏观性质提供了微观解释。例如，如果铜这样的元素只由一种原子组成，那么它就不能被分解成更简单的物质，即不能分解成由更少类型原子组成的物质。",
+            "confidence": 0.9
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "倍比定律",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿还利用普鲁斯特的数据以及他自己实验的结果，阐述了一条有趣的定律。倍比定律（law of multiple proportions）指出，当两种元素反应形成不止一种化合物时，固定质量的一种元素将与另一种元素的质量以小的整数比反应。",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素",
+            "target": "金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "非金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "类金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "主族元素",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "过渡金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "内过渡金属",
+            "type": "CONTAINS",
+            "evidence": "元素只由一种类型的原子组成，这种原子具有该元素特有的质量，并且对该元素的所有原子都相同。",
+            "confidence": 0.8
+          },
+          {
+            "source": "元素",
+            "target": "同位素",
+            "type": "CONTAINS",
+            "evidence": "同位素（isotopes）——同一元素中质量不同的原子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "元素周期表",
+            "target": "周期",
+            "type": "CONTAINS",
+            "evidence": "元素周期表（The Periodic Table）",
+            "confidence": 0.9
+          },
+          {
+            "source": "元素周期表",
+            "target": "族",
+            "type": "CONTAINS",
+            "evidence": "元素周期表（The Periodic Table）",
+            "confidence": 0.9
+          },
+          {
+            "source": "族",
+            "target": "碱金属",
+            "type": "CONTAINS",
+            "evidence": "第1族（氢除外）被称为碱金属",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "碱土金属",
+            "type": "CONTAINS",
+            "evidence": "第2族元素被称为碱土金属",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "卤素",
+            "type": "CONTAINS",
+            "evidence": "第17族元素被称为卤素",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "氧族元素",
+            "type": "CONTAINS",
+            "evidence": "第16族元素被称为氧族元素",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "氮族元素",
+            "type": "CONTAINS",
+            "evidence": "第15族元素被称为氮族元素",
+            "confidence": 0.95
+          },
+          {
+            "source": "族",
+            "target": "稀有气体",
+            "type": "CONTAINS",
+            "evidence": "第18族元素被称为稀有气体",
+            "confidence": 0.95
+          },
+          {
+            "source": "化合物",
+            "target": "二元化合物",
+            "type": "CONTAINS",
+            "evidence": "化合物由两种或更多种元素的原子以小的整数比结合而成。",
+            "confidence": 0.8
+          },
+          {
+            "source": "化学键",
+            "target": "共价键",
+            "type": "CONTAINS",
+            "evidence": "化学键包括共价键和离子键。",
+            "confidence": 0.9
+          },
+          {
+            "source": "化学键",
+            "target": "离子键",
+            "type": "CONTAINS",
+            "evidence": "化学键包括共价键和离子键。",
+            "confidence": 0.9
+          },
+          {
+            "source": "酸",
+            "target": "二元酸",
+            "type": "CONTAINS",
+            "evidence": "酸包括二元酸和含氧酸。",
+            "confidence": 0.9
+          },
+          {
+            "source": "酸",
+            "target": "含氧酸",
+            "type": "CONTAINS",
+            "evidence": "酸包括二元酸和含氧酸。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "单原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括单原子离子和多原子离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "多原子离子",
+            "type": "CONTAINS",
+            "evidence": "离子包括单原子离子和多原子离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "阳离子",
+            "type": "CONTAINS",
+            "evidence": "当一个原子失去一个或多个电子时，就形成带正电的原子，称为阳离子（cation）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子",
+            "target": "阴离子",
+            "type": "CONTAINS",
+            "evidence": "获得一个或多个电子的原子将表现出负电荷，称为阴离子（anion）。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "水合物",
+            "type": "CONTAINS",
+            "evidence": "离子化合物包括水合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "多原子离子",
+            "target": "含氧酸根阴离子",
+            "type": "CONTAINS",
+            "evidence": "多原子离子包括含氧酸根阴离子。",
+            "confidence": 0.8
+          },
+          {
+            "source": "同分异构体",
+            "target": "结构异构体",
+            "type": "CONTAINS",
+            "evidence": "同分异构体包括结构异构体和空间异构体。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同分异构体",
+            "target": "空间异构体",
+            "type": "CONTAINS",
+            "evidence": "同分异构体包括结构异构体和空间异构体。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "原子核",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核，由带正电的质子和不带电的中子组成，周围是一个大得多的空间区域，其中含有带负电的电子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子",
+            "target": "电子",
+            "type": "CONTAINS",
+            "evidence": "原子包含一个非常小的原子核，由带正电的质子和不带电的中子组成，周围是一个大得多的空间区域，其中含有带负电的电子。",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子核",
+            "target": "质子",
+            "type": "CONTAINS",
+            "evidence": "原子核含有原子的大部分质量，因为质子和中子比电子重得多。",
+            "confidence": 0.95
+          },
+          {
+            "source": "原子核",
+            "target": "中子",
+            "type": "CONTAINS",
+            "evidence": "原子核含有原子的大部分质量，因为质子和中子比电子重得多。",
+            "confidence": 0.95
+          },
+          {
+            "source": "卢瑟福金箔实验",
+            "target": "原子核",
+            "type": "RELATED_TO",
+            "evidence": "卢瑟福得出两个结论：1. 原子所占据的体积必须包含大量空空间。2. 一个小的、相对较重的、带正电的物体——原子核——必须在每个原子的中心。",
+            "confidence": 0.9
+          },
+          {
+            "source": "油滴实验",
+            "target": "基本电荷单位",
+            "type": "RELATED_TO",
+            "evidence": "密立根得出结论，这个值一定是一种基本电荷——单个电子的电荷。",
+            "confidence": 0.9
+          },
+          {
+            "source": "质谱法",
+            "target": "同位素",
+            "type": "APPLIES_TO",
+            "evidence": "质谱法用于确定同位素。",
+            "confidence": 0.8
+          },
+          {
+            "source": "质谱法",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "质谱法涉及阳离子。",
+            "confidence": 0.7
+          },
+          {
+            "source": "命名法",
+            "target": "化合物",
+            "type": "APPLIES_TO",
+            "evidence": "化学命名法用于命名化合物。",
+            "confidence": 0.9
+          },
+          {
+            "source": "周期律",
+            "target": "元素周期表",
+            "type": "RELATED_TO",
+            "evidence": "周期律与元素周期表密切相关。",
+            "confidence": 0.8
+          },
+          {
+            "source": "化学符号",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "化学符号（chemical symbol）是我们用来表示元素或元素原子的缩写。",
+            "confidence": 0.9
+          },
+          {
+            "source": "分子式",
+            "target": "实验式",
+            "type": "RELATED_TO",
+            "evidence": "分子式与实验式相关。",
+            "confidence": 0.8
+          },
+          {
+            "source": "分子式",
+            "target": "化学符号",
+            "type": "RELATED_TO",
+            "evidence": "分子式使用化学符号。",
+            "confidence": 0.8
+          },
+          {
+            "source": "实验式",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "实验式表示化合物中原子最简单整数比。",
+            "confidence": 0.8
+          },
+          {
+            "source": "结构式",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "结构式与分子式相关。",
+            "confidence": 0.8
+          },
+          {
+            "source": "同分异构体",
+            "target": "分子式",
+            "type": "RELATED_TO",
+            "evidence": "同分异构体具有相同分子式。",
+            "confidence": 0.8
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及元素。",
+            "confidence": 0.8
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及化合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "道尔顿原子理论",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "道尔顿原子理论涉及原子。",
+            "confidence": 0.8
+          },
+          {
+            "source": "定比定律",
+            "target": "倍比定律",
+            "type": "RELATED_TO",
+            "evidence": "定比定律与倍比定律相关。",
+            "confidence": 0.8
+          },
+          {
+            "source": "定比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "定比定律涉及化合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "倍比定律",
+            "target": "化合物",
+            "type": "RELATED_TO",
+            "evidence": "倍比定律涉及化合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "原子序数",
+            "target": "元素",
+            "type": "RELATED_TO",
+            "evidence": "原子序数是元素的规定性特征。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子序数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "原子序数等于质子数。",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "质量数等于质子数加中子数。",
+            "confidence": 0.9
+          },
+          {
+            "source": "质量数",
+            "target": "质子",
+            "type": "RELATED_TO",
+            "evidence": "质量数等于质子数加中子数。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子质量",
+            "target": "原子质量单位",
+            "type": "RELATED_TO",
+            "evidence": "原子质量以原子质量单位表示。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "中子",
+            "type": "RELATED_TO",
+            "evidence": "同位素质量不同是因为它们的中子数不同。",
+            "confidence": 0.9
+          },
+          {
+            "source": "同位素",
+            "target": "原子质量",
+            "type": "RELATED_TO",
+            "evidence": "同位素具有不同的原子质量。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子构成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子化合物",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "离子化合物由阳离子和阴离子构成。",
+            "confidence": 0.9
+          },
+          {
+            "source": "离子键",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "离子键涉及离子。",
+            "confidence": 0.8
+          },
+          {
+            "source": "离子键",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "离子键存在于离子化合物中。",
+            "confidence": 0.8
+          },
+          {
+            "source": "共价键",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "共价键存在于分子化合物中。",
+            "confidence": 0.8
+          },
+          {
+            "source": "原子核",
+            "target": "电子",
+            "type": "RELATED_TO",
+            "evidence": "原子核与电子相互作用。",
+            "confidence": 0.8
+          },
+          {
+            "source": "含氧酸",
+            "target": "含氧酸根阴离子",
+            "type": "RELATED_TO",
+            "evidence": "含氧酸与含氧酸根阴离子相关。",
+            "confidence": 0.8
+          },
+          {
+            "source": "电子",
+            "target": "原子",
+            "type": "RELATED_TO",
+            "evidence": "电子是原子的组成部分。",
+            "confidence": 0.9
+          },
+          {
+            "source": "电子",
+            "target": "基本电荷单位",
+            "type": "RELATED_TO",
+            "evidence": "基本电荷单位等于一个电子电荷的大小。",
+            "confidence": 0.9
+          },
+          {
+            "source": "原子",
+            "target": "离子",
+            "type": "RELATED_TO",
+            "evidence": "原子通过获得或失去电子形成离子。",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "离子化合物",
+            "type": "RELATED_TO",
+            "evidence": "金属倾向于形成离子化合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "非金属",
+            "target": "分子化合物",
+            "type": "RELATED_TO",
+            "evidence": "非金属倾向于形成分子化合物。",
+            "confidence": 0.8
+          },
+          {
+            "source": "α粒子",
+            "target": "原子核",
+            "type": "RELATED_TO",
+            "evidence": "α粒子与原子核相互作用。",
+            "confidence": 0.8
+          },
+          {
+            "source": "分子式",
+            "target": "结构式",
+            "type": "RELATED_TO",
+            "evidence": "结构式给出与分子式相同的信息",
+            "confidence": 0.9
+          },
+          {
+            "source": "金属",
+            "target": "阳离子",
+            "type": "RELATED_TO",
+            "evidence": "金属形成正离子（阳离子）",
+            "confidence": 0.9
+          },
+          {
+            "source": "非金属",
+            "target": "阴离子",
+            "type": "RELATED_TO",
+            "evidence": "非金属形成负离子（阴离子）",
+            "confidence": 0.9
+          },
+          {
+            "source": "命名法",
+            "target": "离子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "要命名一种无机化合物，我们需要考虑几个问题的答案。首先，这种化合物是离子的还是分子的？",
+            "confidence": 0.85
+          },
+          {
+            "source": "命名法",
+            "target": "分子化合物",
+            "type": "APPLIES_TO",
+            "evidence": "本模块描述了一种用于命名简单离子和分子化合物（如NaCl、CaCO3和N2O4）的方法。",
+            "confidence": 0.85
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 209,
+        "dropped_counts": {
+          "duplicate": 131
+        },
+        "dropped_relations": [
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氧族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氮族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "单原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "多原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "二元酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "含氧酸",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "类金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "主族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "内过渡金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "周期",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "元素周期表",
+            "type": "CONTAINS",
+            "target": "族",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "碱土金属",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "卤素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氧族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "氮族元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "族",
+            "type": "CONTAINS",
+            "target": "稀有气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化合物",
+            "type": "CONTAINS",
+            "target": "二元化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "共价键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学键",
+            "type": "CONTAINS",
+            "target": "离子键",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "单原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "多原子离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子",
+            "type": "CONTAINS",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "CONTAINS",
+            "target": "水合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "多原子离子",
+            "type": "CONTAINS",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "结构异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "CONTAINS",
+            "target": "空间异构体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "CONTAINS",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "CONTAINS",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "命名法",
+            "type": "APPLIES_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "APPLIES_TO",
+            "target": "同位素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子化合物",
+            "type": "RELATED_TO",
+            "target": "阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "离子键",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "共价键",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子核",
+            "type": "RELATED_TO",
+            "target": "电子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "含氧酸",
+            "type": "RELATED_TO",
+            "target": "含氧酸根阴离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "电子",
+            "type": "RELATED_TO",
+            "target": "基本电荷单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子",
+            "type": "RELATED_TO",
+            "target": "离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "周期律",
+            "type": "RELATED_TO",
+            "target": "元素周期表",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学符号",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "实验式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子式",
+            "type": "RELATED_TO",
+            "target": "化学符号",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实验式",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "结构式",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同分异构体",
+            "type": "RELATED_TO",
+            "target": "分子式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "物质守恒定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "倍比定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "倍比定律",
+            "type": "RELATED_TO",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子序数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量数",
+            "type": "RELATED_TO",
+            "target": "质子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子质量",
+            "type": "RELATED_TO",
+            "target": "原子质量单位",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "中子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "同位素",
+            "type": "RELATED_TO",
+            "target": "原子质量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质谱法",
+            "type": "RELATED_TO",
+            "target": "阳离子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "α粒子",
+            "type": "RELATED_TO",
+            "target": "原子核",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "金属",
+            "type": "RELATED_TO",
+            "target": "离子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "非金属",
+            "type": "RELATED_TO",
+            "target": "分子化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      }
+    ]
+  }
+]
