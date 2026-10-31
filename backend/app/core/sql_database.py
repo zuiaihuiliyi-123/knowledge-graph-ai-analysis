@@ -828,6 +828,62 @@ class SQLDatabase:
                 "rows": sum(tables.values()), "source_journal_mode": source_mode,
                 "journal_reset": journal_reset}
 
+    # ---------- 启动前自动备份 ----------
+
+    _AUTO_BACKUP_SUBDIR = "auto"
+
+    def auto_backup(self, keep: int | None = None) -> dict | None:
+        """启动时自动留一份库快照（轮转保留最近 N 份）；跳过或失败返回 None。
+
+        为什么放在 `init_tables()` **之前**：启动会跑一串幂等迁移（补列 / 回填 /
+        重建表），迁移本身是写操作；再加上本项目的开发库曾被 `git checkout`
+        静默覆盖过一次，「最近一次启动前的库」是唯一既新鲜又廉价可得的回退点。
+
+        三条刻意的取舍：
+        1. 库不存在或 0 字节 → 直接跳过，不制造一堆空备份；
+        2. 备份失败只 warning 不抛异常 —— 备份是旁路，不能成为启动的新故障点
+           （与 `main.py` 里请求指标采集的取舍一致）；
+        3. 复用 `backup_to()` 的官方 backup API，不裸拷 `.db`：WAL 下裸拷会静默少数据。
+
+        返回 `backup_to()` 的事实字典，便于启动日志/自检核对（bytes/tables/rows）。
+        """
+        if not getattr(settings, "AUTO_BACKUP", True):
+            return None
+        keep = settings.AUTO_BACKUP_KEEP if keep is None else keep
+        try:
+            if not os.path.exists(self.db_path) or os.path.getsize(self.db_path) == 0:
+                return None
+            out_dir = os.path.join(settings.BACKUP_DIR, self._AUTO_BACKUP_SUBDIR)
+            os.makedirs(out_dir, exist_ok=True)
+            # 带毫秒，避免同一秒内连续启动（脚本/测试）互相覆盖
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+            dst = os.path.join(out_dir, f"app.db.{stamp}.bak")
+            fact = self.backup_to(dst)
+            self._rotate_auto_backups(out_dir, keep)
+            _logger.info("启动前自动备份完成：%s（%s bytes，%s 张表）",
+                         dst, fact["bytes"], len(fact["tables"]))
+            return fact
+        except Exception as exc:  # noqa: BLE001 - 备份失败不得阻塞启动
+            _logger.warning("启动前自动备份失败（不影响启动）：%s", exc)
+            return None
+
+    @staticmethod
+    def _rotate_auto_backups(out_dir: str, keep: int) -> None:
+        """只保留最近 `keep` 份自动备份（按修改时间倒序）；keep <= 0 不做轮转。"""
+        if keep <= 0:
+            return
+        try:
+            files = [os.path.join(out_dir, n) for n in os.listdir(out_dir) if n.endswith(".bak")]
+        except OSError as exc:
+            _logger.warning("扫描自动备份目录失败：%s", exc)
+            return
+        files.sort(key=os.path.getmtime, reverse=True)
+        for old in files[keep:]:
+            try:
+                os.remove(old)
+            except OSError as exc:
+                _logger.warning("清理旧自动备份失败：%s (%s)", old, exc)
+
     def init_tables(self):
         """初始化表结构（幂等，可重复调用）"""
         with self._connect() as conn:

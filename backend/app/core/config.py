@@ -51,6 +51,18 @@ class Settings:
     # 锚定到 backend/ 目录，消除“从哪个目录启动”导致的路径漂移
     SQLITE_DB_PATH: str = _resolve_path(os.getenv("SQLITE_DB_PATH", "./data/app.db"))
 
+    # ---- 启动前自动备份（数据保障）----
+    # 每次启动在 init_tables()（一串幂等迁移，属写操作）之前留一份库快照，
+    # 轮转只保留最近 AUTO_BACKUP_KEEP 份。为什么必须有：
+    # 本项目的库曾被 git checkout「静默覆盖」过一次（历史提交跟踪过 app.db），
+    # 而迁移本身也可能写坏数据 —— 两类事故都靠「最近一次启动时的快照」回退。
+    # 备份目录默认 backend/backup/auto（backend/backup/ 已在 .gitignore 中）。
+    AUTO_BACKUP: bool = (
+        os.getenv("AUTO_BACKUP", "1").strip().lower() not in ("0", "false", "no", "off")
+    )
+    AUTO_BACKUP_KEEP: int = max(1, int(os.getenv("AUTO_BACKUP_KEEP", "10") or 10))
+    BACKUP_DIR: str = _resolve_path(os.getenv("BACKUP_DIR", "./backup"))
+
     # 文件上传配置
     UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB

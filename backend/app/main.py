@@ -19,6 +19,11 @@ from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, docu
 async def lifespan(app: FastAPI):
     # 启动时初始化关系型数据库表结构（SQLite，幂等），并确保存在默认教师/管理员账号。
     # 两者都是「不存在才创建」，重复启动不会覆盖已有账号的密码或角色。
+    #
+    # 先自动备份、再迁移：init_tables() 里跑的是补列/回填/重建表这类**写操作**，
+    # 一旦某次迁移出问题，用这次启动前的快照即可回到上一个可用状态。
+    # 备份失败不阻塞启动（见 SQLDatabase.auto_backup 的取舍说明）。
+    sql_db.auto_backup()
     sql_db.init_tables()
     sql_db.ensure_default_teacher()
     sql_db.ensure_default_admin()
