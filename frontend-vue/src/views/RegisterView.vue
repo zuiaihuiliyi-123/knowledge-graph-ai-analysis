@@ -49,6 +49,13 @@
               <el-radio value="teacher">教师</el-radio>
             </el-radio-group>
           </el-form-item>
+          <el-form-item v-if="form.role === 'teacher'" label="邀请码" prop="teacherInviteCode">
+            <el-input
+              v-model="form.teacherInviteCode"
+              placeholder="请输入管理员提供的教师邀请码"
+              :prefix-icon="Key"
+            />
+          </el-form-item>
           <el-form-item>
             <el-button
               type="primary"
@@ -63,7 +70,7 @@
 
         <div class="role-tips">
           <el-icon><InfoFilled /></el-icon>
-          <span>教师可创建课程、上传资料并管理成员；学生通过加课码或邀请链接加入课程。</span>
+          <span>教师注册需管理员提供的邀请码；教师可创建课程、上传资料并管理成员。学生无需邀请码，通过加课码或邀请链接加入课程。</span>
         </div>
 
         <div class="form-footer">
@@ -84,7 +91,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock, InfoFilled } from '@element-plus/icons-vue'
+import { User, Lock, InfoFilled, Key } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
 import AuthBrandPanel from '../components/AuthBrandPanel.vue'
 import BackendStatusCard from '../components/BackendStatusCard.vue'
@@ -95,7 +102,7 @@ const store = useAppStore()
 
 const formRef = ref(null)
 const loading = ref(false)
-const form = reactive({ username: '', password: '', confirm: '', role: 'student' })
+const form = reactive({ username: '', password: '', confirm: '', role: 'student', teacherInviteCode: '' })
 
 const rules = {
   username: [
@@ -117,6 +124,19 @@ const rules = {
     },
   ],
   role: [{ required: true, message: '请选择身份', trigger: 'change' }],
+  teacherInviteCode: [
+    {
+      // 只有选择「教师」时才必填：学生注册不需要邀请码，故用函数式校验而非常驻 required
+      validator: (_rule, value, callback) => {
+        if (form.role === 'teacher' && !String(value || '').trim()) {
+          callback(new Error('教师注册需要邀请码，请联系管理员获取'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
 }
 
 async function handleRegister() {
@@ -130,7 +150,13 @@ async function handleRegister() {
   loading.value = true
   const username = form.username.trim()
   try {
-    await store.register({ username, password: form.password, role: form.role })
+    await store.register({
+      username,
+      password: form.password,
+      role: form.role,
+      // 后端只认 teacher_invite_code；学生注册不需要，传 undefined 让请求体保持干净
+      teacher_invite_code: form.role === 'teacher' ? form.teacherInviteCode.trim() : undefined,
+    })
     ElMessage.success('注册成功，正在登录…')
     // 注册后自动登录，省去用户再填一次（后端注册接口不返回 token）
     await store.login(username, form.password)

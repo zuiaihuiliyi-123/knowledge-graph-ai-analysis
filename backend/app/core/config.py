@@ -83,6 +83,13 @@ class Settings:
     # 认证（JWT 签名密钥，务必在 .env 中覆盖为随机值）
     SECRET_KEY: str = os.getenv("SECRET_KEY", "please-set-a-random-secret-key-of-at-least-32-bytes")
 
+    # 教师注册邀请码（阶段 1A 安全收口）
+    # 背景：`/api/auth/register` 原先让请求体自选 role="teacher"，任何人都能注册成教师。
+    # 规则：配置了该值 → 教师注册必须携带且匹配；未配置 → **教师自助注册关闭**
+    #      （学生注册不受影响；教师账号由管理员在后台创建或提升）。
+    # 建议用不含空格的长随机串；它只参与服务端比较，永远不会出现在响应里。
+    TEACHER_INVITE_CODE: str = (os.getenv("TEACHER_INVITE_CODE", "") or "").strip()
+
 
 settings = Settings()
 
