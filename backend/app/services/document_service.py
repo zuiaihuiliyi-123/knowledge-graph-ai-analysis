@@ -12,7 +12,7 @@ from ..core.config import settings
 from ..core.database import db
 from ..core.permissions import Permissions
 from ..core.sql_database import sql_db
-from ..core.storage import resolve_document_path
+from ..core.storage import document_relative_path, resolve_document_path
 from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
 from .kg_manager import KnowledgeGraphManager
@@ -151,7 +151,10 @@ class DocumentService:
             except Exception:
                 pass
             return {"ok": False, "code": 5001, "message": f"文件存储失败: {str(e)}"}
-        sql_db.update_document(doc_id, file_path=save_path)
+        # 库里存**相对 UPLOAD_DIR 的路径**（换机器/恢复备份后仍能解析），
+        # save_path 只用于本次落盘。历史行的绝对路径由 resolve_document_path 兼容。
+        sql_db.update_document(
+            doc_id, file_path=document_relative_path(course_id, doc_id, filename))
         return {"ok": True, "document_id": doc_id, "file_sha256": digest}
 
     @staticmethod

@@ -155,14 +155,24 @@ def main():
 
     # ---------- 8. 真实文档的解析探针 ----------
     print("\nStep 8: 真实文档加载探针（只读）")
-    from app.core.sql_database import sql_db
+    import os
 
-    row = sql_db._query_one(
-        "SELECT doc_id, course_id, file_name FROM t_document "
-        "WHERE parse_status = 'PARSED' ORDER BY doc_id LIMIT 1")
-    if not row:
+    from app.core.sql_database import sql_db
+    from app.core.storage import resolve_document_path
+
+    # 挑「本机真能读到文件」的文档：库可能来自备份/他机，记录存在但原始文件缺失。
+    # 这类数据不是代码缺陷，按 skip 处理；否则换一台机器跑就会误报失败。
+    candidates = sql_db._query(
+        "SELECT doc_id, course_id, file_name, file_path FROM t_document "
+        "WHERE parse_status = 'PARSED' ORDER BY doc_id") or []
+    row = next((r for r in candidates
+                if os.path.exists(resolve_document_path(r) or "")), None)
+    if not candidates:
         skip("线上无已解析文档")
+    elif row is None:
+        skip(f"本机没有可读的已解析文档（共 {len(candidates)} 条记录，原始文件均缺失）")
     else:
+        print(f"  选用真实文档 doc={row['doc_id']}（{row['file_name']}）")
         chunks, err = asyncio.run(E.load_chunks(row["course_id"], row["doc_id"]))
         if err:
             check(f"真实文档 doc={row['doc_id']} 能重建分块", False, f"err={err}")
