@@ -43,6 +43,9 @@ backend/backup/
 *.log
 backend/logs/
 
+# 自动生成的本地 JWT 密钥（阶段 1B：未配置 SECRET_KEY 时回落使用，绝不可入库）
+backend/data/.secret_key
+
 # 编辑器 / 手工备份文件（历史上误提交过 GraphCanvas.vue.bak 等）
 *.bak
 *.bak.*
