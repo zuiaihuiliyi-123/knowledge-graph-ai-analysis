@@ -43,13 +43,20 @@ class KnowledgeGraphManager:
             name = entity.get("name", "").strip()
             if not name:
                 continue
+            properties = {"confidence": 0.9, "is_manual": False}
+            # 同名实体在抽取阶段被合并（图谱 MERGE 键是 name，同名无法并存）时，
+            # 备选描述与冲突类别只能挂在这个节点上；不落库就等于永久丢弃。
+            if entity.get("alt_descriptions"):
+                properties["alt_descriptions"] = list(entity["alt_descriptions"])
+            if entity.get("category_variants"):
+                properties["category_variants"] = list(entity["category_variants"])
             db.create_knowledge_node(
                 course_id=course_id,
                 document_id=document_id,
                 name=name,
                 category=entity.get("category", "概念"),
                 description=entity.get("description", ""),
-                properties={"confidence": 0.9, "is_manual": False}
+                properties=properties
             )
             node_count += 1
 
@@ -195,6 +202,12 @@ class KnowledgeGraphManager:
                     "is_manual": node.get("is_manual", False),
                     "created_at": node.get("created_at"),
                     "updated_at": node.get("updated_at"),
+                    # 同名实体在抽取阶段被合并时留下的附加信息。
+                    # 只在存在时出现，保证「没有发生同名合并」的节点读图结果与之前完全一致。
+                    **({"alt_descriptions": node.get("alt_descriptions")}
+                       if node.get("alt_descriptions") else {}),
+                    **({"category_variants": node.get("category_variants")}
+                       if node.get("category_variants") else {}),
                 },
             }
 
