@@ -2321,6 +2321,20 @@ class SQLDatabase:
             conn.commit()
         return 1
 
+    def delete_question_embedding(self, question_id: int) -> int:
+        """删除单题向量缓存，返回影响行数。
+
+        为什么需要单独一个入口：`t_question_embedding` 带 `text_hash`，文本变了
+        `ensure_question_vectors` 会自动重算；但 **`document_id` 变了哈希不变**，
+        缓存行会永久停留在旧作用域——按新文档检索向量时查不到，而 ensure 也不会重写。
+        因此「题目内容或归属发生变化」时必须显式删行。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_question_embedding WHERE question_id = ?", (question_id,))
+            conn.commit()
+            return cur.rowcount
+
     def get_question_embedding(self, question_id: int) -> dict:
         """取单题向量行（含 text_hash，供判断是否需要重算）"""
         row = self._query_one(

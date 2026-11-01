@@ -23,6 +23,7 @@ from ..core.sql_database import (
 from .question_recommender import (
     QuestionRecommender, VALID_MODES as VALID_RECOMMEND_MODES,
 )
+from .vector_index import vector_index
 
 # 题型（Scope B：三型客观题自动判分 + 两型主观题教师批改）
 VALID_TYPES = ("SINGLE", "MULTI", "JUDGE", "FILL", "ESSAY")
@@ -637,6 +638,21 @@ class QuestionService:
         elif "kp_id" in payload:
             update_fields["kp_id"] = normalized["kp_id"] or ""
         sql_db.update_question(question_id, **update_fields)
+
+        # ---- 向量缓存失效 ----
+        # 判定「影响向量的输入」是否真的变了：题干 / 选项 / 所属文档。
+        # - 题干、选项变了：text_hash 会兜住（ensure 重算），这里顺手删行避免旧向量被
+        #   未做哈希校验的读路径（question_recommender 的语义打分）用到；
+        # - document_id 变了：哈希不变，ensure **永远不会**重写 —— 缓存行会永久漂移，
+        #   必须显式删。
+        old_options = (_parse_blanks(question) if question["q_type"] == "FILL"
+                       else _parse_options(question))
+        if (normalized["stem"] != question["stem"]
+                or normalized["options"] != old_options
+                or did != question.get("document_id")):
+            sql_db.delete_question_embedding(question_id)
+            vector_index.invalidate(kind="question", course_id=question["course_id"])
+
         return {"ok": True, "code": 0, "message": "success", "data": {
             "question_id": question_id,
             "updated": True,
@@ -964,6 +980,14 @@ class QuestionService:
         if not isinstance(items, list) or not items:
             return {"ok": False, "code": 4001, "message": "参数错误：items 不能为空"}
         doc = sql_db.get_document(did)
+        # 去重：同一课程内「题干完全相同」视为重复题。
+        # 为什么按课程而不是按文档：教师会把同一份练习挂到多个文档，或重复点「提交导入」；
+        # 两者都会产出重复题，污染批改统计、错题本与推荐配额。同批次内也要去重（下面 add）。
+        existing_stems = {
+            (row.get("stem") or "").strip()
+            for row in sql_db._query(
+                "SELECT stem FROM t_question WHERE course_id = ?", (course_id,))
+        }
         batch_id = sql_db.create_import_batch(
             course_id, did, (doc or {}).get("file_name") or "", source="RULE",
             total=len(items), created_by=user_id, meta={"activate": bool(activate)},
@@ -992,6 +1016,13 @@ class QuestionService:
             status = raw.get("import_status") or "READY"
             if status == "READY" and raw.get("warnings"):
                 status = "NEEDS_REVIEW"
+            # 去重（课程内 + 同批次内）：重复题只跳过并回报原因，不静默写入
+            stem_key = (normalized["stem"] or "").strip()
+            if stem_key and stem_key in existing_stems:
+                skipped.append({"index": idx, "number": raw.get("number"),
+                                "reason": "重复题目：该课程已存在相同题干"})
+                continue
+            existing_stems.add(stem_key)
             if status != "READY":
                 needs_review += 1
             sql_db.create_question(
