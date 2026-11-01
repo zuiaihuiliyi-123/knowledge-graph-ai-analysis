@@ -117,6 +117,20 @@ def main() -> int:
     else:
         check("Neo4j 可用时标注已检查", report3.get("graph_checked") is True, "已检查")
 
+    print("\nStep 3.5: 卡死的处理任务（心跳超时）会被报告")
+    sql_db.upsert_document_task(doc_ok, course_id, stage="EXTRACT", status="RUNNING",
+                                heartbeat_at="2000-01-01 00:00:00")
+    code4, out4, _ = run("--json", "--skip-graph")
+    report4 = json.loads(out4) if out4.strip().startswith("{") else {}
+    stale = [i for i in (report4.get("issues") or []) if i.get("type") == "TASK_STALE"]
+    check("退出码 1", code4 == 1, f"rc={code4}")
+    check("命中卡死任务", any(i.get("doc_id") == doc_ok for i in stale), str(stale)[:160])
+    code5, out5, _ = run("--json", "--skip-graph", "--stale-minutes", "100000000")
+    report5 = json.loads(out5) if out5.strip().startswith("{") else {}
+    check("阈值放大后不再报 TASK_STALE",
+          not [i for i in (report5.get("issues") or []) if i.get("type") == "TASK_STALE"],
+          str(report5.get("by_type")))
+
     print("\nStep 4: 巡检是只读的")
     after = sql_db._query("SELECT * FROM t_document ORDER BY doc_id")
     check("t_document 内容未被改动", before == after, f"{len(before)} -> {len(after)}")

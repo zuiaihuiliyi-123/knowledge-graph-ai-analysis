@@ -721,6 +721,30 @@ _SCHEMA_SQL = [
         PRIMARY KEY (course_id, document_id)
     )
     """,
+
+    # 4.2.22 文档处理任务（阶段 4：断点续跑的可观测部分）。
+    # 一行 = 一篇文档的**当前**处理任务（不是历史流水）：stage/status/attempts 便于
+    # 排查「卡住」「反复失败」，heartbeat_at 由每个阶段刷新，用来判断进程是否还活着。
+    # 中间产物（parsed.txt / extracted.json）在文件系统 TASK_STATE_DIR 下，不放库里：
+    # 抽取结果动辄几十 KB，塞进 SQLite 会让每次列表查询都带着走。
+    """
+    CREATE TABLE IF NOT EXISTS t_document_task (
+        doc_id        INTEGER PRIMARY KEY,
+        course_id     INTEGER NOT NULL,
+        stage         TEXT NOT NULL DEFAULT 'PARSE'
+                      CHECK (stage IN ('PARSE', 'EXTRACT', 'BUILD', 'DONE')),
+        status        TEXT NOT NULL DEFAULT 'IDLE'
+                      CHECK (status IN ('IDLE', 'RUNNING', 'DONE', 'FAILED')),
+        attempts      INTEGER NOT NULL DEFAULT 0,
+        artifacts     TEXT,
+        heartbeat_at  TEXT,
+        error_message TEXT,
+        created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        updated_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        FOREIGN KEY (doc_id) REFERENCES t_document(doc_id)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_document_task_status ON t_document_task(status);",
 ]
 
 
@@ -1845,6 +1869,53 @@ class SQLDatabase:
 
     def get_document(self, doc_id: int) -> dict:
         return self._query_one("SELECT * FROM t_document WHERE doc_id = ?", (doc_id,))
+
+    # ---------- 文档处理任务（阶段 4：断点续跑） ----------
+
+    # 允许由调用方写入的字段（attempts / 时间戳由本方法自己维护，防注入）
+    TASK_FIELDS = ("stage", "status", "artifacts", "heartbeat_at", "error_message")
+
+    def upsert_document_task(self, doc_id: int, course_id: int, *,
+                             bump_attempts: bool = False, **fields) -> None:
+        """写入/更新「这篇文档当前的处理任务」。
+
+        `bump_attempts=True` 表示「这一轮是新的尝试」，attempts +1；
+        其余字段（stage/status/artifacts/error_message）按传入值覆盖。
+        表是「当前任务」而非流水：同一文档永远只有一行。
+        """
+        allowed = {k: v for k, v in fields.items() if k in self.TASK_FIELDS}
+        cols = ["doc_id", "course_id", "attempts", *allowed]
+        params = [int(doc_id), int(course_id), 1 if bump_attempts else 0,
+                  *[allowed[k] for k in allowed]]
+        sets = [f"{k} = excluded.{k}" for k in allowed]
+        if bump_attempts:
+            sets.append("attempts = t_document_task.attempts + 1")
+        sets.append("updated_at = ?")
+        params.append(_now())
+        placeholders = ", ".join("?" * len(cols))
+        self._execute(
+            f"INSERT INTO t_document_task ({', '.join(cols)}) VALUES ({placeholders}) "
+            f"ON CONFLICT(doc_id) DO UPDATE SET {', '.join(sets)}",
+            tuple(params),
+        )
+
+    def get_document_task(self, doc_id: int) -> dict:
+        return self._query_one("SELECT * FROM t_document_task WHERE doc_id = ?", (doc_id,))
+
+    def delete_document_task(self, doc_id: int) -> None:
+        self._execute("DELETE FROM t_document_task WHERE doc_id = ?", (int(doc_id),))
+
+    def list_running_tasks(self, stale_before: str = None) -> list:
+        """仍在 RUNNING 的任务；传 `stale_before` 只取心跳早于该时刻的（排查卡死）。"""
+        if stale_before:
+            return self._query(
+                "SELECT * FROM t_document_task WHERE status = 'RUNNING' "
+                "AND (heartbeat_at IS NULL OR heartbeat_at < ?) ORDER BY doc_id",
+                (stale_before,),
+            )
+        return self._query(
+            "SELECT * FROM t_document_task WHERE status = 'RUNNING' ORDER BY doc_id")
+
 
     def list_documents_by_course(self, course_id: int) -> list:
         return self._query(

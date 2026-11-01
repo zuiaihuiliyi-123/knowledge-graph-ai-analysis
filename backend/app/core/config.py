@@ -123,6 +123,15 @@ class Settings:
     )
     EXTRACT_CACHE_DIR: str = _resolve_path(os.getenv("EXTRACT_CACHE_DIR", "./data/extract_cache"))
 
+    # 断点续跑（阶段 4）：解析文本与抽取结果作为「中间产物」落盘，
+    # 进程重启后若产物仍在且与文件一致（sha256 校验），启动恢复就**接着跑**
+    # 而不是把文档标成 FAILED。RESUME_ON_STARTUP=0 可退回「全部标失败」的旧行为。
+    RESUME_ON_STARTUP: bool = (
+        os.getenv("RESUME_ON_STARTUP", "1").strip().lower()
+        not in ("0", "false", "no", "off")
+    )
+    TASK_STATE_DIR: str = _resolve_path(os.getenv("TASK_STATE_DIR", "./data/task_state"))
+
     # 文件上传配置
     UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB

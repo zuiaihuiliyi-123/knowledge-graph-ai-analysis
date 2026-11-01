@@ -101,11 +101,44 @@ def check_graph(docs: list) -> tuple:
     return issues, True, None
 
 
+def _minutes_ago(minutes: int) -> str:
+    """SQLite 里时间戳统一是 `YYYY-MM-DD HH:MM:SS`（localtime），这里按同格式切片。"""
+    from datetime import datetime, timedelta
+    return (datetime.now() - timedelta(minutes=max(0, int(minutes)))).strftime(
+        "%Y-%m-%d %H:%M:%S")
+
+
+def check_tasks(stale_minutes: int = 30) -> list:
+    """`t_document_task` 里「写着在跑、心跳却早就停了」的任务（阶段 4）。
+
+    单进程部署下，`RUNNING` 且心跳超时的任务只可能来自崩溃，或线程被卡死。
+    启动恢复只在启动时跑一次，中途卡死不会被发现——这类问题不会让数据不一致，
+    但会让文档永远停在「处理中」，所以作为可观测性问题一并报告（不修数据）。
+    """
+    issues = []
+    try:
+        rows = sql_db.list_running_tasks(stale_before=_minutes_ago(stale_minutes))
+    except Exception as exc:  # noqa: BLE001 - 旧库还没这张表时不该让巡检崩掉
+        print(f"读取 t_document_task 失败（忽略该检查）：{exc}", file=sys.stderr)
+        return issues
+    for t in rows or []:
+        issues.append({
+            "type": "TASK_STALE",
+            "doc_id": t.get("doc_id"), "course_id": t.get("course_id"),
+            "file_name": None,
+            "detail": (f"任务 stage={t.get('stage')} 状态 RUNNING，心跳 "
+                       f"{t.get('heartbeat_at') or '从未'} 已超过 {stale_minutes} 分钟"),
+        })
+    return issues
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="跨库一致性巡检（只读）")
     parser.add_argument("--json", action="store_true", help="输出 JSON")
     parser.add_argument("--skip-graph", action="store_true", help="不连 Neo4j，只查 SQLite 侧")
     parser.add_argument("--limit", type=int, default=0, help="只抽检前 N 篇文档（0 = 全部）")
+    parser.add_argument("--stale-minutes", type=int, default=30,
+                        help="处理任务心跳超过多少分钟视为卡死（默认 30）")
     args = parser.parse_args(argv)
 
     try:
@@ -115,6 +148,7 @@ def main(argv=None) -> int:
         return 2
 
     issues = check_files(docs)
+    issues.extend(check_tasks(args.stale_minutes))
     graph_checked, graph_warning = False, None
     if not args.skip_graph:
         graph_issues, graph_checked, graph_warning = check_graph(docs)
@@ -145,6 +179,7 @@ def main(argv=None) -> int:
         print(f"扫描文档        : {report['documents_scanned']}")
         print(f"图谱检查        : {'已执行' if graph_checked else '未执行'}"
               + (f"（{graph_warning}）" if graph_warning else ""))
+        print(f"任务检查        : 已执行（心跳阈值 {args.stale_minutes} 分钟）")
         print(f"发现问题        : {report['issue_count']} 条 {report['by_type'] or ''}")
         for it in report["issues"]:
             print(f"  - [{it['type']}] course={it['course_id']} doc={it['doc_id']} "

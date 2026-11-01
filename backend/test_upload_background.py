@@ -53,7 +53,12 @@ def check(label, ok, detail=""):
         failures.append(label)
 
 
-async def fake_process(doc_id: int) -> dict:
+async def fake_process(doc_id: int, resume: bool = False) -> dict:
+    """打桩的处理函数。
+
+    `resume` 是阶段 4 新增的入参（启动续跑专用），这里必须一起接住：
+    后台任务入口会显式传 `resume=resume`，签名不匹配会直接把任务打成异常。
+    """
     """打桩：记录调用并返回「已完成」，不碰 LLM / Neo4j。"""
     calls.append(int(doc_id))
     doc = sql_db.get_document(int(doc_id))
