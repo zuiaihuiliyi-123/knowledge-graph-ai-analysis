@@ -16,10 +16,20 @@ export const api = {
   health: () => request.get('/health'),
 
   // ---- 文档 / 课程 ----
-  /** 上传文档到已有课程（对齐后端 POST /api/v1/documents/upload；LLM 抽取耗时较长，超时放宽到 10 分钟） */
+  /**
+   * 上传单个文档到已有课程。
+   *
+   * **走后台模式**（`?background=1`）：后端落库后立即返回 `document_id` 与 `status=processing`，
+   * 解析/抽取/建图在后台执行 —— 调用方拿到 id 后轮询文档列表取进度（教师端目前统一走
+   * `uploadDocumentsBatch`，本函数保留给「单文件入口」复用）。
+   *
+   * 为什么不再用同步模式：同步模式要把整条流水线（含 LLM 抽取）跑完才返回，几十页 PDF
+   * 要几十秒到几分钟；一旦浏览器/网关先超时，服务端仍在跑而前端拿不到 id，用户会重复上传。
+   * 因此超时只按「传输 + 落盘」量级设置，不再留 10 分钟的长等待。
+   */
   uploadCourse: (formData, courseId) => {
     if (courseId != null && courseId !== '') formData.append('course_id', courseId)
-    return request.post('/api/v1/documents/upload', formData, { timeout: 600000 })
+    return request.post('/api/v1/documents/upload?background=1', formData, { timeout: 120000 })
   },
   /** 批量上传文档：后端立即返回每个文件的 document_id，解析/抽取/建图后台执行 */
   uploadDocumentsBatch: (formData, courseId) => {
