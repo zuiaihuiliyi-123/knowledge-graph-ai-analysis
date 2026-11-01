@@ -52,13 +52,14 @@
             >
             <div class="msg-bubble">
               <!-- 错误态：LLM 生成失败（网络/接口异常也归为此类） -->
-              <div v-if="m.error" class="msg-error">
+              <div v-if="m.error" class="msg-error" :title="m.errDetail || ''">
                 <el-icon><WarningFilled /></el-icon>
                 <span>AI 服务暂时不可用，请稍后重试</span>
               </div>
               <template v-else>
                 <div v-if="m.role === 'ai'" class="msg-text msg-md" v-html="renderMarkdown(m.content)"></div>
                 <div v-else class="msg-text">{{ m.content }}</div>
+                <div v-if="m.streaming" class="msg-streaming"><span class="typing-dot"></span>正在生成…</div>
                 <!-- 证据链：回答正文 → 引用来源 → 相关知识点 -->
                 <div v-if="m.role === 'ai'" class="msg-sources">
                   <div class="sources-title">
@@ -99,7 +100,7 @@
             </div>
           </template>
 
-          <div v-if="asking" class="msg-row msg-ai">
+          <div v-if="asking && !streamingText" class="msg-row msg-ai">
             <div class="msg-bubble typing">
               <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
             </div>
@@ -128,9 +129,10 @@ import {
   Collection, Document, MagicStick, Right, Star, StarFilled, WarningFilled,
 } from '@element-plus/icons-vue'
 import { api } from '../../api'
+import { askStream } from '../../api/qaStream'
 import { categoryTagType } from '../../utils/graphStyle'
 import { renderMarkdown } from '../../utils/markdown'
-import { useLatestRequest } from '../../composables/useLatestRequest'
+import { isAbortError, useLatestRequest } from '../../composables/useLatestRequest'
 
 const props = defineProps({
   courseId: { type: [String, Number], default: '' },
@@ -145,6 +147,8 @@ const emit = defineEmits(['jump-kp', 'toggle-favorite'])
 
 const question = ref('')
 const asking = ref(false)
+// 已收到的正文字数（非空即代表首字已到：用于收起「正在输入」三点动画）
+const streamingText = ref('')
 const messages = ref([])
 const chatBoxRef = ref(null)
 const sendRequest = useLatestRequest()
@@ -178,27 +182,80 @@ async function sendQuestion() {
   if (!q || asking.value) return
   const cid = props.courseId
   const did = props.documentId
-  // 用写请求语义：提问已触发后端检索+生成（有成本），不在切换资料时取消，只丢弃迟到结果
-  const token = sendRequest.begin()
+  // 流式请求用 beginRead()：切换资料/离开页面时中断流。
+  // 与同步问答不同——中断 SSE 连接会让后端生成器随之结束，等于「止损」；同步请求则早已计费。
+  const { token, signal } = sendRequest.beginRead()
   question.value = ''
   messages.value.push(withCtx({ role: 'user', content: q }))
+
+  // 先占位一条 AI 消息：sources 一到就渲染证据链，delta 直接往里追加
+  messages.value.push(withCtx({
+    role: 'ai', content: '', sources: [], error: false, streaming: true,
+  }))
+  const bubble = messages.value[messages.value.length - 1]
   asking.value = true
+  streamingText.value = ''
   scrollChatToBottom()
+
+  let received = ''
   try {
-    const res = await api.ask(q, cid, did)
-    if (!sendRequest.isLatest(token)) return
-    const sources = (res.sources || []).map(normalizeSource)
-    // 区分「检索成功但生成失败」（LLM 降级文案）与「检索空结果」
-    messages.value.push(withCtx({
-      role: 'ai',
-      content: res.answer || '（无回答）',
-      sources,
-      error: isLlmError(res.answer),
-    }))
-  } catch {
-    if (!sendRequest.isLatest(token)) return
-    messages.value.push(withCtx({ role: 'ai', content: '', error: true, sources: [] }))
+    const events = await askStream({ question: q, courseId: cid, documentId: did, signal })
+    for await (const ev of events) {
+      if (!sendRequest.isLatest(token)) return
+      if (ev.event === 'sources') {
+        bubble.sources = (ev.data?.sources || []).map(normalizeSource)
+      } else if (ev.event === 'delta') {
+        received += ev.data?.text || ''
+        streamingText.value = received
+        bubble.content = received
+        scrollChatToBottom()
+      } else if (ev.event === 'done') {
+        bubble.content = ev.data?.answer || received || '（无回答）'
+        if (ev.data?.sources) bubble.sources = ev.data.sources.map(normalizeSource)
+        bubble.error = isLlmError(bubble.content)
+        bubble.streaming = false
+        return
+      } else if (ev.event === 'error') {
+        bubble.error = true
+        bubble.errDetail = ev.data?.message || ''
+        bubble.streaming = false
+        return
+      }
+    }
+    // 流正常结束但没有 done（后端被中断等）：把已收到的内容当作结果
+    bubble.content = received || '（无回答）'
+    bubble.streaming = false
+  } catch (e) {
+    if (isAbortError(e)) {
+      // 切换资料/卸载：保留半成品并标记中断，避免看起来像「AI 没回答」
+      bubble.streaming = false
+      if (!bubble.content) {
+        bubble.error = true
+        bubble.errDetail = '已中断（切换了学习资料）'
+      }
+      return
+    }
+    // 非流式响应（权限拒绝、代理不支持流）或网络失败：有内容就保留，否则回退同步接口
+    if (!received) {
+      try {
+        const res = await api.ask(q, cid, did, { signal })
+        if (!sendRequest.isLatest(token)) return
+        bubble.content = res.answer || '（无回答）'
+        bubble.sources = (res.sources || []).map(normalizeSource)
+        bubble.error = isLlmError(res.answer)
+        bubble.streaming = false
+        return
+      } catch (e2) {
+        if (isAbortError(e2)) return
+        bubble.error = true
+        bubble.errDetail = e2.message || ''
+      }
+    } else {
+      bubble.error = false
+    }
+    bubble.streaming = false
   } finally {
+    streamingText.value = ''
     if (sendRequest.isLatest(token)) {
       asking.value = false
       scrollChatToBottom()
@@ -218,6 +275,10 @@ function scrollChatToBottom() {
 }
 
 function clearChat() {
+  // 清空对话同时中断在途生成：否则后端会继续吐 token（有成本），且半成品会写回已清空的列表
+  sendRequest.invalidate()
+  asking.value = false
+  streamingText.value = ''
   messages.value = []
 }
 
@@ -231,7 +292,10 @@ function normalizeSource(s) {
 
 // 切换学习资料：作废在途回答并解除输入锁定，避免上一文档的回答落进新文档的对话。
 // 历史消息保留（用户可回看），新消息按 ctxKey 打标记，界面在跨资料处插入分隔行。
-watch(() => props.ctxKey, () => {
+// 注意只在「已有上下文 → 另一个上下文」时中断：首次从空值落上下文（深链进入时
+// initFromRoute 是异步的）不该把刚发出的提问掐掉——那次提问本来就是「全部可访问课程」范围。
+watch(() => props.ctxKey, (now, before) => {
+  if (!before) return
   sendRequest.invalidate()
   asking.value = false
 })
@@ -408,6 +472,15 @@ const relatedKps = computed(() => {
 }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+/* 流式生成中：正文下方的轻提示（首字到达后取代「正在输入」三点动画） */
+.msg-streaming {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
 @keyframes blink {
   0%, 100% { opacity: 0.25; }
   50% { opacity: 1; }
