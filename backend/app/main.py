@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core import metrics
+from .core.database import db
 from .core.sql_database import sql_db
 from .services.document_service import DocumentService
 from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, documents,
@@ -67,6 +68,15 @@ async def lifespan(app: FastAPI):
             DocumentService.reconcile_interrupted()
         except Exception:  # noqa: BLE001 - 恢复失败不应阻止服务启动
             _logger.exception("启动恢复失败（不影响启动）")
+
+    # 图谱索引/约束（幂等 IF NOT EXISTS）。此前 `init_schema()` 只定义、从未被调用——
+    # 本机之所以有索引是历史手工建的，**全新部署不会建**：MERGE 会退化成 Label 扫描，
+    # 批量建图与图谱读取都会慢一个量级，`kp_id` 唯一约束也缺失。
+    # 图库不可用时只告警：不能让「没装 Neo4j」阻止整个服务启动（既有降级路径保留）。
+    try:
+        db.init_schema()
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("初始化 Neo4j 索引/约束失败（图谱功能可能变慢或降级）：%s", exc)
     yield
 
 
