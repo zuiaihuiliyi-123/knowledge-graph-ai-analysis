@@ -83,6 +83,7 @@
           :course-id="currentCourseId"
           :document-id="currentDocumentId"
           :course-name="currentCourseName"
+          :document-name="currentDocumentName"
           :ctx-key="ctxKey"
           :favorite-ids="favoriteIds"
           @jump-kp="jumpToKp"

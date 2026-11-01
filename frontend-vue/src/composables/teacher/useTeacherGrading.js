@@ -39,7 +39,7 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
       resetData()
       return
     }
-    const token = request.begin()
+    const { token, signal } = request.beginRead()
     gradingLoading.value = true
     if (gradingOptCourse !== cid) {
       // 切换课程后重建学生候选与筛选
@@ -49,7 +49,7 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
     }
     try {
       const [summary, data] = await Promise.all([
-        api.getGradingSummary(cid),
+        api.getGradingSummary(cid, { signal }),
         api.getPendingGrades({
           course_id: cid,
           document_id: gradingDocFilter.value || undefined,
@@ -57,7 +57,7 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
           status: gradingStatus.value,
           page: gradingPage.value,
           page_size: gradingPageSize.value,
-        }),
+        }, { signal }),
       ])
       if (!request.isLatest(token) || String(courseId.value) !== cid) return
       gradingSummary.value = summary

@@ -75,10 +75,10 @@ export function useTeacherMonitor({ courseId, active }) {
       monitorLoading.value = false
       return
     }
-    const token = request.begin()
+    const { token, signal } = request.beginRead()
     monitorLoading.value = true
     try {
-      const data = await api.getTeacherStudentsProgress(cid)
+      const data = await api.getTeacherStudentsProgress(cid, { signal })
       if (!request.isLatest(token) || String(courseId.value) !== cid) return
       monitorData.value = data
     } catch (e) {

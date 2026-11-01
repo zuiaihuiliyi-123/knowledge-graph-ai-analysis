@@ -41,12 +41,15 @@
             <p class="welcome-sub">例如：什么是线性表？栈和队列有什么区别？</p>
           </div>
 
-          <div
-            v-for="(m, i) in messages"
-            :key="i"
-            class="msg-row"
-            :class="m.role === 'user' ? 'msg-user' : 'msg-ai'"
-          >
+          <template v-for="(m, i) in messages" :key="i">
+            <!-- 上下文分隔：切换学习资料后历史消息保留，用分隔行标出「属于哪份资料」 -->
+            <div v-if="showCtxDivider(i)" class="chat-divider">
+              <span>已切换学习资料 · {{ m.ctxLabel }}</span>
+            </div>
+            <div
+              class="msg-row"
+              :class="m.role === 'user' ? 'msg-user' : 'msg-ai'"
+            >
             <div class="msg-bubble">
               <!-- 错误态：LLM 生成失败（网络/接口异常也归为此类） -->
               <div v-if="m.error" class="msg-error">
@@ -91,9 +94,10 @@
                   </template>
                   <div v-else class="sources-empty">未检索到相关知识点（AI 基于通用知识回答，仅供参考）</div>
                 </div>
-              </template>
+                </template>
+              </div>
             </div>
-          </div>
+          </template>
 
           <div v-if="asking" class="msg-row msg-ai">
             <div class="msg-bubble typing">
@@ -132,6 +136,7 @@ const props = defineProps({
   courseId: { type: [String, Number], default: '' },
   documentId: { type: [String, Number], default: '' },
   courseName: { type: String, default: '' },
+  documentName: { type: String, default: '' },
   ctxKey: { type: String, default: '' },
   favoriteIds: { type: Array, default: () => [] },
 })
@@ -144,6 +149,26 @@ const messages = ref([])
 const chatBoxRef = ref(null)
 const sendRequest = useLatestRequest()
 
+/** 当前问答上下文的展示名（用于区分历史消息属于哪份学习资料） */
+function currentCtxLabel() {
+  if (props.documentName) return props.documentName
+  if (props.documentId) return `文档 #${props.documentId}`
+  return '未选择学习资料'
+}
+
+/** 给消息打上「属于哪份资料」的标记：切换资料后历史仍可回看，但能看出归属 */
+function withCtx(msg) {
+  return { ...msg, ctxKey: props.ctxKey, ctxLabel: currentCtxLabel() }
+}
+
+/** 相邻两条消息来自不同学习资料时，插入分隔行 */
+function showCtxDivider(index) {
+  const cur = messages.value[index]
+  const prev = messages.value[index - 1]
+  if (!cur || !prev) return false
+  return !!cur.ctxKey && !!prev.ctxKey && cur.ctxKey !== prev.ctxKey
+}
+
 function isFav(kpId) {
   return props.favoriteIds.includes(String(kpId))
 }
@@ -153,9 +178,10 @@ async function sendQuestion() {
   if (!q || asking.value) return
   const cid = props.courseId
   const did = props.documentId
+  // 用写请求语义：提问已触发后端检索+生成（有成本），不在切换资料时取消，只丢弃迟到结果
   const token = sendRequest.begin()
   question.value = ''
-  messages.value.push({ role: 'user', content: q })
+  messages.value.push(withCtx({ role: 'user', content: q }))
   asking.value = true
   scrollChatToBottom()
   try {
@@ -163,15 +189,15 @@ async function sendQuestion() {
     if (!sendRequest.isLatest(token)) return
     const sources = (res.sources || []).map(normalizeSource)
     // 区分「检索成功但生成失败」（LLM 降级文案）与「检索空结果」
-    messages.value.push({
+    messages.value.push(withCtx({
       role: 'ai',
       content: res.answer || '（无回答）',
       sources,
       error: isLlmError(res.answer),
-    })
+    }))
   } catch {
     if (!sendRequest.isLatest(token)) return
-    messages.value.push({ role: 'ai', content: '', error: true, sources: [] })
+    messages.value.push(withCtx({ role: 'ai', content: '', error: true, sources: [] }))
   } finally {
     if (sendRequest.isLatest(token)) {
       asking.value = false
@@ -204,7 +230,7 @@ function normalizeSource(s) {
 }
 
 // 切换学习资料：作废在途回答并解除输入锁定，避免上一文档的回答落进新文档的对话。
-// 历史消息保留（用户可回看），只是不再接收旧上下文的迟到结果。
+// 历史消息保留（用户可回看），新消息按 ctxKey 打标记，界面在跨资料处插入分隔行。
 watch(() => props.ctxKey, () => {
   sendRequest.invalidate()
   asking.value = false
@@ -250,6 +276,22 @@ const relatedKps = computed(() => {
 }
 .msg-user { justify-content: flex-end; }
 .msg-ai { justify-content: flex-start; }
+/* 上下文分隔行：切换学习资料后历史消息保留，用一条细线标出分界 */
+.chat-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+.chat-divider::before,
+.chat-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
 .msg-bubble {
   max-width: 78%;
   padding: 10px var(--space-4);

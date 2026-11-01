@@ -287,13 +287,13 @@ export const useAppStore = defineStore('app', {
       writeLearningContext(this.learningContext)
     },
     /** 拉取某课程文档列表，写入 learningContext.documentList 并返回 */
-    async fetchDocuments(courseId) {
+    async fetchDocuments(courseId, options = {}) {
       const seq = ++documentsRequestSeq
       if (!courseId) {
         this.learningContext.documentList = []
         return []
       }
-      const docs = await api.getDocuments(courseId)
+      const docs = await api.getDocuments(courseId, options)
       const list = Array.isArray(docs) ? docs : []
       // 只让「最后一次请求」且仍是当前课程的响应落地，避免旧课程慢响应覆盖新列表
       if (seq === documentsRequestSeq

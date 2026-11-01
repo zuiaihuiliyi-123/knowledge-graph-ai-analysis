@@ -130,6 +130,24 @@ export async function dismissAlert(page: Page) {
 }
 
 /**
+ * 关闭「新建课程」成功后的加课码提示框（自定义类 `joincode-alert`，按钮文案「知道了」）。
+ *
+ * 与 dismissAlert 的区别：这里按弹框本身定位。dismissAlert 用的是全局第一个
+ * 「知道了/确定/关闭」按钮，页面上还有「收起侧栏」以外的其它同名按钮时可能点错，
+ * 弹框没关掉会以遮罩形式拦截后续所有点击（表现为「按钮 visible 但 click 一直重试」）。
+ */
+export async function dismissJoinCodeAlert(page: Page) {
+  const box = page.locator('.el-message-box.joincode-alert')
+  // 提示框在创建接口返回后才挂载：先等它出现，避免「查得太早 → 没关掉 → 遮罩拦截后续点击」
+  const appeared = await box.waitFor({ state: 'visible', timeout: 10000 })
+    .then(() => true)
+    .catch(() => false)
+  if (!appeared) return
+  await box.getByRole('button', { name: '知道了' }).click({ timeout: 5000 }).catch(() => {})
+  await box.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+}
+
+/**
  * 点击 el-radio 选项。
  * Element Plus 的 radio 内层 span 会拦截指针事件，直接点 role=radio 会一直重试，
  * 因此这里点 label（文本即选项名）。

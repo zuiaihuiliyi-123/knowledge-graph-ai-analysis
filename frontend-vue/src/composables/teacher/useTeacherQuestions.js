@@ -63,12 +63,13 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
     const key = `${cid}|${docs.map((d) => d.doc_id).join(',')}`
     if (kpInflight && kpInflight.key === key) return kpInflight.promise
 
-    const token = kpRequest.begin()
+    const { token, signal } = kpRequest.beginRead()
     const promise = (async () => {
       try {
         const graphs = await Promise.all(
           docs.map((d) =>
-            api.getGraphV1(cid, d.doc_id, { limit: 500 }).catch(() => ({ nodes: [] })),
+            api.getGraphV1(cid, d.doc_id, { limit: 500 }, { signal })
+              .catch(() => ({ nodes: [] })),
           ),
         )
         if (!kpRequest.isLatest(token) || String(courseId.value) !== cid) return
@@ -99,7 +100,7 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
       questionTotal.value = 0
       return
     }
-    const token = listRequest.begin()
+    const { token, signal } = listRequest.beginRead()
     questionsLoading.value = true
     try {
       const data = await api.listQuestions({
@@ -110,7 +111,7 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
         is_active: questionFilters.is_active === '' ? undefined : questionFilters.is_active === '1',
         page: questionPage.value,
         page_size: questionPageSize.value,
-      })
+      }, { signal })
       if (!listRequest.isLatest(token) || String(courseId.value) !== cid) return
       questionList.value = data.items || []
       questionTotal.value = data.total || 0
@@ -132,9 +133,9 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
       questionStats.value = null
       return
     }
-    const token = statsRequest.begin()
+    const { token, signal } = statsRequest.beginRead()
     try {
-      const data = await api.getQuestionStats(cid)
+      const data = await api.getQuestionStats(cid, { signal })
       if (!statsRequest.isLatest(token) || String(courseId.value) !== cid) return
       questionStats.value = data
     } catch {
@@ -149,10 +150,12 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
       questionCoverage.value = null
       return
     }
-    const token = coverageRequest.begin()
+    const { token, signal } = coverageRequest.beginRead()
     questionCoverageLoading.value = true
     try {
-      const data = await api.getQuestionCoverage(cid, questionDocFilter.value || undefined)
+      const data = await api.getQuestionCoverage(
+        cid, questionDocFilter.value || undefined, { signal },
+      )
       if (!coverageRequest.isLatest(token) || String(courseId.value) !== cid) return
       questionCoverage.value = data
     } catch (e) {

@@ -3,6 +3,11 @@ import request from './request'
 /**
  * 后端 API 封装
  * 教师端图谱编辑（新增/更新/删除节点、新增/删除关系）对齐后端 /api/v1/graph 编辑端点。
+ *
+ * 读接口统一接受可选的末位 `options`（原样透传给 axios config），用于传 `signal` 做真正的取消：
+ *   const { token, signal } = req.beginRead()
+ *   const list = await api.getDocuments(courseId, { signal })
+ * 不传 `options` 时行为与之前完全一致。
  */
 export const api = {
   // ---- 用户认证（对齐后端 /api/auth，注意路由无 /v1 版本号） ----
@@ -42,10 +47,12 @@ export const api = {
   retryDocument: (docId) => request.post(`/api/v1/documents/${docId}/retry`),
 
   // ---- 文档管理（对齐后端 /api/v1/documents CRUD） ----
-  /** 某课程文档列表 */
-  getDocuments: (courseId) => request.get('/api/v1/documents', { params: { course_id: courseId } }),
+  /** 某课程文档列表（options 可传 { signal } 以支持取消） */
+  getDocuments: (courseId, options = {}) =>
+    request.get('/api/v1/documents', { params: { course_id: courseId }, ...options }),
   /** 文档详情 */
-  getDocumentDetail: (docId) => request.get(`/api/v1/documents/${docId}`),
+  getDocumentDetail: (docId, options = {}) =>
+    request.get(`/api/v1/documents/${docId}`, { ...options }),
   /** 删除文档（Phase 5 后端仅删记录+文件，图谱级清理留待 Phase 8/9） */
   deleteDocument: (docId) => request.delete(`/api/v1/documents/${docId}`),
 
@@ -119,9 +126,10 @@ export const api = {
   // ---- 知识图谱（G6 格式） ----
   /** 图谱接口（Phase 8：按 course_id + document_id 隔离）：
    *  { nodes: [{id,label,type,description,properties}], edges: [...] } */
-  getGraphV1: (courseId, documentId, params = {}) =>
+  getGraphV1: (courseId, documentId, params = {}, options = {}) =>
     request.get(`/api/v1/graph/${courseId}`, {
       params: { document_id: documentId, ...params },
+      ...options,
     }),
 
   // ---- 教师编辑（对齐后端 /api/v1/graph 编辑端点 6.3.3/6.3.4；Phase 8 全部带 document_id） ----
@@ -152,33 +160,37 @@ export const api = {
 
   // ---- 教师教学监测 ----
   /** 查看自己课程下的学生学习进度（课程归属校验） */
-  getTeacherStudentsProgress: (courseId) =>
-    request.get('/api/v1/teacher/students/progress', { params: { course_id: courseId } }),
+  getTeacherStudentsProgress: (courseId, options = {}) =>
+    request.get('/api/v1/teacher/students/progress', {
+      params: { course_id: courseId },
+      ...options,
+    }),
 
   // ---- 智能问答（Phase 8C：course_id + document_id） ----
-  ask: (question, courseId, documentId) =>
+  ask: (question, courseId, documentId, options = {}) =>
     request.post('/api/v1/qa/ask', {
       question,
       course_id: courseId || null,
       document_id: documentId || null,
-    }),
+    }, { ...options }),
 
   // ---- 学习路径推荐（Phase 8B：course_id + document_id） ----
-  recommendNext: (mastered, courseId, documentId) =>
+  recommendNext: (mastered, courseId, documentId, options = {}) =>
     request.post('/api/v1/learning-path/recommend', {
       mastered,
       course_id: courseId || null,
       document_id: documentId || null,
-    }),
-  pathToTarget: (target, courseId, documentId) =>
+    }, { ...options }),
+  pathToTarget: (target, courseId, documentId, options = {}) =>
     request.post('/api/v1/learning-path/path-to-target', {
       target,
       course_id: courseId || null,
       document_id: documentId || null,
-    }),
-  getPrerequisites: (name, courseId, documentId) =>
+    }, { ...options }),
+  getPrerequisites: (name, courseId, documentId, options = {}) =>
     request.get(`/api/v1/learning-path/prerequisites/${encodeURIComponent(name)}`, {
       params: { course_id: courseId || undefined, document_id: documentId || undefined },
+      ...options,
     }),
 
   // ---- 学习记录（标记掌握 / 查询进度；Phase 8B：document_id） ----
@@ -194,15 +206,17 @@ export const api = {
     request.delete('/api/v1/learning/mark', {
       params: { course_id: courseId, document_id: documentId, kp_id: kpId },
     }),
-  getProgress: (courseId, documentId) =>
+  getProgress: (courseId, documentId, options = {}) =>
     request.get('/api/v1/learning/progress', {
       params: { course_id: courseId || undefined, document_id: documentId || undefined },
+      ...options,
     }),
 
   // ---- 收藏夹（学生个人知识点书签，独立于学习状态；Phase 8B：document_id） ----
-  getFavorites: (courseId, documentId) =>
+  getFavorites: (courseId, documentId, options = {}) =>
     request.get('/api/v1/favorites', {
       params: { course_id: courseId || undefined, document_id: documentId || undefined },
+      ...options,
     }),
   addFavorite: (courseId, documentId, kpId) =>
     request.post('/api/v1/favorites', { course_id: courseId, document_id: documentId, kp_id: kpId }),
@@ -213,14 +227,16 @@ export const api = {
 
   // ---- 题库管理（教师端；Scope B：单选/多选/判断自动判分 + 填空/解答由教师批改） ----
   /** 题库列表（含答案/解析/作答正确率/收藏数） */
-  listQuestions: (params = {}) => request.get('/api/v1/questions', { params }),
+  listQuestions: (params = {}, options = {}) =>
+    request.get('/api/v1/questions', { params, ...options }),
   /** 题库总览：题量/题型分布/作答正确率/收藏数 */
-  getQuestionStats: (courseId) =>
-    request.get('/api/v1/questions/stats', { params: { course_id: courseId } }),
+  getQuestionStats: (courseId, options = {}) =>
+    request.get('/api/v1/questions/stats', { params: { course_id: courseId }, ...options }),
   /** 知识点题目覆盖率：无题知识点清单 + 悬空 kp_id（教师补题指引） */
-  getQuestionCoverage: (courseId, documentId) =>
+  getQuestionCoverage: (courseId, documentId, options = {}) =>
     request.get('/api/v1/questions/coverage', {
       params: { course_id: courseId, document_id: documentId || undefined },
+      ...options,
     }),
   /** 题目收藏情况（哪些学生收藏了哪道题） */
   getQuestionFavorites: (courseId, questionId) =>
@@ -252,10 +268,11 @@ export const api = {
 
   // ---- 主观题批改（教师端；Scope B：填空/解答提交只落库，教师批改后才给分） ----
   /** 待批改列表（只返回待批改的主观题作答，按提交先后排序） */
-  getPendingGrades: (params = {}) => request.get('/api/v1/grading/pending', { params }),
+  getPendingGrades: (params = {}, options = {}) =>
+    request.get('/api/v1/grading/pending', { params, ...options }),
   /** 批改进度汇总（待批改 / 已批改 / 主观题作答量 / 平均分） */
-  getGradingSummary: (courseId) =>
-    request.get('/api/v1/grading/summary', { params: { course_id: courseId } }),
+  getGradingSummary: (courseId, options = {}) =>
+    request.get('/api/v1/grading/summary', { params: { course_id: courseId }, ...options }),
   /** 单题批改（score 0~100，>=60 记为答对；允许重批覆盖） */
   gradeAnswer: (recordId, score, comment) =>
     request.post(`/api/v1/grading/${recordId}`, { score, comment }),
@@ -265,21 +282,25 @@ export const api = {
 
   // ---- 做题练习（学生端；出题接口不含答案，提交后才下发） ----
   /** 出题（course_id 必填；可指定文档/知识点/题型/数量） */
-  getPracticeQuestions: (params = {}) => request.get('/api/v1/practice/questions', { params }),
+  getPracticeQuestions: (params = {}, options = {}) =>
+    request.get('/api/v1/practice/questions', { params, ...options }),
   /** 智能推荐出题（按学情选卷；返回体含 reason/bucket_label，同样不含答案） */
   recommendQuestions: (payload = {}) => request.post('/api/v1/practice/recommend', payload),
   /** 提交作答：服务端判分并返回正确答案与解析 */
   submitAnswer: (questionId, userAnswer) =>
     request.post('/api/v1/practice/submit', { question_id: questionId, user_answer: userAnswer }),
   /** 我的答题记录（onlyWrong=true 仅错误记录） */
-  getAnswerRecords: (params = {}) => request.get('/api/v1/practice/records', { params }),
+  getAnswerRecords: (params = {}, options = {}) =>
+    request.get('/api/v1/practice/records', { params, ...options }),
   /** 错题本（每题最近一次错误 + 关联知识点） */
-  getWrongBook: (params = {}) => request.get('/api/v1/practice/wrong-book', { params }),
+  getWrongBook: (params = {}, options = {}) =>
+    request.get('/api/v1/practice/wrong-book', { params, ...options }),
   /** 我的练习统计 */
-  getPracticeStats: (params = {}) => request.get('/api/v1/practice/stats', { params }),
+  getPracticeStats: (params = {}, options = {}) =>
+    request.get('/api/v1/practice/stats', { params, ...options }),
   /** 我的题目收藏 */
-  getQuestionFavList: (courseId) =>
-    request.get('/api/v1/practice/favorites', { params: { course_id: courseId } }),
+  getQuestionFavList: (courseId, options = {}) =>
+    request.get('/api/v1/practice/favorites', { params: { course_id: courseId }, ...options }),
   favoriteQuestion: (courseId, questionId) =>
     request.post('/api/v1/practice/favorites', { course_id: courseId, question_id: questionId }),
   unfavoriteQuestion: (courseId, questionId) =>
