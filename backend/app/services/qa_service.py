@@ -11,6 +11,7 @@
 import asyncio
 import logging
 import math
+import threading
 from typing import List
 
 from openai import OpenAI
@@ -363,6 +364,80 @@ class QAService:
         except Exception as e:
             answer = f"抱歉，问答服务暂时不可用：{str(e)}"
         return {"answer": answer, "sources": sources}
+
+    async def stream_answer(self, question: str, course_id=None, document_id=None,
+                            allowed_ids: List[int] = None):
+        """流式回答（SSE 用）：先给引用来源，再逐块给答案增量。
+
+        yield 的事件：
+          `{"event": "sources", "data": {"sources": [...]}}`
+          `{"event": "delta",   "data": {"text": "…"}}`
+          `{"event": "done",    "data": {"answer": "全文", "sources": [...]}}`
+          `{"event": "error",   "data": {"message": "…"}}`
+
+        两条硬约束：
+        1. **检索只跑一次**：与 `ask_with_sources` 同一入口，`sources` 就是真正喂给模型的上下文
+           （不得为了拿来源再单独检索一遍，见 `ask_with_sources` 的说明）；
+        2. **同步客户端不阻塞事件循环**：`openai` 的流式迭代放在**后台线程**里消费，
+           通过 `call_soon_threadsafe` 投递到 asyncio 队列。这里不能简单用 `to_thread`——
+           那样要等整段结束才能拿到结果，等于没有流式。
+        """
+        sources = await asyncio.to_thread(
+            self.search_related_nodes, question, course_id, document_id, 5, allowed_ids)
+        yield {"event": "sources", "data": {"sources": sources}}
+
+        contexts = [_format_node(n) for n in sources]
+        context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
+
+        loop = asyncio.get_running_loop()
+        queue: asyncio.Queue = asyncio.Queue()
+
+        def _produce() -> None:
+            """后台线程：消费 openai 同步流，逐块投递给事件循环（禁止在此使用 asyncio API）。"""
+            try:
+                with track_llm_call("qa_stream"):
+                    stream = self.client.chat.completions.create(
+                        model=settings.LLM_MODEL,
+                        messages=[
+                            {"role": "system",
+                             "content": QA_SYSTEM_PROMPT.format(context=context_text)},
+                            {"role": "user", "content": question},
+                        ],
+                        temperature=0.3,
+                        max_tokens=1024,
+                        timeout=settings.QA_TIMEOUT,
+                        stream=True,
+                    )
+                    for chunk in stream:
+                        choices = getattr(chunk, "choices", None) or []
+                        if not choices:
+                            continue
+                        delta = getattr(choices[0], "delta", None)
+                        text = getattr(delta, "content", None) if delta else None
+                        if text:
+                            loop.call_soon_threadsafe(queue.put_nowait, ("delta", text))
+                loop.call_soon_threadsafe(queue.put_nowait, ("done", None))
+            except Exception as e:  # noqa: BLE001 - 流式失败必须变成 error 事件，不能吞
+                _logger.warning("流式问答失败: %s", e)
+                loop.call_soon_threadsafe(queue.put_nowait, ("error", str(e)))
+
+        threading.Thread(target=_produce, daemon=True, name="qa-stream").start()
+
+        parts: List[str] = []
+        while True:
+            kind, payload = await queue.get()
+            if kind == "delta":
+                parts.append(payload)
+                yield {"event": "delta", "data": {"text": payload}}
+            elif kind == "done":
+                yield {"event": "done",
+                       "data": {"answer": "".join(parts), "sources": sources}}
+                return
+            else:
+                # 与同步路径一致的口径：明确报错，绝不伪造答案
+                yield {"event": "error",
+                       "data": {"message": f"抱歉，问答服务暂时不可用：{payload}"}}
+                return
 
     async def ask(self, question: str, course_id=None, document_id=None,
                   allowed_ids: List[int] = None) -> str:
