@@ -106,6 +106,15 @@ class Settings:
     AUTO_BACKUP_KEEP: int = max(1, int(os.getenv("AUTO_BACKUP_KEEP", "10") or 10))
     BACKUP_DIR: str = _resolve_path(os.getenv("BACKUP_DIR", "./backup"))
 
+    # 启动恢复开关（阶段 4）：把上一进程残留的 PARSING / EXTRACTING / BUILDING 收敛为 FAILED，
+    # 让教师在列表里看到失败原因并可重试（否则会永久显示「处理中」）。
+    # 单 uvicorn 进程部署保持开启；多 worker 部署建议关闭，避免把另一个 worker
+    # 正在处理的文档误标为失败（详见 DocumentService.reconcile_interrupted 的说明）。
+    RECONCILE_ON_STARTUP: bool = (
+        os.getenv("RECONCILE_ON_STARTUP", "1").strip().lower()
+        not in ("0", "false", "no", "off")
+    )
+
     # 文件上传配置
     UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB

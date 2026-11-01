@@ -326,11 +326,65 @@ class DocumentService:
         docs = sql_db.list_documents_by_course(int(course_id))
         return any(int(d["doc_id"]) in _running_docs for d in docs)
 
+    # ---------- 启动恢复（阶段 4） ----------
+
+    @staticmethod
+    def reconcile_interrupted(reason: str = "服务重启导致任务中断，可点击重试") -> dict:
+        """把「上一进程遗留的中间态」收敛为 FAILED，返回 `{scanned, recovered}`。
+
+        为什么必须做：解析/抽取/建图都在**进程内**的 asyncio 任务里跑，状态却只写进了
+        SQLite。进程一旦重启（或崩溃），库里会永久停在 `PARSING` / `EXTRACTING` /
+        `BUILDING`——前端一直显示「处理中」，而实际上没有任何任务在跑，教师也没有
+        「重试」按钮（重试入口对中间态是放行的，只是界面上没人去点）。
+
+        收敛方向是 **FAILED 而不是自动重跑**：
+        - 自动重跑会在启动瞬间对全部积压文档发起 LLM 调用，费用与并发都不可控；
+        - `retry_document` 已经支持「复用已保存文件 + 只清理该文档的图/向量」，
+          由教师显式点击更安全。
+
+        只改**中间态**字段，已完成的阶段不回退（例如已 PARSED 的文档不会被改成 FAILED）。
+
+        多进程部署注意：本方法假设「一个 uvicorn 进程」（`CLAUDE.md` 记录的部署形态）。
+        多 worker 下应当由启动最早的那个进程执行，或用 `RECONCILE_ON_STARTUP=0` 关闭，
+        避免把另一个 worker 正在处理的文档误标为失败。
+        """
+        rows = sql_db._query(
+            "SELECT doc_id, course_id, parse_status, extract_status, graph_status "
+            "FROM t_document "
+            "WHERE parse_status = 'PARSING' OR extract_status = 'EXTRACTING' "
+            "   OR graph_status = 'BUILDING'"
+        ) or []
+
+        recovered = 0
+        for row in rows:
+            did = int(row["doc_id"])
+            # 理论上启动时注册表为空；这里防御「热重载 / 同一进程内重复调用」的场景
+            if did in _running_docs:
+                continue
+            fields = {"error_message": reason}
+            if row.get("parse_status") == "PARSING":
+                fields["parse_status"] = "FAILED"
+            if row.get("extract_status") == "EXTRACTING":
+                fields["extract_status"] = "FAILED"
+            if row.get("graph_status") == "BUILDING":
+                fields["graph_status"] = "FAILED"
+            try:
+                sql_db.update_document(did, **fields)
+                recovered += 1
+            except Exception:  # noqa: BLE001 - 单条失败不应拖垮启动
+                _logger.exception("启动恢复失败 doc_id=%s", did)
+
+        if recovered:
+            _logger.warning(
+                "启动恢复：%s 篇文档残留中间状态（PARSING/EXTRACTING/BUILDING），已标记 FAILED 待重试",
+                recovered)
+        return {"scanned": len(rows), "recovered": recovered}
+
     # ---------- 单文件上传（保持原有同步语义） ----------
 
     @staticmethod
     async def process_upload(content: bytes, filename: str, course_id: int,
-                             teacher_id: int = None) -> dict:
+                             teacher_id: int = None, background: bool = False) -> dict:
         """
         处理文档上传全流程（上传到已存在课程；不再自动建课）。
 
@@ -338,8 +392,12 @@ class DocumentService:
         - ok=True：data 含 document_id/course_id/filename/status/counts
         - ok=False：code/message 为业务错误码与描述（错误码见规划文档 6.2.1，2005 为解析失败扩展码）
 
-        该入口保持同步语义（请求返回时图谱已构建完成），供「单文件上传」兼容路径使用；
-        批量上传走 process_batch，由后台任务处理。
+        两种模式（阶段 4 起）：
+        - `background=False`（默认，保持既有语义）：请求返回时图谱已构建完成；
+        - `background=True`：落库后立即返回 `status=processing`，解析/抽取/建图交给后台任务
+          （与批量上传共用 `_schedule_processing`，受同一并发上限约束）。
+          大文件（几十页 PDF）同步跑完要几十秒到几分钟，会把一个请求一直占住；
+          需要「点了就能离开」的调用方用这个模式，前端轮询文档列表即可。
         """
         # 1. 格式 / 大小校验
         checked = DocumentService._validate_upload(content, filename)
@@ -364,8 +422,19 @@ class DocumentService:
         if not persisted["ok"]:
             return persisted
 
-        # 5. 同步处理（与批量共用同一套状态写入，图谱完成才返回成功）
+        # 5. 处理：同步（默认）或交给后台任务
         doc_id = persisted["document_id"]
+        if background:
+            # 异步模式：落库后立即返回，与批量上传共用同一条后台任务入口
+            # （并发上限、状态写入、异常兜底都在 _run_document_task 里）。
+            if not DocumentService._schedule_processing(doc_id):
+                return {"ok": False, "code": 4009, "message": "该文档正在处理中，请勿重复提交"}
+            payload = DocumentService._success_payload(
+                sql_db.get_document(doc_id), status="processing")
+            payload["background"] = True
+            return {"ok": True, "code": 0, "message": "已接收，正在后台处理", "data": payload}
+
+        # 同步处理（与批量共用同一套状态写入，图谱完成才返回成功）
         if doc_id in _running_docs:
             return {"ok": False, "code": 4009, "message": "该文档正在处理中，请勿重复提交"}
         _running_docs.add(doc_id)

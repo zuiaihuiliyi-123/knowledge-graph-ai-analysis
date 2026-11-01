@@ -31,9 +31,15 @@ def _coerce_int(value):
 async def upload_document(
     file: UploadFile = File(..., description="上传的文档文件（PDF/TXT/DOCX/MD）"),
     course_id: str = Form(..., description="目标课程 ID（上传到已有课程，不再自动建课）"),
+    background: bool = Query(
+        False, description="true=落库后立即返回、后台处理（大文件建议）；false=同步跑完再返回"),
     current_user: dict = Depends(require_teacher),
 ):
-    """教师向已有课程上传文档，完成解析、抽取、入图（teacher_id 取自登录用户）"""
+    """教师向已有课程上传文档，完成解析、抽取、入图（teacher_id 取自登录用户）。
+
+    `background=true` 时返回 `status=processing`，前端轮询文档列表获取进度；
+    默认（false）保持既有同步语义：返回时图谱已构建完成。
+    """
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
@@ -43,6 +49,7 @@ async def upload_document(
         filename=file.filename or "未命名",
         course_id=cid,
         teacher_id=current_user["user_id"],
+        background=background,
     )
     if not result["ok"]:
         return error(result["code"], result["message"])

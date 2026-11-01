@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core import metrics
 from .core.sql_database import sql_db
+from .services.document_service import DocumentService
 from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, documents,
                   learning, dashboard, favorites, teacher,
                   course_members, invites, profile, questions, practice, grading,
@@ -57,6 +58,15 @@ async def lifespan(app: FastAPI):
     sql_db.init_tables()
     sql_db.ensure_default_teacher()
     sql_db.ensure_default_admin()
+
+    # 重启恢复：解析/抽取/建图都在进程内的 asyncio 任务里跑，进程重启后库里会残留
+    # PARSING / EXTRACTING / BUILDING —— 没有任务在跑却一直显示「处理中」。这里收敛为
+    # FAILED 并写明原因，教师才能看到「重试」。多 worker 部署请设 RECONCILE_ON_STARTUP=0。
+    if settings.RECONCILE_ON_STARTUP:
+        try:
+            DocumentService.reconcile_interrupted()
+        except Exception:  # noqa: BLE001 - 恢复失败不应阻止服务启动
+            _logger.exception("启动恢复失败（不影响启动）")
     yield
 
 
