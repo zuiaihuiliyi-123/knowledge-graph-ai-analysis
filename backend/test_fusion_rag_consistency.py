@@ -136,18 +136,22 @@ def main():
         check("撤销后同样只重建一次", fake.calls == after_revoke,
               f"{after_revoke} -> {fake.calls}")
 
-        # ---------- 5. epoch 机制：集合碰巧一致时也能发现融合变过 ----------
-        print("\nStep 5: 融合 epoch 能捕捉「集合碰巧一致但融合状态变过」")
+        # ---------- 5. epoch 机制：集合碰巧一致时也要「对账」，但不重复烧 embedding ----------
+        print("\nStep 5: epoch 落后时只做对账（集合没变则不重新嵌）")
         scope = sql_db.fusion_scope_get(cid, did)
         check("融合过的文档有 scope 行", scope is not None, str(scope))
         check("epoch 随 apply/revoke 递增", scope["epoch"] >= 2, str(scope["epoch"]))
         sql_db.fusion_scope_mark_indexed(cid, did, -1)   # 人为把 indexed_epoch 打回旧值
         idx.ensure_index(cid, did)
-        check("indexed_epoch 落后于 epoch 时会重建",
-              fake.calls > after_revoke, f"{after_revoke} -> {fake.calls}")
-        check("重建后 indexed_epoch 追平",
+        # 阶段 5'：kp_id 集合没变 → 增量同步不调用 embedding（此前会整篇重算，等于一次真实计费请求）
+        check("集合未变时 epoch 落后也不重新嵌入",
+              fake.calls == after_revoke, f"{after_revoke} -> {fake.calls}")
+        check("对账后 indexed_epoch 追平（不会每次问答都重复判定）",
               sql_db.fusion_scope_get(cid, did)["indexed_epoch"]
               == sql_db.fusion_scope_get(cid, did)["epoch"])
+        idx.ensure_index(cid, did)
+        check("追平后再次查询仍不嵌入", fake.calls == after_revoke,
+              f"{after_revoke} -> {fake.calls}")
 
         # 未曾融合的文档不得因为建索引而凭空多出 scope 行
         sql_db._execute("INSERT INTO t_document (doc_id, course_id, uploader_id, file_name, "

@@ -115,6 +115,14 @@ class Settings:
         not in ("0", "false", "no", "off")
     )
 
+    # 抽取结果缓存（阶段 5'）：同一段文本 + 同一套 prompt/模型/温度只调用一次 LLM。
+    # 键里包含 prompt 指纹，改 Prompt 或换模型会自动失效；只缓存成功结果。
+    # EXTRACT_CACHE=0 可整体关闭（评测对照 / 排障时使用）。
+    EXTRACT_CACHE: bool = (
+        os.getenv("EXTRACT_CACHE", "1").strip().lower() not in ("0", "false", "no", "off")
+    )
+    EXTRACT_CACHE_DIR: str = _resolve_path(os.getenv("EXTRACT_CACHE_DIR", "./data/extract_cache"))
+
     # 文件上传配置
     UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB

@@ -5,11 +5,23 @@ import json
 import logging
 import re
 import asyncio
+import hashlib
 from typing import List
 from openai import OpenAI
 from ..core.config import settings
 from ..core.database import VALID_RELATION_TYPES
 from ..utils.text_processor import chunk_text_for_llm
+from . import extraction_cache
+
+_PROMPT_FP_CACHE = {}
+
+
+def _prompt_fingerprint() -> str:
+    """Prompt 指纹（改 Prompt 即让抽取缓存自动失效，避免两套 Prompt 的结果混用）。"""
+    if "v" not in _PROMPT_FP_CACHE:
+        _PROMPT_FP_CACHE["v"] = hashlib.sha256(
+            EXTRACTION_PROMPT.encode("utf-8")).hexdigest()[:16]
+    return _PROMPT_FP_CACHE["v"]
 
 _logger = logging.getLogger(__name__)
 
@@ -596,6 +608,16 @@ class KnowledgeExtractor:
         rate_limit / auth / truncated …）与 `retryable`，供上层决定是否重试。
         """
         use_json_mode = bool(settings.LLM_JSON_MODE)
+        # ---- 抽取结果缓存（阶段 5'）----
+        # 键 = prompt 指纹 + 模型 + 温度 + 文本：改 Prompt / 换模型 / 调温度都会自动换键。
+        # 命中时直接返回结构化结果，跳过请求、JSON 修复与重试（重试/重复上传不再烧 LLM 费用）。
+        cache_key = None
+        if extraction_cache.enabled():
+            cache_key = extraction_cache.build_key(
+                text, settings.LLM_MODEL, self.temperature, _prompt_fingerprint())
+            cached = extraction_cache.load(cache_key)
+            if cached is not None:
+                return cached
         try:
             response = self._request_completion(text, use_json_mode)
         except Exception as e:
@@ -629,6 +651,8 @@ class KnowledgeExtractor:
             clean, dropped = _validate_extraction_payload(payload)
             if dropped:
                 _logger.warning("抽取结果中丢弃结构非法的条目 %d 条", dropped)
+            if cache_key:
+                extraction_cache.store(cache_key, clean)   # 只缓存成功结果
             return clean
 
         except ExtractionSchemaError as e:

@@ -83,8 +83,12 @@ class KnowledgeEmbedder:
         改变知识点集合，此时旧向量全部指向已不存在的节点 —— 向量检索会一直返回空，
         而因为表里「非空」，索引永远不会重建。故改为比对 kp_id 集合是否一致。
 
+        **阶段 5' 起改为增量同步**（`sync_index`）：集合差异只补缺失、只删过期，
+        不再「整篇清空 + 全量重算」。改一个知识点/做一次融合不再触发整篇文档的
+        embedding API 调用（这是本链路唯一的真实外部计费点）。
+
         返回值即调用方检索所需的那份向量：比对阶段只读 kp_id 列（不反序列化向量），
-        判定新鲜后整取一次返回。旧实现返回条数、由调用方再查一遍，等于每问一次
+        同步后整取一次返回。旧实现返回条数、由调用方再查一遍，等于每问一次
         多解析一遍全部向量文本。
         """
         if course_id is None or document_id is None:
@@ -92,13 +96,61 @@ class KnowledgeEmbedder:
         current = self._current_kp_ids(course_id, document_id)
         if not current:
             return []  # 图谱为空（节点尚未抽取），交给关键词检索兜底
-        if sql_db.get_embedding_kp_ids(course_id, document_id) != current:
-            self.build_index(course_id, document_id)
-        elif self._fusion_epoch_changed(course_id, document_id):
-            # kp_id 集合碰巧一致、但融合状态变过（apply / revoke / 整批撤销）
-            # → 仍要重建。epoch 是权威且顺序无关的信号，不依赖图库可用性。
-            self.build_index(course_id, document_id)
+
+        stored = sql_db.get_embedding_kp_ids(course_id, document_id)
+        # 融合状态变过（apply / revoke / 整批撤销）时也要核对一次：
+        # epoch 是权威且顺序无关的信号，不依赖图库可用性。
+        if stored != current or self._fusion_epoch_changed(course_id, document_id):
+            self.sync_index(course_id, document_id, current=current, stored=stored)
         return sql_db.get_embeddings_by_document(course_id, document_id)
+
+    def sync_index(self, course_id, document_id, current=None, stored=None) -> dict:
+        """增量同步向量索引：只删过期、只补缺失，返回 `{added, removed, kept}`。
+
+        与 `build_index`（全量重建）的分工：
+        - **重新抽取**：kp_id 全换，走 `build_index` 逻辑更简单、也不会漏；
+        - **教师改一个知识点 / 融合 apply-revoke**：kp_id 集合只变少数几个 → 走这里。
+
+        注意：**描述文本变化不会改变 kp_id 集合**，本案靠编辑处显式
+        `delete_embeddings_by_document` 失效（7 个调用点即失效收口），
+        本方法不负责文本级比对——否则每次问答都要把全部文本重新哈希一遍。
+        """
+        if not self.embedding.available:
+            return {"added": 0, "removed": 0, "kept": 0}
+
+        current = self._current_kp_ids(course_id, document_id) if current is None else set(current)
+        stored = (sql_db.get_embedding_kp_ids(course_id, document_id)
+                  if stored is None else set(stored))
+
+        to_remove = stored - current
+        to_add = current - stored
+
+        if to_remove:
+            sql_db.delete_kp_embeddings(course_id, document_id, sorted(to_remove))
+            vector_index.invalidate(kind="kp", course_id=course_id)
+
+        added = 0
+        if to_add:
+            recs = [r for r in self._load_kp_records(course_id, document_id)
+                    if r.get("kp_id") in to_add]
+            if recs:
+                texts = [
+                    f"{r.get('category') or '概念'}：{r.get('name') or ''}。{r.get('description') or ''}"
+                    for r in recs
+                ]
+                vecs = self.embedding.embed(texts)
+                for r, vec in zip(recs, vecs):
+                    sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
+                added = len(recs)
+                vector_index.invalidate(kind="kp", course_id=course_id)
+
+        # 即使本次没有增删（集合碰巧一致、只是 epoch 领先），也要记下 epoch，
+        # 否则 `ensure_index` 会每次问答都判定「epoch 变了」而反复同步。
+        scope = sql_db.fusion_scope_get(course_id, document_id)
+        if scope:
+            sql_db.fusion_scope_mark_indexed(course_id, document_id, scope.get("epoch") or 0)
+
+        return {"added": added, "removed": len(to_remove), "kept": len(stored & current)}
 
     @staticmethod
     def _fusion_epoch_changed(course_id, document_id) -> bool:

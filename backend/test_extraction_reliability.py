@@ -3,12 +3,19 @@
 覆盖：JSON mode 请求参数、供应商不支持时回退、结构校验、可恢复错误有限重试、
 不可恢复错误不重试、截断/空响应分类、非法条目逐条丢弃。
 
+注意：本脚本必须 **关闭抽取结果缓存**（`EXTRACT_CACHE=0`）——它反复用「同一段文本
++ 不同假响应」验证错误路径与新行为，缓存命中会让第二次之后的用例直接拿到第一次的结果。
+
 运行：cd backend && python test_extraction_reliability.py
 """
 import asyncio
 import json
+import os
 import sys
 from types import SimpleNamespace
+
+# 必须在导入 app.* 之前设置：config 在模块导入时读取环境变量
+os.environ["EXTRACT_CACHE"] = "0"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")

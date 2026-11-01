@@ -2078,6 +2078,24 @@ class SQLDatabase:
         )
         return {r["kp_id"] for r in rows}
 
+    def delete_kp_embeddings(self, course_id: int, document_id, kp_ids) -> int:
+        """按 kp_id 精确删除向量行，返回删除条数（增量同步专用）。
+
+        为什么需要它：`delete_embeddings_by_document` 是「整篇清空再重建」；
+        教师只改/删一两个知识点、或融合 apply/revoke 只让少数节点进出时，
+        整篇重建会重新调用一次外部 embedding API（69 条向量 ≈ 一次真实计费请求）。
+        """
+        ids = [str(k) for k in (kp_ids or []) if k]
+        if not ids:
+            return 0
+        placeholders = ",".join("?" * len(ids))
+        sql = ("DELETE FROM t_kp_embedding "
+               f"WHERE course_id = ? AND document_id = ? AND kp_id IN ({placeholders})")
+        with self._connect() as c:
+            cur = c.execute(sql, (course_id, document_id, *ids))
+            c.commit()
+            return cur.rowcount
+
     def delete_embeddings_by_document(self, course_id: int, document_id, conn=None) -> int:
         """删除文档全部知识点向量，返回删除条数。
 
