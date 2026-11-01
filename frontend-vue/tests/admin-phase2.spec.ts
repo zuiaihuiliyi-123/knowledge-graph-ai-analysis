@@ -1,7 +1,5 @@
 import { test, expect, Page } from '@playwright/test'
-import {
-  BASE, RUN, teacherName, studentName, registerAndLogin, login, loginAdmin, api, dismissAlert,
-} from './helpers'
+import { BASE, RUN, teacherName, studentName, registerAndLogin, login, loginAdmin, api, dismissAlert, loginTeacher } from './helpers'
 
 /**
  * 第二阶段（代码审查 / 风险修复）新增的端到端验证。
@@ -273,7 +271,7 @@ for (const vp of VIEWPORTS) {
 
 test('阅读器：打开真实文档 → 渲染 → 搜索 → 缩放 → 阅读进度', async ({ page }) => {
   test.setTimeout(120000)
-  const token = await login(page, 'admin', 'admin123')   // admin 是教师，持有真实课程与文档
+  const token = await loginTeacher(page)   // admin 是教师，持有真实课程与文档
 
   // 找一门有文档的课程（文档列表接口是 /api/v1/documents?course_id=，data 直接是数组）
   const cs = await api(page, 'get', '/api/v1/courses/my?page_size=100', token)
@@ -337,7 +335,7 @@ test('阅读器：打开真实文档 → 渲染 → 搜索 → 缩放 → 阅读
 
 test('知识图谱：教师端进入图谱管理 → G6 画布渲染', async ({ page }) => {
   test.setTimeout(120000)
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
 
   await page.locator('.sidebar-menu').getByText('图谱管理', { exact: true }).first().click()
   await page.waitForURL(/tab=preview/, { timeout: 20000 })

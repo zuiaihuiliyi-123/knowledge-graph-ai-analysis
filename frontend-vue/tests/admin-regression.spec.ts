@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { BASE, RUN, login, registerAndLogin, dismissBackendStatus } from './helpers'
+import { BASE, RUN, login, registerAndLogin, dismissBackendStatus, loginTeacher } from './helpers'
 
 /**
  * 管理员端改造的教师端 / 学生端回归（只读：不创建课程、不上传文档、不改账号）。
@@ -13,13 +13,13 @@ import { BASE, RUN, login, registerAndLogin, dismissBackendStatus } from './help
  *   既有 spec 中所有基于 getByRole('tab') 的断言因此都是失败状态（改造前即如此），
  *   详见报告的「未覆盖项」。这里按真实交互走：**用侧边栏导航 + 断言面板内容**。
  *
- * 使用既有真实数据：admin / admin123（教师），课程 5 与其真实文档。
+ * 使用既有真实数据：既有教师账号（默认 demo_teacher / demo123456），课程 5 与其真实文档。
  */
 
 const COURSE = 5
 
 test('教师：侧边栏菜单与应用外壳完整', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await dismissBackendStatus(page)
 
   // 品牌区（应用外壳未被管理员端改造影响）
@@ -35,7 +35,7 @@ test('教师：侧边栏菜单与应用外壳完整', async ({ page }) => {
 })
 
 test('教师：侧边栏「课程管理」可进入课程列表并渲染出真实课程', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await dismissBackendStatus(page)
 
   await page.locator('.sidebar-menu').getByText('课程管理', { exact: true }).first().click()
@@ -48,7 +48,7 @@ test('教师：侧边栏「课程管理」可进入课程列表并渲染出真�
 })
 
 test('教师：侧边栏「图谱管理」切到图谱面板', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await dismissBackendStatus(page)
 
   await page.locator('.sidebar-menu').getByText('图谱管理', { exact: true }).first().click()
@@ -57,7 +57,7 @@ test('教师：侧边栏「图谱管理」切到图谱面板', async ({ page }) 
 })
 
 test('教师：课程文档面板渲染真实文档行，操作按钮可用', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await page.goto(`${BASE}/teacher?tab=documents&course_id=${COURSE}`)
   await dismissBackendStatus(page)
 

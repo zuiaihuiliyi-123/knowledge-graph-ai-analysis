@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { BASE, login, registerAndLogin, api, dismissBackendStatus } from './helpers'
+import { BASE, login, registerAndLogin, api, dismissBackendStatus, loginTeacher } from './helpers'
 
 /**
  * PR #3 合并后的集成验证（课程中心 × 题库）
@@ -16,7 +16,7 @@ test('合并：教师端 7 个 Tab 并存，题库管理深链直达题库总览
   const errors: string[] = []
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
 
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
 
   // 取一门当前教师名下的课程，用于深链
   const resp = await api(page, 'get', '/api/v1/courses', token)
