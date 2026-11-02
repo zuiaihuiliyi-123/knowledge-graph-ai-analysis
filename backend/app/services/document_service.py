@@ -7,15 +7,17 @@ import asyncio
 import logging
 import os
 import hashlib
+from datetime import datetime
 
 from ..core.config import settings
 from ..core.database import db
 from ..core.permissions import Permissions
 from ..core.sql_database import sql_db
-from ..core.storage import resolve_document_path
+from ..core.storage import document_relative_path, resolve_document_path
 from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
 from .kg_manager import KnowledgeGraphManager
+from . import task_state
 
 _logger = logging.getLogger(__name__)
 
@@ -151,7 +153,10 @@ class DocumentService:
             except Exception:
                 pass
             return {"ok": False, "code": 5001, "message": f"文件存储失败: {str(e)}"}
-        sql_db.update_document(doc_id, file_path=save_path)
+        # 库里存**相对 UPLOAD_DIR 的路径**（换机器/恢复备份后仍能解析），
+        # save_path 只用于本次落盘。历史行的绝对路径由 resolve_document_path 兼容。
+        sql_db.update_document(
+            doc_id, file_path=document_relative_path(course_id, doc_id, filename))
         return {"ok": True, "document_id": doc_id, "file_sha256": digest}
 
     @staticmethod
@@ -173,16 +178,21 @@ class DocumentService:
     # ---------- 单文档处理（同步单传与后台批量共用） ----------
 
     @staticmethod
-    async def _process_document(doc_id: int) -> dict:
+    async def _process_document(doc_id: int, resume: bool = False) -> dict:
         """对**一个** document_id 完成 解析 → 抽取 → 入图，逐步写真实状态。
 
         任何一步失败都立即落库并返回，不静默当成成功；调用方（后台任务）据此
         让失败文件独立结束，不影响其他文档。
+
+        `resume=True`（仅启动恢复使用）：解析文本 / 抽取结果若已作为中间产物落盘
+        （且 sha256 与当前文件一致），直接复用，跳过昂贵的解析或 LLM 调用。
+        教师显式重试**不走**复用（`retry_document` 会先清产物），保证「重试 = 重来」。
         """
         doc = sql_db.get_document(doc_id)
         if doc is None:
             return {"ok": False, "code": 2002, "message": f"文档不存在: doc_id={doc_id}"}
         course_id = doc["course_id"]
+        sha = doc.get("file_sha256")
 
         path = resolve_document_path(doc)
         if not path or not os.path.exists(path):
@@ -190,21 +200,32 @@ class DocumentService:
             sql_db.update_document(doc_id, parse_status="FAILED", error_message=message)
             return {"ok": False, "code": 2003, "message": message}
 
-        # 1. 解析（UPLOADED -> PARSING -> PARSED/FAILED）
-        sql_db.update_document(doc_id, parse_status="PARSING", error_message=None)
-        try:
-            text = await asyncio.to_thread(_parse_file_sync, path)
-        except Exception as e:
-            message = f"解析失败: {str(e)}"
-            sql_db.update_document(doc_id, parse_status="FAILED", error_message=message)
-            return {"ok": False, "code": 2005, "message": f"文档解析失败: {str(e)}"}
+        # 任务行的 attempts 在这里 +1：每进入一次 _process_document 就是一次新尝试
+        DocumentService._task_stage(doc_id, course_id, "PARSE", bump_attempts=True)
 
-        # 解析结果为空（如扫描版 PDF 无文本层）时提前报错，避免静默产出 0 知识点
-        if not text or not text.strip():
-            message = "解析结果为空（可能是扫描版 PDF 无文本层，无法抽取知识）"
-            sql_db.update_document(doc_id, parse_status="FAILED", error_message=message)
-            return {"ok": False, "code": 2005, "message": message}
-        sql_db.update_document(doc_id, parse_status="PARSED")
+        # 1. 解析（UPLOADED -> PARSING -> PARSED/FAILED）；有产物则跳过
+        text = task_state.load_parsed(doc_id, sha) if resume else None
+        if text:
+            _logger.info("断点续跑：复用解析产物 doc_id=%s（省掉重新解析）", doc_id)
+            sql_db.update_document(doc_id, parse_status="PARSED", error_message=None)
+        else:
+            sql_db.update_document(doc_id, parse_status="PARSING", error_message=None)
+            try:
+                text = await asyncio.to_thread(_parse_file_sync, path)
+            except Exception as e:
+                message = f"解析失败: {str(e)}"
+                sql_db.update_document(doc_id, parse_status="FAILED", error_message=message)
+                DocumentService._task_failed(doc_id, course_id, "PARSE", message)
+                return {"ok": False, "code": 2005, "message": f"文档解析失败: {str(e)}"}
+
+            # 解析结果为空（如扫描版 PDF 无文本层）时提前报错，避免静默产出 0 知识点
+            if not text or not text.strip():
+                message = "解析结果为空（可能是扫描版 PDF 无文本层，无法抽取知识）"
+                sql_db.update_document(doc_id, parse_status="FAILED", error_message=message)
+                DocumentService._task_failed(doc_id, course_id, "PARSE", message)
+                return {"ok": False, "code": 2005, "message": message}
+            task_state.save_parsed(doc_id, sha, text)
+            sql_db.update_document(doc_id, parse_status="PARSED")
 
         # 解析期间文档可能已被删除（多进程部署、或管理员从另一实例清理）。
         # 此时不再继续抽取，避免白花一次 LLM 调用。
@@ -212,23 +233,36 @@ class DocumentService:
             _logger.warning("文档在处理期间被删除，终止任务 doc_id=%s", doc_id)
             return {"ok": False, "code": 4009, "message": "文档已被删除，任务终止"}
 
-        # 2. 抽取（PENDING -> EXTRACTING -> COMPLETED/FAILED）
-        sql_db.update_document(doc_id, extract_status="EXTRACTING", error_message=None)
-        try:
-            result = await KnowledgeExtractor().extract(text)
-        except Exception as e:
-            message = f"抽取失败: {str(e)}"
-            sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
-            return {"ok": False, "code": 3003, "message": f"知识抽取失败: {str(e)}"}
+        # 2. 抽取（PENDING -> EXTRACTING -> COMPLETED/FAILED）；有产物则跳过（省一次 LLM 调用）
+        DocumentService._task_stage(doc_id, course_id, "EXTRACT")
+        cached = task_state.load_extraction(doc_id, sha) if resume else None
+        if cached:
+            entities = cached["entities"]
+            relations = cached["relations"]
+            _logger.info("断点续跑：复用抽取产物 doc_id=%s（%s 实体 / %s 关系，未调用 LLM）",
+                         doc_id, len(entities), len(relations))
+            sql_db.update_document(doc_id, extract_status="COMPLETED", error_message=None)
+        else:
+            sql_db.update_document(doc_id, extract_status="EXTRACTING", error_message=None)
+            try:
+                result = await KnowledgeExtractor().extract(text)
+            except Exception as e:
+                message = f"抽取失败: {str(e)}"
+                sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
+                DocumentService._task_failed(doc_id, course_id, "EXTRACT", message)
+                return {"ok": False, "code": 3003, "message": f"知识抽取失败: {str(e)}"}
 
-        # 抽取结果带 error（JSON 解析失败 / LLM 异常等）时，不应静默当作 0 实体成功
-        if result.get("error"):
-            message = str(result["error"])
-            sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
-            return {"ok": False, "code": 3003, "message": f"知识抽取失败: {message}"}
+            # 抽取结果带 error（JSON 解析失败 / LLM 异常等）时，不应静默当作 0 实体成功
+            if result.get("error"):
+                message = str(result["error"])
+                sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
+                DocumentService._task_failed(doc_id, course_id, "EXTRACT", message)
+                return {"ok": False, "code": 3003, "message": f"知识抽取失败: {message}"}
 
-        entities = result.get("entities", [])
-        relations = result.get("relations", [])
+            entities = result.get("entities", [])
+            relations = result.get("relations", [])
+            # 抽取成功后立刻落盘：这是最贵的一步，任何后续失败（建图/重启）都不应重花钱
+            task_state.save_extraction(doc_id, sha, entities, relations)
 
         # 3. 入图（整数 course_id + 文档级 document_id；每个文档独立建图）
         # 入图前必须再确认作用域仍存在：删除与后台任务并发时，绝不能向已删除的
@@ -245,6 +279,7 @@ class DocumentService:
             graph_status="BUILDING",
             error_message=None,
         )
+        DocumentService._task_stage(doc_id, course_id, "BUILD")
         try:
             await asyncio.to_thread(
                 KnowledgeGraphManager.build_graph, course_id, doc_id, entities, relations)
@@ -255,6 +290,8 @@ class DocumentService:
                 DocumentService._cleanup_deleted_scope(course_id, doc_id)
                 return {"ok": False, "code": 4009, "message": "文档已被删除，任务终止"}
             sql_db.update_document(doc_id, graph_status="FAILED", error_message=message)
+            # 建图失败**保留**抽取产物：重跑建图不该再花一次 LLM 的钱
+            DocumentService._task_failed(doc_id, course_id, "BUILD", message)
             return {"ok": False, "code": 5002, "message": message}
 
         # 入图完成后兜底：若删除发生在构建过程中，把本次写入的节点/关系清掉
@@ -263,37 +300,88 @@ class DocumentService:
             DocumentService._cleanup_deleted_scope(course_id, doc_id)
             return {"ok": False, "code": 4009, "message": "文档已被删除，任务终止"}
 
-        # 4. 只有图谱真正入库后才标记完成
+        # 4. 只有图谱真正入库后才标记完成（此时才清中间产物：留着只会占空间）
         sql_db.update_document(doc_id, graph_status="COMPLETED", error_message=None)
+        task_state.clear(doc_id)
+        DocumentService._task_done(doc_id, course_id)
 
         return {"ok": True, "code": 0, "message": "success",
                 "data": DocumentService._success_payload(sql_db.get_document(doc_id))}
 
     @staticmethod
-    async def _run_document_task(doc_id: int) -> None:
+    def _stamp() -> str:
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def _task_stage(doc_id: int, course_id: int, stage: str, *,
+                    bump_attempts: bool = False) -> None:
+        """记录任务进入某阶段 + 刷新心跳 + 回写当前可复用的中间产物。
+
+        全部包在 try 里：任务状态是「可观测性」，写它失败绝不能拖垮真正的流水线。
+        """
+        try:
+            sha = (sql_db.get_document(doc_id) or {}).get("file_sha256")
+            artifacts = task_state.available(doc_id, sha)
+            sql_db.upsert_document_task(
+                doc_id, course_id,
+                bump_attempts=bump_attempts,
+                stage=stage,
+                status="RUNNING",
+                error_message=None,
+                heartbeat_at=DocumentService._stamp(),
+                artifacts=",".join(artifacts) or None,
+            )
+        except Exception:  # noqa: BLE001
+            _logger.warning("任务状态写入失败 doc_id=%s stage=%s", doc_id, stage, exc_info=True)
+
+    @staticmethod
+    def _task_failed(doc_id: int, course_id: int, stage: str, message: str) -> None:
+        try:
+            sql_db.upsert_document_task(
+                doc_id, course_id, stage=stage, status="FAILED",
+                error_message=message, heartbeat_at=DocumentService._stamp())
+        except Exception:  # noqa: BLE001
+            _logger.warning("任务失败状态写入失败 doc_id=%s", doc_id, exc_info=True)
+
+    @staticmethod
+    def _task_done(doc_id: int, course_id: int) -> None:
+        try:
+            sql_db.upsert_document_task(
+                doc_id, course_id, stage="DONE", status="DONE",
+                artifacts=None, error_message=None,
+                heartbeat_at=DocumentService._stamp())
+        except Exception:  # noqa: BLE001
+            _logger.warning("任务完成状态写入失败 doc_id=%s", doc_id, exc_info=True)
+
+    @staticmethod
+    async def _run_document_task(doc_id: int, resume: bool = False) -> None:
         """后台任务的统一入口：受并发 semaphore 约束，异常兜底落库。"""
         try:
             async with _get_semaphore():
-                await DocumentService._process_document(doc_id)
+                await DocumentService._process_document(doc_id, resume=resume)
         except Exception as e:
             # 走到这里说明状态更新本身也失败了，尽最大努力留下失败原因
             _logger.exception("文档处理异常 doc_id=%s", doc_id)
             try:
                 sql_db.update_document(
                     doc_id, graph_status="FAILED", error_message=f"处理异常: {str(e)}")
+                doc = sql_db.get_document(doc_id) or {}
+                DocumentService._task_failed(
+                    doc_id, int(doc.get("course_id") or 0), "BUILD", f"处理异常: {str(e)}")
             except Exception:
                 pass
         finally:
             _running_docs.discard(doc_id)
 
     @staticmethod
-    def _schedule_processing(doc_id: int) -> bool:
+    def _schedule_processing(doc_id: int, resume: bool = False) -> bool:
         """把文档交给后台处理。同一文档重复调度返回 False。"""
         if doc_id in _running_docs:
             return False
         _running_docs.add(doc_id)
         try:
-            task = asyncio.create_task(DocumentService._run_document_task(doc_id))
+            task = asyncio.create_task(
+                DocumentService._run_document_task(doc_id, resume=resume))
         except Exception:
             _running_docs.discard(doc_id)
             return False
@@ -323,11 +411,86 @@ class DocumentService:
         docs = sql_db.list_documents_by_course(int(course_id))
         return any(int(d["doc_id"]) in _running_docs for d in docs)
 
+    # ---------- 启动恢复（阶段 4） ----------
+
+    @staticmethod
+    def reconcile_interrupted(reason: str = "服务重启导致任务中断，可点击重试") -> dict:
+        """处理「上一进程遗留的中间态」，返回 `{scanned, recovered, resumed}`。
+
+        为什么必须做：解析/抽取/建图都在**进程内**的 asyncio 任务里跑，状态却只写进了
+        SQLite。进程一旦重启（或崩溃），库里会永久停在 `PARSING` / `EXTRACTING` /
+        `BUILDING`——前端一直显示「处理中」，而实际上没有任何任务在跑。
+
+        两种收敛方式（阶段 4 起）：
+
+        | 条件 | 处理 | 代价 |
+        |---|---|---|
+        | 中间产物可复用（`parsed.txt` / `extracted.json` 且 sha256 一致） | **续跑**：保持状态，重新排后台任务，`resume=True` 跳过已完成的贵阶段 | 只花没做完的那一步 |
+        | 无产物 / `RESUME_ON_STARTUP=0` / 调度失败 | 收敛为 **FAILED**，教师手动重试 | 从头再来 |
+
+        自动续跑是安全的：产物带 sha256 指纹，文件被换掉就不会被误用；
+        而「无产物还自动重跑」恰恰是不该做的（启动瞬间对全部积压文档发起 LLM 调用，
+        费用与并发都不可控），所以那种情况保持旧的 FAILED 行为。
+
+        只改**中间态**字段，已完成的阶段不回退。
+
+        多进程部署注意：本方法假设「一个 uvicorn 进程」（`CLAUDE.md` 记录的部署形态）。
+        多 worker 下应当由启动最早的那个进程执行，或用 `RECONCILE_ON_STARTUP=0` 关闭。
+        """
+        rows = sql_db._query(
+            "SELECT doc_id, course_id, parse_status, extract_status, graph_status "
+            "FROM t_document "
+            "WHERE parse_status = 'PARSING' OR extract_status = 'EXTRACTING' "
+            "   OR graph_status = 'BUILDING'"
+        ) or []
+
+        recovered = 0
+        resumed = 0
+        for row in rows:
+            did = int(row["doc_id"])
+            # 理论上启动时注册表为空；这里防御「热重载 / 同一进程内重复调用」的场景
+            if did in _running_docs:
+                continue
+
+            doc = sql_db.get_document(did) or {}
+            sha = doc.get("file_sha256")
+            artifacts = task_state.available(did, sha) if settings.RESUME_ON_STARTUP else []
+            if artifacts:
+                try:
+                    if DocumentService._schedule_processing(did, resume=True):
+                        resumed += 1
+                        _logger.warning(
+                            "启动续跑：doc_id=%s 复用中间产物 %s，从断点继续", did, artifacts)
+                        continue
+                except Exception:  # noqa: BLE001 - 续跑失败就退回标失败
+                    _logger.exception("启动续跑调度失败 doc_id=%s", did)
+
+            fields = {"error_message": reason}
+            if row.get("parse_status") == "PARSING":
+                fields["parse_status"] = "FAILED"
+            if row.get("extract_status") == "EXTRACTING":
+                fields["extract_status"] = "FAILED"
+            if row.get("graph_status") == "BUILDING":
+                fields["graph_status"] = "FAILED"
+            try:
+                sql_db.update_document(did, **fields)
+                DocumentService._task_failed(did, int(row["course_id"]), "PARSE", reason)
+                recovered += 1
+            except Exception:  # noqa: BLE001 - 单条失败不应拖垮启动
+                _logger.exception("启动恢复失败 doc_id=%s", did)
+
+        if recovered:
+            _logger.warning(
+                "启动恢复：%s 篇文档残留中间状态且无可复用产物，已标记 FAILED 待重试", recovered)
+        if resumed:
+            _logger.warning("启动恢复：%s 篇文档已按断点续跑重新入队", resumed)
+        return {"scanned": len(rows), "recovered": recovered, "resumed": resumed}
+
     # ---------- 单文件上传（保持原有同步语义） ----------
 
     @staticmethod
     async def process_upload(content: bytes, filename: str, course_id: int,
-                             teacher_id: int = None) -> dict:
+                             teacher_id: int = None, background: bool = False) -> dict:
         """
         处理文档上传全流程（上传到已存在课程；不再自动建课）。
 
@@ -335,8 +498,12 @@ class DocumentService:
         - ok=True：data 含 document_id/course_id/filename/status/counts
         - ok=False：code/message 为业务错误码与描述（错误码见规划文档 6.2.1，2005 为解析失败扩展码）
 
-        该入口保持同步语义（请求返回时图谱已构建完成），供「单文件上传」兼容路径使用；
-        批量上传走 process_batch，由后台任务处理。
+        两种模式（阶段 4 起）：
+        - `background=False`（默认，保持既有语义）：请求返回时图谱已构建完成；
+        - `background=True`：落库后立即返回 `status=processing`，解析/抽取/建图交给后台任务
+          （与批量上传共用 `_schedule_processing`，受同一并发上限约束）。
+          大文件（几十页 PDF）同步跑完要几十秒到几分钟，会把一个请求一直占住；
+          需要「点了就能离开」的调用方用这个模式，前端轮询文档列表即可。
         """
         # 1. 格式 / 大小校验
         checked = DocumentService._validate_upload(content, filename)
@@ -361,8 +528,19 @@ class DocumentService:
         if not persisted["ok"]:
             return persisted
 
-        # 5. 同步处理（与批量共用同一套状态写入，图谱完成才返回成功）
+        # 5. 处理：同步（默认）或交给后台任务
         doc_id = persisted["document_id"]
+        if background:
+            # 异步模式：落库后立即返回，与批量上传共用同一条后台任务入口
+            # （并发上限、状态写入、异常兜底都在 _run_document_task 里）。
+            if not DocumentService._schedule_processing(doc_id):
+                return {"ok": False, "code": 4009, "message": "该文档正在处理中，请勿重复提交"}
+            payload = DocumentService._success_payload(
+                sql_db.get_document(doc_id), status="processing")
+            payload["background"] = True
+            return {"ok": True, "code": 0, "message": "已接收，正在后台处理", "data": payload}
+
+        # 同步处理（与批量共用同一套状态写入，图谱完成才返回成功）
         if doc_id in _running_docs:
             return {"ok": False, "code": 4009, "message": "该文档正在处理中，请勿重复提交"}
         _running_docs.add(doc_id)
@@ -522,6 +700,13 @@ class DocumentService:
             entity_count=0,
             relation_count=0,
         )
+        # 「重试 = 真的重来」：清掉中间产物与任务行，避免复用上次的解析/抽取结果。
+        # （只有启动恢复才复用产物——那是「接着跑」，语义不同。）
+        task_state.clear(doc_id)
+        try:
+            sql_db.delete_document_task(doc_id)
+        except Exception:  # noqa: BLE001
+            _logger.warning("重试前清理任务行失败 doc_id=%s", doc_id, exc_info=True)
         if not DocumentService._schedule_processing(doc_id):
             sql_db.update_document(doc_id, graph_status="FAILED",
                                    error_message="文档已在处理队列中")
@@ -671,6 +856,14 @@ class DocumentService:
             removed_favorites = sql_db.delete_favorites_by_document(cid, doc_id)
         except Exception as e:
             return {"ok": False, "code": 5002, "message": f"删除文档收藏失败: {str(e)}"}
+
+        # 4.2 处理任务的中间产物与任务行（阶段 4）：文档都不在了，产物没有意义，
+        # 留着还会在「重建图谱」扫描时被误认为可复用。
+        try:
+            task_state.clear(doc_id)
+            sql_db.delete_document_task(doc_id)
+        except Exception:  # noqa: BLE001 - 清理失败不该阻止删除（文件/行可后续再清）
+            _logger.warning("删除文档时清理任务产物失败 doc_id=%s", doc_id, exc_info=True)
 
         # 4.5 题库：答题记录 → 题目收藏 → 该文档题目
         # 顺序敏感（t_answer_record / t_question_favorite 均外键指向 t_question）：

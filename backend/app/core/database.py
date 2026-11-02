@@ -162,6 +162,111 @@ class Neo4jDB:
             "props": properties or {},
         })
 
+    def create_knowledge_nodes_bulk(self, course_id: str, document_id, rows: list) -> int:
+        """批量 MERGE 知识点节点（**单条 Cypher + UNWIND**），返回写入条数。
+
+        为什么要有批量版本：一份 60 个实体的文档逐条写入就是 60 次网络往返，
+        叠加抽取/向量化后建图成为明显瓶颈；UNWIND 把节点写入压成 1 次往返。
+
+        与 `create_knowledge_node` 语义完全一致：
+        - MERGE key 仍是 `(course_id, document_id, name)`（幂等、同文档同名不并存）；
+        - `kp_id` 只在 ON CREATE 时生成，重复调用不会改已有节点的 id；
+        - `SET` 覆盖 category/description/updated_at，并把 row.props 合并进节点
+          （同名实体合并留下的 alt_descriptions / category_variants 就走这里）。
+
+        rows: `[{"name", "category", "description", "properties"}]`；空 name 的行会被跳过。
+        """
+        payload = []
+        for r in rows or []:
+            name = (r.get("name") or "").strip()
+            if not name:
+                continue
+            payload.append({
+                "name": name,
+                "kp_id": generate_kp_id(course_id),
+                "category": r.get("category") or "概念",
+                "description": r.get("description") or "",
+                "props": r.get("properties") or {},
+            })
+        if not payload:
+            return 0
+
+        cypher = """
+        UNWIND $rows AS row
+        MERGE (kp:KnowledgePoint {course_id: $course_id, document_id: $document_id, name: row.name})
+        ON CREATE SET kp.kp_id = row.kp_id, kp.created_at = $now
+        SET kp.category = row.category,
+            kp.description = row.description,
+            kp.updated_at = $now,
+            kp += row.props
+        RETURN count(kp) AS written
+        """
+        res = self.query(cypher, {
+            "course_id": course_id,
+            "document_id": document_id,
+            "rows": payload,
+            "now": _now_iso(),
+        })
+        return int(res[0]["written"]) if res else 0
+
+    def create_relationships_bulk(self, course_id: str, document_id, rels: list) -> int:
+        """批量 MERGE 关系（**按类型分组后每组一条 UNWIND**），返回写入条数。
+
+        为什么分组而不是一条 Cypher：Neo4j 不支持把关系类型参数化，类型必须拼进语句；
+        先把类型收敛到 `VALID_RELATION_TYPES`（非法回退 RELATED_TO），再按类型各发一条，
+        最多 4 次往返（当前只有 4 种类型），而不是每条关系一次。
+
+        与 `create_relationship` 语义一致：
+        - 两端 MATCH 都带 `course_id + document_id`，禁止跨文档/跨课程连边；
+        - 端点不存在的行会被 MATCH 过滤掉（与逐条版本一致，不报错）；
+        - `MERGE (a)-[r:TYPE]->(b)` 幂等，`relation_type` 中文标签与 props 会被覆盖/合并。
+
+        rels: `[{"source", "target", "type", "properties"}]`。
+        """
+        buckets = {}
+        for r in rels or []:
+            source = (r.get("source") or "").strip()
+            target = (r.get("target") or "").strip()
+            if not source or not target or source == target:
+                continue
+            rel_type = (r.get("type") or "").strip().upper()
+            if rel_type not in VALID_RELATION_TYPES:
+                rel_type = "RELATED_TO"
+            buckets.setdefault(rel_type, []).append({
+                "source": source,
+                "target": target,
+                "label": RELATION_TYPE_LABELS.get(rel_type, rel_type),
+                "props": r.get("properties") or {},
+            })
+        if not buckets:
+            return 0
+
+        now = _now_iso()
+        written = 0
+        for rel_type, rows in buckets.items():
+            cypher = f"""
+            UNWIND $rows AS row
+            MATCH (a:KnowledgePoint {{course_id: $course_id, document_id: $document_id, name: row.source}})
+            MATCH (b:KnowledgePoint {{course_id: $course_id, document_id: $document_id, name: row.target}})
+            MERGE (a)-[r:{rel_type}]->(b)
+            ON CREATE SET r.created_at = $now
+            SET r.relation_type = row.label,
+                r.course_id = $course_id,
+                r.document_id = $document_id,
+                r.updated_at = $now,
+                r += row.props
+            RETURN count(r) AS written
+            """
+            res = self.query(cypher, {
+                "course_id": course_id,
+                "document_id": document_id,
+                "rows": rows,
+                "now": now,
+            })
+            if res:
+                written += int(res[0]["written"])
+        return written
+
     def get_full_graph(self, course_id: str = None, document_id=None):
         """获取完整知识图谱（document_id 为 None 时回退课程级，仅兼容旧聚合入口）"""
         if course_id is not None and document_id is not None:

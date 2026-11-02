@@ -1,0 +1,89 @@
+/**
+ * 学习路径 Tab 右侧三个面板的共享样式（推荐下一步 / 到达目标 / 前置知识）。
+ *
+ * 为什么是全局样式文件而不是各组件 scoped：
+ * 三个面板的卡片结构完全一致（tip + btn-row + rec-item 列表），scoped 会要求
+ * 同一批规则重复三份；这里用 `.path-panel` 前缀把作用域收在面板内部，
+ * 其它页面不受影响（这三个类名目前只有学习路径面板使用）。
+ */
+
+.path-panel .tip {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-label);
+  margin: 0 0 10px;
+}
+
+.path-panel .btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.path-panel .icon-gap {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+/* 条目卡片（推荐结果 / 相关概念 / 前置知识共用） */
+.path-panel .rec-item {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--bg-soft);
+  margin-bottom: 8px;
+  transition: background .18s;
+}
+.path-panel .rec-item:hover {
+  background: var(--brand-50);
+}
+.path-panel .rec-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.path-panel .rec-desc {
+  color: var(--color-text-regular);
+  font-size: var(--font-size-label);
+  margin: 6px 0 4px;
+}
+.path-panel .rec-reason {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+/* 到达目标：多条路径的容器 */
+.path-panel .path-plans {
+  margin-bottom: var(--space-4);
+  padding: 10px;
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-md);
+}
+.path-panel .path-index {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+.path-panel .path-steps {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.path-panel .path-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  padding: var(--space-1) var(--space-2);
+}
+.path-panel .step-name {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
+}
+.path-panel .path-arrow {
+  color: var(--brand-400);
+  font-weight: var(--font-weight-bold);
+}

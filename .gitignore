@@ -43,6 +43,16 @@ backend/backup/
 *.log
 backend/logs/
 
+# 自动生成的本地 JWT 密钥（阶段 1B：未配置 SECRET_KEY 时回落使用，绝不可入库）
+backend/data/.secret_key
+
+# 抽取结果缓存（阶段 5'：按 prompt/模型/温度/文本哈希落盘，运行期产物不入库）
+backend/data/extract_cache/
+
+# 文档处理任务的中间产物（阶段 4：parsed.txt / extracted.json，用于断点续跑）
+# 只是「省下一次重解析 / 一次 LLM 调用」的缓存，随时可删；不进版本库。
+backend/data/task_state/
+
 # 编辑器 / 手工备份文件（历史上误提交过 GraphCanvas.vue.bak 等）
 *.bak
 *.bak.*

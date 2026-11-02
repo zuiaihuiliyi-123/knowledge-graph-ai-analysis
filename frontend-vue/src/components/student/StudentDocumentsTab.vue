@@ -73,7 +73,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Download, Reading, Refresh } from '@element-plus/icons-vue'
 import { useAppStore } from '../../stores/app'
-import { useLatestRequest } from '../../composables/useLatestRequest'
+import { useLatestRequest, isAbortError } from '../../composables/useLatestRequest'
 import { formatBytes } from '../../utils/format'
 import { downloadDocumentFile } from '../../utils/download'
 import { getReadingProgress } from '../../utils/readingProgress'
@@ -121,11 +121,13 @@ watch(() => store.learningContext.documentList, syncDocProgress, { immediate: tr
 async function loadCourseDocuments() {
   const cid = String(props.courseId || '')
   if (!cid) return
-  const token = request.begin()
+  const { token, signal } = request.beginRead()
   docLoading.value = true
   try {
-    await store.fetchDocuments(cid)
+    await store.fetchDocuments(cid, { signal })
   } catch (e) {
+    // 取消（切换课程/离开 Tab）不算失败
+    if (isAbortError(e)) return
     if (request.isLatest(token) && String(props.courseId) === cid) {
       ElMessage.warning(`文档列表加载失败：${e.message}`)
     }

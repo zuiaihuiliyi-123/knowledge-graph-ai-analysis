@@ -109,7 +109,15 @@ async def remove_favorite(
     document_id: str = Query(..., description="文档 ID（Phase 8B 按文档隔离）"),
     current_user: dict = Depends(get_current_user),
 ):
-    """取消收藏（刻意不校验课程成员身份：退出/被移除课程后仍须能清理自己的收藏）"""
+    """取消收藏。
+
+    与 DELETE /learning/mark 保持同一套口径：
+
+    - 不校验课程成员身份（退出/被移除课程后仍须能清理自己的收藏）；
+    - 幂等：收藏不存在时返回 `deleted=0`，不报错；
+    - 参数校验与 POST /favorites 一致：`kp_id` 为空/空白（例如路径里是 `%20`）直接 4001。
+      以前空白 kp_id 会被带进 SQL 删 0 行并返回 success，前端无从判断是否真的取消成功。
+    """
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
@@ -117,5 +125,7 @@ async def remove_favorite(
     if did is None:
         return error(4001, "参数错误：document_id 必须为整数")
     kp_id = (kp_id or "").strip()
+    if not kp_id:
+        return error(4001, "参数错误：kp_id 不能为空")
     deleted = sql_db.remove_favorite(current_user["user_id"], cid, did, kp_id)
     return success({"course_id": cid, "document_id": did, "kp_id": kp_id, "deleted": deleted})

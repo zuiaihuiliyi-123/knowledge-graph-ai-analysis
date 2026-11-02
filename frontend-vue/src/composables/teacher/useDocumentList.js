@@ -32,14 +32,14 @@ export function useDocumentList(courseId) {
     // 同课程的请求合并：open=1 watcher 与课程 watch 同时触发时只发一次
     if (!force && inflight && inflight.target === target) return inflight.promise
 
-    const token = request.begin()
+    const { token, signal } = request.beginRead()
     if (!silent) {
       visiblePending += 1
       documentsLoading.value = true
     }
     const promise = (async () => {
       try {
-        const list = await api.getDocuments(target)
+        const list = await api.getDocuments(target, { signal })
         // 课程已切换或已有更新请求：丢弃旧响应，避免把上一门课的文档写进当前列表
         if (!request.isLatest(token) || String(courseId.value) !== target) return null
         documents.value = Array.isArray(list) ? list : []

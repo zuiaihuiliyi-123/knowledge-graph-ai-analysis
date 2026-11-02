@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { BASE, login, dismissBackendStatus, api } from './helpers'
+import { BASE, login, dismissBackendStatus, api, loginTeacher } from './helpers'
 
 /**
  * 教师端 / 学生端模块化重构后的只读冒烟回归。
@@ -33,7 +33,7 @@ test('教师端：7 个 Tab 与深链加载正常，控制台无错误', async (
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
   page.on('pageerror', (e) => errors.push(String(e)))
 
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
   const { course, doc } = await firstCourseAndDoc(page, token, false)
   const c = course.course_id
   const d = doc.doc_id

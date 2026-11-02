@@ -5,11 +5,23 @@ import json
 import logging
 import re
 import asyncio
+import hashlib
 from typing import List
 from openai import OpenAI
 from ..core.config import settings
 from ..core.database import VALID_RELATION_TYPES
 from ..utils.text_processor import chunk_text_for_llm
+from . import extraction_cache
+
+_PROMPT_FP_CACHE = {}
+
+
+def _prompt_fingerprint() -> str:
+    """Prompt 指纹（改 Prompt 即让抽取缓存自动失效，避免两套 Prompt 的结果混用）。"""
+    if "v" not in _PROMPT_FP_CACHE:
+        _PROMPT_FP_CACHE["v"] = hashlib.sha256(
+            EXTRACTION_PROMPT.encode("utf-8")).hexdigest()[:16]
+    return _PROMPT_FP_CACHE["v"]
 
 _logger = logging.getLogger(__name__)
 
@@ -596,6 +608,16 @@ class KnowledgeExtractor:
         rate_limit / auth / truncated …）与 `retryable`，供上层决定是否重试。
         """
         use_json_mode = bool(settings.LLM_JSON_MODE)
+        # ---- 抽取结果缓存（阶段 5'）----
+        # 键 = prompt 指纹 + 模型 + 温度 + 文本：改 Prompt / 换模型 / 调温度都会自动换键。
+        # 命中时直接返回结构化结果，跳过请求、JSON 修复与重试（重试/重复上传不再烧 LLM 费用）。
+        cache_key = None
+        if extraction_cache.enabled():
+            cache_key = extraction_cache.build_key(
+                text, settings.LLM_MODEL, self.temperature, _prompt_fingerprint())
+            cached = extraction_cache.load(cache_key)
+            if cached is not None:
+                return cached
         try:
             response = self._request_completion(text, use_json_mode)
         except Exception as e:
@@ -629,6 +651,8 @@ class KnowledgeExtractor:
             clean, dropped = _validate_extraction_payload(payload)
             if dropped:
                 _logger.warning("抽取结果中丢弃结构非法的条目 %d 条", dropped)
+            if cache_key:
+                extraction_cache.store(cache_key, clean)   # 只缓存成功结果
             return clean
 
         except ExtractionSchemaError as e:
@@ -678,7 +702,8 @@ class KnowledgeExtractor:
         )
         raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
-    def _merge_results(self, results: List[dict]) -> dict:
+    @staticmethod
+    def _merge_results(results: List[dict]) -> dict:
         """
         合并多个提取结果（数据完整性约束不依赖 LLM，全部在此兜底）：
         - 实体：轻量规范化后按规范名去重
@@ -690,9 +715,16 @@ class KnowledgeExtractor:
         为什么少。评测侧据此才能把"抽到了但被阈值砍掉"（low_confidence）
         与"压根没抽到"（missed_core）区分开，否则后者会被系统性高估。
         """
-        # 第一遍：规范化实体并按规范名去重（保留首个出现的字段）
+        # 第一遍：规范化实体并按规范名去重。
+        # 同名实体**不丢信息**：首条充当主 description / category（保持既有评测与展示口径），
+        # 其余不同描述累积进 descriptions（并配 alt_descriptions），类别冲突记到
+        # category_variants。为什么不干脆拆成两个节点：图谱 MERGE 键就是
+        # (course_id, document_id, name)，同名不可能并存；融合层只做映射也不拆分，
+        # 这里一旦吞掉就**永久丢失**（见 docs/文档级知识融合与实体消歧实施报告.md §10）。
         merged_entities = {}  # 规范名 -> entity dict
         dropped_entity_count = 0
+        entity_duplicates = 0
+        duplicate_names = []
         for result in results:
             for entity in result.get("entities", []):
                 name = _normalize_entity_name(entity.get("name", ""))
@@ -703,15 +735,40 @@ class KnowledgeExtractor:
                 if _is_code_symbol(name):
                     dropped_entity_count += 1
                     continue
-                if name not in merged_entities:
-                    category = entity.get("category", "概念")
-                    if category not in ("概念", "定理", "公式", "方法"):
-                        category = "概念"
+
+                category = entity.get("category", "概念")
+                if category not in ("概念", "定理", "公式", "方法"):
+                    category = "概念"
+                description = (entity.get("description") or "").strip()
+
+                host = merged_entities.get(name)
+                if host is None:
                     merged_entities[name] = {
                         "name": name,
                         "category": category,
-                        "description": (entity.get("description") or "").strip(),
+                        "description": description,
+                        # 主描述排第一；空描述不入列表，避免下游把 "" 当成一条证据
+                        "descriptions": [description] if description else [],
                     }
+                    continue
+
+                # ---- 同名：只累积，不覆盖主字段 ----
+                entity_duplicates += 1
+                if name not in duplicate_names:
+                    duplicate_names.append(name)
+                descriptions = host["descriptions"]
+                if description and description not in descriptions:
+                    descriptions.append(description)
+                if category != host["category"]:
+                    variants = host.setdefault("category_variants", [])
+                    if category not in variants:
+                        variants.append(category)
+
+        # 主描述之外的备选描述单独列出来，供融合/RAG/前端直接消费
+        for host in merged_entities.values():
+            descriptions = host.get("descriptions") or []
+            if len(descriptions) > 1:
+                host["alt_descriptions"] = descriptions[1:]
         entity_names = set(merged_entities.keys())
 
         # 第二遍：关系校验（source/target 使用同一套规范化，保证与实体名对齐）
@@ -794,6 +851,10 @@ class KnowledgeExtractor:
             "dropped_relations": dropped,
             "dropped_counts": dropped_counts,
             "dropped_entity_count": dropped_entity_count,
+            # 同名实体合并次数与涉及的名字：此前完全不可见，评测无法区分
+            # 「本来就只有 N 个实体」与「N+3 个被同名合并掉了」
+            "entity_duplicates": entity_duplicates,
+            "duplicate_names": duplicate_names,
         }
         # 分块错误透传（最多携带前 3 条，避免信息过长），供上层判断抽取是否真正成功
         if errors:

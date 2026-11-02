@@ -35,6 +35,7 @@
     <section class="ai-main">
       <header class="ai-top">
         <span class="ai-top-title">AI 学习助手</span>
+        <el-tag v-if="documentName" size="small" effect="plain" class="ai-top-doc">{{ documentName }}</el-tag>
         <span class="ai-top-hint" title="学生问答页与右下角 AI 助教悬浮球共用同一份对话">
           <el-icon><InfoFilled /></el-icon>
           与悬浮球共用同一份对话
@@ -53,40 +54,46 @@
         </div>
 
         <div v-else class="ai-thread">
-          <div
-            v-for="m in messages"
-            :key="m.mid"
-            class="turn"
-            :class="m.role === 'user' ? 'is-user' : 'is-ai'"
-          >
+          <template v-for="(m, i) in messages" :key="m.mid">
+            <!-- 切换学习资料后插入分隔行，避免两段上下文被误读成同一轮问答 -->
+            <div v-if="showCtxDivider(i)" class="chat-divider">
+              <span>已切换学习资料 · {{ m.ctxLabel }}</span>
+            </div>
+            <div
+              class="turn"
+              :class="m.role === 'user' ? 'is-user' : 'is-ai'"
+            >
             <div v-if="m.role === 'user'" class="user-bubble">{{ m.content }}</div>
 
             <template v-else>
               <div class="turn-avatar"><el-icon><MagicStick /></el-icon></div>
               <div class="turn-body">
-                <div v-if="m.error" class="turn-error">
+                <div v-if="m.error" class="turn-error" :title="m.errDetail || ''">
                   <el-icon><WarningFilled /></el-icon>
                   <span>AI 服务暂时不可用，请稍后重试</span>
                 </div>
                 <div v-else class="turn-text md" v-html="renderMarkdown(m.content)"></div>
+                <!-- 流式生成中：正文还在增长时的轻提示 -->
+                <div v-if="m.streaming" class="msg-streaming">
+                  {{ m.content ? '正在生成…' : '正在思考…' }}
+                </div>
 
-                <div v-if="!m.error && m.content" class="turn-ops">
+                <div v-if="!m.error && m.content && !m.streaming" class="turn-ops">
                   <button class="turn-op" @click="copyAnswer(m)">
                     <el-icon><CopyDocument /></el-icon>复制
                   </button>
-                  <button
-                    v-if="m.sources && m.sources.length"
-                    class="turn-op"
-                    @click="toggleCites(m.mid)"
-                  >
-                    <el-icon><Document /></el-icon>参考来源 {{ m.sources.length }}
+                  <button class="turn-op" @click="toggleCites(m.mid)">
+                    <el-icon><Document /></el-icon>参考来源<span v-if="m.sources && m.sources.length"> {{ m.sources.length }}</span>
                     <el-icon class="op-arrow" :class="{ open: !!openCites[m.mid] }"><ArrowDown /></el-icon>
                   </button>
                 </div>
 
-                <div v-if="openCites[m.mid] && m.sources && m.sources.length" class="cite-list">
+                <div v-if="openCites[m.mid]" class="cite-list">
+                  <div v-if="!m.sources || !m.sources.length" class="cite-empty">
+                    未检索到相关知识点（AI 基于通用知识回答，仅供参考）
+                  </div>
                   <div
-                    v-for="(s, j) in m.sources"
+                    v-for="(s, j) in (m.sources || [])"
                     :key="s.kp_id || s.name || j"
                     class="cite-card"
                     @click="emit('jump-kp', s)"
@@ -115,8 +122,9 @@
               </div>
             </template>
           </div>
+          </template>
 
-          <div v-if="asking" class="turn is-ai">
+          <div v-if="asking && !lastStreaming" class="turn is-ai">
             <div class="turn-avatar"><el-icon><MagicStick /></el-icon></div>
             <div class="turn-body">
               <div class="typing"><span></span><span></span><span></span></div>
@@ -200,12 +208,33 @@ const SAMPLES = [
   '出一道相关练习题并给出答案',
 ]
 
+// 末尾是否已是一条「正在生成」的占位消息：流式输出时由它显示进度，不再单独转圈
+const lastStreaming = computed(() => {
+  const last = messages.value[messages.value.length - 1]
+  return !!(last && last.streaming)
+})
+
+/** 相邻两条消息来自不同的学习资料时，中间插一条分隔说明 */
+function showCtxDivider(index) {
+  if (index === 0) return false
+  const cur = messages.value[index]
+  const prev = messages.value[index - 1]
+  return !!(cur && prev && cur.ctxKey && cur.ctxKey !== prev.ctxKey)
+}
+
 // 课程 / 学习资料上下文变化交给共享会话：切课程载入该课程的历史，换资料只作废在途回答
-watch([() => props.courseId, () => props.documentId], ([cid, did]) => {
-  chat.bindContext(cid, did)
+watch([() => props.courseId, () => props.documentId, () => props.documentName], ([cid, did, dname]) => {
+  chat.bindContext(cid, did, dname)
 }, { immediate: true })
-// 悬浮窗里提问时这里也会收到新消息，跟随滚动到底部，避免「联动」后看不到新回答
-watch(() => messages.value.length, () => scrollChatToBottom())
+// 新消息（长度变化）与流式增量（同一条内容变长）都要跟随滚动：悬浮窗提问时这里也要看到
+watch(
+  () => {
+    const list = messages.value
+    const last = list[list.length - 1]
+    return `${list.length}:${last ? `${last.mid}:${(last.content || '').length}` : ''}`
+  },
+  () => scrollChatToBottom(),
+)
 // 切会话后来源展开状态按会话重来，并回到最新一条
 watch(() => chat.activeId, () => {
   openCites.value = {}
@@ -425,6 +454,14 @@ function relativeTime(t) {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
+.ai-top-doc {
+  max-width: 220px;
+  margin-left: 10px;
+  margin-right: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .ai-top-hint {
   display: inline-flex;
   align-items: center;
@@ -482,6 +519,36 @@ function relativeTime(t) {
   font-size: var(--font-size-label);
 }
 .turn-ops { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+/* 流式生成中：正文还在增长时的轻提示 */
+.msg-streaming {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+/* 切换学习资料的分隔行：把两段上下文分开，避免误读成同一轮问答 */
+.chat-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 6px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.chat-divider::before,
+.chat-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-light);
+}
+.cite-empty {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
 .turn-op {
   display: inline-flex;
   align-items: center;

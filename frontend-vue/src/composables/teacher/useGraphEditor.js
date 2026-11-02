@@ -51,9 +51,9 @@ export function useGraphEditor({ courseId, documentId, editMode }) {
       editNodes.value = []
       return
     }
-    const token = nodesRequest.begin()
+    const { token, signal } = nodesRequest.beginRead()
     try {
-      const data = await api.getGraphV1(cid, did, { limit: 800 })
+      const data = await api.getGraphV1(cid, did, { limit: 800 }, { signal })
       if (!nodesRequest.isLatest(token)) return
       if (String(courseId.value) !== cid || String(documentId.value) !== did) return
       editNodes.value = data.nodes || []
@@ -141,11 +141,13 @@ export function useGraphEditor({ courseId, documentId, editMode }) {
 
   async function loadPrereqs() {
     if (!selectedNode.value) return
-    const token = prereqRequest.begin()
+    const { token, signal } = prereqRequest.beginRead()
     const label = selectedNode.value.label
     prereqLoading.value = true
     try {
-      const res = await api.getPrerequisites(label, courseId.value, documentId.value)
+      const res = await api.getPrerequisites(
+        label, courseId.value, documentId.value, { signal },
+      )
       if (!prereqRequest.isLatest(token)) return
       // 查询期间用户可能已经换了节点：只保留当前节点的结果
       if (selectedNode.value?.label !== label) return

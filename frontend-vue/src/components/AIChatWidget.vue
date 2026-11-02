@@ -96,10 +96,14 @@
           <div class="ai-msg-main">
             <div v-if="m.role === 'ai' && m.greeting" class="ai-tag">AI 助教</div>
             <div class="ai-bubble">
-              <div v-if="m.error" class="ai-error">⚠️ AI 服务暂时不可用，请稍后重试</div>
+              <div v-if="m.error" class="ai-error" :title="m.errDetail || ''">⚠️ AI 服务暂时不可用，请稍后重试</div>
               <template v-else>
                 <div v-if="m.role === 'ai'" class="ai-msg-text ai-md" v-html="renderMarkdown(m.content)"></div>
                 <div v-else class="ai-msg-text">{{ m.content }}</div>
+                <div v-if="m.role === 'ai' && m.streaming" class="ai-streaming">
+                  <span class="ai-dot"></span>
+                  <span>{{ m.content ? '正在生成…' : '正在思考…' }}</span>
+                </div>
                 <div v-if="m.role === 'ai' && m.sources && m.sources.length" class="ai-sources">
                   <div class="ai-sources-title">参考来源 · 课程知识库</div>
                   <div v-for="(s, j) in m.sources" :key="s.kp_id || s.name || j" class="ai-source-item">
@@ -112,7 +116,7 @@
           </div>
         </div>
 
-        <div v-if="asking" class="ai-msg-row is-ai">
+        <div v-if="asking && !lastStreaming" class="ai-msg-row is-ai">
           <div class="ai-bubble ai-typing">
             <span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>
           </div>
@@ -330,6 +334,11 @@ const displayMessages = computed(() => (
 ))
 
 const hasContext = computed(() => Boolean(effCourseId.value && effDocumentId.value))
+// 末尾是否已有一条「正在生成」的占位消息（流式输出时由它显示进度，不再单独转圈）
+const lastStreaming = computed(() => {
+  const last = messages.value[messages.value.length - 1]
+  return !!(last && last.streaming)
+})
 
 // 课程 / 学习资料上下文变化交给共享会话：切课程载入该课程历史，切文档只作废在途回答
 watch(effCourseId, (cid) => chat.bindContext(cid, effDocumentId.value), { immediate: true })
@@ -686,6 +695,16 @@ watch(() => messages.value.length, () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 流式生成中：正文下方的轻提示（首字到达后取代整块「正在输入」动画） */
+.ai-streaming {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #9d98b5;
 }
 
 /* 正在输入动画 */

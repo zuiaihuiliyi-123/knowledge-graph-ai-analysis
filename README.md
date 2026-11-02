@@ -169,7 +169,7 @@ npm run build      # 输出 dist/
 | `sysadmin` | 管理员 | `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD` |
 | `admin` | 教师 | `DEFAULT_TEACHER_PASSWORD`（用户名固定） |
 
-若未配置上述环境变量，系统会随机生成 16 位口令并**只在启动日志中打印一次**，同时要求首次登录后立即改密。学生账号通过注册页（`/register`）创建，默认角色为 `student`。
+若未配置上述环境变量，系统会随机生成 16 位口令并**只在启动日志中打印一次**，同时要求首次登录后立即改密。学生账号通过注册页（`/register`）创建，默认角色为 `student`；**教师注册需要 `.env` 里的 `TEACHER_INVITE_CODE`**，未配置时该通道关闭（教师改由管理员在「用户管理」中创建或提升角色）。
 
 ### 环境变量说明
 
@@ -177,10 +177,14 @@ npm run build      # 输出 dist/
 |---|---|
 | `LLM_API_KEY` / `LLM_API_BASE` / `LLM_MODEL` | DeepSeek 抽取与问答生成 |
 | `EMBEDDING_API_KEY` / `EMBEDDING_API_BASE` / `EMBEDDING_MODEL` | SiliconFlow `BAAI/bge-m3` 向量化；未配置时 RAG 退回关键词检索 |
-| `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j 连接 |
-| `SQLITE_DB_PATH` | SQLite 路径，默认 `./data/app.db`（相对 `backend/`） |
+| `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j 连接。**代码里没有任何默认口令**，缺 `NEO4J_PASSWORD` 时图谱相关接口走降级路径并在启动日志告警 |
+| `SQLITE_DB_PATH` | SQLite 路径，默认 `./data/app.db`（相对 `backend/`）。**建议指向仓库外**（如 `../../kg-data/app.db`）：历史提交曾跟踪过该文件，`git switch/checkout` 会静默覆盖被忽略的同名文件（详见 `docs/问题修复记录.md` 第 7 条） |
 | `UPLOAD_DIR` | 课程文档上传目录 |
-| `SECRET_KEY` | JWT 签名密钥，部署时务必改为随机长串 |
+| `SECRET_KEY` | JWT 签名密钥，长度 ≥ 32。未配置时回落到本地随机密钥文件 `backend/data/.secret_key`（不纳入版本库），**删除它会让所有已登录 token 失效** |
+| `SECRET_KEY_FILE` | 可选，本地随机密钥文件的位置 |
+| `APP_ENV` | `dev`（默认）/ `production`。`production` 要求 `SECRET_KEY` 必须来自环境变量，否则启动失败 |
+| `TEACHER_INVITE_CODE` | 教师注册邀请码。**不配置 = 教师自助注册关闭**（学生注册不受影响，教师由管理员创建/提升） |
+| `AUTO_BACKUP` / `AUTO_BACKUP_KEEP` | 启动前自动备份开关（默认 `1`）与保留份数（默认 `10`），快照写入 `backend/backup/auto/` |
 | `DEFAULT_ADMIN_*` / `DEFAULT_TEACHER_PASSWORD` | 可选，固定引导账号口令 |
 
 ## 数据存储
@@ -193,6 +197,13 @@ npm run build      # 输出 dist/
 | **Neo4j** | `KnowledgePoint` 节点及其关系。MERGE 键为 `(course_id, document_id, name)`；关系类型为英文 Cypher 类型（`PRECEDES` / `CONTAINS` / `RELATED_TO` / `APPLIES_TO`），中文名存于 `relation_type` 属性 |
 
 两者之间没有分布式事务，删除课程 / 文档时需要在两侧显式级联清理。`app.db` 与上传文件均不纳入版本库。
+
+> ⚠️ **权限与文件保护的两条约定**（阶段 0/1 建立，改动部署方式时注意）：
+> 1. **SQLite 库建议放在仓库外**（`SQLITE_DB_PATH=../../kg-data/app.db`）。历史提交曾跟踪过
+>    `backend/data/app.db`，`git switch/checkout` 会静默覆盖被 `.gitignore` 忽略的同名文件，
+>    已造成一次本地数据丢失（`docs/问题修复记录.md` 第 7 条）。
+> 2. `backend/data/.secret_key` 是未配置 `SECRET_KEY` 时自动生成的本地 JWT 密钥（同样不纳入版本库）；
+>    换机器或删除该文件后，所有已签发的 token 都会失效，需要重新登录。
 
 ## 核心链路说明
 

@@ -721,6 +721,30 @@ _SCHEMA_SQL = [
         PRIMARY KEY (course_id, document_id)
     )
     """,
+
+    # 4.2.22 文档处理任务（阶段 4：断点续跑的可观测部分）。
+    # 一行 = 一篇文档的**当前**处理任务（不是历史流水）：stage/status/attempts 便于
+    # 排查「卡住」「反复失败」，heartbeat_at 由每个阶段刷新，用来判断进程是否还活着。
+    # 中间产物（parsed.txt / extracted.json）在文件系统 TASK_STATE_DIR 下，不放库里：
+    # 抽取结果动辄几十 KB，塞进 SQLite 会让每次列表查询都带着走。
+    """
+    CREATE TABLE IF NOT EXISTS t_document_task (
+        doc_id        INTEGER PRIMARY KEY,
+        course_id     INTEGER NOT NULL,
+        stage         TEXT NOT NULL DEFAULT 'PARSE'
+                      CHECK (stage IN ('PARSE', 'EXTRACT', 'BUILD', 'DONE')),
+        status        TEXT NOT NULL DEFAULT 'IDLE'
+                      CHECK (status IN ('IDLE', 'RUNNING', 'DONE', 'FAILED')),
+        attempts      INTEGER NOT NULL DEFAULT 0,
+        artifacts     TEXT,
+        heartbeat_at  TEXT,
+        error_message TEXT,
+        created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        updated_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        FOREIGN KEY (doc_id) REFERENCES t_document(doc_id)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_document_task_status ON t_document_task(status);",
 ]
 
 
@@ -827,6 +851,62 @@ class SQLDatabase:
         return {"path": dst_path, "bytes": os.path.getsize(dst_path), "tables": tables,
                 "rows": sum(tables.values()), "source_journal_mode": source_mode,
                 "journal_reset": journal_reset}
+
+    # ---------- 启动前自动备份 ----------
+
+    _AUTO_BACKUP_SUBDIR = "auto"
+
+    def auto_backup(self, keep: int | None = None) -> dict | None:
+        """启动时自动留一份库快照（轮转保留最近 N 份）；跳过或失败返回 None。
+
+        为什么放在 `init_tables()` **之前**：启动会跑一串幂等迁移（补列 / 回填 /
+        重建表），迁移本身是写操作；再加上本项目的开发库曾被 `git checkout`
+        静默覆盖过一次，「最近一次启动前的库」是唯一既新鲜又廉价可得的回退点。
+
+        三条刻意的取舍：
+        1. 库不存在或 0 字节 → 直接跳过，不制造一堆空备份；
+        2. 备份失败只 warning 不抛异常 —— 备份是旁路，不能成为启动的新故障点
+           （与 `main.py` 里请求指标采集的取舍一致）；
+        3. 复用 `backup_to()` 的官方 backup API，不裸拷 `.db`：WAL 下裸拷会静默少数据。
+
+        返回 `backup_to()` 的事实字典，便于启动日志/自检核对（bytes/tables/rows）。
+        """
+        if not getattr(settings, "AUTO_BACKUP", True):
+            return None
+        keep = settings.AUTO_BACKUP_KEEP if keep is None else keep
+        try:
+            if not os.path.exists(self.db_path) or os.path.getsize(self.db_path) == 0:
+                return None
+            out_dir = os.path.join(settings.BACKUP_DIR, self._AUTO_BACKUP_SUBDIR)
+            os.makedirs(out_dir, exist_ok=True)
+            # 带毫秒，避免同一秒内连续启动（脚本/测试）互相覆盖
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+            dst = os.path.join(out_dir, f"app.db.{stamp}.bak")
+            fact = self.backup_to(dst)
+            self._rotate_auto_backups(out_dir, keep)
+            _logger.info("启动前自动备份完成：%s（%s bytes，%s 张表）",
+                         dst, fact["bytes"], len(fact["tables"]))
+            return fact
+        except Exception as exc:  # noqa: BLE001 - 备份失败不得阻塞启动
+            _logger.warning("启动前自动备份失败（不影响启动）：%s", exc)
+            return None
+
+    @staticmethod
+    def _rotate_auto_backups(out_dir: str, keep: int) -> None:
+        """只保留最近 `keep` 份自动备份（按修改时间倒序）；keep <= 0 不做轮转。"""
+        if keep <= 0:
+            return
+        try:
+            files = [os.path.join(out_dir, n) for n in os.listdir(out_dir) if n.endswith(".bak")]
+        except OSError as exc:
+            _logger.warning("扫描自动备份目录失败：%s", exc)
+            return
+        files.sort(key=os.path.getmtime, reverse=True)
+        for old in files[keep:]:
+            try:
+                os.remove(old)
+            except OSError as exc:
+                _logger.warning("清理旧自动备份失败：%s (%s)", old, exc)
 
     def init_tables(self):
         """初始化表结构（幂等，可重复调用）"""
@@ -1790,6 +1870,53 @@ class SQLDatabase:
     def get_document(self, doc_id: int) -> dict:
         return self._query_one("SELECT * FROM t_document WHERE doc_id = ?", (doc_id,))
 
+    # ---------- 文档处理任务（阶段 4：断点续跑） ----------
+
+    # 允许由调用方写入的字段（attempts / 时间戳由本方法自己维护，防注入）
+    TASK_FIELDS = ("stage", "status", "artifacts", "heartbeat_at", "error_message")
+
+    def upsert_document_task(self, doc_id: int, course_id: int, *,
+                             bump_attempts: bool = False, **fields) -> None:
+        """写入/更新「这篇文档当前的处理任务」。
+
+        `bump_attempts=True` 表示「这一轮是新的尝试」，attempts +1；
+        其余字段（stage/status/artifacts/error_message）按传入值覆盖。
+        表是「当前任务」而非流水：同一文档永远只有一行。
+        """
+        allowed = {k: v for k, v in fields.items() if k in self.TASK_FIELDS}
+        cols = ["doc_id", "course_id", "attempts", *allowed]
+        params = [int(doc_id), int(course_id), 1 if bump_attempts else 0,
+                  *[allowed[k] for k in allowed]]
+        sets = [f"{k} = excluded.{k}" for k in allowed]
+        if bump_attempts:
+            sets.append("attempts = t_document_task.attempts + 1")
+        sets.append("updated_at = ?")
+        params.append(_now())
+        placeholders = ", ".join("?" * len(cols))
+        self._execute(
+            f"INSERT INTO t_document_task ({', '.join(cols)}) VALUES ({placeholders}) "
+            f"ON CONFLICT(doc_id) DO UPDATE SET {', '.join(sets)}",
+            tuple(params),
+        )
+
+    def get_document_task(self, doc_id: int) -> dict:
+        return self._query_one("SELECT * FROM t_document_task WHERE doc_id = ?", (doc_id,))
+
+    def delete_document_task(self, doc_id: int) -> None:
+        self._execute("DELETE FROM t_document_task WHERE doc_id = ?", (int(doc_id),))
+
+    def list_running_tasks(self, stale_before: str = None) -> list:
+        """仍在 RUNNING 的任务；传 `stale_before` 只取心跳早于该时刻的（排查卡死）。"""
+        if stale_before:
+            return self._query(
+                "SELECT * FROM t_document_task WHERE status = 'RUNNING' "
+                "AND (heartbeat_at IS NULL OR heartbeat_at < ?) ORDER BY doc_id",
+                (stale_before,),
+            )
+        return self._query(
+            "SELECT * FROM t_document_task WHERE status = 'RUNNING' ORDER BY doc_id")
+
+
     def list_documents_by_course(self, course_id: int) -> list:
         return self._query(
             "SELECT * FROM t_document WHERE course_id = ? ORDER BY doc_id", (course_id,),
@@ -2021,6 +2148,24 @@ class SQLDatabase:
             (course_id, document_id),
         )
         return {r["kp_id"] for r in rows}
+
+    def delete_kp_embeddings(self, course_id: int, document_id, kp_ids) -> int:
+        """按 kp_id 精确删除向量行，返回删除条数（增量同步专用）。
+
+        为什么需要它：`delete_embeddings_by_document` 是「整篇清空再重建」；
+        教师只改/删一两个知识点、或融合 apply/revoke 只让少数节点进出时，
+        整篇重建会重新调用一次外部 embedding API（69 条向量 ≈ 一次真实计费请求）。
+        """
+        ids = [str(k) for k in (kp_ids or []) if k]
+        if not ids:
+            return 0
+        placeholders = ",".join("?" * len(ids))
+        sql = ("DELETE FROM t_kp_embedding "
+               f"WHERE course_id = ? AND document_id = ? AND kp_id IN ({placeholders})")
+        with self._connect() as c:
+            cur = c.execute(sql, (course_id, document_id, *ids))
+            c.commit()
+            return cur.rowcount
 
     def delete_embeddings_by_document(self, course_id: int, document_id, conn=None) -> int:
         """删除文档全部知识点向量，返回删除条数。
@@ -2264,6 +2409,20 @@ class SQLDatabase:
             )
             conn.commit()
         return 1
+
+    def delete_question_embedding(self, question_id: int) -> int:
+        """删除单题向量缓存，返回影响行数。
+
+        为什么需要单独一个入口：`t_question_embedding` 带 `text_hash`，文本变了
+        `ensure_question_vectors` 会自动重算；但 **`document_id` 变了哈希不变**，
+        缓存行会永久停留在旧作用域——按新文档检索向量时查不到，而 ensure 也不会重写。
+        因此「题目内容或归属发生变化」时必须显式删行。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_question_embedding WHERE question_id = ?", (question_id,))
+            conn.commit()
+            return cur.rowcount
 
     def get_question_embedding(self, question_id: int) -> dict:
         """取单题向量行（含 text_hash，供判断是否需要重算）"""

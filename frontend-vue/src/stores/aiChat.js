@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api } from '../api'
+import { askStream } from '../api/qaStream'
+import { isAbortError } from '../composables/useLatestRequest'
 
 /**
  * AI 问答共享会话（多会话版）。
@@ -10,6 +12,7 @@ import { api } from '../api'
  *
  * - 对话按课程持久化到 localStorage：一段对话 = 一条记录，刷新、切 Tab、换入口都不丢
  * - 提问时序（AbortController + 序号作废）集中在这里，两个入口共用一套语义
+ * - 回答走 SSE 流式（api/qaStream.js）逐字渲染；不支持流式时回落到同步 api.ask
  */
 
 // v2：每个课程存 { activeId, sessions: [{ id, title, updatedAt, messages }] }
@@ -30,6 +33,8 @@ export const useAiChatStore = defineStore('aiChat', () => {
   const asking = ref(false)
   const courseId = ref('')
   const documentId = ref('')
+  // 当前学习资料名：写进消息标记，用于「切换资料后历史消息属于哪份资料」的分隔行
+  const documentName = ref('')
 
   let abort = null
   // 上下文切换 / 切会话 / 新提问时自增：迟到的旧回调发现序号变了就丢弃
@@ -66,6 +71,11 @@ export const useAiChatStore = defineStore('aiChat', () => {
       content: typeof m.content === 'string' ? m.content : '',
       sources: Array.isArray(m.sources) ? m.sources.slice(0, MAX_SOURCE_PER_MSG) : [],
       error: !!m.error,
+      errDetail: typeof m.errDetail === 'string' ? m.errDetail : '',
+      // 存盘的是结果：重新载入时不可能还在流式生成，不保留中间态
+      streaming: false,
+      ctxKey: typeof m.ctxKey === 'string' ? m.ctxKey : '',
+      ctxLabel: typeof m.ctxLabel === 'string' ? m.ctxLabel : '',
       time: Number(m.time) || 0,
     }
   }
@@ -145,6 +155,9 @@ export const useAiChatStore = defineStore('aiChat', () => {
           content: (m.content || '').slice(0, MAX_CONTENT_LEN),
           sources: (m.sources || []).slice(0, MAX_SOURCE_PER_MSG),
           error: !!m.error,
+          errDetail: m.errDetail || '',
+          ctxKey: m.ctxKey || '',
+          ctxLabel: m.ctxLabel || '',
           time: m.time || 0,
         })),
       })),
@@ -157,6 +170,15 @@ export const useAiChatStore = defineStore('aiChat', () => {
     seq++
     if (abort) { abort.abort(); abort = null }
     asking.value = false
+    // 正在生成的那条占位消息要收尾：保留半成品，一个字都没有就留一句明确的中断说明，
+    // 否则切回来会看到一条永远「正在生成…」的空气泡
+    for (const s of sessions.value) {
+      for (const m of s.messages) {
+        if (!m.streaming) continue
+        m.streaming = false
+        if (!m.content) m.content = '（已中断）'
+      }
+    }
   }
 
   /** 把会话顶到列表最前（主流 AI 的历史列表按最近使用排序） */
@@ -182,11 +204,15 @@ export const useAiChatStore = defineStore('aiChat', () => {
    * 绑定当前学习上下文。课程变化时载入该课程的历史会话；仅文档变化时保留历史，
    * 只作废在途回答（旧文档的答案不应落进新文档的对话）。
    */
-  function bindContext(cid, did = '') {
+  function bindContext(cid, did = '', dname = '') {
     const nextCourse = cid ? String(cid) : ''
     const nextDoc = did ? String(did) : ''
+    const nextName = dname ? String(dname) : ''
+    const docChanged = nextDoc !== documentId.value
+    // 资料名只有问答页知道；悬浮球绑定上下文时不带名字，文档没变就别把已有名字抹掉
+    if (nextName || docChanged || nextCourse !== courseId.value) documentName.value = nextName
     if (nextCourse === courseId.value) {
-      if (nextDoc !== documentId.value) {
+      if (docChanged) {
         documentId.value = nextDoc
         abortInFlight()
       }
@@ -196,6 +222,14 @@ export const useAiChatStore = defineStore('aiChat', () => {
     courseId.value = nextCourse
     documentId.value = nextDoc
     loadSessions(nextCourse)
+  }
+
+  /** 当前上下文标识（跨资料的历史消息靠它分辨归属）；无学习资料时为空串 */
+  function ctxKeyOf() {
+    return courseId.value && documentId.value ? `${courseId.value}:${documentId.value}` : ''
+  }
+  function ctxLabelOf() {
+    return documentName.value || (documentId.value ? `文档 #${documentId.value}` : '未选择学习资料')
   }
 
   /** 新建对话：当前已经是空对话就不重复新建，避免点一下多出一个「新对话」 */
@@ -232,48 +266,102 @@ export const useAiChatStore = defineStore('aiChat', () => {
 
   /**
    * 发送提问。两个入口共用：谁先发起都写进同一段对话。
-   * 用户主动停止时 axios 抛 CanceledError，这里留一条「已停止生成」提示并解锁。
+   *
+   * 流程对齐后端 SSE 契约：先占位一条空的 AI 消息，`sources` 到了先渲染证据链，
+   * `delta` 边到边追加（逐字输出），`done` 收尾。非流式响应（权限拒绝 / 代理不支持 SSE）
+   * 或网络异常时回落到同步 api.ask。
    */
   async function send(question) {
     const q = (question || '').trim()
     if (!q || asking.value) return
     const session = ensureSession()
     const mySeq = ++seq
-    session.messages.push({ mid: ++midSeq, role: 'user', content: q, sources: [], error: false, time: Date.now() })
+    const ctx = { ctxKey: ctxKeyOf(), ctxLabel: ctxLabelOf() }
+
+    session.messages.push({
+      mid: ++midSeq, role: 'user', content: q, sources: [], error: false, errDetail: '',
+      streaming: false, ...ctx, time: Date.now(),
+    })
     // 会话标题取首个提问，和主流 AI 的历史列表一致
     if (!session.title) session.title = truncateTitle(q)
+    const bubble = {
+      mid: ++midSeq, role: 'ai', content: '', sources: [], error: false, errDetail: '',
+      streaming: true, ...ctx, time: Date.now(),
+    }
+    session.messages.push(bubble)
     touch(session)
     asking.value = true
     persist()
 
     const controller = new AbortController()
     abort = controller
+    const scope = {
+      courseId: courseId.value || null,
+      documentId: documentId.value || null,
+      signal: controller.signal,
+    }
+    let received = ''
     try {
-      const res = await api.ask(q, courseId.value || null, documentId.value || null, { signal: controller.signal })
-      if (mySeq !== seq) return // 上下文/会话已切换或新提问已接管，本次回答作废
-      session.messages.push({
-        mid: ++midSeq,
-        role: 'ai',
-        content: res.answer || '（无回答）',
-        // 与问答页一致：区分「检索成功但 LLM 生成失败」（降级文案）与正常回答
-        sources: (res.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG),
-        error: isLlmError(res.answer),
-        time: Date.now(),
-      })
-      touch(session)
+      const events = await askStream({ question: q, ...scope })
+      for await (const ev of events) {
+        if (mySeq !== seq) return // 上下文/会话已切换或新提问已接管，本次回答作废
+        if (ev.event === 'sources') {
+          bubble.sources = (ev.data?.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+        } else if (ev.event === 'delta') {
+          received += ev.data?.text || ''
+          bubble.content = received
+        } else if (ev.event === 'done') {
+          bubble.content = ev.data?.answer || received || '（无回答）'
+          if (ev.data?.sources) {
+            bubble.sources = ev.data.sources.map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+          }
+          // 区分「检索成功但 LLM 生成失败」（后端固定降级文案）与正常回答
+          bubble.error = isLlmError(bubble.content)
+          bubble.streaming = false
+          return
+        } else if (ev.event === 'error') {
+          bubble.error = true
+          bubble.errDetail = ev.data?.message || ''
+          bubble.streaming = false
+          return
+        }
+      }
+      // 流正常结束但没等到 done（后端被中断等）：已收到的内容照样给用户
+      bubble.content = received || '（无回答）'
+      bubble.streaming = false
     } catch (e) {
       if (mySeq !== seq) return
-      const stopped = e?.name === 'CanceledError'
-      session.messages.push({
-        mid: ++midSeq,
-        role: 'ai',
-        content: stopped ? '（已停止生成）' : '',
-        error: !stopped,
-        sources: [],
-        time: Date.now(),
-      })
+      if (isAbortError(e)) {
+        // 用户点「停止生成」：一个字都没收到就给一句明确提示，否则保留半成品
+        bubble.streaming = false
+        if (!bubble.content) bubble.content = '（已停止生成）'
+        return
+      }
+      // 有增量就保留（只是最后一段没收干净）；一个 delta 都没有才回落同步接口
+      if (received) {
+        bubble.streaming = false
+        return
+      }
+      try {
+        const res = await api.ask(q, scope.courseId, scope.documentId, { signal: controller.signal })
+        if (mySeq !== seq) return
+        bubble.content = res.answer || '（无回答）'
+        bubble.sources = (res.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+        bubble.error = isLlmError(res.answer)
+        bubble.streaming = false
+      } catch (e2) {
+        if (mySeq !== seq) return
+        bubble.streaming = false
+        if (isAbortError(e2)) {
+          if (!bubble.content) bubble.content = '（已停止生成）'
+          return
+        }
+        bubble.error = true
+        bubble.errDetail = e2?.message || ''
+      }
     } finally {
       if (mySeq === seq) { asking.value = false; abort = null }
+      touch(session)
       persist()
     }
   }
@@ -313,6 +401,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     asking,
     courseId,
     documentId,
+    documentName,
     activeSession,
     sessionList,
     bindContext,

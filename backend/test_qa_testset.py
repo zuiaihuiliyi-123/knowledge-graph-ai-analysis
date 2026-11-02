@@ -1,5 +1,5 @@
 """
-20 题智能问答测试集：基于 course 5（第6章 面向对象程序设计）真实知识图谱
+21 题智能问答测试集：基于 course 5（第6章 面向对象程序设计）真实知识图谱
 
 对每道题：
   1. search_related_knowledge(question, course_id=5, top_k=3) —— 记录向量检索 top3 上下文

@@ -19,9 +19,11 @@ V1.1 抽取器**没有保留 chunk 溯源**：`extract()` 把文本切块后逐�
   最小索引用于分档。
 """
 import logging
+import os
 import re
 from datetime import datetime, timezone
 
+from ...core.config import settings
 from ...core.sql_database import sql_db
 from ...core.storage import resolve_document_path
 from ...utils.text_processor import chunk_text_for_llm
@@ -73,6 +75,14 @@ async def load_chunks(course_id, document_id) -> tuple:
     path = resolve_document_path(doc)
     if not path:
         return None, "无法解析文档路径"
+    if not os.path.exists(path):
+        # 记录里的绝对路径可能来自**另一台机器**（app.db 随备份/仓库流转），而本机上传目录里
+        # 也没有同名文件。这里必须明确报「文件缺失」：若直接把原路径交给解析器，
+        # FileNotFoundError 会把他机路径原样写进日志，排查时极易误判成"路径拼接写错了"。
+        return None, (
+            f"原始文件缺失（记录路径 {doc.get('file_path')!r}，"
+            f"上传目录 {settings.UPLOAD_DIR} 下未找到 doc_id={document_id} 的文件）"
+        )
     try:
         text = await DocumentParser.parse(path)
     except Exception as e:  # noqa: BLE001

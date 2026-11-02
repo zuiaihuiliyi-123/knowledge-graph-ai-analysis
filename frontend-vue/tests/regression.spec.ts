@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { BASE, RUN, login, registerAndLogin, dismissBackendStatus, api } from './helpers'
+import { BASE, RUN, login, registerAndLogin, dismissBackendStatus, api, loginTeacher } from './helpers'
 
 /**
  * 既有功能回归（课程中心改造不得破坏这些已验收的能力）
@@ -9,7 +9,11 @@ import { BASE, RUN, login, registerAndLogin, dismissBackendStatus, api } from '.
  * - 知识图谱（G6 画布）渲染
  * - 学生端 AI 助教悬浮窗
  *
- * 使用既有数据：admin / admin123，课程 5（含 69 个真实知识点的真实 PDF 文档）。
+ * 使用既有数据：既有教师账号（默认 demo_teacher / demo123456），课程取 `KGU_TEACHER_COURSE`
+ * （默认 65，demo_teacher 名下且有真实 PDF 文档与已建图谱）。
+ *
+ * 【2026-11 修订】课程号改为环境变量：原硬编码课程 5 属于 admin，用 demo_teacher 登录会
+ * 一律 403（权限收口后教师只能看自己的课程），测试因此长期无法在演示账号下运行。
  *
  * 【2026-09 修订】两处断言随界面/数据变化更新（属测试过时，非功能损坏）：
  *   1. 文档行操作按钮由 6 个减为 4 个（在线阅读 / 下载 / 监测 / 删除）——
@@ -18,7 +22,8 @@ import { BASE, RUN, login, registerAndLogin, dismissBackendStatus, api } from '.
  *      原先写的 doc 4 已不存在），因此只断言「进入了阅读器」，不假定具体编号。
  */
 
-const COURSE = 5
+/** 回归用的教师课程：默认 65（demo_teacher 名下，含真实 PDF + 已建图谱） */
+const COURSE = Number(process.env.KGU_TEACHER_COURSE || 65)
 
 /** 课程 5 的第一份文档 id（动态取：库重建后 doc_id 会变，硬编码必然失效） */
 async function firstDocId(page: any, token: string): Promise<number> {
@@ -32,7 +37,7 @@ async function firstDocId(page: any, token: string): Promise<number> {
 test.describe.configure({ mode: 'serial' })
 
 test('教师文档表：生成进度列与 4 个操作按钮都在，且非占位行可点', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await page.goto(`${BASE}/teacher?tab=documents&course_id=${COURSE}`)
   await dismissBackendStatus(page)
 
@@ -54,7 +59,7 @@ test('教师文档表：生成进度列与 4 个操作按钮都在，且非占�
 })
 
 test('在线阅读：PDF 画布 / 文本层 / 搜索 / 缩放 / 进度 全部可用', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await page.goto(`${BASE}/teacher?tab=documents&course_id=${COURSE}`)
   await dismissBackendStatus(page)
 
@@ -87,7 +92,7 @@ test('在线阅读：PDF 画布 / 文本层 / 搜索 / 缩放 / 进度 全部可
 })
 
 test('阅读器 → 跳转知识图谱', async ({ page }) => {
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
   const docId = await firstDocId(page, token)
   await page.goto(`${BASE}/reader/${docId}?course_id=${COURSE}&from=teacher`)
   await dismissBackendStatus(page)
@@ -110,7 +115,7 @@ test('知识图谱：G6 画布渲染出真实图谱', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
 
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
   const docId = await firstDocId(page, token)
   await page.goto(`${BASE}/teacher?tab=preview&course_id=${COURSE}&document_id=${docId}`)
   await dismissBackendStatus(page)
@@ -150,7 +155,7 @@ test('回归：课程管理 6 个 Tab 全部存在，控制台无报错', async 
   const errors: string[] = []
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
 
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await page.goto(`${BASE}/teacher?tab=courses`)
   await dismissBackendStatus(page)
 

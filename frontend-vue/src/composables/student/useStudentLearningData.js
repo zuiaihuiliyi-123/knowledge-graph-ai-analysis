@@ -60,13 +60,13 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
       pathDataLoading.value = false
       return
     }
-    const token = pathRequest.begin()
+    const { token, signal } = pathRequest.beginRead()
     pathDataLoading.value = true
     graphDataChecked.value = false
     try {
       const [graph, progress] = await Promise.all([
-        api.getGraphV1(cid, currentDocumentId.value, { limit: 800 }),
-        api.getProgress(cid, currentDocumentId.value),
+        api.getGraphV1(cid, currentDocumentId.value, { limit: 800 }, { signal }),
+        api.getProgress(cid, currentDocumentId.value, { signal }),
       ])
       if (!pathRequest.isLatest(token) || ctxKey.value !== key) return
       graphNodes.value = graph.nodes || []
@@ -82,7 +82,9 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
         .filter(Boolean)
       // 推荐失败只影响推荐结果，不能连带清空已成功取回的图谱（否则总览/收藏归零）
       try {
-        const res = await api.recommendNext(masteredNames, cid, currentDocumentId.value)
+        const res = await api.recommendNext(
+          masteredNames, cid, currentDocumentId.value, { signal },
+        )
         if (!pathRequest.isLatest(token) || ctxKey.value !== key) return
         pathRecs.value = res.recommendations || []
 
@@ -126,11 +128,11 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
       favoritesLoaded.value = false
       return
     }
-    const token = favoritesRequest.begin()
+    const { token, signal } = favoritesRequest.beginRead()
     favoritesLoading.value = true
     favoritesLoaded.value = false
     try {
-      const res = await api.getFavorites(cid, currentDocumentId.value)
+      const res = await api.getFavorites(cid, currentDocumentId.value, { signal })
       if (!favoritesRequest.isLatest(token) || ctxKey.value !== key) return
       favoriteCache[key] = (res.items || []).map((f) => f.kp_id)
       favoritesLoaded.value = true

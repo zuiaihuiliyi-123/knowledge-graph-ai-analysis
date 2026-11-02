@@ -93,17 +93,30 @@ async def mark_knowledge(request: MarkRequest, current_user: dict = Depends(get_
 @router.delete("/mark")
 async def unmark_knowledge(course_id: str, document_id: str, kp_id: str,
                            current_user: dict = Depends(get_current_user)):
-    """取消知识点掌握标记（删除对应学习记录；刻意不校验成员身份，退出课程后仍可清理自己的记录）"""
+    """取消知识点掌握标记（删除对应学习记录）。
+
+    两条刻意保持的口径（与 POST /mark 对齐，也与 DELETE /favorites 对齐）：
+
+    - **不校验课程成员身份**：退出/被移除课程后，学生仍须能清理自己的记录；
+    - **幂等**：记录本来就不存在时返回 `deleted=0` 而不是报错——重复点击「取消掌握」
+      不该弹红条（POST 是 upsert，二者合起来才是「设置/取消」的完整语义）。
+
+    但参数校验必须和 POST 一致：`kp_id` 为空串/空白时直接 4001。
+    以前这里会把空串一路带进 SQL（`WHERE kp_id = ''`），删掉 0 行却返回 success，
+    调用方看不出「什么都没发生」。
+    """
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
     did = _coerce_int(document_id)
     if did is None:
         return error(4001, "参数错误：document_id 必须为整数")
-    deleted = sql_db.delete_learning_record(
-        current_user["user_id"], cid, did, (kp_id or "").strip(),
-    )
-    return success({"deleted": deleted})
+    kp_id = (kp_id or "").strip()
+    if not kp_id:
+        return error(4001, "参数错误：kp_id 不能为空")
+    deleted = sql_db.delete_learning_record(current_user["user_id"], cid, did, kp_id)
+    return success({"course_id": cid, "document_id": did, "kp_id": kp_id,
+                    "deleted": deleted})
 
 
 @router.get("/progress")

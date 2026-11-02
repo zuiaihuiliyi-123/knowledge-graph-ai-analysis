@@ -6,6 +6,7 @@
 会导致后端 import 即崩溃（ModuleNotFoundError），故替换。
 """
 import datetime
+import secrets
 
 import jwt
 from fastapi import APIRouter, Depends, Request
@@ -28,6 +29,8 @@ class UserRegister(BaseModel):
     role: str = "student"
     email: str | None = None
     display_name: str | None = None
+    # 教师自助注册所需邀请码（学生不需要；未配置 TEACHER_INVITE_CODE 时教师注册关闭）
+    teacher_invite_code: str | None = None
 
 
 class UserLogin(BaseModel):
@@ -57,14 +60,35 @@ def _issue_token(user: dict) -> str:
 
 @router.post("/register")
 def register(user: UserRegister):
-    """用户注册（默认学生角色，可指定 teacher）"""
+    """用户注册。
+
+    - 学生：默认角色，直接注册；
+    - 教师：必须携带 `teacher_invite_code` 且与 `TEACHER_INVITE_CODE` 一致。
+      未配置该环境变量时教师自助注册**关闭**（教师账号由管理员创建/提升）。
+
+    为什么收紧：原先 `role` 完全由请求体决定，任何人 POST 一下就能拿到教师身份，
+    进而建课、上传文档、管理别的学生 —— 这是最容易被利用的一条越权入口。
+    邀请码走 `secrets.compare_digest` 定长比较，避免逐字符比较带来的时序差异。
+    """
     username = (user.username or "").strip()
     if not username:
         return error(1001, "用户名不能为空")
     if not user.password:
         return error(1001, "密码不能为空")
-    if user.role not in ("teacher", "student"):
+
+    role = (user.role or "student").strip().lower()
+    if role not in ("teacher", "student"):
         return error(1001, "角色不合法，仅支持 teacher/student")
+
+    if role == "teacher":
+        expected = (settings.TEACHER_INVITE_CODE or "").strip()
+        if not expected:
+            # 未配置邀请码 = 未开放教师自助注册。与「邀请码错误」用同一业务码，
+            # 避免把「系统是否配置了邀请码」当成探测信息暴露出去。
+            return error(4003, "教师注册未开放：请联系管理员开通账号")
+        provided = (user.teacher_invite_code or "").strip()
+        if not provided or not secrets.compare_digest(provided, expected):
+            return error(4003, "教师邀请码不正确")
 
     if sql_db.get_user_by_username(username):
         return error(2006, f"用户名已存在: {username}")
@@ -72,11 +96,11 @@ def register(user: UserRegister):
     user_id = sql_db.create_user(
         username=username,
         password_hash=hash_password(user.password),
-        role=user.role,
+        role=role,
         display_name=user.display_name,
         email=user.email,
     )
-    return success({"user_id": user_id, "username": username})
+    return success({"user_id": user_id, "username": username, "role": role})
 
 
 @router.post("/login")

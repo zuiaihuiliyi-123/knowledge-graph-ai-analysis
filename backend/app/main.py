@@ -1,6 +1,7 @@
 """
 FastAPI 应用入口
 """
+import logging
 import time
 from contextlib import asynccontextmanager
 
@@ -8,20 +9,74 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .core import metrics
+from .core.database import db
 from .core.sql_database import sql_db
+from .services.document_service import DocumentService
 from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, documents,
                   learning, dashboard, favorites, teacher,
                   course_members, invites, profile, questions, practice, grading,
                   admin, admin_fusion)
 
+_logger = logging.getLogger(__name__)
+
+
+def _audit_secrets() -> list[str]:
+    """启动自检：列出「会造成静默降级或安全暴露」的配置问题。
+
+    刻意只告警不阻塞启动（生产环境的 SECRET_KEY 已由 config 强制校验）：
+    图谱/向量/LLM 都有既定的降级路径，缺密钥时系统仍可启动，
+    但**必须让人看见**——本项目历史上多次出现「功能静默失效却被当成数据为空」。
+
+    返回的文案里不含任何密钥本体，可以安全写进日志。
+    """
+    issues = []
+    if settings.SECRET_KEY_SOURCE != "env":
+        where = "本地密钥文件" if settings.SECRET_KEY_SOURCE == "local-file" else "进程内临时密钥"
+        issues.append(
+            f"SECRET_KEY 未通过环境变量配置，当前使用{where}；"
+            f"部署前请在 .env 配置长度 >= {32} 的随机串"
+        )
+    if not settings.NEO4J_PASSWORD:
+        issues.append("NEO4J_PASSWORD 未配置：图谱相关接口会走降级/失败路径")
+    if not settings.LLM_API_KEY or settings.LLM_API_KEY == "your-api-key-here":
+        issues.append("LLM_API_KEY 未配置或仍是占位值：抽取与问答生成不可用")
+    if not settings.EMBEDDING_API_KEY:
+        issues.append("EMBEDDING_API_KEY 未配置：RAG 会静默退回关键词检索")
+    return issues
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    for issue in _audit_secrets():
+        _logger.warning("启动自检：%s", issue)
     # 启动时初始化关系型数据库表结构（SQLite，幂等），并确保存在默认教师/管理员账号。
     # 两者都是「不存在才创建」，重复启动不会覆盖已有账号的密码或角色。
+    #
+    # 先自动备份、再迁移：init_tables() 里跑的是补列/回填/重建表这类**写操作**，
+    # 一旦某次迁移出问题，用这次启动前的快照即可回到上一个可用状态。
+    # 备份失败不阻塞启动（见 SQLDatabase.auto_backup 的取舍说明）。
+    sql_db.auto_backup()
     sql_db.init_tables()
     sql_db.ensure_default_teacher()
     sql_db.ensure_default_admin()
+
+    # 重启恢复：解析/抽取/建图都在进程内的 asyncio 任务里跑，进程重启后库里会残留
+    # PARSING / EXTRACTING / BUILDING —— 没有任务在跑却一直显示「处理中」。这里收敛为
+    # FAILED 并写明原因，教师才能看到「重试」。多 worker 部署请设 RECONCILE_ON_STARTUP=0。
+    if settings.RECONCILE_ON_STARTUP:
+        try:
+            DocumentService.reconcile_interrupted()
+        except Exception:  # noqa: BLE001 - 恢复失败不应阻止服务启动
+            _logger.exception("启动恢复失败（不影响启动）")
+
+    # 图谱索引/约束（幂等 IF NOT EXISTS）。此前 `init_schema()` 只定义、从未被调用——
+    # 本机之所以有索引是历史手工建的，**全新部署不会建**：MERGE 会退化成 Label 扫描，
+    # 批量建图与图谱读取都会慢一个量级，`kp_id` 唯一约束也缺失。
+    # 图库不可用时只告警：不能让「没装 Neo4j」阻止整个服务启动（既有降级路径保留）。
+    try:
+        db.init_schema()
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("初始化 Neo4j 索引/约束失败（图谱功能可能变慢或降级）：%s", exc)
     yield
 
 

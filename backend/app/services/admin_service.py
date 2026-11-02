@@ -26,6 +26,7 @@ from ..core.security import hash_password, verify_password
 from ..core.sql_database import (
     ADMIN_ACTIONS, COURSE_GOVERNANCE_STATUS, COURSE_VISIBLE_SQL, USER_ROLES, sql_db,
 )
+from ..core.user_state import invalidate_user_state
 from .dashboard_service import DashboardService
 from .document_service import DocumentService
 from .member_service import MemberService
@@ -300,6 +301,8 @@ class AdminService:
                                     "账号状态未变化")
 
         sql_db.set_user_active(user_id, active)
+        # 账号态缓存必须立刻失效：否则被禁用者的旧 token 还能在 TTL 窗口内继续访问。
+        invalidate_user_state(user_id)
         action = "user.enable" if active else "user.disable"
         AdminService.write_audit(
             operator, action, "user", user_id,
@@ -329,6 +332,8 @@ class AdminService:
                 return guard
 
         sql_db.set_user_role(user_id, role)
+        # 角色变更同样要立刻失效缓存：降级后旧 token 不应再通过 require_teacher。
+        invalidate_user_state(user_id)
         AdminService.write_audit(
             operator, "user.role_change", "user", user_id,
             detail=f"把 {target['username']} 的角色从 {target['role']} 改为 {role}",
@@ -416,6 +421,8 @@ class AdminService:
             )
 
         sql_db.delete_user(user_id)
+        # 账号已物理删除：清掉缓存里的 None/旧状态，避免残留条目继续被命中。
+        invalidate_user_state(user_id)
         AdminService.write_audit(
             operator, "user.delete", "user", user_id,
             detail=f"删除用户 {target['username']}（{target['role']}，无关联业务数据）",

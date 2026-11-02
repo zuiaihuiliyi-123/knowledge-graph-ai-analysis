@@ -35,8 +35,11 @@ request.interceptors.response.use(
     return body
   },
   (err) => {
-    // 中止（用户点「停止生成」）：保留 CanceledError 原样抛出，调用方可用 isCancel() 识别
-    if (axios.isCancel(err)) return Promise.reject(err)
+    // 主动取消（AbortController）：原样上抛，交由调用方按 isAbortError 静默忽略。
+    // 不能走下面的统一包装——否则用户点「停止生成」或切课程时，被取消的请求会弹「网络请求失败」。
+    if (axios.isCancel?.(err) || err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') {
+      return Promise.reject(err)
+    }
     // 401 未认证/登录过期：清除本地凭证并跳转登录页（整页跳转，避免与 router/store 循环依赖）
     if (err.response?.status === 401) {
       localStorage.removeItem('kg_token')

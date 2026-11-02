@@ -35,30 +35,35 @@ class KnowledgeGraphManager:
 
         Phase 8A：所有节点/关系都携带 document_id，同一课程不同文档的图谱互相隔离。
         """
-        node_count = 0
-        relation_count = 0
-
-        # 创建节点
+        # ---- 节点：单次 UNWIND 批量写入（此前逐条 = 每实体一次往返） ----
+        node_rows = []
         for entity in entities:
-            name = entity.get("name", "").strip()
+            name = (entity.get("name") or "").strip()
             if not name:
                 continue
-            db.create_knowledge_node(
-                course_id=course_id,
-                document_id=document_id,
-                name=name,
-                category=entity.get("category", "概念"),
-                description=entity.get("description", ""),
-                properties={"confidence": 0.9, "is_manual": False}
-            )
-            node_count += 1
+            properties = {"confidence": 0.9, "is_manual": False}
+            # 同名实体在抽取阶段被合并（图谱 MERGE 键是 name，同名无法并存）时，
+            # 备选描述与冲突类别只能挂在这个节点上；不落库就等于永久丢弃。
+            if entity.get("alt_descriptions"):
+                properties["alt_descriptions"] = list(entity["alt_descriptions"])
+            if entity.get("category_variants"):
+                properties["category_variants"] = list(entity["category_variants"])
+            node_rows.append({
+                "name": name,
+                "category": entity.get("category", "概念"),
+                "description": entity.get("description", ""),
+                "properties": properties,
+            })
+        node_count = db.create_knowledge_nodes_bulk(course_id, document_id, node_rows)
 
-        # 创建关系
+        # ---- 关系：按类型分组后每组一次 UNWIND ----
+        rel_rows = []
         for rel in relations:
             source = (rel.get("source") or "").strip()
             target = (rel.get("target") or "").strip()
             rel_type = (rel.get("type") or "").strip().upper()
-            # 应用层校验：类型白名单、过滤空值与自环（对齐规划文档「表格4」）
+            # 应用层校验：类型白名单（非法**直接丢弃**，不静默降级为 RELATED_TO）、
+            # 过滤空值与自环（对齐规划文档「表格4」）
             if rel_type not in VALID_RELATION_TYPES:
                 continue
             if not source or not target or source == target:
@@ -70,24 +75,17 @@ class KnowledgeGraphManager:
                 confidence = float(confidence)
             except (TypeError, ValueError):
                 confidence = 0.8
-            evidence = (rel.get("evidence") or "").strip()
-
-            try:
-                db.create_relationship(
-                    course_id=course_id,
-                    document_id=document_id,
-                    source=source,
-                    target=target,
-                    rel_type=rel_type,
-                    properties={
-                        "confidence": confidence,
-                        "evidence": evidence,
-                        "is_manual": False,
-                    }
-                )
-                relation_count += 1
-            except Exception:
-                pass  # 忽略无效关系（如目标节点不存在）
+            rel_rows.append({
+                "source": source,
+                "target": target,
+                "type": rel_type,
+                "properties": {
+                    "confidence": confidence,
+                    "evidence": (rel.get("evidence") or "").strip(),
+                    "is_manual": False,
+                },
+            })
+        relation_count = db.create_relationships_bulk(course_id, document_id, rel_rows)
 
         return {
             "course_id": course_id,
@@ -195,6 +193,12 @@ class KnowledgeGraphManager:
                     "is_manual": node.get("is_manual", False),
                     "created_at": node.get("created_at"),
                     "updated_at": node.get("updated_at"),
+                    # 同名实体在抽取阶段被合并时留下的附加信息。
+                    # 只在存在时出现，保证「没有发生同名合并」的节点读图结果与之前完全一致。
+                    **({"alt_descriptions": node.get("alt_descriptions")}
+                       if node.get("alt_descriptions") else {}),
+                    **({"category_variants": node.get("category_variants")}
+                       if node.get("category_variants") else {}),
                 },
             }
 

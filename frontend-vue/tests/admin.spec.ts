@@ -1,7 +1,5 @@
 import { test, expect, Page } from '@playwright/test'
-import {
-  BASE, RUN, registerAndLogin, login, loginAdmin, api, dismissBackendStatus,
-} from './helpers'
+import { BASE, RUN, registerAndLogin, login, loginAdmin, api, dismissBackendStatus, loginTeacher } from './helpers'
 
 /**
  * 管理员端验收 + 三角色权限回归。
@@ -174,7 +172,7 @@ test('教师：访问 /admin 被拒（403 页），且管理端接口 403', asyn
 })
 
 test('管理员登录不影响教师登录：教师仍进课程中心', async ({ page }) => {
-  await login(page, 'admin', 'admin123')
+  await loginTeacher(page)
   await expect(page).toHaveURL(/course-center/)
   const menu = page.locator('.sidebar-menu')
   await expect(menu.getByText('课程中心').first()).toBeVisible()

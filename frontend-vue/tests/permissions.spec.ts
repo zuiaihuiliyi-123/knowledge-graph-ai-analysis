@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { BASE, RUN, registerAndLogin, login, api } from './helpers'
+import { BASE, RUN, registerAndLogin, login, api, TEACHER_PASSWORD, TEACHER_USER, loginTeacher } from './helpers'
 
 /**
  * 权限验收：必须「正确拒绝」
@@ -19,19 +19,21 @@ import { BASE, RUN, registerAndLogin, login, api } from './helpers'
  * 这属**测试夹具过时**，不是权限功能损坏；改为运行时动态解析文档 id。
  */
 
-const OTHER_TEACHERS_COURSE = 9   // teacher_demo 的课程
-const ADMIN_COURSE = 5            // admin 的课程（含真实文档与图谱）
+const OTHER_TEACHERS_COURSE = 9   // teacher_demo 的课程（与登录账号无关，用于「越权应被拒」）
+// 登录账号的「自己课程」：默认 demo_teacher 拥有 63/64/65（65 有本机源文件与真实 PDF）。
+// 原先写死 5（属于 admin），换账号后 5 变成「别人的课程」，正向用例会全部误判为 4003。
+const ADMIN_COURSE = Number(process.env.KGU_TEACHER_COURSE || 65)
 
 /**
- * 解析课程 5 的第一份文档 id（避免硬编码随库重建失效）。
+ * 解析 ADMIN_COURSE 的第一份文档 id（避免硬编码随库重建失效）。
  *
- * 刻意**只走接口**取管理员 token，不用 helper 的 login()——后者会导航浏览器到
+ * 刻意**只走接口**取 token，不用 helper 的 login()——后者会导航浏览器到
  * /login，而调用方此时往往已用学生身份登录，守卫会立刻把人送回课程中心，
  * 于是「等登录表单出现」永远等不到（这正是本用例上一版失败的原因）。
  */
 async function resolveAdminDoc(page: any): Promise<number> {
   const loginResp = await api(page, 'post', '/api/auth/login', undefined,
-    { username: 'admin', password: 'admin123' })
+    { username: TEACHER_USER, password: TEACHER_PASSWORD })
   const adminToken = (await loginResp.json()).data.access_token
   const r = await api(page, 'get', `/api/v1/documents?course_id=${ADMIN_COURSE}`, adminToken)
   const body = await r.json()
@@ -101,7 +103,7 @@ test('学生：接口层对未加入课程一律拒绝', async ({ page }) => {
 })
 
 test('教师：访问其他教师的课程一律拒绝', async ({ page }) => {
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
 
   const cases: Array<[string, string, string, any]> = [
     ['get', `/api/v1/documents?course_id=${OTHER_TEACHERS_COURSE}`, '文档列表', undefined],
@@ -124,7 +126,7 @@ test('教师：访问其他教师的课程一律拒绝', async ({ page }) => {
 })
 
 test('教师：自己的课程全部放行（正向回归）', async ({ page }) => {
-  const token = await login(page, 'admin', 'admin123')
+  const token = await loginTeacher(page)
   const adminDoc = await resolveAdminDoc(page)
 
   const docs = await api(page, 'get', `/api/v1/documents?course_id=${ADMIN_COURSE}`, token)

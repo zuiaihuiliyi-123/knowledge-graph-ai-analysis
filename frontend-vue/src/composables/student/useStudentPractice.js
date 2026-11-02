@@ -108,9 +108,9 @@ export function useStudentPractice({ courseId, documentId, ctxKey, active, graph
       practiceKpOptions.value = graphNodes.value
       return practiceKpOptions.value
     }
-    const token = optionsRequest.begin()
+    const { token, signal } = optionsRequest.beginRead()
     try {
-      const g = await api.getGraphV1(cid, did, { limit: 500 })
+      const g = await api.getGraphV1(cid, did, { limit: 500 }, { signal })
       if (!optionsRequest.isLatest(token) || ctxKey.value !== key) return practiceKpOptions.value
       practiceKpOptions.value = g.nodes || []
     } catch {
@@ -127,13 +127,13 @@ export function useStudentPractice({ courseId, documentId, ctxKey, active, graph
       practiceStats.value = null
       return
     }
-    const token = statsRequest.begin()
+    const { token, signal } = statsRequest.beginRead()
     practiceStatsLoading.value = true
     try {
       const data = await api.getPracticeStats({
         course_id: cid,
         document_id: practiceScope.value === 'document' ? documentId.value : undefined,
-      })
+      }, { signal })
       if (!statsRequest.isLatest(token) || ctxKey.value !== key) return
       practiceStats.value = data
     } catch {
@@ -355,13 +355,13 @@ export function useStudentPractice({ courseId, documentId, ctxKey, active, graph
       wrongList.value = []
       return
     }
-    const token = wrongRequest.begin()
+    const { token, signal } = wrongRequest.beginRead()
     wrongLoading.value = true
     try {
       const data = await api.getWrongBook({
         course_id: cid,
         document_id: practiceScope.value === 'document' ? documentId.value : undefined,
-      })
+      }, { signal })
       if (!wrongRequest.isLatest(token) || ctxKey.value !== key) return
       wrongList.value = data.items || []
     } catch (e) {
@@ -382,10 +382,10 @@ export function useStudentPractice({ courseId, documentId, ctxKey, active, graph
       myQuestionFavs.value = []
       return
     }
-    const token = favoriteListRequest.begin()
+    const { token, signal } = favoriteListRequest.beginRead()
     myQuestionFavLoading.value = true
     try {
-      const data = await api.getQuestionFavList(cid)
+      const data = await api.getQuestionFavList(cid, { signal })
       if (!favoriteListRequest.isLatest(token) || ctxKey.value !== key) return
       myQuestionFavs.value = data.items || []
       // 同一课程内「我的收藏」是全量集合，可安全用于覆盖收藏标记
