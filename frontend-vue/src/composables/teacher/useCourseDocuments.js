@@ -247,7 +247,7 @@ export function useCourseDocuments({
       await reloadDocuments()
       recoverBatchItemsFromDocuments(documents.value)
       // 之前已有一批在途文档时 hasInFlightDoc 不会“从 false 变 true”，需显式续上轮询
-      if (active.value && hasInFlightDoc.value) startPolling()
+      if (hasInFlightDoc.value) startPolling()
     } catch (e) {
       // 网络超时/断网不等于后端没收到：先回读文档列表，按文件名+大小认领已建档的记录
       await reloadDocuments()
@@ -301,7 +301,7 @@ export function useCourseDocuments({
       item.error = ''
       ElMessage.success(`「${item.file_name}」已重新进入处理队列`)
       await reloadDocuments()
-      if (active.value && hasInFlightDoc.value) startPolling()
+      if (hasInFlightDoc.value) startPolling()
     } catch (e) {
       item.error = e.message || '重试失败'
       ElMessage.error(`「${item.file_name}」重试失败：${item.error}`)
@@ -322,7 +322,7 @@ export function useCourseDocuments({
       await api.retryDocument(row.doc_id)
       ElMessage.success(`「${row.file_name}」已重新进入处理队列`)
       await reloadDocuments()
-      if (active.value && hasInFlightDoc.value) startPolling()
+      if (hasInFlightDoc.value) startPolling()
     } catch (e) {
       ElMessage.error(`重试失败：${e.message}`)
     } finally {
@@ -403,10 +403,11 @@ export function useCourseDocuments({
     if (pollTimer) return
     pollStartedAt = Date.now()
     pollTimer = setInterval(() => {
-      // 离开文档页、无进行中任务或超过 30 分钟兜底时自动停止
+      // 教师切去其它 Tab 时页内数据照样更新（el-tabs 的 pane 是 v-show 保活，
+      // 进度表不会冻住）；完成/失败仍走全局 ElMessage，不在本页也能收到。
+      // 无课程、无进行中任务或超过 30 分钟兜底时自动停止。
       if (
-        !active.value
-        || !courseId.value
+        !courseId.value
         || !hasInFlightDoc.value
         || Date.now() - pollStartedAt > DOC_POLL_TIMEOUT
       ) {
@@ -417,8 +418,8 @@ export function useCourseDocuments({
     }, DOC_POLL_INTERVAL)
   }
 
-  watch([active, hasInFlightDoc, courseId], ([isActive, inFlight, cid]) => {
-    if (isActive && inFlight && cid) startPolling()
+  watch([hasInFlightDoc, courseId], ([inFlight, cid]) => {
+    if (inFlight && cid) startPolling()
     else stopPolling()
   }, { immediate: true })
 

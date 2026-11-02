@@ -79,15 +79,17 @@
             <template v-if="hasContext">当前课程：{{ effCourseName || effCourseId }}</template>
             <template v-else>未选择课程 · 可在页面上方选择学习资料</template>
           </div>
-          <span v-if="messages.length > 1" class="ai-clear" @click="clearChat">清空</span>
+          <span class="ai-clear" title="开一段新对话，旧对话保留在问答页的历史里" @click="newChat">
+            <el-icon :size="12"><Plus /></el-icon>新对话
+          </span>
         </div>
       </div>
 
       <!-- 消息区 -->
       <div ref="chatBoxRef" class="ai-messages">
         <div
-          v-for="(m, i) in messages"
-          :key="i"
+          v-for="(m, i) in displayMessages"
+          :key="m.mid || `greeting-${i}`"
           class="ai-msg-row"
           :class="m.role === 'user' ? 'is-user' : 'is-ai'"
         >
@@ -117,16 +119,18 @@
         </div>
       </div>
 
-      <!-- 输入区 -->
+      <!-- 输入区：等待回答时不锁输入，只锁发送（可提前打下一个问题） -->
       <div class="ai-input-row">
         <input
           v-model="question"
           class="ai-input"
           type="text"
-          placeholder="请输入您的问题"
-          :disabled="asking"
+          :placeholder="asking ? 'AI 正在回答，可以提前输入下一个问题…' : '请输入您的问题'"
           @keydown.enter="onEnter"
         />
+        <button v-if="asking" class="ai-stop" title="停止生成" @click="stopSend">
+          <el-icon :size="16"><VideoPause /></el-icon>
+        </button>
         <button class="ai-send" :disabled="asking || !question.trim()" title="发送" @click="send">
           <el-icon :size="16"><Top /></el-icon>
         </button>
@@ -136,10 +140,10 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue'
-import { Close, Top } from '@element-plus/icons-vue'
-import { api } from '../api'
+import { ref, nextTick, computed, watch } from 'vue'
+import { Close, Plus, Top, VideoPause } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
+import { useAiChatStore } from '../stores/aiChat'
 import { renderMarkdown } from '../utils/markdown'
 
 const store = useAppStore()
@@ -163,7 +167,6 @@ const effCourseName = computed(() => {
 
 const open = ref(false)
 const question = ref('')
-const asking = ref(false)
 const chatBoxRef = ref(null)
 
 /* ===== 悬浮球拖动 =====
@@ -315,9 +318,27 @@ function onFabPointerUp() {
 
 // 首条问候消息（清空对话后也会回到这条）
 const GREETING = '你好！我是你的 AI 助教小智～\n课程学习中遇到任何疑问随时问我，我会结合课程知识图谱为你解答。'
-const messages = ref([{ role: 'ai', content: GREETING, sources: [], greeting: true }])
+// 共享会话：与主问答页（学生端「智能问答」Tab）读写同一份对话，两个入口互为联动
+const chat = useAiChatStore()
+const messages = computed(() => chat.messages)
+const asking = computed(() => chat.asking)
+// 没有历史对话时展示问候语；问候语不写进存储，两个入口各自渲染自己的空态
+const displayMessages = computed(() => (
+  messages.value.length
+    ? messages.value
+    : [{ role: 'ai', content: GREETING, sources: [], greeting: true }]
+))
 
 const hasContext = computed(() => Boolean(effCourseId.value && effDocumentId.value))
+
+// 课程 / 学习资料上下文变化交给共享会话：切课程载入该课程历史，切文档只作废在途回答
+watch(effCourseId, (cid) => chat.bindContext(cid, effDocumentId.value), { immediate: true })
+watch(effDocumentId, (did) => chat.bindContext(effCourseId.value, did))
+
+// 问答页里切了会话，悬浮窗跟着回到最新一条
+watch(() => chat.activeId, () => {
+  if (open.value) scrollToBottom()
+})
 
 function toggle() {
   // 拖动结束后松手会触发 click，此处抑制，避免误开/误关面板
@@ -336,43 +357,20 @@ async function send() {
   const q = question.value.trim()
   if (!q || asking.value) return
   question.value = ''
-  messages.value.push({ role: 'user', content: q })
-  asking.value = true
   scrollToBottom()
-  try {
-    const res = await api.ask(q, effCourseId.value || null, effDocumentId.value || null)
-    const sources = (res.sources || []).map(normalizeSource)
-    // 与主问答页一致：区分「检索成功但 LLM 生成失败」（降级文案）与正常回答
-    messages.value.push({
-      role: 'ai',
-      content: res.answer || '（无回答）',
-      sources,
-      error: isLlmError(res.answer),
-    })
-  } catch (e) {
-    // 网络 / 接口整体异常
-    messages.value.push({ role: 'ai', content: '', error: true, sources: [] })
-  } finally {
-    asking.value = false
-    scrollToBottom()
-  }
+  await chat.send(q)
+  scrollToBottom()
 }
 
-function clearChat() {
-  messages.value = [{ role: 'ai', content: GREETING, sources: [], greeting: true }]
+/** 停止当前生成：中断请求（共享会话按 CanceledError 标记「已停止生成」并解锁） */
+function stopSend() {
+  chat.stop()
 }
 
-// LLM 生成失败判定：后端生成异常时返回固定前缀的降级文案（与主问答页同一约定）
-function isLlmError(answer) {
-  return typeof answer === 'string' && answer.indexOf('问答服务暂时不可用') !== -1
-}
-
-// 引用来源归一化：后端返回结构化对象；兼容旧字符串格式（[类别] 名称: 描述）
-function normalizeSource(s) {
-  if (typeof s !== 'string') return s || {}
-  const m = s.match(/^\[(.+?)\]\s*(.+?)(?::\s*([\s\S]*))?$/)
-  if (m) return { category: m[1], name: m[2].trim(), description: (m[3] || '').trim() }
-  return { category: '', name: s, description: '' }
+// 开新对话而不是清空：旧对话仍留在问答页左侧的历史列表里，可随时翻回去看
+function newChat() {
+  chat.newSession()
+  scrollToBottom()
 }
 
 function scrollToBottom() {
@@ -382,6 +380,11 @@ function scrollToBottom() {
     }
   })
 }
+
+// 问答页里提问时这里也会收到新消息：面板开着就跟随滚动到底部（同一份对话的联动效果）
+watch(() => messages.value.length, () => {
+  if (open.value) scrollToBottom()
+})
 </script>
 
 <style scoped>
@@ -553,6 +556,9 @@ function scrollToBottom() {
   color: #8f8aa8;
 }
 .ai-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 11px;
   color: #8f8aa8;
   cursor: pointer;
@@ -752,6 +758,24 @@ function scrollToBottom() {
 .ai-send:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+.ai-stop {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(239, 94, 94, 0.7);
+  border-radius: 50%;
+  background: rgba(239, 94, 94, 0.15);
+  color: #ff8f8f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.ai-stop:hover {
+  background: rgba(239, 94, 94, 0.3);
+  transform: scale(1.06);
 }
 
 /* ===== 三边缩放手柄（左 / 上 / 左上角） ===== */

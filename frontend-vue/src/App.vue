@@ -21,45 +21,81 @@
         </div>
       </div>
 
-      <!-- 用户信息 -->
-      <div v-show="!store.sidebarCollapsed" class="sidebar-user">
-        <div class="user-avatar" :class="store.role">
-          <img
-            v-if="showAvatar"
-            :src="store.avatarUrl"
-            class="user-avatar-img"
-            alt=""
-            @error="avatarFailed = true"
-          />
-          <template v-else>{{ avatarText }}</template>
+      <!-- 用户信息：点头像/姓名展开账号菜单（个人中心 / 退出登录），符合常见账号交互习惯 -->
+      <el-dropdown
+        v-show="!store.sidebarCollapsed"
+        class="sidebar-user-menu"
+        trigger="click"
+        placement="bottom-start"
+        popper-class="user-menu-popper"
+        @command="onUserCommand"
+      >
+        <div class="sidebar-user" :class="{ 'is-menu': store.isLoggedIn }">
+          <div class="user-avatar" :class="store.role">
+            <img
+              v-if="showAvatar"
+              :src="store.avatarUrl"
+              class="user-avatar-img"
+              alt=""
+              @error="avatarFailed = true"
+            />
+            <template v-else>{{ avatarText }}</template>
+          </div>
+          <div class="user-meta">
+            <div class="user-name" :title="store.displayName">{{ store.displayName }}</div>
+            <div class="user-role" :class="store.role">{{ roleText }}</div>
+          </div>
+          <el-icon v-if="store.isLoggedIn" class="user-caret"><ArrowDown /></el-icon>
         </div>
-        <div class="user-meta">
-          <div class="user-name" :title="store.displayName">{{ store.displayName }}</div>
-          <div class="user-role" :class="store.role">{{ roleText }}</div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="profile" :icon="User">个人中心</el-dropdown-item>
+            <el-dropdown-item
+              v-if="store.isLoggedIn"
+              command="logout"
+              :icon="SwitchButton"
+              divided
+            >
+              退出登录
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <!-- 折叠态：只剩头像，同样点击展开同一套账号菜单 -->
+      <el-dropdown
+        v-show="store.sidebarCollapsed"
+        class="sidebar-user-menu"
+        trigger="click"
+        placement="right-start"
+        popper-class="user-menu-popper"
+        @command="onUserCommand"
+      >
+        <div class="sidebar-user-collapsed">
+          <div class="user-avatar small" :class="store.role">
+            <img
+              v-if="showAvatar"
+              :src="store.avatarUrl"
+              class="user-avatar-img"
+              alt=""
+              @error="avatarFailed = true"
+            />
+            <template v-else>{{ avatarText }}</template>
+          </div>
         </div>
-        <el-button
-          v-if="store.isLoggedIn"
-          text
-          size="small"
-          class="user-logout"
-          :title="'退出登录'"
-          @click="handleLogout"
-        >
-          <el-icon><SwitchButton /></el-icon>
-        </el-button>
-      </div>
-      <div v-show="store.sidebarCollapsed" class="sidebar-user-collapsed">
-        <div class="user-avatar small" :class="store.role">
-          <img
-            v-if="showAvatar"
-            :src="store.avatarUrl"
-            class="user-avatar-img"
-            alt=""
-            @error="avatarFailed = true"
-          />
-          <template v-else>{{ avatarText }}</template>
-        </div>
-      </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="profile" :icon="User">个人中心</el-dropdown-item>
+            <el-dropdown-item
+              v-if="store.isLoggedIn"
+              command="logout"
+              :icon="SwitchButton"
+              divided
+            >
+              退出登录
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
 
       <!-- 导航菜单 -->
       <el-menu
@@ -125,16 +161,31 @@
             <span class="greet-hi">{{ greetText }}</span>
             <b>{{ store.displayName }}</b>
           </span>
-          <div class="header-avatar user-avatar" :class="store.role" @click="router.push('/profile')">
-            <img
-              v-if="showAvatar"
-              :src="store.avatarUrl"
-              class="user-avatar-img"
-              alt=""
-              @error="avatarFailed = true"
-            />
-            <template v-else>{{ avatarText }}</template>
-          </div>
+          <el-dropdown trigger="click" placement="bottom-end" popper-class="user-menu-popper" @command="onUserCommand">
+            <div class="header-avatar user-avatar" :class="store.role" :title="store.displayName">
+              <img
+                v-if="showAvatar"
+                :src="store.avatarUrl"
+                class="user-avatar-img"
+                alt=""
+                @error="avatarFailed = true"
+              />
+              <template v-else>{{ avatarText }}</template>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="profile" :icon="User">个人中心</el-dropdown-item>
+                <el-dropdown-item
+                  v-if="store.isLoggedIn"
+                  command="logout"
+                  :icon="SwitchButton"
+                  divided
+                >
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-header>
 
@@ -159,7 +210,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import {
   HomeFilled, DataAnalysis, Reading, User, UserFilled, EditPen, Notebook, Compass, Fold, Expand, SwitchButton, Share,
-  Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star, Connection,
+  Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star, Connection, ChatDotRound, ArrowDown,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
 import AIChatWidget from './components/AIChatWidget.vue'
@@ -202,6 +253,7 @@ const studentMenu = [
     children: [
       { path: '/student?tab=documents', title: '课程文档', icon: Reading },
       { path: '/student?tab=browse', title: '图谱浏览', icon: Compass },
+      { path: '/student?tab=qa', title: '智能问答', icon: ChatDotRound },
       { path: '/student?tab=path', title: '学习路径推荐', icon: Guide },
       { path: '/student?tab=favorites', title: '收藏夹', icon: Star },
       { path: '/student?tab=practice', title: '做题练习', icon: Notebook },
@@ -331,6 +383,12 @@ async function handleLogout() {
   } catch { /* 取消 */ }
 }
 
+// 账号菜单：侧栏用户块与顶栏头像共用同一套命令，退出登录不再是一个没有文字的图标按钮
+function onUserCommand(command) {
+  if (command === 'profile') router.push('/profile')
+  else if (command === 'logout') handleLogout()
+}
+
 onMounted(() => {
   if (store.isLoggedIn) {
     store.fetchProfile().catch(() => {})
@@ -405,7 +463,8 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-/* 用户块 */
+/* 用户块：整体作为账号菜单触发器 */
+.sidebar-user-menu { display: block; }
 .sidebar-user {
   margin: 4px 12px 12px;
   padding: 10px;
@@ -415,6 +474,12 @@ onMounted(() => {
   border-radius: 12px;
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.07);
+  transition: background .2s ease, border-color .2s ease;
+}
+.sidebar-user.is-menu { cursor: pointer; }
+.sidebar-user.is-menu:hover {
+  background: rgba(255,255,255,.1);
+  border-color: rgba(255,255,255,.16);
 }
 .sidebar-user-collapsed {
   display: flex;
@@ -463,11 +528,12 @@ onMounted(() => {
 }
 .user-role.teacher { background: rgba(245,166,35,.18); color: #ffc266; }
 .user-role.admin { background: rgba(139,92,246,.2); color: #c4b0ff; }
-.user-logout {
-  color: rgba(200,208,238,.6) !important;
-  padding: 4px;
+/* 账号菜单展开箭头（替代原来的纯图标退出按钮） */
+.user-caret {
+  color: rgba(200,208,238,.55);
+  font-size: 13px;
+  flex-shrink: 0;
 }
-.user-logout:hover { color: #ff8095 !important; }
 
 /* 菜单 */
 .sidebar-menu {

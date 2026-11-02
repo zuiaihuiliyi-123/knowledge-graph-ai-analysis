@@ -35,6 +35,8 @@ request.interceptors.response.use(
     return body
   },
   (err) => {
+    // 中止（用户点「停止生成」）：保留 CanceledError 原样抛出，调用方可用 isCancel() 识别
+    if (axios.isCancel(err)) return Promise.reject(err)
     // 401 未认证/登录过期：清除本地凭证并跳转登录页（整页跳转，避免与 router/store 循环依赖）
     if (err.response?.status === 401) {
       localStorage.removeItem('kg_token')

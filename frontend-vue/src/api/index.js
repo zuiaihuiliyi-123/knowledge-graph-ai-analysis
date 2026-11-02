@@ -146,12 +146,13 @@ export const api = {
     request.get('/api/v1/teacher/students/progress', { params: { course_id: courseId } }),
 
   // ---- 智能问答（Phase 8C：course_id + document_id） ----
-  ask: (question, courseId, documentId) =>
+  // options.signal：可选 AbortController.signal，用于「停止生成」中断等待
+  ask: (question, courseId, documentId, options) =>
     request.post('/api/v1/qa/ask', {
       question,
       course_id: courseId || null,
       document_id: documentId || null,
-    }),
+    }, options),
 
   // ---- 学习路径推荐（Phase 8B：course_id + document_id） ----
   recommendNext: (mastered, courseId, documentId) =>
