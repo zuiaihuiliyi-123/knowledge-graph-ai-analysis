@@ -16,7 +16,8 @@ from ..core.config import settings
 from ..core.dependencies import get_current_user
 from ..core.response import success, error
 from ..core.security import hash_password, verify_password
-from ..core.sql_database import sql_db
+from ..core.sql_database import ARCHIVED_USERNAME_PREFIX, sql_db
+from ..core.user_state import invalidate_user_state
 from ..services.admin_service import AdminService
 from ..services.profile_service import ProfileService
 
@@ -73,6 +74,9 @@ def register(user: UserRegister):
     username = (user.username or "").strip()
     if not username:
         return error(1001, "用户名不能为空")
+    if username.startswith(ARCHIVED_USERNAME_PREFIX):
+        # 这是「注销后归档」的内部命名空间，真实用户不能占用，否则归档时会撞 UNIQUE。
+        return error(1001, "用户名不合法，请更换")
     if not user.password:
         return error(1001, "密码不能为空")
 
@@ -90,16 +94,18 @@ def register(user: UserRegister):
         if not provided or not secrets.compare_digest(provided, expected):
             return error(4003, "教师邀请码不正确")
 
-    if sql_db.get_user_by_username(username):
-        return error(2006, f"用户名已存在: {username}")
-
-    user_id = sql_db.create_user(
+    # 已注销账号的用户名可以被重新注册：旧行归档用户名（保留历史数据），
+    # 新注册拿到全新 user_id，不会继承旧账号的课程/作答/收藏等数据。
+    user_id = sql_db.create_user_releasing_inactive(
         username=username,
         password_hash=hash_password(user.password),
         role=role,
         display_name=user.display_name,
         email=user.email,
     )
+    if user_id is None:
+        return error(2006, f"用户名已存在: {username}")
+
     return success({"user_id": user_id, "username": username, "role": role})
 
 
@@ -196,4 +202,6 @@ def deactivate_account(body: DeactivateAccount, current_user: dict = Depends(get
         return error(2002, "密码不正确")
 
     sql_db.deactivate_user(current_user["user_id"])
+    # 账号态缓存必须立即失效：否则旧 token 在 TTL（默认 30s）内仍可访问受保护接口。
+    invalidate_user_state(current_user["user_id"])
     return success({"user_id": current_user["user_id"]})

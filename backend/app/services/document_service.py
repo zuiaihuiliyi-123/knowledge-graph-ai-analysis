@@ -687,8 +687,12 @@ class DocumentService:
                     "message": f"清理旧图谱失败，无法重试: {str(e)}"}
         try:
             sql_db.delete_embeddings_by_document(course_id, doc_id)
+            # 重新抽取会让该文档的 kp_id 全部更换：旧收藏/学习记录的 kp_id 将全部失效，
+            # 不清就会变成孤儿——前端「共收藏 N 个」计数照算，列表却匹配不到节点。
+            sql_db.delete_favorites_by_document(course_id, doc_id)
+            sql_db.delete_learning_records_by_document(course_id, doc_id)
         except Exception as e:
-            _logger.warning("重试前清理文档向量失败 course_id=%s doc_id=%s: %s",
+            _logger.warning("重试前清理文档向量/收藏/学习记录失败 course_id=%s doc_id=%s: %s",
                             course_id, doc_id, e)
 
         sql_db.update_document(

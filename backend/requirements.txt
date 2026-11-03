@@ -30,7 +30,10 @@ jieba==0.42.1
 # 向量检索（L2 阶段 E：VectorIndex 的 numpy 矩阵后端）
 # 未安装时 `services/vector_index.py` 会自动回落纯 Python 余弦（功能可用，但慢 100×+），
 # 所以这里是**显式声明**而非隐性依赖——此前 numpy 只被离线脚本 eval_*.py 用到，requirements 未声明。
-numpy==1.26.4
+# Python 3.13 起 numpy 1.26.4 没有预编译 wheel（pip 会转源码编译并失败）；项目只使用
+# ndarray / matmul / linalg.norm / argsort 等基础 API，3.13+ 改用已实测的本机版本 2.5.3。
+numpy==1.26.4; python_version < "3.13"
+numpy==2.5.3; python_version >= "3.13"
 
 # 工具
 pydantic==2.10.4

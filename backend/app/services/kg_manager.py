@@ -363,6 +363,10 @@ class KnowledgeGraphManager:
         if cnt == 0:
             raise ValueError(f"知识点不存在: {kp_id}")
         sql_db.delete_embeddings_by_document(int(course_id), document_id)
+        # 级联清理：节点删除后该 kp_id 失效，旧收藏/学习记录会成孤儿
+        # （前端「共收藏 N 个」计数照算、列表却匹配不到节点）。按 kp_id 收口。
+        sql_db.delete_favorites_by_kp(int(course_id), document_id, kp_id)
+        sql_db.delete_learning_records_by_kp(int(course_id), document_id, kp_id)
         return {"kp_id": kp_id, "deleted": True}
 
     @staticmethod
