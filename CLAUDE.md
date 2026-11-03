@@ -20,6 +20,10 @@ cd backend && pip install -r requirements.txt
 # 环境变量（模板 backend/.env.example：LLM_* / EMBEDDING_* / NEO4J_* / SQLITE_DB_PATH / UPLOAD_DIR / SECRET_KEY）
 cp backend/.env.example backend/.env   # 然后编辑填入真实值
 
+# 一键启动（仓库根目录；自动检查依赖并启动 Neo4j（可选）+ 后端 + 前端）
+python start.py                  # Windows 也可双击 start.bat
+python start.py --check          # 只检查环境/端口/数据库
+
 # 启动后端（在 backend/ 目录下）
 python -m uvicorn app.main:app --reload
 

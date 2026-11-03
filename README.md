@@ -118,13 +118,32 @@ flowchart LR
 
 ## 快速开始
 
+### 一键启动（推荐）
+
+仓库根目录的 `start.py` 会把环境检查、依赖安装、Neo4j（可选）、后端、前端串起来：
+
+```bash
+# Windows：双击 start.bat，或在根目录执行
+python start.py
+
+# macOS / Linux
+./start.sh
+```
+
+- 启动成功后打开 <http://127.0.0.1:5173>；
+- SQLite 无需准备，后端首次启动会自动建库；
+- Neo4j 可用时脚本会复用/尝试启动本地实例；不可用时仍会启动前后端，只降级图谱相关功能；
+- 环境检查：`python start.py --check`；仅前端/仅后端：`--frontend-only` / `--backend-only`。
+
+完整参数与数据库行为见 [docs/一键启动说明.md](docs/一键启动说明.md)。
+
 ### 环境要求
 
-- Python 3.12+（当前开发环境为 3.13）
-- Node.js ≥ 18
+- Python 3.12+（3.13 也可用；requirements 已按版本选择 numpy）
+- Node.js 20.19+ 或 22.12+（Vite 7 要求）
 - 本地或远程 Neo4j 5.x 及以上实例（无需 APOC 插件，启动后由后端幂等初始化约束）
 
-### 1. 启动后端
+### 手动启动：1. 启动后端
 
 ```bash
 cd backend
@@ -144,7 +163,7 @@ python -m uvicorn app.main:app --reload
 - 健康检查：`curl http://localhost:8000/health` → `{"status":"ok"}`
 - SQLite 表结构在首次启动时自动创建（`sql_db.init_tables()`），**克隆仓库后无需准备任何数据库文件**
 
-### 2. 启动前端
+### 手动启动：2. 启动前端
 
 ```bash
 cd frontend-vue

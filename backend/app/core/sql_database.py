@@ -45,6 +45,12 @@ BUSY_TIMEOUT_MS = int(os.getenv("SQLITE_BUSY_TIMEOUT", "15000"))
 # admin 为管理员端新增角色（平台治理，不属于任何课程的教学角色）。
 # 注意：注册接口（api/auth.py）刻意不接受 "admin"，管理员只能由既有管理员在后台指派。
 USER_ROLES = ("admin", "teacher", "student")
+
+# 已注销账号被同名重新注册时，旧账号的用户名归档为此前缀：
+#   __deleted_user_<user_id>__<原用户名>
+# 只改 username，不动 user_id / is_active / 业务数据；外键与历史记录仍然指向旧账号。
+# 注册接口拒绝该前缀，避免真实用户注册到会被归档逻辑占用的名字。
+ARCHIVED_USERNAME_PREFIX = "__deleted_user_"
 DOC_FILE_TYPES = ("PDF", "TXT", "DOCX", "MD")
 DOC_PARSE_STATUS = ("UPLOADED", "PARSING", "PARSED", "FAILED")
 DOC_EXTRACT_STATUS = ("PENDING", "EXTRACTING", "COMPLETED", "FAILED")
@@ -1481,6 +1487,57 @@ class SQLDatabase:
             (username, password_hash, role, display_name, email),
         )
 
+    def create_user_releasing_inactive(self, username: str, password_hash: str,
+                                       role: str = "student", display_name: str = None,
+                                       email: str = None) -> int | None:
+        """注册新账号；同名旧账号若已注销（is_active=0），先归档其用户名再插入。
+
+        背景：注销是软停用（保留 user_id 与全部历史数据），但 `username` 有 UNIQUE
+        约束。若只把 is_active 置 0，同名用户永远无法重新注册，表现就是「已注销，
+        却仍提示用户名已存在」。
+
+        处理方式：把旧行的 username 改为 `ARCHIVED_USERNAME_PREFIX<id>__<原名>`，
+        再插入新用户。旧行仍保留、外键与历史数据不受影响；新账号获得干净的 user_id。
+
+        返回新用户 user_id；同名账号仍启用、同名旧账号是管理员/引导账号，或并发注册
+        中被别人抢先插入时返回 None（调用方统一按「用户名已存在」处理）。
+        查询、归档、插入放在同一个 `BEGIN IMMEDIATE` 事务里，避免两个请求同时归档
+        同一行或同时插入造成 UNIQUE 冲突。
+        """
+        with self._connect() as conn:
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                row = conn.execute(
+                    "SELECT user_id, is_active, role FROM t_user WHERE username = ?",
+                    (username,),
+                ).fetchone()
+                if row is not None:
+                    # 启用中的账号占用用户名；管理员与引导账号（admin / sysadmin）的
+                    # 用户名不允许被复用，避免停用后名字被普通账号占用、掩盖真实身份，
+                    # 也让 ensure_default_* 在重启时仍能认出引导账号。
+                    protected = row["role"] == "admin" or username in (
+                        DEFAULT_TEACHER_USERNAME, DEFAULT_ADMIN_USERNAME)
+                    if int(row["is_active"] or 0) or protected:
+                        conn.rollback()
+                        return None
+                    archived = f"{ARCHIVED_USERNAME_PREFIX}{row['user_id']}__{username}"
+                    conn.execute(
+                        "UPDATE t_user SET username = ?, updated_at = ? "
+                        "WHERE user_id = ? AND is_active = 0",
+                        (archived, _now(), row["user_id"]),
+                    )
+                cur = conn.execute(
+                    "INSERT INTO t_user (username, password_hash, role, display_name, email) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (username, password_hash, role, display_name, email),
+                )
+                conn.commit()
+                return cur.lastrowid
+            except sqlite3.IntegrityError:
+                # 并发插入同名账号（BEGIN IMMEDIATE 已挡住正常路径，这里兜底外部写入）
+                conn.rollback()
+                return None
+
     def get_user_by_username(self, username: str) -> dict:
         return self._query_one("SELECT * FROM t_user WHERE username = ?", (username,))
 
@@ -2266,6 +2323,38 @@ class SQLDatabase:
             cur = conn.execute(
                 "DELETE FROM t_student_favorite WHERE course_id = ? AND document_id = ?",
                 (course_id, document_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def delete_favorites_by_kp(self, course_id: int, document_id, kp_id: str) -> int:
+        """删除某知识点的全部学生收藏，返回删除条数。
+
+        教师删除单个知识点节点（kg_manager.delete_node）的级联收口：
+        t_student_favorite.kp_id 是逻辑外键，节点从 Neo4j 删除后若不清，
+        这些收藏就成了孤儿——前端「共收藏 N 个」计数照算，列表却因
+        匹配不到图谱节点而少显示甚至不显示。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_student_favorite "
+                "WHERE course_id = ? AND document_id = ? AND kp_id = ?",
+                (course_id, document_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def delete_learning_records_by_kp(self, course_id: int, document_id, kp_id: str) -> int:
+        """删除某知识点的全部学生学习记录，返回删除条数。
+
+        与 delete_favorites_by_kp 同一收口点：kp_id 失效后旧学习记录会让
+        掌握数/学习进度统计虚高且对不上图谱节点，一并清理。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_learning_record "
+                "WHERE course_id = ? AND document_id = ? AND kp_id = ?",
+                (course_id, document_id, kp_id),
             )
             conn.commit()
             return cur.rowcount
