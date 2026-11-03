@@ -119,17 +119,19 @@ test.describe('问答界面流式渲染（路由拦截伪造 SSE）', () => {
       { timeout: 20000 },
     )
 
-    const input = page.getByPlaceholder('输入你的问题，回车发送')
+    const input = page.getByPlaceholder(/给 AI 学习助手下达指令|输入你的问题/)
     await expect(input).toBeVisible({ timeout: 20000 })
     await input.fill('什么是 DMA 方式？')
     await input.press('Enter')
 
     // 最终答案（delta 拼接 + done 收尾）
-    await expect(page.getByText('DMA 是一种直接内存访问方式。')).toBeVisible({ timeout: 20000 })
-    // 证据链：来源卡片来自 sources 事件
-    await expect(page.locator('.source-card').filter({ hasText: 'DMA方式' })).toHaveCount(1)
+    // 注意：悬浮球与学生问答页共用同一份会话，同名文本在 DOM 里有两份，必须限定问答页容器
+    await expect(page.locator('.ai-chat').getByText('DMA 是一种直接内存访问方式。')).toBeVisible({ timeout: 20000 })
+    // 证据链：来源卡片来自 sources 事件（默认收起，点「参考来源」展开）
+    await page.locator('.ai-chat .turn-op').filter({ hasText: '参考来源' }).last().click()
+    await expect(page.locator('.ai-chat .cite-card').filter({ hasText: 'DMA方式' })).toHaveCount(1)
     // 生成中提示在 done 之后必须消失，输入框解锁
-    await expect(page.locator('.msg-streaming')).toHaveCount(0)
+    await expect(page.locator('.ai-chat .msg-streaming')).toHaveCount(0)
     await expect(input).toBeEnabled()
 
     expect(seen.body, '前端必须真的调用 /qa/ask/stream').toBeTruthy()
@@ -139,6 +141,68 @@ test.describe('问答界面流式渲染（路由拦截伪造 SSE）', () => {
     expect(seen.auth.startsWith('Bearer ')).toBe(true)
 
     expect(errors, `控制台不应报错：${errors.join(' | ')}`).toEqual([])
+  })
+
+  test('真实分帧到达时逐段渲染（done 之前就能看到正文）', async ({ page }) => {
+    test.setTimeout(120000)
+    await login(page, STUDENT_USER, STUDENT_PASS)
+
+    // 关键：route.fulfill 只能一次性给出整个响应体，无法验证「中间态」——
+    // 这正是旧实现「delta 写进非响应式对象、界面要等整段生成完才出现」能蒙混过关的原因。
+    // 这里在页面里替换 fetch，用真正的 ReadableStream 分帧推送（第一段 0.6s、第二段 5s），
+    // 断言「第一段已显示时，第二段还没到，且仍在生成」。
+    await page.addInitScript(() => {
+      const realFetch = window.fetch.bind(window)
+      const encoder = new TextEncoder()
+      ;(window as any).fetch = async (input: any, init?: any) => {
+        const url = typeof input === 'string' ? input : (input && input.url) || ''
+        if (!String(url).includes('/api/v1/qa/ask/stream')) return realFetch(input, init)
+        const stream = new ReadableStream({
+          start(controller) {
+            const send = (text: string, delay: number) =>
+              setTimeout(() => controller.enqueue(encoder.encode(text)), delay)
+            send('event: sources\ndata: {"sources":[{"kp_id":"kp-1","name":"DMA方式","category":"概念"}]}\n\n', 50)
+            send('event: delta\ndata: {"text":"第一段。"}\n\n', 600)
+            send('event: delta\ndata: {"text":"第二段。"}\n\n', 5000)
+            send('event: done\ndata: {"answer":"第一段。第二段。","sources":[],"finish_reason":"stop"}\n\n', 5500)
+            setTimeout(() => controller.close(), 5600)
+          },
+        })
+        return new Response(stream, {
+          status: 200,
+          headers: { 'content-type': 'text/event-stream; charset=utf-8' },
+        })
+      }
+    })
+
+    await page.goto(`${BASE}/student?tab=qa&course_id=${COURSE}&document_id=${DOC}`)
+    await dismissBackendStatus(page)
+    await page.waitForFunction(
+      ([cid, did]) => {
+        const raw = localStorage.getItem('kg_learning_context')
+        if (!raw) return false
+        const ctx = JSON.parse(raw)
+        return String(ctx.currentCourseId) === cid && String(ctx.currentDocumentId) === did
+      },
+      [String(COURSE), String(DOC)],
+      { timeout: 20000 },
+    )
+
+    const input = page.getByPlaceholder(/给 AI 学习助手下达指令|输入你的问题/)
+    await expect(input).toBeVisible({ timeout: 20000 })
+    await input.fill('分帧渲染测试')
+    await input.press('Enter')
+
+    const answer = page.locator('.turn.is-ai .turn-text').last()
+    // 第一段到达即渲染；此时第二段尚未发出，提示仍是「正在生成…」（说明真的在边生成边显示）
+    await expect(answer).toContainText('第一段。', { timeout: 15000 })
+    await expect(page.locator('.ai-chat .msg-streaming')).toContainText('正在生成')
+    await expect(answer).not.toContainText('第二段。')
+
+    // done 之后补齐并收尾
+    await expect(answer).toContainText('第一段。第二段。', { timeout: 20000 })
+    await expect(page.locator('.ai-chat .msg-streaming')).toHaveCount(0)
+    await expect(input).toBeEnabled()
   })
 
   test('后端返回 error 事件时展示失败态，不伪造答案', async ({ page }) => {
@@ -163,24 +227,24 @@ test.describe('问答界面流式渲染（路由拦截伪造 SSE）', () => {
       [String(COURSE), String(DOC)],
       { timeout: 20000 },
     )
-    const input = page.getByPlaceholder('输入你的问题，回车发送')
+    const input = page.getByPlaceholder(/给 AI 学习助手下达指令|输入你的问题/)
     await expect(input).toBeVisible({ timeout: 20000 })
     await input.fill('余额不足时会怎样？')
     await input.press('Enter')
 
-    const errBox = page.locator('.msg-error')
+    const errBox = page.locator('.ai-chat .msg-error')
     await expect(errBox).toHaveCount(1, { timeout: 20000 })
     await expect(errBox).toContainText('AI 服务暂时不可用')
     // 后端给的原因放在 title 里：方便排查，但不打扰用户
     await expect(errBox).toHaveAttribute('title', /402/)
-    await expect(page.locator('.msg-streaming')).toHaveCount(0)
+    await expect(page.locator('.ai-chat .msg-streaming')).toHaveCount(0)
   })
 
-  test('流式端点返回非 SSE（代理降级/权限拒绝）时回退同步接口，答案照常显示', async ({ page }) => {
+  test('流式端点返回业务错误（权限拒绝）时直接提示原因，不再白跑同步接口', async ({ page }) => {
     test.setTimeout(120000)
     await login(page, STUDENT_USER, STUDENT_PASS)
 
-    // 模拟「代理不支持流式」：/ask/stream 回一份普通 JSON（后端权限拒绝就是这种形状）
+    // 模拟后端用统一包装 JSON 返回业务错误（权限拒绝就是这种形状）：不是 SSE
     await page.route('**/api/v1/qa/ask/stream', (route) => route.fulfill({
       status: 200,
       headers: { 'content-type': 'application/json; charset=utf-8' },
@@ -213,12 +277,13 @@ test.describe('问答界面流式渲染（路由拦截伪造 SSE）', () => {
       { timeout: 20000 },
     )
 
-    const input = page.getByPlaceholder('输入你的问题，回车发送')
+    const input = page.getByPlaceholder(/给 AI 学习助手下达指令|输入你的问题/)
     await input.fill('降级测试')
     await input.press('Enter')
 
-    await expect(page.getByText('同步接口兜底答案。')).toBeVisible({ timeout: 20000 })
-    expect(syncCalled, '流式失败后应回退到同步 /qa/ask').toBeGreaterThan(0)
-    await expect(page.locator('.msg-error')).toHaveCount(0)
+    await expect(page.locator('.ai-chat .msg-error')).toHaveCount(1, { timeout: 20000 })
+    await expect(page.locator('.ai-chat .msg-error')).toContainText('无权访问该课程')
+    // 权限拒绝时同步接口的结果只会一样：再打一次纯属浪费（还会把原因误报成「AI 不可用」）
+    expect(syncCalled, '业务错误不该再回落同步接口').toBe(0)
   })
 })

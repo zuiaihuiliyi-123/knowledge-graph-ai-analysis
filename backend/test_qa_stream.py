@@ -21,6 +21,8 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
+import time
 from types import SimpleNamespace
 
 _TMP = tempfile.mkdtemp(prefix="kg_qa_stream_")
@@ -42,6 +44,7 @@ from app.core.dependencies import get_current_user              # noqa: E402
 from app.core.security import hash_password                     # noqa: E402
 from app.core.sql_database import sql_db                        # noqa: E402
 from app.main import app                                        # noqa: E402
+from app.services import qa_service as qa_service_module          # noqa: E402
 from app.services.qa_service import QAService                   # noqa: E402
 
 SOURCES = [{"kp_id": "kp1", "name": "栈", "category": "概念",
@@ -62,36 +65,43 @@ def check(label, ok, detail=""):
 class FakeStream:
     """模拟 openai 的流式返回：可迭代出若干 chunk。"""
 
-    def __init__(self, chunks):
+    def __init__(self, chunks, finish_reason=None):
         self._chunks = [SimpleNamespace(choices=[SimpleNamespace(
             delta=SimpleNamespace(content=c))]) for c in chunks]
+        if finish_reason and self._chunks:
+            self._chunks[-1].choices[0].finish_reason = finish_reason
+        self.closed = False
+
+    def close(self):
+        self.closed = True
 
     def __iter__(self):
         return iter(self._chunks)
 
 
 class FakeCompletions:
-    def __init__(self, chunks=None, raise_exc=None):
+    def __init__(self, chunks=None, raise_exc=None, finish_reason=None):
         self.chunks = chunks or []
         self.raise_exc = raise_exc
+        self.finish_reason = finish_reason
         self.kwargs = None
 
     def create(self, **kwargs):
         self.kwargs = kwargs
         if self.raise_exc:
             raise self.raise_exc
-        return FakeStream(self.chunks)
+        return FakeStream(self.chunks, self.finish_reason)
 
 
 class FakeClient:
-    def __init__(self, chunks=None, raise_exc=None):
-        self.completions = FakeCompletions(chunks, raise_exc)
+    def __init__(self, chunks=None, raise_exc=None, finish_reason=None):
+        self.completions = FakeCompletions(chunks, raise_exc, finish_reason)
         self.chat = SimpleNamespace(completions=self.completions)
 
 
-def make_service(chunks=None, raise_exc=None):
+def make_service(chunks=None, raise_exc=None, finish_reason=None):
     svc = QAService()
-    svc.client = FakeClient(chunks, raise_exc)
+    svc.client = FakeClient(chunks, raise_exc, finish_reason)
     svc.search_related_nodes = lambda *a, **k: list(SOURCES)
     return svc
 
@@ -138,7 +148,71 @@ def main() -> int:
     check("错误信息明确指出不可用", "暂时不可用" in bad_events[-1]["data"]["message"],
           bad_events[-1]["data"]["message"])
 
-    print("\nStep 4: HTTP /ask/stream 端到端")
+    print("\nStep 4: 结束原因透传（撞上 max_tokens 时前端才能提示截断）")
+    truncated = collect(make_service(CHUNKS, finish_reason="length"))
+    check("done.finish_reason == length",
+          truncated[-1]["data"].get("finish_reason") == "length",
+          str(truncated[-1]["data"].get("finish_reason")))
+    normal = collect(make_service(CHUNKS))
+    check("正常结束不臆造 finish_reason",
+          normal[-1]["data"].get("finish_reason") is None,
+          str(normal[-1]["data"].get("finish_reason")))
+
+    print("\nStep 5: 客户端断开后关闭上游流（止损，别把整段答案读完）")
+
+    class BlockingStream:
+        """先给一个 chunk，然后「卡住」模拟上游仍在生成；close() 才结束。"""
+
+        def __init__(self):
+            self.closed = False
+            self._release = threading.Event()
+            self._chunks = [SimpleNamespace(choices=[SimpleNamespace(
+                delta=SimpleNamespace(content="第一段"), finish_reason=None)])]
+
+        def __iter__(self):
+            yield from self._chunks
+            self._release.wait(10)  # 没人 close() 就一直等
+
+        def close(self):
+            self.closed = True
+            self._release.set()
+
+    async def _abort_mid_stream():
+        svc = make_service()
+        blocking = BlockingStream()
+        svc.client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
+            create=lambda **kw: blocking)))
+        agen = svc.stream_answer("栈是什么？")
+        first = await agen.__anext__()
+        second = await agen.__anext__()
+        await agen.aclose()   # 模拟「停止生成」/ 切走页面
+        for _ in range(100):
+            if blocking.closed:
+                break
+            await asyncio.sleep(0.02)
+        return first, second, blocking.closed
+
+    first, second, closed = asyncio.run(_abort_mid_stream())
+    check("断开前已拿到 sources", first["event"] == "sources", str(first["event"]))
+    check("断开前已拿到增量", second["event"] == "delta", str(second["event"]))
+    check("断开后上游流被关闭（不再继续烧 token）", closed, str(closed))
+
+    print("\nStep 6: 长时间无输出时发保活帧（不让代理掐断空闲连接）")
+    qa_service_module._HEARTBEAT_SECONDS = 0.05
+    try:
+        slow = make_service(CHUNKS)
+        slow.search_related_nodes = lambda *a, **k: (time.sleep(0.2), list(SOURCES))[1]
+        slow_events = collect(slow)
+        kinds_slow = [e["event"] for e in slow_events]
+        check("检索期间出现 ping", "ping" in kinds_slow, str(kinds_slow[:6]))
+        check("ping 不改变正常事件序列",
+              [k for k in kinds_slow if k != "ping"]
+              == ["sources"] + ["delta"] * len(CHUNKS) + ["done"],
+              str(kinds_slow))
+    finally:
+        qa_service_module._HEARTBEAT_SECONDS = 10
+
+    print("\nStep 7: HTTP /ask/stream 端到端")
     user_id = sql_db.create_user("qa_streamer", hash_password("pw123456"), role="student")
     fake_events = [{"event": "sources", "data": {"sources": SOURCES}},
                    {"event": "delta", "data": {"text": "栈是"}},
@@ -186,7 +260,7 @@ def main() -> int:
             check("done 里答案完整", parsed[-1][1].get("answer") == "栈是线性表",
                   str(parsed[-1][1])[:80])
 
-            print("\nStep 5: 原同步端点行为不变（回归）")
+            print("\nStep 8: 原同步端点行为不变（回归）")
             resp2 = client.post("/api/v1/qa/ask", json={"question": "栈是什么？"})
             body2 = resp2.json()
             check("同步端点 200 且 code=0",

@@ -96,7 +96,7 @@
           <div class="ai-msg-main">
             <div v-if="m.role === 'ai' && m.greeting" class="ai-tag">AI 助教</div>
             <div class="ai-bubble">
-              <div v-if="m.error" class="ai-error" :title="m.errDetail || ''">⚠️ AI 服务暂时不可用，请稍后重试</div>
+              <div v-if="m.error" class="ai-error msg-error" :title="m.errDetail || ''">⚠️ {{ m.errorMessage || 'AI 服务暂时不可用，请稍后重试' }}</div>
               <template v-else>
                 <div v-if="m.role === 'ai'" class="ai-msg-text ai-md" v-html="renderMarkdown(m.content)"></div>
                 <div v-else class="ai-msg-text">{{ m.content }}</div>
@@ -104,6 +104,8 @@
                   <span class="ai-dot"></span>
                   <span>{{ m.content ? '正在生成…' : '正在思考…' }}</span>
                 </div>
+                <!-- 结果不完整（截断 / 中断）时明确说明，不假装完整 -->
+                <div v-if="m.role === 'ai' && m.note && !m.streaming" class="ai-note">{{ m.note }}</div>
                 <div v-if="m.role === 'ai' && m.sources && m.sources.length" class="ai-sources">
                   <div class="ai-sources-title">参考来源 · 课程知识库</div>
                   <div v-for="(s, j) in m.sources" :key="s.kp_id || s.name || j" class="ai-source-item">
@@ -662,6 +664,12 @@ watch(() => messages.value.length, () => {
 .ai-md :deep(hr) { border: none; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 10px 0; }
 .ai-error {
   color: #f0b8c4;
+}
+/* 结果不完整（截断 / 中断）的说明：浅黄，提示但不打断阅读 */
+.ai-note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #f0c98a;
 }
 
 /* 引用来源 */

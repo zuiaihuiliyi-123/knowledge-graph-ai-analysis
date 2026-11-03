@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { api } from '../api'
 import { askStream } from '../api/qaStream'
 import { isAbortError } from '../composables/useLatestRequest'
@@ -72,6 +72,10 @@ export const useAiChatStore = defineStore('aiChat', () => {
       sources: Array.isArray(m.sources) ? m.sources.slice(0, MAX_SOURCE_PER_MSG) : [],
       error: !!m.error,
       errDetail: typeof m.errDetail === 'string' ? m.errDetail : '',
+      errorMessage: typeof m.errorMessage === 'string' ? m.errorMessage : '',
+      // 结果不完整的说明（撞上 max_tokens、连接中断等）：与 error 分开，
+      // 因为「有半成品正文」时仍应把正文显示出来
+      note: typeof m.note === 'string' ? m.note : '',
       // 存盘的是结果：重新载入时不可能还在流式生成，不保留中间态
       streaming: false,
       ctxKey: typeof m.ctxKey === 'string' ? m.ctxKey : '',
@@ -156,6 +160,8 @@ export const useAiChatStore = defineStore('aiChat', () => {
           sources: (m.sources || []).slice(0, MAX_SOURCE_PER_MSG),
           error: !!m.error,
           errDetail: m.errDetail || '',
+          errorMessage: m.errorMessage || '',
+          note: m.note || '',
           ctxKey: m.ctxKey || '',
           ctxLabel: m.ctxLabel || '',
           time: m.time || 0,
@@ -284,10 +290,13 @@ export const useAiChatStore = defineStore('aiChat', () => {
     })
     // 会话标题取首个提问，和主流 AI 的历史列表一致
     if (!session.title) session.title = truncateTitle(q)
-    const bubble = {
+    // 必须是响应式对象：消息 push 进 reactive 数组后，数组里存的是它的 raw target，
+    // 之后再直接改 raw 对象不会触发 Vue 更新 —— 表现就是整段答案要等到 asking
+    // 变化（请求结束）才一次性出现，流式等于白做。这里持有代理即可逐帧渲染。
+    const bubble = reactive({
       mid: ++midSeq, role: 'ai', content: '', sources: [], error: false, errDetail: '',
-      streaming: true, ...ctx, time: Date.now(),
-    }
+      errorMessage: '', note: '', streaming: true, ...ctx, time: Date.now(),
+    })
     session.messages.push(bubble)
     touch(session)
     asking.value = true
@@ -315,20 +324,31 @@ export const useAiChatStore = defineStore('aiChat', () => {
           if (ev.data?.sources) {
             bubble.sources = ev.data.sources.map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
           }
+          // 后端透传 finish_reason：length 说明撞上 max_tokens，正文被截断
+          if (ev.data?.finish_reason === 'length') {
+            bubble.note = '回答达到长度上限，可能未完整'
+          }
           // 区分「检索成功但 LLM 生成失败」（后端固定降级文案）与正常回答
           bubble.error = isLlmError(bubble.content)
           bubble.streaming = false
           return
         } else if (ev.event === 'error') {
-          bubble.error = true
           bubble.errDetail = ev.data?.message || ''
           bubble.streaming = false
+          if (received) {
+            // 已经吐出一部分正文：保留它并说明中断，不要用错误框把半成品吞掉
+            bubble.content = received
+            bubble.note = '回答生成中断，以上为已生成内容'
+          } else {
+            bubble.error = true
+          }
           return
         }
       }
       // 流正常结束但没等到 done（后端被中断等）：已收到的内容照样给用户
       bubble.content = received || '（无回答）'
       bubble.streaming = false
+      if (received) bubble.note = '回答可能未完整（连接中断）'
     } catch (e) {
       if (mySeq !== seq) return
       if (isAbortError(e)) {
@@ -337,9 +357,19 @@ export const useAiChatStore = defineStore('aiChat', () => {
         if (!bubble.content) bubble.content = '（已停止生成）'
         return
       }
+      // 业务错误（如 4003 无权访问该课程）：同步接口会被同样拒绝，再打一次没有意义。
+      // 直接把后端给的原因显示出来，而不是误报成「AI 服务暂时不可用」。
+      if (e && e.code) {
+        bubble.streaming = false
+        bubble.error = true
+        bubble.errDetail = e.message || ''
+        bubble.errorMessage = e.message || ''
+        return
+      }
       // 有增量就保留（只是最后一段没收干净）；一个 delta 都没有才回落同步接口
       if (received) {
         bubble.streaming = false
+        bubble.note = '回答可能未完整（连接中断）'
         return
       }
       try {

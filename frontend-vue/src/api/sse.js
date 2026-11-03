@@ -55,14 +55,20 @@ export async function* readSseEvents(response) {
 
   const normalize = (text) => text.replace(/\r\n/g, '\n')
 
-  while (true) {
-    const { value, done } = await reader.read()
-    if (done) break
-    buffer = normalize(buffer + decoder.decode(value, { stream: true }))
+  try {
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer = normalize(buffer + decoder.decode(value, { stream: true }))
+      yield* drain()
+    }
+    buffer = normalize(buffer + decoder.decode())
     yield* drain()
+    const tail = parseSseFrame(buffer)
+    if (tail) yield tail
+  } finally {
+    // 调用方在 done 之后会直接 return（不再读后续帧）：必须释放锁，
+    // 否则这条响应体一直挂在 reader 上，长时间使用会累积未释放的流。
+    try { reader.releaseLock() } catch { /* 已释放/已取消 */ }
   }
-  buffer = normalize(buffer + decoder.decode())
-  yield* drain()
-  const tail = parseSseFrame(buffer)
-  if (tail) yield tail
 }

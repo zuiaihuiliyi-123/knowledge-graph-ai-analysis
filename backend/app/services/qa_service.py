@@ -92,6 +92,33 @@ def _format_node(node) -> str:
     return ctx
 
 
+# 流式问答的保活间隔（秒）：超过这个时间没有任何输出，就发一个 ping 帧。
+# 检索首次要建索引、模型也可能长时间不出 token，静默连接容易被代理直接掐断。
+_HEARTBEAT_SECONDS = 10
+
+
+def _close_quietly(stream) -> None:
+    """关闭上游流（客户端断开时止损）。收尾阶段的任何异常都不该影响调用方。"""
+    close = getattr(stream, "close", None)
+    if not callable(close):
+        return
+    try:
+        close()
+    except Exception:  # noqa: BLE001 - 连接可能已被对端关闭
+        pass
+
+
+def _drain_task_exception(task) -> None:
+    """取走后台任务的异常，避免客户端提前断开后出现
+    「Task exception was never retrieved」这类噪音日志。"""
+    if task.cancelled():
+        return
+    try:
+        task.exception()
+    except Exception:  # noqa: BLE001 - 已被取消/已取走
+        pass
+
+
 class QAService:
     """智能问答服务"""
 
@@ -370,20 +397,36 @@ class QAService:
         """流式回答（SSE 用）：先给引用来源，再逐块给答案增量。
 
         yield 的事件：
+          `{"event": "ping",    "data": {}}`                    ← 长时间无输出时的保活帧
           `{"event": "sources", "data": {"sources": [...]}}`
           `{"event": "delta",   "data": {"text": "…"}}`
-          `{"event": "done",    "data": {"answer": "全文", "sources": [...]}}`
-          `{"event": "error",   "data": {"message": "…"}}`
+          `{"event": "done",    "data": {"answer": "全文", "sources": [...],
+                                        "finish_reason": "stop"}}`
+          `{"event": "error",   "data": {"message": "…", "partial": "已生成的正文"}}`
 
-        两条硬约束：
+        四条硬约束：
         1. **检索只跑一次**：与 `ask_with_sources` 同一入口，`sources` 就是真正喂给模型的上下文
            （不得为了拿来源再单独检索一遍，见 `ask_with_sources` 的说明）；
         2. **同步客户端不阻塞事件循环**：`openai` 的流式迭代放在**后台线程**里消费，
            通过 `call_soon_threadsafe` 投递到 asyncio 队列。这里不能简单用 `to_thread`——
-           那样要等整段结束才能拿到结果，等于没有流式。
+           那样要等整段结束才能拿到结果，等于没有流式；
+        3. **客户端断开就止损**：生成器被关闭（切走页面 / 点「停止生成」）时置停止标志并
+           关闭上游流，否则后台线程会把整段答案读完，token 照付；
+        4. **保留结束原因**：`finish_reason == "length"` 说明撞上 max_tokens，前端要能提示
+           截断，不能把半截答案当完整答案展示。
         """
-        sources = await asyncio.to_thread(
-            self.search_related_nodes, question, course_id, document_id, 5, allowed_ids)
+        # 检索可能较慢（首次还要建索引），期间给保活帧，避免代理/浏览器把空闲连接掐掉
+        search_task = asyncio.create_task(asyncio.to_thread(
+            self.search_related_nodes, question, course_id, document_id, 5, allowed_ids))
+        # 客户端提前断开时，检索任务若接着抛错也要把异常取走（否则日志里全是
+        # "Task exception was never retrieved"）
+        search_task.add_done_callback(_drain_task_exception)
+        while True:
+            done, _ = await asyncio.wait({search_task}, timeout=_HEARTBEAT_SECONDS)
+            if done:
+                break
+            yield {"event": "ping", "data": {}}
+        sources = search_task.result()
         yield {"event": "sources", "data": {"sources": sources}}
 
         contexts = [_format_node(n) for n in sources]
@@ -391,9 +434,24 @@ class QAService:
 
         loop = asyncio.get_running_loop()
         queue: asyncio.Queue = asyncio.Queue()
+        stop = threading.Event()
+        # 后台线程写、事件循环读；只放一个 key，跨线程读写由 GIL 保证原子性
+        holder: dict = {}
+
+        def _emit(kind, payload) -> None:
+            """线程 → 事件循环投递；客户端已断开或事件循环已关闭时安静丢弃。"""
+            if stop.is_set():
+                return
+            try:
+                loop.call_soon_threadsafe(queue.put_nowait, (kind, payload))
+            except RuntimeError:
+                # 事件循环已关闭（服务停止）：没有人再消费了
+                pass
 
         def _produce() -> None:
             """后台线程：消费 openai 同步流，逐块投递给事件循环（禁止在此使用 asyncio API）。"""
+            stream = None
+            finish_reason = None
             try:
                 with track_llm_call("qa_stream"):
                     stream = self.client.chat.completions.create(
@@ -408,36 +466,61 @@ class QAService:
                         timeout=settings.QA_TIMEOUT,
                         stream=True,
                     )
+                    holder["stream"] = stream
                     for chunk in stream:
+                        if stop.is_set():
+                            break
                         choices = getattr(chunk, "choices", None) or []
                         if not choices:
                             continue
+                        finish_reason = getattr(choices[0], "finish_reason", None) or finish_reason
                         delta = getattr(choices[0], "delta", None)
                         text = getattr(delta, "content", None) if delta else None
                         if text:
-                            loop.call_soon_threadsafe(queue.put_nowait, ("delta", text))
-                loop.call_soon_threadsafe(queue.put_nowait, ("done", None))
+                            _emit("delta", text)
+                _emit("done", finish_reason)
             except Exception as e:  # noqa: BLE001 - 流式失败必须变成 error 事件，不能吞
                 _logger.warning("流式问答失败: %s", e)
-                loop.call_soon_threadsafe(queue.put_nowait, ("error", str(e)))
+                _emit("error", str(e))
+            finally:
+                _close_quietly(stream)
 
         threading.Thread(target=_produce, daemon=True, name="qa-stream").start()
 
         parts: List[str] = []
-        while True:
-            kind, payload = await queue.get()
-            if kind == "delta":
-                parts.append(payload)
-                yield {"event": "delta", "data": {"text": payload}}
-            elif kind == "done":
-                yield {"event": "done",
-                       "data": {"answer": "".join(parts), "sources": sources}}
-                return
-            else:
-                # 与同步路径一致的口径：明确报错，绝不伪造答案
-                yield {"event": "error",
-                       "data": {"message": f"抱歉，问答服务暂时不可用：{payload}"}}
-                return
+        try:
+            while True:
+                try:
+                    kind, payload = await asyncio.wait_for(queue.get(),
+                                                           timeout=_HEARTBEAT_SECONDS)
+                except asyncio.TimeoutError:
+                    # 模型在长时间思考 / 网络抖动：发保活帧，不影响正文
+                    yield {"event": "ping", "data": {}}
+                    continue
+                if kind == "delta":
+                    parts.append(payload)
+                    yield {"event": "delta", "data": {"text": payload}}
+                elif kind == "done":
+                    yield {"event": "done",
+                           "data": {"answer": "".join(parts).strip(),
+                                    "sources": sources,
+                                    "finish_reason": payload}}
+                    return
+                else:
+                    # 与同步路径一致的口径：明确报错、绝不伪造答案；
+                    # partial 让前端能把已经生成的半截正文保留下来
+                    yield {"event": "error",
+                           "data": {"message": f"抱歉，问答服务暂时不可用：{payload}",
+                                    "partial": "".join(parts).strip()}}
+                    return
+        finally:
+            # 正常收尾或客户端断开（GeneratorExit / CancelledError）都会走到这里：
+            # 立刻置位并关掉上游流，别让后台线程继续把整段答案读完。
+            stop.set()
+            upstream = holder.get("stream")
+            if upstream is not None:
+                threading.Thread(target=_close_quietly, args=(upstream,),
+                                 daemon=True, name="qa-stream-close").start()
 
     async def ask(self, question: str, course_id=None, document_id=None,
                   allowed_ids: List[int] = None) -> str:

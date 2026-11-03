@@ -26,6 +26,9 @@ from datetime import datetime
 # 只统计这些「AI 能力」的 LLM 调用（其余调用点未接入，见下）
 LLM_SCOPES = {
     "qa": "智能问答",
+    # 学生端主入口已切到 SSE 流式：漏登记会让「LLM 调用次数/成功率」在管理员端
+    # 长期显示为 0（调用其实发生了，只是统计不到）
+    "qa_stream": "智能问答（流式）",
     "fusion_disambiguation": "实体消歧",
 }
 

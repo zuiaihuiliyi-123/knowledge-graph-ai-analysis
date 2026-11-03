@@ -89,10 +89,11 @@ async def ask_question_stream(request: QuestionRequest,
     """流式问答（SSE）。
 
     事件序列：
+        （`: ping`）                                        ← 长时间无输出时的保活注释帧
         event: sources   data: {"sources": [...]}       ← 先给证据链，前端可立即渲染
         event: delta     data: {"text": "…"}            ← 可能多次
-        event: done      data: {"answer": "全文", "sources": [...]}
-        event: error     data: {"message": "…"}         ← 失败时替代 done
+        event: done      data: {"answer": "全文", "sources": [...], "finish_reason": "stop"}
+        event: error     data: {"message": "…", "partial": "…"}  ← 失败时替代 done
 
     与 `/ask` 共用同一套检索与权限判定；`sources` 就是本次真正喂给 LLM 的上下文。
     响应头带 `X-Accel-Buffering: no`：反向代理（Nginx 等）默认会缓冲响应，
@@ -107,6 +108,11 @@ async def ask_question_stream(request: QuestionRequest,
             async for item in qa_service.stream_answer(
                     request.question, request.course_id, request.document_id,
                     allowed_ids=allowed_ids):
+                if item["event"] == "ping":
+                    # 注释帧：SSE 规范里的保活写法。解析器会忽略它，
+                    # 但代理/浏览器据此知道连接还活着（长检索、模型思考期间不发会断流）。
+                    yield ": ping\n\n"
+                    continue
                 yield _sse(item["event"], item["data"])
         except Exception as exc:  # noqa: BLE001 - 流已开始，只能以 error 事件告知
             yield _sse("error", {"message": f"问答流中断：{exc}"})
@@ -116,7 +122,7 @@ async def ask_question_stream(request: QuestionRequest,
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
+            # Connection 是逐跳头，ASGI 服务不会转写；保留反而容易误导排查，故不设
             "X-Accel-Buffering": "no",
         },
     )

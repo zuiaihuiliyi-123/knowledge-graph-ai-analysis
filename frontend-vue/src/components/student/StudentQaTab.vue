@@ -68,15 +68,17 @@
             <template v-else>
               <div class="turn-avatar"><el-icon><MagicStick /></el-icon></div>
               <div class="turn-body">
-                <div v-if="m.error" class="turn-error" :title="m.errDetail || ''">
+                <div v-if="m.error" class="turn-error msg-error" :title="m.errDetail || ''">
                   <el-icon><WarningFilled /></el-icon>
-                  <span>AI 服务暂时不可用，请稍后重试</span>
+                  <span>{{ m.errorMessage || 'AI 服务暂时不可用，请稍后重试' }}</span>
                 </div>
                 <div v-else class="turn-text md" v-html="renderMarkdown(m.content)"></div>
                 <!-- 流式生成中：正文还在增长时的轻提示 -->
                 <div v-if="m.streaming" class="msg-streaming">
                   {{ m.content ? '正在生成…' : '正在思考…' }}
                 </div>
+                <!-- 生成结束但结果不完整（截断 / 中断）：明确说明，不假装完整 -->
+                <div v-if="m.note && !m.streaming" class="msg-note">{{ m.note }}</div>
 
                 <div v-if="!m.error && m.content && !m.streaming" class="turn-ops">
                   <button class="turn-op" @click="copyAnswer(m)">
@@ -527,6 +529,12 @@ function relativeTime(t) {
   margin-top: 6px;
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
+}
+/* 结果不完整（截断 / 中断）的说明：警告色，但不打断阅读 */
+.msg-note {
+  margin-top: 6px;
+  font-size: var(--font-size-caption);
+  color: var(--color-warning);
 }
 /* 切换学习资料的分隔行：把两段上下文分开，避免误读成同一轮问答 */
 .chat-divider {
