@@ -89,7 +89,7 @@ flowchart LR
 │   │   ├── utils/               # 文本预处理
 │   │   └── main.py              # 应用入口与路由注册
 │   ├── data/                    # app.db / uploads / sample_docs（不入库，首次启动自动创建）
-│   ├── test_*.py                # 49 个端到端验证脚本（自带断言）
+│   ├── test_*.py                # 74 个端到端验证脚本（自带断言）
 │   ├── eval_*.py                # 13 个评测脚本（抽取准确率、ANN、题库召回…）
 │   ├── eval_data/               # 评测结果 JSON
 │   ├── scripts/                 # 数据准备与迁移脚本
@@ -99,19 +99,21 @@ flowchart LR
 ├── frontend-vue/                # Vue 3 前端（当前唯一前端）
 │   ├── src/
 │   │   ├── api/                 # 接口封装与响应解包
-│   │   ├── components/          # 图谱画布、文档选择器、阅读器、管理端组件
+│   │   ├── components/          # 按域分：teacher / student / reader / course / admin
+│   │   ├── composables/         # 组件配套逻辑（图谱编辑、题库、监测…）
 │   │   ├── router/              # 路由与角色守卫
 │   │   ├── stores/              # Pinia 状态
 │   │   ├── views/               # 教师端 / 学生端 / 课程中心 / 管理员端
 │   │   └── main.js
-│   ├── tests/                   # Playwright 端到端测试（11 个 spec）
+│   ├── tests/                   # Playwright 端到端测试（14 个 spec）
 │   ├── vite.config.js           # 开发代理 /api、/health → :8000
 │   ├── eslint.config.js         # ESLint 扁平配置
 │   └── playwright.config.ts
 ├── .github/workflows/ci.yml     # CI：ruff + 导入冒烟 + ESLint + 生产构建
 ├── pyproject.toml               # ruff 配置（不声明运行期依赖）
-├── docs/                        # 设计与评测文档（见文末索引）
-├── md2tex.py                    # Markdown → LaTeX 辅助脚本
+├── docs/                        # 设计与评测文档（完整索引见 docs/README.md）
+├── materials/                   # 答辩与提交材料：PPT、讲稿、AI 使用报告
+├── tools/md2tex.py              # Markdown → LaTeX 辅助脚本（生成 docs/*.tex）
 ├── CLAUDE.md                    # 面向开发者的代码库说明
 └── README.md
 ```
@@ -256,7 +258,7 @@ cd frontend-vue && npm run lint
 npm run build
 ```
 
-- 后端共 **49 个 `test_*.py`** 验证脚本与 **13 个 `eval_*.py`** 评测脚本；前端有 **11 个 Playwright spec**
+- 后端共 **74 个 `test_*.py`** 验证脚本与 **13 个 `eval_*.py`** 评测脚本；前端有 **14 个 Playwright spec**
 - **CI**（[.github/workflows/ci.yml](.github/workflows/ci.yml)）在每次 push / PR 执行：后端 ruff + `import app.main` 冒烟，前端 ESLint + `vite build`
 - ⚠️ 多数验证脚本会**真实写入** `app.db` 与 Neo4j（创建账号、课程、节点后自行清理）。建议在专用环境运行，跑完核对数据是否复原；因此它们**不放进 CI**
 - 评测运行步骤见 [评测运行简明教程](docs/评测运行简明教程.md)
@@ -281,4 +283,4 @@ npm run build
 | [问题修复记录](docs/问题修复记录.md) | 真实缺陷的定位与修复过程 |
 | [评测运行简明教程](docs/评测运行简明教程.md) | 三步跑通抽取准确率评测 |
 
-更多文档见 [`docs/`](docs/) 目录。
+完整文档索引（29 份，按需求 / 设计 / 评测 / 交付 / 过程记录分类）见 [`docs/README.md`](docs/README.md)；答辩 PPT、讲稿与 AI 使用验证报告见 [`materials/`](materials/)。

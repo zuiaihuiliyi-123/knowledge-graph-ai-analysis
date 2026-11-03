@@ -82,6 +82,15 @@ backend/backup/*.bak
 backend/backup/sqlite_*.db
 backend/_uvicorn*.log
 
+# LaTeX 编译中间产物（VS Code + LaTeX Workshop 保存 .tex 时会自动生成）
+# 论文 .tex 与图表源文件入库；编译结果不入库，需要交付的 PDF 请显式 git add
+*.aux
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
 # Streamlit
 .streamlit/
 

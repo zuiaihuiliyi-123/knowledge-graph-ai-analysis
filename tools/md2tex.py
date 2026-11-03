@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """《系统使用说明文档》Markdown → LaTeX 转换器
 
-用法：
-    python md2tex.py docs/系统使用说明文档.md docs/系统使用说明文档.tex
+用法（在仓库根目录执行）：
+    python tools/md2tex.py docs/系统使用说明文档.md docs/系统使用说明文档.tex
 
 为什么自己写而不直接用 pandoc：
 1) 原文含大量 emoji（📷🅿️✅❌☐），XeLaTeX 无法渲染，需按语义替换为 LaTeX 宏；
@@ -408,9 +408,9 @@ PREAMBLE = r"""% !TEX program = xelatex
 %=========================================================================
 %  基于 AIGC 的课程知识图谱智能构建与学习导航系统 · 系统使用说明文档
 %
-%  由 md2tex.py 自动生成，请勿直接编辑本文件——
-%  修订请改 docs/系统使用说明文档.md 后重新运行：
-%      python md2tex.py docs/系统使用说明文档.md docs/系统使用说明文档.tex
+%  由 tools/md2tex.py 自动生成，请勿直接编辑本文件——
+%  修订请改 docs/系统使用说明文档.md 后重新运行（在仓库根目录）：
+%      python tools/md2tex.py docs/系统使用说明文档.md docs/系统使用说明文档.tex
 %
 %  ★ 编译方式：必须使用 XeLaTeX（Overleaf：Menu → Compiler → XeLaTeX）
 %    默认的 pdfLaTeX 无法处理中文，会直接编译失败。

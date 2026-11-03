@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 "服务外包大赛"（A10 赛题）参赛项目：基于 AIGC 的课程知识图谱智能构建与学习系统。核心链路：课程文档（PDF/TXT/DOCX/MD）→ LLM 抽取知识点与关系 → Neo4j 知识图谱 → 图谱可视化 + RAG 问答 + 学习路径推荐。8 周赛程，交付物除代码外还包括 Prompt 工程记录、知识抽取测试报告、问答测试集（20+ 题）、演示视频与 PPT。
 
-- 更新版开发计划见会话中的《A10 赛题项目开发计划书》；仓库内 [docs/项目说明.md](docs/项目说明.md) 是较旧版本，以计划书为准
-- `docs/` 下有 17 份专题文档（数据库设计、题库功能、协作与图谱共享、知识点自动标注设计、论文算法复现实验、评测运行简明教程、问题修复记录、交付说明…）。**改对应模块前先查**——多数设计决策与实测数据都记在里面
-- README.md 已明显过时：仍以 Streamlit 描述前端（`frontend/app.py` **已不存在**），声称的 `backend/app/models/user.py` 不存在，根目录 `tests/` 是个空目录；而占仓库近半规模的 `frontend-vue/` 与 git 分析模块 README 完全未提
+- 开发计划在仓库内有三个版本，按时间递进：[docs/项目说明_初稿.md](docs/项目说明_初稿.md)（最初的阶段清单）→ [docs/项目说明_v1.md](docs/项目说明_v1.md)（第一版计划书）→ [docs/项目说明_v2.md](docs/项目说明_v2.md)（V2.0，含赛题核心指标对照，**以它为准**）。注意 v2 的部分技术描述（如"Chroma 向量库"）已被代码取代，实现细节以代码为准
+- `docs/` 下有 29 份专题文档（数据库设计、题库功能、协作与图谱共享、知识点自动标注设计、论文算法复现实验、评测运行简明教程、问题修复记录、交付说明…），完整分类索引见 [docs/README.md](docs/README.md)。**改对应模块前先查**——多数设计决策与实测数据都记在里面
+- 根 [README.md](README.md) 是唯一总入口（定位 / 功能 / 快速开始 / 环境变量 / 验证与评测 / 文档索引），本文件只补充"改代码必读"的架构约束与历史坑，两者分工不重复。答辩材料（PPT、讲稿、AI 使用验证报告）在 `materials/`，不要在 `docs/` 里另起一份
 - 代码注释、文档、commit message 全部使用中文，新代码保持一致
 
 ## 常用命令
@@ -45,7 +45,7 @@ curl http://localhost:8000/health
 |---|---|---|
 | 端到端验证脚本 | `backend/test_*.py` | 自带断言、输出 `通过 N/M`，直接 `python test_xxx.py` 运行。多数会**真写 app.db 与 Neo4j 并自清** |
 | 评测脚本 | `backend/eval_*.py` | 知识抽取准确率 / ANN 对比 / 布隆过滤器等，只读，结果落 `backend/eval_data/*.json` |
-| 前端 e2e | `frontend-vue/tests/*.spec.ts` | Playwright，11 个 spec |
+| 前端 e2e | `frontend-vue/tests/*.spec.ts` | Playwright，14 个 spec |
 | 静态检查 | `pyproject.toml` + `frontend-vue/eslint.config.js` | `ruff check .`（Pyflakes + 语法错误）与 `npm run lint`（ESLint error 级） |
 | CI | `.github/workflows/ci.yml` | 后端 ruff + `import app.main` 冒烟；前端 lint + `vite build`。不连 Neo4j / LLM |
 
