@@ -255,9 +255,11 @@ export const useAppStore = defineStore('app', {
       await this.refreshAfterMembershipChange()
       return data
     },
-    /** 申请加入公开课程 */
+    /** 从「发现课程」加入公开课（返回 {status:'approved'|'pending'}） */
     async applyToCourse(courseId, reason = null) {
       const data = await api.applyToCourse(courseId, reason)
+      // 「直接加入」的课程会就地变成 approved，成员关系变了要刷新课程列表
+      await this.refreshAfterMembershipChange()
       return data
     },
     /** 学生退出课程（软移除，学习记录与收藏保留） */

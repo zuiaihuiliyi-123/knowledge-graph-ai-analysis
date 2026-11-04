@@ -113,7 +113,9 @@
                   size="small"
                   disabled
                 >已关闭加入</el-button>
-                <el-button v-else size="small" type="primary" @click="openApply(c)">申请加入</el-button>
+                <el-button v-else size="small" type="primary" @click="openApply(c)">
+                  {{ c.join_mode === 'auto' ? '直接加入' : '申请加入' }}
+                </el-button>
               </div>
             </el-card>
           </div>
@@ -211,8 +213,12 @@
       </el-table>
     </div>
 
-    <!-- 申请加入（发现课程） -->
-    <el-dialog v-model="applyVisible" title="申请加入课程" width="460px">
+    <!-- 加入课程（发现课程）：join_mode='auto' 是直接入课，不产生待审核 -->
+    <el-dialog
+      v-model="applyVisible"
+      :title="applying?.join_mode === 'auto' ? '加入课程（无需审核）' : '申请加入课程'"
+      width="460px"
+    >
       <div class="apply-course">{{ applying?.course_name }}</div>
       <div class="apply-sub">
         {{ applying?.teacher_name || '—' }}
@@ -224,11 +230,15 @@
         :rows="3"
         maxlength="200"
         show-word-limit
-        placeholder="选填：给教师留言说明你的申请理由"
+        :placeholder="applying?.join_mode === 'auto'
+          ? '选填：给教师留言（该课程为「直接加入」，提交后立即可学习）'
+          : '选填：给教师留言说明你的申请理由'"
       />
       <template #footer>
         <el-button @click="applyVisible = false">取消</el-button>
-        <el-button type="primary" :loading="applying2" @click="doApply">提交申请</el-button>
+        <el-button type="primary" :loading="applying2" @click="doApply">
+          {{ applying?.join_mode === 'auto' ? '加入课程' : '提交申请' }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -471,8 +481,18 @@ function openApply(c) {
 async function doApply() {
   applying2.value = true
   try {
-    await store.applyToCourse(applying.value.course_id, applyReason.value?.trim() || null)
-    ElMessage.success('已提交申请，等待教师审核')
+    const data = await store.applyToCourse(applying.value.course_id, applyReason.value?.trim() || null)
+    // 「直接加入」的课程后端会直接 approved，别再说「等待教师审核」
+    if (data?.status === 'approved') {
+      ElMessage.success(`已加入课程「${data.course_name}」`)
+      await loadMine()
+      if (!isTeacher.value) {
+        activeTab.value = 'mine'
+        onTabChange('mine')
+      }
+    } else {
+      ElMessage.success('已提交申请，等待教师审核')
+    }
     applyVisible.value = false
     await loadDiscover()
     await loadPending()

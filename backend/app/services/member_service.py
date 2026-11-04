@@ -1,12 +1,17 @@
 """课程成员服务（课程中心：加入 / 申请 / 审核 / 邀请 / 移除）
 
 加入规则（安全关键，全部在此收口）：
-- 加课码 + join_mode='auto'      -> 直接 approved
-- 加课码 + join_mode='approval'  -> pending，等教师审核
-- 加课码 + join_mode='closed'    -> 拒绝（4006）；但邀请链接仍然有效
-- 邀请令牌                       -> 一律 approved（教师已明确同意，且不因 join_mode=closed 失效）
-- 曾被移除（removed）后无论何种方式 -> 强制 pending + join_source='apply'
+- 加课码 + join_mode='auto' + 学生 -> 直接 approved；此前停留在「待审核 / 被拒 / 曾被移除」
+  的旧记录同样就地升为 approved —— 这一档的定义就是「无需审核」，再挂 pending 只会把学生
+  卡在「申请中」
+- 加课码 + join_mode='approval'  -> pending，等教师审核；
+  曾被移除（removed）后也必须重新审核 + join_source='apply'
   （防止泄露出去的加课码把「已被移除的学生」重新自动放进来）
+- 加课码 + join_mode='closed'    -> 拒绝（4006）；但邀请链接仍然有效
+- 加课码 + 教师账号               -> 一律 pending（协作教师有课程管理权，防加课码外泄直接得权）
+- 邀请令牌                       -> 一律 approved（教师已明确同意，且不因 join_mode=closed 失效）
+- 发现课程「申请加入」+ join_mode='auto' + 学生 -> 直接 approved（不是申请，是入课）
+- 发现课程「申请加入」+ 其他       -> pending
 - 已被拒绝（rejected）后可重新申请 -> pending
 
 统一返回 {"ok": bool, "code": int, "message": str, "data": dict}
@@ -188,13 +193,18 @@ class MemberService:
     # ---------- 加入（加课码 / 申请 / 邀请） ----------
 
     @staticmethod
-    def _guard_membership(member: dict) -> dict:
-        """返回 (允许继续?, 直接拒绝的响应)。已是成员 / 审核中直接拒绝，避免重复申请。"""
+    def _guard_membership(member: dict, allow_pending: bool = False) -> dict:
+        """返回需要直接拒绝的响应（None = 可以继续）。
+
+        已是成员一律拒绝；「审核中」默认也拒绝，避免重复提交。
+        allow_pending=True 用于「直接加入」的课程：待审核的旧记录会被就地升为
+        approved，不再把学生挡回「请耐心等待」。
+        """
         if member is None:
             return None
         if member["status"] == "approved":
             return MemberService._fail(4004, "您已是该课程成员")
-        if member["status"] == "pending":
+        if member["status"] == "pending" and not allow_pending:
             return MemberService._fail(4004, "您的申请正在审核中，请耐心等待")
         return None
 
@@ -218,32 +228,38 @@ class MemberService:
         if course["teacher_id"] == user_id:
             return MemberService._fail(4004, "您是该课程的创建教师")
 
-        member = sql_db.get_membership(course_id, user_id)
-        blocked = MemberService._guard_membership(member)
-        if blocked:
-            return blocked
-
         # 加入角色随账号角色：教师加入即协作教师（需审核后共管课程），学生即学生成员
         account = sql_db.get_user_by_id(user_id) or {}
         member_role = "teacher" if account.get("role") == "teacher" else "student"
 
         join_mode = course.get("join_mode") or "approval"
-        # 曾被移除的学生：无论课程是否自动加入，都必须重新走审核，
-        # 否则一个外泄的加课码就能把「已被移除」的决定撤销掉。
-        if member and member["status"] == "removed":
-            sql_db.upsert_membership(course_id, user_id, member_role, "pending", "apply", reason)
-            return {"ok": True, "code": 0, "message": "success", "data": {
-                "course_id": course_id, "course_name": course["course_name"],
-                "status": "pending", "join_mode": join_mode}}
+        # 「直接加入」的课程对学生没有审核环节：不管此前是待审核 / 被拒 / 曾被移除，
+        # 一律直接放行——这一档的定义就是「无需审核」，再挂 pending 只会让学生卡住。
+        auto_join = join_mode == "auto" and member_role == "student"
+
+        member = sql_db.get_membership(course_id, user_id)
+        blocked = MemberService._guard_membership(member, allow_pending=auto_join)
+        if blocked:
+            return blocked
 
         if join_mode == "closed":
             return MemberService._fail(4006, "该课程已关闭加入，请联系教师获取邀请链接")
 
-        # 教师经加课码加入一律需审核（协作教师有课程管理权，防加课码外泄直接得权）
-        if member_role == "teacher":
+        if auto_join:
+            status = "approved"
+        elif member_role == "teacher":
+            # 教师经加课码加入一律需审核（协作教师有课程管理权，防加课码外泄直接得权）
             status = "pending"
+        elif member and member["status"] == "removed":
+            # 「审核后加入」的课程：曾被移除的学生必须重新走审核，
+            # 否则一个外泄的加课码就能把「已被移除」的决定撤销掉。
+            sql_db.upsert_membership(course_id, user_id, member_role, "pending", "apply", reason)
+            return {"ok": True, "code": 0, "message": "success", "data": {
+                "course_id": course_id, "course_name": course["course_name"],
+                "status": "pending", "join_mode": join_mode}}
         else:
-            status = "approved" if join_mode == "auto" else "pending"
+            status = "pending"
+
         sql_db.upsert_membership(course_id, user_id, member_role, status, "code", reason)
         return {"ok": True, "code": 0, "message": "success", "data": {
             "course_id": course_id, "course_name": course["course_name"],
@@ -251,7 +267,12 @@ class MemberService:
 
     @staticmethod
     def apply_to_course(user_id: int, course_id: int, reason: str = None) -> dict:
-        """从「发现课程」申请加入公开课：始终进入待审核"""
+        """从「发现课程」加入公开课。
+
+        join_mode='auto' 的学生：不是「申请」而是直接入课（approved），
+        否则学生点了「直接加入」的课还要等审核，与课程设置自相矛盾。
+        其余情况始终进入待审核。
+        """
         if reason and len(reason) > 200:
             return MemberService._fail(1001, "申请理由过长（最大 200 字符）")
         course = sql_db.get_course(course_id)
@@ -262,19 +283,23 @@ class MemberService:
         if course["teacher_id"] == user_id:
             return MemberService._fail(4004, "您是该课程的创建教师")
 
-        member = sql_db.get_membership(course_id, user_id)
-        blocked = MemberService._guard_membership(member)
-        if blocked:
-            return blocked
-
         # 申请角色随账号角色：教师申请即协作教师（审核通过后共管课程），学生即学生成员
         account = sql_db.get_user_by_id(user_id) or {}
         member_role = "teacher" if account.get("role") == "teacher" else "student"
+        join_mode = course.get("join_mode") or "approval"
+        # 与加课码保持一致：「直接加入」+ 学生 = 无需审核
+        auto_join = join_mode == "auto" and member_role == "student"
 
-        sql_db.upsert_membership(course_id, user_id, member_role, "pending", "apply", reason)
+        member = sql_db.get_membership(course_id, user_id)
+        blocked = MemberService._guard_membership(member, allow_pending=auto_join)
+        if blocked:
+            return blocked
+
+        status = "approved" if auto_join else "pending"
+        sql_db.upsert_membership(course_id, user_id, member_role, status, "apply", reason)
         return {"ok": True, "code": 0, "message": "success", "data": {
             "course_id": course_id, "course_name": course["course_name"], "role": member_role,
-            "status": "pending", "join_mode": course.get("join_mode") or "approval"}}
+            "status": status, "join_mode": join_mode}}
 
     @staticmethod
     def leave_course(user_id: int, course_id: int) -> dict:

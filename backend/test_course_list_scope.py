@@ -150,22 +150,30 @@ def main():
           and all(i["my_role"] == "teacher" for i in d["items"]),
           str([i["my_role"] for i in d["items"]]))
 
-    # s2 申请 B（B 是 auto，但 /apply 一律 pending）
-    r = call("post", f"/api/v1/courses/{cB}/apply", s2, json={"reason": "想学"})
-    check("s2 申请加入公开课 B → pending",
+    # s2 申请 A（A 是 approval）→ 进待审核，理由入库
+    s2_id = sql_db.get_user_by_username(f"s2_{suffix}")["user_id"]
+    r = call("post", f"/api/v1/courses/{cA}/apply", s2, json={"reason": "想学"})
+    check("s2 申请「审核后加入」的公开课 A → pending",
           r.json().get("code") == 0 and r.json()["data"]["status"] == "pending", r.text[:140])
     d = data_of(call("get", "/api/v1/courses/my?status=pending&page_size=100", s2))
-    check("s2 的「申请中」列表含 B 与申请理由",
-          [i["course_id"] for i in d["items"]] == [cB]
+    check("s2 的「申请中」列表含 A 与申请理由",
+          [i["course_id"] for i in d["items"]] == [cA]
           and d["items"][0]["applied_reason"] == "想学", str(d["items"])[:160])
 
     # 拒绝后仍能在「申请中」看到审核意见
-    r = call("post", f"/api/v1/courses/{cB}/members/{sql_db.get_user_by_username(f's2_{suffix}')['user_id']}"
-                    f"/reject", t1, json={"comment": "名额已满"})
+    r = call("post", f"/api/v1/courses/{cA}/members/{s2_id}/reject", t1, json={"comment": "名额已满"})
     check("t1 拒绝 s2 的申请并给理由", r.json().get("code") == 0, r.text[:140])
     d = data_of(call("get", "/api/v1/courses/my?status=pending&page_size=100", s2))
     check("s2 仍能看到被拒记录与审核意见",
           d["items"][0]["review_comment"] == "名额已满", str(d["items"])[:160])
+
+    # 回归：B 是「直接加入」，学生加入就该直接成为成员，不许进待审核
+    r = call("post", f"/api/v1/courses/{cB}/apply", s2, json={"reason": "想学"})
+    check("s2 加入「直接加入」的公开课 B → 直接 approved（无需审核）",
+          r.json().get("code") == 0 and r.json()["data"]["status"] == "approved", r.text[:140])
+    check("B 上没有留下待审核记录",
+          sql_db.get_membership(cB, s2_id)["status"] == "approved",
+          str(sql_db.get_membership(cB, s2_id))[:140])
 
     print("\n" + "=" * 70)
     print("Step 5: 既有课程未丢失、教师能按关键词/分类过滤")
