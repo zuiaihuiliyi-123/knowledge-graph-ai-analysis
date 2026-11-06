@@ -29,6 +29,8 @@ TMP_DIR = tempfile.mkdtemp(prefix="kgu_perm_")
 TMP_DB = os.path.join(TMP_DIR, "app_copy.db")
 shutil.copy2(LIVE_DB, TMP_DB)
 os.environ["SQLITE_DB_PATH"] = TMP_DB
+# 阶段 1A 起教师注册需要邀请码；本脚本自建测试教师，显式给一个仅测试用的值。
+os.environ["TEACHER_INVITE_CODE"] = "T-PERM-MATRIX"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -86,8 +88,10 @@ def main():
 
     def token_of(username, password="pw123456", role=None):
         if role:
-            r = call("post", "/api/auth/register",
-                     json={"username": username, "password": password, "role": role})
+            payload = {"username": username, "password": password, "role": role}
+            if role == "teacher":
+                payload["teacher_invite_code"] = os.environ["TEACHER_INVITE_CODE"]
+            r = call("post", "/api/auth/register", json=payload)
             if code_of(r) not in (0, 2006):           # 2006 = 已存在（重复运行时）
                 raise SystemExit(f"注册 {username} 失败: {r.text}")
         r = call("post", "/api/auth/login", json={"username": username, "password": password})
