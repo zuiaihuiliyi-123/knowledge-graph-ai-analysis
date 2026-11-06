@@ -38,7 +38,7 @@ def invalidate_user_state(user_id: int | None = None) -> None:
 
 
 def load_user_state(user_id: int) -> dict | None:
-    """读取账号态 `{username, role, is_active}`；账号不存在返回 `None`（同样走缓存）。"""
+    """读取账号态 `{username, role, is_active, must_change_password, token_version}`。"""
     uid = int(user_id)
     now = time.monotonic()
     with _lock:
@@ -51,6 +51,8 @@ def load_user_state(user_id: int) -> dict | None:
         "username": row.get("username") or "",
         "role": (row.get("role") or "").strip(),
         "is_active": int(row.get("is_active", 1) or 0),
+        "must_change_password": int(row.get("must_change_password") or 0),
+        "token_version": int(row.get("token_version") or 0),
     }
     with _lock:
         _cache[uid] = (now, state)

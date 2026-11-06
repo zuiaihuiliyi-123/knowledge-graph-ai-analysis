@@ -389,7 +389,10 @@ class QAService:
                 )
             answer = response.choices[0].message.content.strip()
         except Exception as e:
-            answer = f"抱歉，问答服务暂时不可用：{str(e)}"
+            # 对外只返回固定文案，避免把上游 API 地址/模型名/服务器路径暴露给终端用户；
+            # 完整堆栈只进服务端日志，排查时按时间点检索。
+            _logger.exception("问答生成失败：%s", e)
+            answer = "抱歉，问答服务暂时不可用，请稍后重试。"
         return {"answer": answer, "sources": sources}
 
     async def stream_answer(self, question: str, course_id=None, document_id=None,
@@ -510,7 +513,7 @@ class QAService:
                     # 与同步路径一致的口径：明确报错、绝不伪造答案；
                     # partial 让前端能把已经生成的半截正文保留下来
                     yield {"event": "error",
-                           "data": {"message": f"抱歉，问答服务暂时不可用：{payload}",
+                           "data": {"message": "抱歉，问答服务暂时不可用，请稍后重试。",
                                     "partial": "".join(parts).strip()}}
                     return
         finally:

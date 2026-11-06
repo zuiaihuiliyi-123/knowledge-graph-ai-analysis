@@ -42,8 +42,12 @@
             </div>
           </el-option>
         </el-select>
-        <div v-if="courseId && !docLoading && documentList.length === 0" class="cds-hint">
-          该课程暂无文档，请先在教师端上传
+        <div v-if="courseId && docError" class="cds-hint cds-error">
+          获取学习资料失败：{{ docError }}
+          <el-button text type="primary" size="small" @click="onCourseChange(courseId, false)">重试</el-button>
+        </div>
+        <div v-else-if="courseId && !docLoading && documentList.length === 0" class="cds-hint">
+          该课程暂无可学习的文档，请联系授课教师上传资料
         </div>
         <div v-else-if="courseId && !docLoading && documentList.length === 1" class="cds-hint cds-single">
           <el-button text type="primary" @click="continueSingle">
@@ -76,6 +80,7 @@ const courseId = ref(props.initialCourseId ? String(props.initialCourseId) : '')
 const documentId = ref(props.initialDocumentId ? String(props.initialDocumentId) : '')
 const documentList = ref([])
 const docLoading = ref(false)
+const docError = ref('')
 
 const courseList = computed(() => store.courses)
 
@@ -97,12 +102,15 @@ function parseStatusText(s) {
 async function onCourseChange(cid, resetDoc = true) {
   if (resetDoc) documentId.value = ''
   documentList.value = []
+  docError.value = ''
   if (!cid) return
   docLoading.value = true
   try {
     documentList.value = await api.getDocuments(cid)
   } catch (e) {
+    // 不再把"加载失败"伪装成"暂无文档"：两者对用户的含义完全不同
     documentList.value = []
+    docError.value = e?.message || '文档列表加载失败'
   } finally {
     docLoading.value = false
   }
@@ -159,5 +167,8 @@ onMounted(() => {
 }
 .cds-single {
   padding: 0;
+}
+.cds-error {
+  color: #f56c6c;
 }
 </style>

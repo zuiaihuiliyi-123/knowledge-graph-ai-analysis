@@ -81,18 +81,29 @@ class UsersMixin:
 
 
     def update_password(self, user_id: int, password_hash: str) -> int:
-        """更新指定用户密码哈希（仅本人修改密码使用）"""
+        """更新指定用户密码哈希，并递增 token_version（旧 token 立即失效）。"""
         return self._execute(
-            "UPDATE t_user SET password_hash = ? WHERE user_id = ?",
-            (password_hash, user_id),
+            "UPDATE t_user SET password_hash = ?, "
+            "token_version = token_version + 1, updated_at = ? WHERE user_id = ?",
+            (password_hash, _now(), user_id),
         )
 
 
     def deactivate_user(self, user_id: int) -> int:
-        """注销（软停用）指定用户：置 is_active=0，保留历史数据；登录时会被拒绝"""
+        """注销（软停用）指定用户：置 is_active=0 并吊销现有 token，保留历史数据"""
         return self._execute(
-            "UPDATE t_user SET is_active = 0 WHERE user_id = ?",
-            (user_id,),
+            "UPDATE t_user SET is_active = 0, "
+            "token_version = token_version + 1, updated_at = ? WHERE user_id = ?",
+            (_now(), user_id),
+        )
+
+
+    def bump_token_version(self, user_id: int) -> int:
+        """吊销该用户已签发的全部 token（登出 / 强制下线）。"""
+        return self._execute(
+            "UPDATE t_user SET token_version = token_version + 1, "
+            "updated_at = ? WHERE user_id = ?",
+            (_now(), user_id),
         )
 
 

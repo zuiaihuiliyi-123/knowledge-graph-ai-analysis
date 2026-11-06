@@ -300,6 +300,7 @@
       </p>
       <div class="pwd-box">{{ generatedPassword }}</div>
       <template #footer>
+        <el-button @click="copyGeneratedPassword">复制密码</el-button>
         <el-button type="primary" @click="generatedVisible = false">我已记录</el-button>
       </template>
     </el-dialog>
@@ -312,6 +313,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -343,7 +345,7 @@ const editForm = reactive({
 const roleForm = reactive({ role: 'student' })
 const resetForm = reactive({ new_password: '' })
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 const roleLabel = (r) => ({ admin: '管理员', teacher: '教师', student: '学生' }[r] || r || '—')
 function roleTagType(r) {
   return { admin: 'primary', teacher: 'warning', student: 'success' }[r] || 'info'
@@ -537,6 +539,29 @@ async function submitReset() {
     ElMessage.error(e?.message || '重置密码失败')
   } finally {
     submitting.value = false
+  }
+}
+
+/** 复制系统生成的初始密码：16 位随机串手抄极易出错，且关窗后不可再查看 */
+async function copyGeneratedPassword() {
+  const text = generatedPassword.value || ''
+  if (!text) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    ElMessage.success('初始密码已复制')
+  } catch {
+    ElMessage.warning('复制失败，请手动选择密码文本复制')
   }
 }
 

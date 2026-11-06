@@ -145,17 +145,19 @@ class AdminMixin:
 
 
     def set_user_active(self, user_id: int, is_active: bool) -> int:
-        """启用 / 禁用账号（管理员操作；与「用户自助注销」共用 is_active 字段）"""
+        """启用 / 禁用账号（管理员操作）；同时递增 token_version 让旧会话立即失效。"""
         return self._execute(
-            "UPDATE t_user SET is_active = ?, updated_at = ? WHERE user_id = ?",
+            "UPDATE t_user SET is_active = ?, token_version = token_version + 1, "
+            "updated_at = ? WHERE user_id = ?",
             (1 if is_active else 0, _now(), user_id),
         )
 
 
     def set_user_role(self, user_id: int, role: str) -> int:
-        """修改用户角色（管理员操作）。调用方必须先用 USER_ROLES 白名单校验。"""
+        """修改用户角色（管理员操作）；同时递增 token_version，旧权限立即失效。"""
         return self._execute(
-            "UPDATE t_user SET role = ?, updated_at = ? WHERE user_id = ?",
+            "UPDATE t_user SET role = ?, token_version = token_version + 1, "
+            "updated_at = ? WHERE user_id = ?",
             (role, _now(), user_id),
         )
 

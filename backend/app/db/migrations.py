@@ -431,16 +431,16 @@ class MigrationMixin:
     # 重建 t_user 时保留的列（显式列名 INSERT…SELECT，避免历史列序差异）
     _USER_COLUMNS = (
         "user_id", "username", "password_hash", "role", "display_name",
-        "email", "is_active", "must_change_password", "created_at", "updated_at",
+        "email", "is_active", "must_change_password", "token_version",
+        "created_at", "updated_at",
     )
 
 
     def _migrate_admin_user_columns(self, conn: sqlite3.Connection):
-        """幂等迁移：t_user 补 must_change_password 列（管理员端强制改密）。
+        """幂等迁移：t_user 补 must_change_password / token_version 列。
 
-        历史行取默认值 0 —— 既有账号（包括已用过一段时间的 sysadmin）不会被强制改密，
-        避免一次升级把所有在线用户挡在改密页上。该标记只对**新引导创建**的账号
-        以及被管理员重置过密码的账号置 1。
+        历史行取默认值 0 —— 既有账号不会被强制改密，旧 JWT 也不会在升级瞬间失效
+        （旧 token 没有 ver 声明，按 0 处理；迁移后 token_version 也是 0）。
 
         用 PRAGMA table_info 守卫而非 ALTER ... IF NOT EXISTS：SQLite 没有后者。
         """
@@ -448,6 +448,11 @@ class MigrationMixin:
         if "must_change_password" not in cols:
             conn.execute(
                 "ALTER TABLE t_user ADD COLUMN must_change_password "
+                "INTEGER NOT NULL DEFAULT 0"
+            )
+        if "token_version" not in cols:
+            conn.execute(
+                "ALTER TABLE t_user ADD COLUMN token_version "
                 "INTEGER NOT NULL DEFAULT 0"
             )
 
@@ -500,6 +505,7 @@ class MigrationMixin:
                     is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
                     must_change_password INTEGER NOT NULL DEFAULT 0
                                   CHECK (must_change_password IN (0, 1)),
+                    token_version INTEGER NOT NULL DEFAULT 0,
                     created_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
                     updated_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
                 )

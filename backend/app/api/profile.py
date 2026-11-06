@@ -10,6 +10,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 
+from ..core.config import settings
 from ..core.dependencies import get_current_user
 from ..core.response import success, error
 from ..services.profile_service import ProfileService
@@ -42,6 +43,8 @@ async def update_profile(body: ProfileUpdate, current_user: dict = Depends(get_c
 async def upload_avatar(file: UploadFile = File(..., description="头像图片（jpg/jpeg/png/webp，≤2MB）"),
                         current_user: dict = Depends(get_current_user)):
     """上传头像（替换旧头像；文件名由服务端生成）"""
+    if getattr(file, "size", None) is not None and file.size > settings.MAX_AVATAR_SIZE:
+        return error(1002, f"头像大小超限，最大 {settings.MAX_AVATAR_SIZE // 1024 // 1024}MB")
     content = await file.read()
     result = ProfileService.save_avatar(current_user["user_id"], content, file.filename or "")
     return success(result["data"]) if result["ok"] else error(result["code"], result["message"])

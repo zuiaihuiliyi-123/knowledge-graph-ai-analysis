@@ -98,13 +98,13 @@ def main() -> int:
 
 
         # ---------- 降级立即生效 ----------
-        print("\nStep 4: 管理员降级 → 旧 token 立即失去教师权限")
+        print("\nStep 4: 管理员降级 → 旧 token 立即失效")
         res = AdminService.set_user_role(admin_ctx, teacher_id, "student")
         check("降级操作成功", res.get("ok") is True, str(res))
         resp = client.get("/api/v1/teacher/students/progress",
                           params={"course_id": 1},
                           headers={"Authorization": f"Bearer {token}"})
-        check("降级后旧 token 访问教师接口 → HTTP 403", resp.status_code == 403,
+        check("降级后旧 token 立即失效 → HTTP 401", resp.status_code == 401,
               f"HTTP {resp.status_code}")
 
         # ---------- 禁用立即生效 ----------
@@ -141,11 +141,12 @@ def main() -> int:
                   first.status_code == 200 and second.status_code == 200,
                   f"first={first.status_code} second={second.status_code}")
 
-            # 6b. TTL 置 0 → 下次请求即从库读取，降级立即可见
+            # 6b. TTL 置 0 → 下次请求即从库读取；set_user_role 已递增 token_version，
+            # 因此旧 token 直接 401（比按新角色返回 403 更严格：强制重新登录）
             user_state.USER_STATE_TTL = 0.0
             third = client.get("/api/v1/teacher/students/progress", params={"course_id": 1},
                                headers={"Authorization": f"Bearer {ttl_token}"})
-            check("TTL=0 时旁路改库立即生效 → 403", third.status_code == 403,
+            check("TTL=0 时旁路改库立即生效 → 401", third.status_code == 401,
                   f"HTTP {third.status_code}")
         finally:
             user_state.USER_STATE_TTL = original_ttl

@@ -17,6 +17,14 @@
       </div>
     </div>
 
+    <!-- 数据加载失败：明确提示 + 重试，而不是把 KPI 全渲染成 0 -->
+    <el-alert v-if="statsError" type="error" show-icon :closable="false" class="dash-error">
+      <div class="dash-error-body">
+        <span>数据加载失败：{{ statsError }}</span>
+        <el-button size="small" type="primary" plain @click="refreshStats">重试</el-button>
+      </div>
+    </el-alert>
+
     <!-- 核心指标 -->
     <div class="stats-row" v-loading="loading">
       <div
@@ -120,7 +128,6 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import { ElMessage } from 'element-plus'
 import {
   DataAnalysis, Aim, Connection, Compass, ArrowRight, Search,
   Collection, Document, User, UserFilled, Upload, Notebook,
@@ -151,6 +158,7 @@ const defaultStats = () => ({
 
 const stats = ref(defaultStats())
 const loading = ref(true)
+const statsError = ref('')
 
 const fmt = (n) => Number(n || 0).toLocaleString('zh-CN')
 
@@ -187,7 +195,7 @@ const todayText = computed(() => {
 const quickLinks = [
   { label: '课程管理', desc: '管理课程、图谱与教学监测', icon: Notebook, path: '/teacher?tab=courses', bg: 'linear-gradient(135deg,#4f8df7,#6a5cf6)' },
   { label: '图谱管理', desc: '查看课程知识图谱，可就地切换编辑审核', icon: Search, path: '/teacher?tab=preview', bg: 'linear-gradient(135deg,#22c08a,#14b8d6)' },
-  { label: '上传课程资料', desc: '上传文档，自动构建知识图谱', icon: Upload, path: '/teacher?tab=upload', bg: 'linear-gradient(135deg,#f5a623,#f4794d)' },
+  { label: '上传课程资料', desc: '上传文档，自动构建知识图谱', icon: Upload, path: '/teacher?tab=documents', bg: 'linear-gradient(135deg,#f5a623,#f4794d)' },
   { label: '题库管理', desc: '建设与维护课程配套题库', icon: Collection, path: '/teacher?tab=questions', bg: 'linear-gradient(135deg,#8b5cf6,#c084fc)' },
 ]
 
@@ -220,15 +228,30 @@ function emptyGraphic() {
 
 async function fetchStats() {
   loading.value = true
+  statsError.value = ''
   try {
     const data = await api.getDashboardStats()
     stats.value = { ...defaultStats(), ...data }
   } catch (e) {
-    ElMessage.warning(`数据总览加载失败：${e.message}`)
-    stats.value = defaultStats()
+    // 保留上一次成功的数据（首屏则为空），由页面顶部错误条提供重试入口。
+    // 旧行为把 stats 清零，视觉上等同于"平台数据被清空"，极易误导。
+    statsError.value = e?.message || '请稍后重试'
   } finally {
     loading.value = false
   }
+}
+
+/** 重试：重新取数后再重建图表（chart 实例仍指向旧数据，必须 dispose 后重init） */
+async function refreshStats() {
+  await fetchStats()
+  if (statsError.value) return
+  await nextTick()
+  donutChart?.dispose()
+  relChart?.dispose()
+  donutChart = null
+  relChart = null
+  initDonutChart()
+  initRelationChart()
 }
 
 const AXIS_LABEL = '#8590a8'
@@ -335,10 +358,7 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await fetchStats()
-  await nextTick()
-  initDonutChart()
-  initRelationChart()
+  await refreshStats()
   window.addEventListener('resize', handleResize)
 })
 
@@ -450,6 +470,17 @@ onBeforeUnmount(() => {
 }
 
 /* ===== KPI 卡 ===== */
+.dash-error {
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+}
+.dash-error-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .stats-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

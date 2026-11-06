@@ -40,7 +40,7 @@
           </el-form-item>
         </el-form>
 
-        <div class="quick-demo">
+        <div v-if="showDemos" class="quick-demo">
           <span class="quick-label">演示账号一键填充：</span>
           <el-tag
             v-for="d in demos"
@@ -53,17 +53,17 @@
 
         <div class="login-tips">
           <el-icon><InfoFilled /></el-icon>
-          <span>首次使用可在账号注册入口创建账号；教师创建课程、上传资料后即可体验完整流程。</span>
+          <span>学生可在注册入口自助创建账号；教师账号需由管理员创建或审批。</span>
         </div>
 
         <div class="form-footer">
           <el-button link type="primary" @click="router.push('/register')">没有账号？去注册</el-button>
-          <el-button link @click="router.push('/invite')">加课码 / 邀请链接</el-button>
+          <el-button link @click="goJoin">加课码 / 邀请链接</el-button>
         </div>
       </div>
       <div class="form-status">
-        <span class="status-dot" :class="store.backendOnline ? 'on' : 'off'" />
-        {{ store.backendOnline ? '后端服务在线，可正常登录' : '后端服务未连接，请先启动后端服务' }}
+        <span class="status-dot" :class="statusClass" />
+        {{ statusText }}
       </div>
     </div>
 
@@ -72,8 +72,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, InfoFilled } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
@@ -81,12 +81,17 @@ import AuthBrandPanel from '../components/AuthBrandPanel.vue'
 import BackendStatusCard from '../components/BackendStatusCard.vue'
 import BrandMark from '../components/BrandMark.vue'
 
+const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
 
 const formRef = ref(null)
 const loading = ref(false)
 const form = reactive({ username: '', password: '', role: 'student' })
+
+// 演示账号默认只在开发模式显示；如需在比赛演示包中显示，
+// 构建时设置 VITE_SHOW_DEMO_ACCOUNTS=1，并确保这些账号已改过默认口令。
+const showDemos = import.meta.env.DEV || import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === '1'
 const demos = [
   { role: 'teacher', label: '教师 demo_teacher', username: 'demo_teacher', password: 'demo123456' },
   { role: 'student', label: '学生 demo_student', username: 'demo_student', password: 'demo123456' },
@@ -97,10 +102,35 @@ const rules = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
+const statusClass = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return 'checking'
+  return store.backendOnline ? 'on' : 'off'
+})
+const statusText = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return '正在检测后端服务…'
+  return store.backendOnline
+    ? '后端服务在线，可正常登录'
+    : '服务暂时不可用，请稍后重试或联系管理员'
+})
+
 function fillDemo(d) {
   form.username = d.username
   form.password = d.password
   form.role = d.role
+}
+
+function goJoin() {
+  router.push({ path: '/course-center', query: { tab: 'join' } })
+}
+
+function safeRedirect() {
+  const raw = route.query.redirect
+  const target = Array.isArray(raw) ? raw[0] : raw
+  // 只接受站内绝对路径，避免被构造成 //evil.com 之类的开放重定向
+  if (typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')) {
+    return target
+  }
+  return store.isAdmin ? '/admin' : '/course-center?tab=mine'
 }
 
 async function handleLogin() {
@@ -114,7 +144,7 @@ async function handleLogin() {
   try {
     await store.login(form.username, form.password)
     ElMessage.success('登录成功')
-    router.push('/course-center')
+    router.replace(safeRedirect())
   } catch (e) {
     ElMessage.error(e.message || '登录失败')
   } finally {
@@ -124,6 +154,13 @@ async function handleLogin() {
 
 onMounted(() => {
   store.checkHealth().catch(() => {})
+  // 由响应拦截器在 401 时写入：提示"登录已过期"，而不是无声跳回登录页
+  try {
+    if (sessionStorage.getItem('kg_auth_expired') === '1') {
+      sessionStorage.removeItem('kg_auth_expired')
+      ElMessage.warning('登录状态已过期，请重新登录')
+    }
+  } catch { /* 存储不可用时忽略 */ }
 })
 </script>
 
@@ -219,6 +256,15 @@ onMounted(() => {
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 .status-dot.on { background: #18b87a; box-shadow: 0 0 8px rgba(24,184,122,.7); }
 .status-dot.off { background: #f5475d; box-shadow: 0 0 8px rgba(245,71,93,.6); }
+.status-dot.checking {
+  background: #f0a020;
+  box-shadow: 0 0 8px rgba(240,160,32,.6);
+  animation: kg-status-pulse 1.2s ease-in-out infinite;
+}
+@keyframes kg-status-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
 
 /* ============ 响应式 ============ */
 @media (max-width: 960px) {

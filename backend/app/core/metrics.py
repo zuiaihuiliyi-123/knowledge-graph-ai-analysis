@@ -53,6 +53,9 @@ _requests = {
 }
 _by_path = defaultdict(lambda: {"count": 0, "errors": 0, "total_ms": 0.0})
 _llm = defaultdict(lambda: {"calls": 0, "success": 0, "failed": 0, "total_ms": 0.0})
+# 路径桶上限：即使有未匹配路由或将来又退回原始 path，也不会无限增长。
+# 超出后归入 __other__，管理端的「按路径统计」仍是可解释的。
+_MAX_PATH_BUCKETS = 200
 
 
 def record_request(path: str, status_code: int, duration_ms: float) -> None:
@@ -65,6 +68,8 @@ def record_request(path: str, status_code: int, duration_ms: float) -> None:
             _requests["errors"] += 1
         if status_code >= 500:
             _requests["server_errors"] += 1
+        if path not in _by_path and len(_by_path) >= _MAX_PATH_BUCKETS:
+            path = "__other__"
         bucket = _by_path[path]
         bucket["count"] += 1
         bucket["total_ms"] += duration_ms

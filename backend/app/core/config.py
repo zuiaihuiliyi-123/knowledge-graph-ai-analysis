@@ -135,6 +135,7 @@ class Settings:
     # 文件上传配置
     UPLOAD_DIR: str = _resolve_path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB
+    MAX_BATCH_FILES: int = 20  # 单次批量上传文件数上限
     ALLOWED_EXTENSIONS: set = {".pdf", ".docx", ".txt", ".md"}
 
     # 头像上传配置（个人中心）。与课程文档分目录存放，避免与 course_id 目录混淆
@@ -168,6 +169,23 @@ class Settings:
     #      （学生注册不受影响；教师账号由管理员在后台创建或提升）。
     # 建议用不含空格的长随机串；它只参与服务端比较，永远不会出现在响应里。
     TEACHER_INVITE_CODE: str = (os.getenv("TEACHER_INVITE_CODE", "") or "").strip()
+
+    # 密码最小长度（注册 / 改密。前端也会从后端读取该值，避免两边规则漂移）
+    MIN_PASSWORD_LENGTH: int = max(6, int(os.getenv("MIN_PASSWORD_LENGTH", "6") or 6))
+
+    # 跨域白名单（逗号分隔）。生产环境请配置为实际前端域名，不要使用 *。
+    # 前端使用 Authorization: Bearer（localStorage），不依赖 Cookie。
+    CORS_ORIGINS: str = os.getenv(
+        "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+
+    # 日志级别（DEBUG/INFO/WARNING/ERROR）
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+
+    @property
+    def cors_origins(self) -> list:
+        """解析 CORS 白名单；配置为空时回落到本地前端地址。"""
+        origins = [o.strip() for o in (self.CORS_ORIGINS or "").split(",") if o.strip()]
+        return origins or ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 
 settings = Settings()

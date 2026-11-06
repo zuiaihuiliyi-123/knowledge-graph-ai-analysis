@@ -78,8 +78,8 @@
         </div>
       </div>
       <div class="form-status">
-        <span class="status-dot" :class="store.backendOnline ? 'on' : 'off'" />
-        {{ store.backendOnline ? '后端服务在线，可正常注册' : '后端服务未连接，请先启动后端服务' }}
+        <span class="status-dot" :class="statusClass" />
+        {{ statusText }}
       </div>
     </div>
 
@@ -88,8 +88,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, InfoFilled, Key } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
@@ -97,12 +97,24 @@ import AuthBrandPanel from '../components/AuthBrandPanel.vue'
 import BackendStatusCard from '../components/BackendStatusCard.vue'
 import BrandMark from '../components/BrandMark.vue'
 
+const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
 
 const formRef = ref(null)
 const loading = ref(false)
 const form = reactive({ username: '', password: '', confirm: '', role: 'student', teacherInviteCode: '' })
+
+const statusClass = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return 'checking'
+  return store.backendOnline ? 'on' : 'off'
+})
+const statusText = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return '正在检测后端服务…'
+  return store.backendOnline
+    ? '后端服务在线，可正常注册'
+    : '服务暂时不可用，请稍后重试或联系管理员'
+})
 
 const rules = {
   username: [
@@ -139,6 +151,16 @@ const rules = {
   ],
 }
 
+function safeRedirect() {
+  const raw = route.query.redirect
+  const target = Array.isArray(raw) ? raw[0] : raw
+  // 只接受站内绝对路径，避免被构造成 //evil.com 之类的开放重定向
+  if (typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')) {
+    return target
+  }
+  return '/course-center?tab=mine'
+}
+
 async function handleRegister() {
   if (!formRef.value) return
   try {
@@ -160,7 +182,7 @@ async function handleRegister() {
     ElMessage.success('注册成功，正在登录…')
     // 注册后自动登录，省去用户再填一次（后端注册接口不返回 token）
     await store.login(username, form.password)
-    router.push('/course-center')
+    router.replace(safeRedirect())
   } catch (e) {
     ElMessage.error(e.message || '注册失败')
   } finally {
@@ -255,6 +277,15 @@ onMounted(() => {
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 .status-dot.on { background: #18b87a; box-shadow: 0 0 8px rgba(24,184,122,.7); }
 .status-dot.off { background: #f5475d; box-shadow: 0 0 8px rgba(245,71,93,.6); }
+.status-dot.checking {
+  background: #f0a020;
+  box-shadow: 0 0 8px rgba(240,160,32,.6);
+  animation: kg-status-pulse 1.2s ease-in-out infinite;
+}
+@keyframes kg-status-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
 
 /* ============ 响应式 ============ */
 @media (max-width: 960px) {

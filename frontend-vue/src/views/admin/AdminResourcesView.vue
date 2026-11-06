@@ -341,6 +341,7 @@ import {
 import PageHeader from '../../components/PageHeader.vue'
 import MetricTile from '../../components/admin/MetricTile.vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 
 const tab = ref('documents')
 const loading = ref(false)
@@ -377,7 +378,7 @@ const taskVisible = ref(false)
 const actingDoc = ref(null)
 const actingTask = ref(null)
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 const statusTag = (s) =>
   ({ COMPLETED: 'success', PARSED: 'success', PARSING: 'warning', EXTRACTING: 'warning', FAILED: 'danger' }[s] || 'info')
 const taskTag = (s) =>

@@ -59,11 +59,17 @@ const router = createRouter({
     },
     {
       // 课程邀请落地页：独立整页（未加入前不应看到侧边栏与其它课程入口）
-      // query: 无；token 在 path 上
+      // public: true —— 受邀用户大多尚未登录，必须先能打开邀请页看到课程信息，
+      // 再引导登录/注册并回到本页；否则「点链接 → 被送去登录 → token 丢失」。
       path: '/invite/:token',
       name: 'invite',
       component: () => import('../views/InviteLandingView.vue'),
-      meta: { title: '课程邀请' },
+      meta: { title: '课程邀请', public: true },
+    },
+    {
+      // 登录页「加课码 / 邀请链接」入口的兜底：没有 token 时去课程中心的加入页
+      path: '/invite',
+      redirect: { path: '/course-center', query: { tab: 'join' } },
     },
     {
       // 修改密码：独立整页（从个人中心跳转）
@@ -160,6 +166,13 @@ const router = createRouter({
       component: () => import('../views/admin/AdminFusionView.vue'),
       meta: { title: '知识融合', admin: true },
     },
+    {
+      // 404 兜底：手误地址不再得到空白页
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue'),
+      meta: { title: '页面不存在', public: true },
+    },
   ],
 })
 
@@ -177,9 +190,8 @@ router.beforeEach((to) => {
   }
 
   // 首次登录强制改密：引导账号的随机密码、以及被管理员重置过密码的账号，
-  // 在改密之前只能停留在「修改密码」页（只允许去退出登录，所以 /login 不受限）。
-  // 后端不依赖这个守卫做安全判定——它只是把人引导到该去的地方；
-  // 未改密并不会让接口变得更宽松（改密标记不改变任何接口的授权结果）。
+  // 在改密之前只能停留在「修改密码」页。前端守卫负责把人引导到正确页面，
+  // 后端 get_current_user 同时会拦截其他业务接口（403），两层都生效。
   if (token && user?.must_change_password && to.name !== 'change-password'
       && !to.meta?.public) {
     return { name: 'change-password', query: { forced: '1' } }

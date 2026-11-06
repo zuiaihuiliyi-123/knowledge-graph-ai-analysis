@@ -186,6 +186,7 @@ import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 
 const loading = ref(false)
 const rows = ref([])
@@ -204,7 +205,7 @@ const query = reactive({
   operator_id: null, page: 1, page_size: 20,
 })
 
-const fmtTime = (t) => (t ? String(t).slice(0, 19) : '—')
+const fmtTime = (t) => formatDateTime(t)
 const roleLabel = (r) => ({ admin: '管理员', teacher: '教师', student: '学生' }[r] || r || '—')
 const targetLabel = (t) =>
   ({ user: '用户', course: '课程', document: '文档', settings: '平台设置' }[t] || t || '')

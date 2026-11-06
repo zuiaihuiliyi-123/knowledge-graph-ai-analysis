@@ -232,6 +232,7 @@
 import { ref } from 'vue'
 import { CopyDocument, Grid, List, Plus, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { formatDateTime } from '../../utils/format'
 
 const props = defineProps({
   courses: { type: Array, default: () => [] },
@@ -305,8 +306,7 @@ const progressColor = [
 ]
 
 function fmtTime(t) {
-  if (!t) return ''
-  return String(t).slice(0, 16)
+  return formatDateTime(t, '')
 }
 
 async function copyCode(code) {

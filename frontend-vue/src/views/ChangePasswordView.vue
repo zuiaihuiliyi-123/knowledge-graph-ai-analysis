@@ -93,9 +93,14 @@ async function changePassword() {
   if (pwdForm.new_password === pwdForm.old_password) { ElMessage.warning('新密码不能与原密码相同'); return }
   changingPwd.value = true
   try {
-    await api.changePassword({ old_password: pwdForm.old_password, new_password: pwdForm.new_password })
-    // 后端已清除改密标记，本地标记同步清掉，否则守卫还会把人挡在改密页
-    store.clearMustChangePassword()
+    const data = await api.changePassword({ old_password: pwdForm.old_password, new_password: pwdForm.new_password })
+    // 后端改密时递增 token_version，旧 token 已失效；响应里带回了按新版本号签发的 token，
+    // 这里必须写回，否则下一次请求会被 401 踢回登录页。
+    if (data?.access_token) {
+      store.setAuth({ token: data.access_token, user: { ...(store.user || {}), must_change_password: 0 } })
+    } else {
+      store.clearMustChangePassword()
+    }
     ElMessage.success('密码修改成功')
     pwdForm.old_password = ''
     pwdForm.new_password = ''

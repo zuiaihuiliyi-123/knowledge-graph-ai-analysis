@@ -251,6 +251,7 @@ import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search } from '@element-plus/icons-vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 import { useAppStore } from '../../stores/app'
 
 const props = defineProps({
@@ -295,7 +296,7 @@ const progressColor = [
 ]
 
 function fmtTime(t) {
-  return t ? String(t).slice(0, 16) : '—'
+  return formatDateTime(t)
 }
 
 const SOURCE_TEXT = { create: '创建', code: '加课码', invite: '邀请', apply: '申请', import: '导入' }
