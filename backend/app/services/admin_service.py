@@ -152,6 +152,30 @@ class AdminService:
         })
 
     @staticmethod
+    def options() -> dict:
+        """筛选下拉的可选项（教师列表 + 全平台课程）。
+
+        用户管理 / 课程管理 / 资源管理三个页面共用；单独查询避免各页依赖分页结果。
+        """
+        _, teachers = sql_db.list_users_admin(role="teacher", page=1, page_size=100,
+                                              sort_by="user_id", sort_order="asc")
+        _, courses = sql_db.list_courses_admin(page=1, page_size=500,
+                                              sort_by="course_id", sort_order="asc")
+        return AdminService._ok({
+            "teachers": [
+                {"user_id": t["user_id"], "username": t["username"],
+                 "name": t.get("display_name") or t.get("real_name") or t["username"],
+                 "is_active": t.get("is_active", 1)}
+                for t in teachers
+            ],
+            "courses": [
+                {"course_id": c["course_id"], "course_name": c["course_name"],
+                 "teacher_name": c.get("teacher_name") or ""}
+                for c in courses
+            ],
+        })
+
+    @staticmethod
     def _neo4j_available() -> bool:
         """真实探测 Neo4j 是否可用（不做任何写入，只取 1 个节点）"""
         try:

@@ -17,6 +17,7 @@ kp_id 可空（逻辑外键指向 Neo4j KnowledgePoint，用于「推荐知识�
 import json
 
 from ..core.database import db
+from ..core.permissions import Permissions
 from ..core.sql_database import (
     AUTO_GRADE_TYPES, MANUAL_GRADE_TYPES, sql_db,
 )
@@ -1208,11 +1209,20 @@ class PracticeService:
         }}
 
     @staticmethod
-    def submit(user_id: int, question_id: int, user_answer) -> dict:
-        """提交作答：服务端判分 → 落答题记录 → 返回正确答案与解析（答案解析仅此路径下发）"""
+    def submit(user_id: int, question_id: int, user_answer,
+               current_user: dict = None) -> dict:
+        """提交作答：服务端判分 → 落答题记录 → 返回正确答案与解析（答案解析仅此路径下发）。
+
+        current_user 非空时按题目所属课程校验成员关系；内部调用（测试/批处理）不传时
+        保持原有行为。`/submit` 是唯一下发标准答案的练习接口，路由必须传 current_user。
+        """
         question = sql_db.get_question(question_id)
         if question is None:
             return {"ok": False, "code": 2002, "message": f"题目不存在: question_id={question_id}"}
+        if current_user is not None:
+            perm = Permissions.require_course_content(int(question["course_id"]), current_user)
+            if not perm["ok"]:
+                return {"ok": False, "code": perm["code"], "message": perm["message"]}
         if not question["is_active"]:
             return {"ok": False, "code": 2004, "message": "该题已停用，无法作答"}
 

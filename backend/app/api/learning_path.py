@@ -9,6 +9,7 @@ from ..core.response import success, error
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..services.path_recommender import PathRecommender
+from ..schemas.learning_path import TargetPathRequest
 
 router = APIRouter(prefix="/api/v1/learning-path", tags=["学习路径"])
 
@@ -29,12 +30,6 @@ def _scope_and_guard(course_id, current_user: dict):
 
 class RecommendRequest(BaseModel):
     mastered: List[str] = []  # 已掌握的知识点名称列表
-    course_id: str | None = None
-    document_id: str | None = None
-
-
-class TargetPathRequest(BaseModel):
-    target: str  # 目标知识点
     course_id: str | None = None
     document_id: str | None = None
 

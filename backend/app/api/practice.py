@@ -19,8 +19,8 @@ from pydantic import BaseModel
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..core.response import success, error
-from ..core.sql_database import sql_db
 from ..services.question_service import PracticeService
+from ..schemas.practice import SubmitRequest, QuestionFavoriteRequest
 
 router = APIRouter(prefix="/api/v1/practice", tags=["做题练习"])
 
@@ -48,11 +48,6 @@ def _guard_course(cid: int, current_user: dict):
     return None if perm["ok"] else error(perm["code"], perm["message"])
 
 
-class SubmitRequest(BaseModel):
-    question_id: int
-    user_answer: object = None     # 单选/判断：字符串；多选：数组；未作答可传 null
-
-
 class RecommendRequest(BaseModel):
     """智能推荐出题入参（mode 见 services/question_recommender.py 模块文档）"""
     course_id: str
@@ -62,11 +57,6 @@ class RecommendRequest(BaseModel):
     count: int = 10
     mode: str = "mixed"            # weak/review/new/advanced/mixed/random
     seed: int | None = None        # 固定随机种子（便于复现与 A/B）
-
-
-class QuestionFavoriteRequest(BaseModel):
-    course_id: str
-    question_id: int
 
 
 @router.get("/questions")
@@ -118,14 +108,8 @@ async def submit_answer(body: SubmitRequest, current_user: dict = Depends(get_cu
     `/submit` 是**唯一会下发标准答案**的练习接口，因此必须按题目所属课程校验成员关系：
     否则任意登录用户拿一个 question_id 就能把别人课程的答案一问一问套出来。
     """
-    question = sql_db.get_question(body.question_id)
-    if not question:
-        return error(2002, f"题目不存在: question_id={body.question_id}")
-    denied = _guard_course(int(question["course_id"]), current_user)
-    if denied is not None:
-        return denied
     return _wrap(PracticeService.submit(
-        current_user["user_id"], body.question_id, body.user_answer,
+        current_user["user_id"], body.question_id, body.user_answer, current_user,
     ))
 
 

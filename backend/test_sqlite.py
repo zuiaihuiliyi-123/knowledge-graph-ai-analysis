@@ -71,10 +71,12 @@ def main():
     print("Step 4: 学习记录 upsert（唯一约束校验）")
     print("=" * 60)
     kp_id = "kp_course_demo_0001"
-    sql_db.upsert_learning_record(user_id=teacher_id, course_id=course_id, kp_id=kp_id,
+    sql_db.upsert_learning_record(user_id=teacher_id, course_id=course_id,
+                                  document_id=doc_id, kp_id=kp_id,
                                   status="LEARNING", mastery_level=60)
     # 第二次写入同一 (user, course, kp)，应更新而非新增
-    sql_db.upsert_learning_record(user_id=teacher_id, course_id=course_id, kp_id=kp_id,
+    sql_db.upsert_learning_record(user_id=teacher_id, course_id=course_id,
+                                  document_id=doc_id, kp_id=kp_id,
                                   status="MASTERED", mastery_level=100)
     records = sql_db.list_records_by_user_course(teacher_id, course_id)
     print(f"  记录数（应=1）: {len(records)}")
@@ -92,7 +94,8 @@ def main():
     print(f"  用户数: {len(users)}")
 
     print()
-    if (len(tables) == 4 and len(records) == 1
+    required_tables = {"t_user", "t_course", "t_document", "t_learning_record"}
+    if (required_tables.issubset(set(tables)) and len(records) == 1
             and doc["parse_status"] == "PARSED"
             and records[0]["status"] == "MASTERED"):
         print("✓ SQLite 建表 + CRUD + 唯一约束 全部验证通过")

@@ -44,15 +44,27 @@ class Neo4jDB:
     """Neo4j 数据库管理类（含失败熔断，保证「图库不可用」时降级够快）"""
 
     def __init__(self):
-        self.driver = GraphDatabase.driver(
-            settings.NEO4J_URI,
-            auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD),
-            connection_timeout=_CONNECTION_TIMEOUT,
-        )
+        # 惰性创建驱动：模块导入/应用启动不连库，首次 query（或访问 driver）时才建。
+        # 这样测试与离线脚本 import app.main 不会留下未关闭的驱动连接。
+        self._driver = None
         self._down_until = 0.0        # 熔断截止时间（time.monotonic 基准）
 
+    @property
+    def driver(self):
+        """惰性创建并返回驱动；保留 driver 属性以兼容既有脚本的直接访问。"""
+        if self._driver is None:
+            self._driver = GraphDatabase.driver(
+                settings.NEO4J_URI,
+                auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD),
+                connection_timeout=_CONNECTION_TIMEOUT,
+            )
+        return self._driver
+
     def close(self):
-        self.driver.close()
+        """关闭驱动（幂等）；关闭后下次访问 driver 会重新创建。"""
+        if self._driver is not None:
+            self._driver.close()
+            self._driver = None
 
     def circuit_open(self) -> bool:
         """当前是否处于熔断期（供调用方判断，不需自己捕获异常）"""

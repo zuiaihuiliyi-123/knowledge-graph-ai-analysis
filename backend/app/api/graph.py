@@ -2,12 +2,16 @@
 图谱查询与手动编辑 API（对齐规划文档 6.3.2 查询 + 6.3.3/6.3.4 手动编辑）
 """
 from fastapi import APIRouter, Query, Depends
-from pydantic import BaseModel
 
 from ..core.response import success, error
 from ..core.dependencies import get_current_user, require_teacher
 from ..core.permissions import Permissions
 from ..services.kg_manager import KnowledgeGraphManager
+from ..schemas.graph import (
+    NodeCreate,
+    NodeUpdate,
+    EdgeCreate,
+)
 
 router = APIRouter(prefix="/api/v1/graph", tags=["知识图谱"])
 
@@ -49,25 +53,7 @@ def _guard(course_id: str, current_user: dict, manage: bool = False):
     return cid, None
 
 
-# ---------------- 请求体模型 ----------------
-
-class NodeCreate(BaseModel):
-    name: str
-    category: str = "概念"
-    description: str = ""
-
-
-class NodeUpdate(BaseModel):
-    # str | None：Pydantic v2 下 `str = None` 不接受显式 null（语义均为「不修改该字段」）
-    name: str | None = None
-    category: str | None = None
-    description: str | None = None
-
-
-class EdgeCreate(BaseModel):
-    source: str  # 源知识点 kp_id
-    target: str  # 目标知识点 kp_id
-    type: str = "RELATED_TO"
+# 请求体见 app/schemas/graph.py。
 
 
 # ---------------- 查询 ----------------
