@@ -8,12 +8,15 @@
 学生退出课程走 DELETE /{course_id}/members/{自己}，由 MemberService.leave_course 单独处理。
 """
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
 
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..core.response import success, error
 from ..services.member_service import MemberService
+from ..schemas.course_members import (
+    RejectRequest,
+    InviteCreateRequest,
+)
 
 router = APIRouter(prefix="/api/v1/courses", tags=["课程成员"])
 
@@ -23,15 +26,6 @@ def _coerce_int(value):
         return int(value)
     except (TypeError, ValueError):
         return None
-
-
-class RejectRequest(BaseModel):
-    comment: str | None = None
-
-
-class InviteCreateRequest(BaseModel):
-    role: str = "student"
-    expires_in_days: int = 7
 
 
 @router.get("/{course_id}/members")

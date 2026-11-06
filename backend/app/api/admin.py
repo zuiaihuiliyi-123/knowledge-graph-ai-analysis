@@ -10,12 +10,17 @@
 - 需要 IP / User-Agent 的写操作统一接收 Request，交给 AdminService.write_audit 落审计表。
 """
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field
 
 from ..core.dependencies import require_admin
 from ..core.response import success, error
-from ..core.sql_database import sql_db
 from ..services.admin_service import AdminService
+from ..schemas.admin import (
+    UserUpdate,
+    RoleUpdate,
+    ResetPassword,
+    GovernanceAction,
+    TransferCourse,
+)
 
 router = APIRouter(prefix="/api/v1/admin", tags=["管理员端"])
 
@@ -27,37 +32,7 @@ def _reply(result: dict, message: str = None) -> dict:
     return error(result["code"], result["message"])
 
 
-# ---------- 请求体 ----------
-
-
-class UserUpdate(BaseModel):
-    """编辑用户资料。
-
-    刻意**不含** role / is_active / password：这三个是高危操作，各自有独立端点与独立审计动作，
-    混进一个"万能更新"接口会让审计日志无法区分「改了昵称」和「改了角色」。
-    """
-    display_name: str | None = None
-    email: str | None = None
-    profile: dict | None = Field(default=None, description="资料字段（按被编辑者角色白名单过滤）")
-
-
-class RoleUpdate(BaseModel):
-    role: str
-
-
-class ResetPassword(BaseModel):
-    # 不传则由服务端生成随机初始密码（只在响应里返回一次）
-    new_password: str | None = None
-
-
-class GovernanceAction(BaseModel):
-    # hide / restore / archive / unarchive / close / reopen
-    action: str
-    note: str | None = None
-
-
-class TransferCourse(BaseModel):
-    teacher_id: int
+# 请求体见 app/schemas/admin.py。
 
 
 # ---------- 工作台 ----------
@@ -76,23 +51,7 @@ async def admin_options(admin: dict = Depends(require_admin)):
     单独一个接口的原因：用户管理 / 课程管理 / 资源管理三个页面的筛选器都要它，
     各自去拉一次全量列表既慢又会让筛选器依赖分页结果。
     """
-    _, teachers = sql_db.list_users_admin(role="teacher", page=1, page_size=100,
-                                          sort_by="user_id", sort_order="asc")
-    _, courses = sql_db.list_courses_admin(page=1, page_size=500,
-                                          sort_by="course_id", sort_order="asc")
-    return success({
-        "teachers": [
-            {"user_id": t["user_id"], "username": t["username"],
-             "name": t.get("display_name") or t.get("real_name") or t["username"],
-             "is_active": t.get("is_active", 1)}
-            for t in teachers
-        ],
-        "courses": [
-            {"course_id": c["course_id"], "course_name": c["course_name"],
-             "teacher_name": c.get("teacher_name") or ""}
-            for c in courses
-        ],
-    })
+    return _reply(AdminService.options())
 
 
 # ---------- 用户管理 ----------

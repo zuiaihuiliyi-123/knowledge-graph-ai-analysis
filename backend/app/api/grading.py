@@ -12,11 +12,14 @@
   FastAPI 会优先匹配更具体的 /batch 前缀（与题库模块同一约定）。
 """
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
 
 from ..core.dependencies import require_teacher
 from ..core.response import success, error
 from ..services.grading_service import GradingService
+from ..schemas.grading import (
+    GradeRequest,
+    BatchGradeRequest,
+)
 
 router = APIRouter(prefix="/api/v1/grading", tags=["主观题批改"])
 
@@ -30,17 +33,6 @@ def _coerce_int(value):
 
 def _wrap(result: dict):
     return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
-
-
-class GradeRequest(BaseModel):
-    score: float
-    comment: str | None = None
-
-
-class BatchGradeRequest(BaseModel):
-    record_ids: list
-    score: float
-    comment: str | None = None
 
 
 @router.get("/pending")

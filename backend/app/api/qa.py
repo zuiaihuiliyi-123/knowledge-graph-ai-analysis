@@ -10,24 +10,16 @@ import json
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from ..core.response import success, error
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..services.qa_service import QAService
+from ..schemas.qa import QuestionRequest
 
 router = APIRouter(prefix="/api/v1/qa", tags=["智能问答"])
 
 qa_service = QAService()
-
-
-class QuestionRequest(BaseModel):
-    question: str
-    # 前端未选择课程/文档时会显式传 null，须用 Optional 接受 null；
-    # 旧写法 str = None 在 Pydantic v2 下会把 null 判为「不是合法字符串」→ 422。
-    course_id: str | None = None
-    document_id: str | None = None
 
 
 def _resolve_scope(request: QuestionRequest, current_user: dict):

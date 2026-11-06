@@ -5,18 +5,14 @@
 从根本上避免 "invites" 被当成 course_id 解析（否则会 422）。
 """
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..core.response import success, error
 from ..services.member_service import MemberService
+from ..schemas.invites import AcceptRequest
 
 router = APIRouter(prefix="/api/v1/invites", tags=["课程邀请"])
-
-
-class AcceptRequest(BaseModel):
-    token: str
 
 
 @router.get("/{token}")

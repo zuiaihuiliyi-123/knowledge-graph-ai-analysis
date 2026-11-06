@@ -77,7 +77,14 @@ async def lifespan(app: FastAPI):
         db.init_schema()
     except Exception as exc:  # noqa: BLE001
         _logger.warning("初始化 Neo4j 索引/约束失败（图谱功能可能变慢或降级）：%s", exc)
-    yield
+    try:
+        yield
+    finally:
+        # 驱动在 lifespan 里可能是惰性创建后才存在的；关闭失败不应阻止进程退出。
+        try:
+            db.close()
+        except Exception:  # noqa: BLE001
+            _logger.warning("关闭 Neo4j 驱动失败（不影响退出）", exc_info=True)
 
 
 app = FastAPI(
