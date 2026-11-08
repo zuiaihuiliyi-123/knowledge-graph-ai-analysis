@@ -65,6 +65,24 @@ class MembersMixin:
                                    applied_reason, joined_at, now, now))
 
 
+    def downgrade_teacher_memberships(self, user_id: int) -> int:
+        """把该用户在全部课程上的教师成员行降为学生，返回影响行数。
+
+        账号角色与课程成员角色是两套数据：管理员把教师降级后，t_course_member
+        里 role='teacher' 的历史行不会自动失效。Permissons 已按账号角色兜底拒绝，
+        这里再把快照修正掉，避免「账号已是学生、成员列表仍显示协作教师」的脏数据。
+        只改 role，不动 status —— 是否仍留在课程里由教师后续审核决定。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE t_course_member SET role = 'student', updated_at = ? "
+                "WHERE user_id = ? AND role = 'teacher'",
+                (_now(), user_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+
     def set_membership_status(self, course_id: int, user_id: int, status: str,
                               reviewed_by: int = None, comment: str = None) -> int:
         """审核/移除：仅改状态，返回影响行数（0 表示成员记录不存在）。

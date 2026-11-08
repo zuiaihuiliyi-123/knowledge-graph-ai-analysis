@@ -433,6 +433,15 @@ class MemberService:
         if status == "expired":
             return MemberService._fail(4010, "该邀请链接已过期")
 
+        # 教师协作邀请必须由教师账号接受：邀请里的 role 是教师单方面指定的，
+        # 若直接照写，任何学生拿到链接都能获得该课程的管理权（改课/传文档/审成员）。
+        # 校验必须在**消费令牌之前**，否则拒绝后邀请也已被用掉。
+        if invite["role"] == "teacher":
+            target = sql_db.get_user_by_id(user_id)
+            if not target or target.get("role") not in ("teacher", "admin"):
+                return MemberService._fail(
+                    4003, "该邀请为教师协作邀请，仅教师账号可以接受。请先联系管理员提升账号角色")
+
         # 原子消费：rowcount==1 才说明本次真正用掉了这个邀请，避免并发/重复点击重复加课
         if sql_db.mark_invite_used(invite["invite_id"], user_id) == 0:
             return MemberService._fail(4010, "该邀请链接已被使用")

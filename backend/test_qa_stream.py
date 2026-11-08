@@ -102,7 +102,8 @@ class FakeClient:
 def make_service(chunks=None, raise_exc=None, finish_reason=None):
     svc = QAService()
     svc.client = FakeClient(chunks, raise_exc, finish_reason)
-    svc.search_related_nodes = lambda *a, **k: list(SOURCES)
+    # 当前问答链路入口是 search_related_nodes_with_mode（返回 (nodes, mode)）
+    svc.search_related_nodes_with_mode = lambda *a, **k: (list(SOURCES), "vector")
     return svc
 
 
@@ -201,7 +202,8 @@ def main() -> int:
     qa_service_module._HEARTBEAT_SECONDS = 0.05
     try:
         slow = make_service(CHUNKS)
-        slow.search_related_nodes = lambda *a, **k: (time.sleep(0.2), list(SOURCES))[1]
+        slow.search_related_nodes_with_mode = lambda *a, **k: (
+            time.sleep(0.2), (list(SOURCES), "vector"))[1]
         slow_events = collect(slow)
         kinds_slow = [e["event"] for e in slow_events]
         check("检索期间出现 ping", "ping" in kinds_slow, str(kinds_slow[:6]))

@@ -600,13 +600,12 @@ class QuestionService:
         if not ok:
             return {"ok": False, "code": 1001, "message": message}
 
-        did = question.get("document_id")
+        old_did = question.get("document_id")
+        did = old_did
         if "document_id" in payload:
             did, err = _check_document(question["course_id"], payload.get("document_id"))
             if err:
                 return err
-            # document_id 的「清空」语义用独立方法表达（update_question 对 None = 不修改）
-            sql_db.set_question_document(question_id, did)
 
         # 知识点完整性校验：只在「本次显式传入知识点」时执行——
         # 历史数据里可能已有悬空 kp_id，教师仅改解析/难度时不应被拦住；
@@ -638,7 +637,19 @@ class QuestionService:
             update_fields["kp_primary"] = normalized.get("kp_primary")
         elif "kp_id" in payload:
             update_fields["kp_id"] = normalized["kp_id"] or ""
+
+        # 文档归属与其它字段**同一条 UPDATE** 写入（非 None 时）。
+        # 旧实现先 set_question_document 再校验知识点，校验失败时题目已经漂到
+        # 另一篇文档，而接口只返回「知识点不存在」，教师无从知道归属已变。
+        doc_changed = "document_id" in payload and did != old_did
+        if doc_changed and did is not None:
+            update_fields["document_id"] = did
+
         sql_db.update_question(question_id, **update_fields)
+        # 「清空归属」无法走 update_question（None = 不修改），只能单独调用；
+        # 放在主更新成功之后，主更新失败时不会先丢掉归属。
+        if doc_changed and did is None:
+            sql_db.set_question_document(question_id, None)
 
         # ---- 向量缓存失效 ----
         # 判定「影响向量的输入」是否真的变了：题干 / 选项 / 所属文档。

@@ -55,6 +55,12 @@
       </el-button>
     </div>
 
+    <!-- 节点被 LIMIT 截断时的常驻提示：避免把「前 N 个」误当成完整图谱 -->
+    <div v-if="!loading && truncated" class="graph-trunc-notice">
+      <el-icon><WarningFilled /></el-icon>
+      节点较多，已显示前 {{ loadedNodeCount }} 个（共 {{ totalNodes }} 个）
+    </div>
+
     <!-- 图例（左上，可折叠，默认紧凑；展开后展示与真实节点一致的形状） -->
     <div class="graph-legend" :class="{ expanded: !legendCollapsed }">
       <button
@@ -112,7 +118,7 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Graph } from '@antv/g6'
-import { Filter, ArrowDown, Loading } from '@element-plus/icons-vue'
+import { Filter, ArrowDown, Loading, WarningFilled } from '@element-plus/icons-vue'
 import { api } from '../api'
 import {
   NODE_TYPES,
@@ -325,6 +331,11 @@ const visibleEmpty = computed(
   () => !loading.value && rawNodes.length > 0 && visibleNodeIds.value.length === 0
 )
 
+// 是否被后端 LIMIT 截断：图太大时只取回前 N 个，必须让用户知道，而不是把截断当完整图谱
+const truncated = ref(false)
+const totalNodes = ref(0)
+const loadedNodeCount = ref(0)
+
 // ---------------------------------------------------------------
 // 数据加载
 // ---------------------------------------------------------------
@@ -338,6 +349,9 @@ async function loadGraph() {
     emptyText.value = '请先选择课程和学习资料'
     rawNodes = []
     rawEdges = []
+    truncated.value = false
+    totalNodes.value = 0
+    loadedNodeCount.value = 0
     dataVersion.value++          // 数据已换（清空），通知依赖它的 computed 重算
     expandedIds.value = []
     focusedId.value = null
@@ -351,6 +365,9 @@ async function loadGraph() {
     if (token !== loadToken) return   // 已有更新的加载请求，本次结果作废（不要覆盖画布）
     rawNodes = data.nodes || []
     rawEdges = data.edges || []
+    truncated.value = !!data.truncated
+    totalNodes.value = Number(data.total_nodes || 0)
+    loadedNodeCount.value = rawNodes.length
     dataVersion.value++          // 必须先于下面读取 coreIds：让 coreIds 用新数据重算
     // 局部展开模式：默认展开核心节点 → 显示核心 + 一阶关系
     expandedIds.value = props.progressive ? coreIds.value.slice() : []
@@ -1258,5 +1275,25 @@ function centerOnSearch() {
 .graph-loading-text {
   font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
+}
+
+/* 截断提示：居中浮在画布底部，不遮挡图例与工具栏 */
+.graph-trunc-notice {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #b26a00;
+  background: rgba(255, 248, 230, 0.96);
+  border: 1px solid #f5d99b;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
 }
 </style>

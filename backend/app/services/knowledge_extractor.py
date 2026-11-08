@@ -362,12 +362,22 @@ _CODE_KEYWORDS = {
 }
 
 
-def _is_code_symbol(name: str) -> bool:
-    """判断实体名是否为程序符号（函数调用、运算符、关键字），而非课程知识点。"""
+def _is_code_symbol(name: str, category: str = None) -> bool:
+    """判断实体名是否为程序符号（函数调用、运算符、关键字），而非课程知识点。
+
+    括号不再一律判死：数学/算法知识点本来就常带括号（如「时间复杂度 O(n)」），
+    中文名称里的括号更是正常表达（如「f(x) 的单调性」）。只有**纯 ASCII 的函数
+    调用写法**（BUILD_TREE()、equals()）才视为代码符号；`category='公式'` 与含
+    中文的名称直接跳过括号规则，避免把整类知识点误杀。
+    """
     if not name:
         return True
     if "(" in name or ")" in name:  # 函数调用风格：BUILD_TREE()、equals()
-        return True
+        is_cjk_or_formula = category == "公式" or bool(re.search(r"[一-鿿]", name))
+        if not is_cjk_or_formula and re.fullmatch(
+                r"[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\)", name.strip()):
+            return True
+        # 其余带括号名称（O(n)、中文函数说明等）继续走下面的运算符/关键字判定
     if re.fullmatch(r"[=+\-*/%<>!&|^~]+", name):  # 纯运算符：== 等
         return True
     compact = name.replace(" ", "")
@@ -715,6 +725,12 @@ class KnowledgeExtractor:
         为什么少。评测侧据此才能把"抽到了但被阈值砍掉"（low_confidence）
         与"压根没抽到"（missed_core）区分开，否则后者会被系统性高估。
         """
+        # 分块成功/失败计数：上层据此区分「整篇失败」与「部分分块失败但仍有可用结果」。
+        # error 仍保留「至少有一个分块失败」的旧语义，兼容既有调用方。
+        chunk_count = len(results)
+        failed_chunk_count = sum(1 for r in results if r.get("error"))
+        succeeded_chunk_count = chunk_count - failed_chunk_count
+
         # 第一遍：规范化实体并按规范名去重。
         # 同名实体**不丢信息**：首条充当主 description / category（保持既有评测与展示口径），
         # 其余不同描述累积进 descriptions（并配 alt_descriptions），类别冲突记到
@@ -731,8 +747,9 @@ class KnowledgeExtractor:
                 if not name:
                     dropped_entity_count += 1
                     continue
-                # 代码程序符号兜底过滤（Prompt 已要求不抽，这里是数据完整性兜底）
-                if _is_code_symbol(name):
+                # 代码程序符号兜底过滤（Prompt 已要求不抽，这里是数据完整性兜底）。
+                # 传入原始 category：公式类名称里的括号是正常数学表达，不能按代码判死。
+                if _is_code_symbol(name, entity.get("category")):
                     dropped_entity_count += 1
                     continue
 
@@ -851,6 +868,11 @@ class KnowledgeExtractor:
             "dropped_relations": dropped,
             "dropped_counts": dropped_counts,
             "dropped_entity_count": dropped_entity_count,
+            # 分块粒度统计：succeeded_chunk_count > 0 时，即使 error 存在也应
+            # 使用已有的 entities/relations 继续入库（部分失败 ≠ 整篇作废）
+            "chunk_count": chunk_count,
+            "failed_chunk_count": failed_chunk_count,
+            "succeeded_chunk_count": succeeded_chunk_count,
             # 同名实体合并次数与涉及的名字：此前完全不可见，评测无法区分
             # 「本来就只有 N 个实体」与「N+3 个被同名合并掉了」
             "entity_duplicates": entity_duplicates,

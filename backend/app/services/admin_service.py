@@ -356,6 +356,12 @@ class AdminService:
                 return guard
 
         sql_db.set_user_role(user_id, role)
+        # 教师成员行是「加入课程时的角色快照」，不会随账号角色自动变化。
+        # 降级后必须同步回收，否则成员列表仍显示协作教师，前端也会按教师入口渲染。
+        # 权限判定侧另有一道账号角色闸门（Permissions.resolve.can_manage），
+        # 这里负责修正数据本身。
+        if role != "teacher":
+            sql_db.downgrade_teacher_memberships(user_id)
         # 角色变更同样要立刻失效缓存：降级后旧 token 不应再通过 require_teacher。
         invalidate_user_state(user_id)
         AdminService.write_audit(

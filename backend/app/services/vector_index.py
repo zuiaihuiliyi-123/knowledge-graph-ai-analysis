@@ -27,7 +27,9 @@
 import os
 import threading
 import time
+from collections import Counter
 
+from ..core.config import settings
 from ..core.sql_database import _blob_to_vec, sql_db
 
 try:
@@ -152,6 +154,11 @@ class VectorIndex:
                         out[ids[i]] = c
             return out
         q = _np.asarray(query_vecs, dtype=_np.float32)           # (n, d)
+        # 查询向量与库内矩阵维度不一致（换了模型但缓存行尚未重建）时，
+        # 矩阵乘法会直接抛异常。返回空 = 「无证据」，由调用方跳过该信号，
+        # 绝不能把一次精排降级变成 500。
+        if mat is None or getattr(mat, "ndim", 0) != 2 or mat.shape[1] != q.shape[1]:
+            return {}
         norms = _np.linalg.norm(q, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
         sims = mat @ (q / norms).T                              # (m, n)
@@ -184,19 +191,25 @@ class VectorIndex:
                 return ent["ids"], (ent["mat"] if "mat" in ent else ent["vecs"])
             self._misses += 1
 
+            # 只取当前 embedding 模型生成的行：换模型后旧行的维度/语义空间都不同，
+            # 混入矩阵会让检索结果不可信，维度不同时矩阵乘法还会直接抛异常。
             if kind == _KP:
-                rows = sql_db.get_kp_embedding_blobs(course_id, document_id)
+                rows = sql_db.get_kp_embedding_blobs(
+                    course_id, document_id, model=settings.EMBEDDING_MODEL)
                 key_field = "kp_id"
             else:
-                rows = sql_db.get_question_embedding_blobs(course_id, document_id)
+                rows = sql_db.get_question_embedding_blobs(
+                    course_id, document_id, model=settings.EMBEDDING_MODEL)
                 key_field = "question_id"
 
-            ids, blobs, width = [], [], None
+            # 宽度取**众数**而不是首行：历史/外部写入可能混进少数异宽脏行，
+            # 以首行为准会把「大多数正确向量」误判成异宽而整批丢掉。
+            widths = [len(r["blob"]) for r in rows if r.get("blob")]
+            width = Counter(widths).most_common(1)[0][0] if widths else None
+            ids, blobs = [], []
             for r in rows:
                 blob = r["blob"]
-                if width is None:
-                    width = len(blob)
-                if len(blob) != width:      # 维度不一致的脏行跳过，避免整批检索直接崩
+                if not blob or len(blob) != width:
                     continue
                 ids.append(r[key_field])
                 blobs.append(blob)
@@ -235,6 +248,11 @@ class VectorIndex:
             return [(ids[i], round(s, 6)) for s, i in scored[:k]]
 
         q = _np.asarray(q_vec, dtype=_np.float32)
+        # 维度不一致（模型切换后旧索引未重建）：返回空让上层降级关键词检索，
+        # 而不是让 `container @ q` 抛 ValueError 变成 500。
+        if container is None or getattr(container, "ndim", 0) != 2 \
+                or container.shape[1] != q.shape[0]:
+            return []
         norm = float(_np.linalg.norm(q))
         if norm == 0.0:
             return []

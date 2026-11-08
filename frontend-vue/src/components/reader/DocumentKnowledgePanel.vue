@@ -260,6 +260,17 @@
       </div>
 
       <div class="dkp-body">
+        <el-alert
+          class="dkp-notes-local-tip"
+          type="warning"
+          :closable="false"
+          show-icon
+          title="笔记只保存在当前浏览器（本机），更换设备或清除缓存会丢失，建议定期导出。"
+        >
+          <template #default>
+            <el-button link type="primary" size="small" @click="exportNotes">导出全部笔记</el-button>
+          </template>
+        </el-alert>
         <el-empty
           v-if="!filteredNotes.length"
           description="本文档还没有笔记"
@@ -752,6 +763,31 @@ async function removeNote(note) {
   deleteNote(props.documentId, note.id)
   loadNotes()
   ElMessage.success('已删除')
+}
+
+/** 导出本文档全部笔记为纯文本（笔记仅存本机，导出是防丢失的兜底手段） */
+function exportNotes() {
+  const list = listNotes(props.documentId)
+  if (!list.length) {
+    ElMessage.info('本文档还没有笔记')
+    return
+  }
+  const blocks = list.map((n) => {
+    const head = [n.source, n.page ? `第 ${n.page} 页` : '', formatTime(n.createdAt)]
+      .filter(Boolean).join(' · ')
+    const quote = n.quote ? `\n原文：${n.quote}` : ''
+    return `【${head || '笔记'}】\n${n.text}${quote}`
+  })
+  const blob = new Blob([blocks.join('\n\n---\n\n')], { type: 'text/plain;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `笔记-${props.docName || props.documentId || '文档'}.txt`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+  ElMessage.success('笔记已导出')
 }
 
 /** 供阅读器调用：选中一段文字后直接存成笔记 */
@@ -1343,6 +1379,10 @@ defineExpose({ runAction, askWithContext, saveSelectionNote })
 .dkp-ask-btn:disabled {
   background: #d4ddfc;
   cursor: not-allowed;
+}
+
+.dkp-notes-local-tip {
+  margin-bottom: 10px;
 }
 
 /* ---------- 笔记 ---------- */

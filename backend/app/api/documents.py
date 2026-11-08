@@ -13,6 +13,7 @@ from typing import List
 from fastapi import APIRouter, UploadFile, File, Form, Depends, Query
 from fastapi.responses import FileResponse, JSONResponse
 
+from ..core.config import settings
 from ..core.response import success, error
 from ..core.dependencies import get_current_user, require_teacher
 from ..services.document_service import DocumentService
@@ -43,7 +44,12 @@ async def upload_document(
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
-    content = await file.read()
+    # 先看 Content-Length/分片解析得到的大小，超限直接拒绝，不把整个文件读进内存；
+    # 再以 read(limit+1) 兜底（file.size 在部分客户端/代理下可能为 None）。
+    max_size = settings.MAX_UPLOAD_SIZE
+    if file.size is not None and file.size > max_size:
+        return error(1002, f"文件大小超限，最大 {max_size // 1024 // 1024}MB")
+    content = await file.read(max_size + 1)
     result = await DocumentService.process_upload(
         content=content,
         filename=file.filename or "未命名",

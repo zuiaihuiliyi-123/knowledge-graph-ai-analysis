@@ -79,6 +79,7 @@ class MigrationMixin:
             self._migrate_question_bank(conn)
             self._migrate_question_kp(conn)
             self._migrate_embeddings_blob(conn)
+            self._migrate_embeddings_model(conn)
             self._migrate_course_center(conn)
             self._migrate_admin(conn)
             self._migrate_admin_user_columns(conn)
@@ -291,6 +292,24 @@ class MigrationMixin:
                     conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
             total += self._backfill_blob_rows(conn, table, self._EMB_BACKFILL_LIMIT)
         return total
+
+
+    def _migrate_embeddings_model(self, conn: sqlite3.Connection):
+        """幂等迁移：两张向量表补 `model` 列（记录向量由哪个 embedding 模型生成）。
+
+        为什么必须记录：换模型（bge-m3 → 其它）或服务端默认维度变化后，旧向量与
+        新查询向量维度不同。numpy 矩阵乘法遇到维度不一致会直接抛异常（问答 500），
+        而「维度碰巧相同但语义空间不同」的情况更隐蔽——检索不报错，只是结果无意义。
+        记录模型后，`KnowledgeEmbedder.ensure_index` 能识别过期索引并重建。
+
+        历史行保持 NULL：迁移无法知道旧向量出自哪个模型，NULL 会被判定为「过期」，
+        在下次问答/标注时按当前模型懒重建。只加列，不猜值。
+        """
+        for table in self._BLOB_KEY_COLUMNS:
+            cols = {row["name"] for row in
+                    conn.execute(f"PRAGMA table_info({table})").fetchall()}
+            if "model" not in cols:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN model TEXT")
 
 
     def _backfill_blob_rows(self, conn: sqlite3.Connection, table: str, limit: int) -> int:

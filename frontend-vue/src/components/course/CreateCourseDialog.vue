@@ -57,6 +57,7 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '../../stores/app'
 
@@ -66,6 +67,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'created'])
 
 const store = useAppStore()
+const router = useRouter()
 const formRef = ref(null)
 const submitting = ref(false)
 
@@ -127,17 +129,25 @@ async function submit() {
   }
 }
 
-/** 创建成功后把加课码直接摆到教师面前（这是后续邀请学生最常用的入口） */
+/** 创建成功后把加课码直接摆到教师面前，并给一个「去上传文档」的下一步行动 */
 function showJoinCode(data) {
   if (!data?.join_code) {
     ElMessage.success('课程创建成功')
     return
   }
-  ElMessageBox.alert(
-    `课程「${data.course_name}」已创建。\n加课码：${data.join_code}\n\n把它发给学生，学生即可在「课程中心 → 加入课程」中输入加入。`,
+  ElMessageBox.confirm(
+    `课程「${data.course_name}」已创建。\n加课码：${data.join_code}\n\n把它发给学生，学生即可在「课程中心 → 加入课程」中输入加入。\n\n现在去上传课程文档，系统会自动抽取知识点并构建知识图谱。`,
     '创建成功',
-    { confirmButtonText: '知道了', customClass: 'joincode-alert' },
-  ).catch(() => {})
+    {
+      confirmButtonText: '去上传文档',
+      cancelButtonText: '稍后再说',
+      type: 'success',
+      customClass: 'joincode-alert',
+    },
+  )
+    // 教师建课的下一步几乎必然是上传文档：直接把入口递到面前，避免建完课「课程去哪了」的断点
+    .then(() => router.push({ path: '/teacher', query: { tab: 'documents', course_id: String(data.course_id) } }))
+    .catch(() => {})
 }
 </script>
 

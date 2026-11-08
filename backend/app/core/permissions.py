@@ -104,6 +104,15 @@ class Permissions:
         # 而教师对自己的课程之外不应有可见性（对应验收要求「教师访问别人课程必须拒绝」）。
         public_ok = relation == REL_PUBLIC and user.get("role") == "student"
 
+        # 管理权必须同时满足「成员关系」与「账号角色」两个条件：
+        # t_course_member.role 是加入当时的快照，管理员把教师降级为学生后，
+        # 旧成员行仍是 teacher/approved。只看成员行会让被降级账号继续改课、
+        # 传文档、审成员——这里以账号当前角色为准，拦掉这类残留授权。
+        # admin 保留管理权是平台治理角色本身的语义，不代表它属于某门课。
+        account_role = user.get("role")
+        can_manage = (relation in (REL_OWNER, REL_TEACHER_MEMBER)
+                      and account_role in ("teacher", "admin"))
+
         data = {
             "course": row,
             "relation": relation,
@@ -114,7 +123,7 @@ class Permissions:
                 REL_OWNER, REL_TEACHER_MEMBER, REL_MEMBER,
                 REL_PENDING, REL_REJECTED, REL_REMOVED) or public_ok,
             "can_read_content": relation in (REL_OWNER, REL_TEACHER_MEMBER, REL_MEMBER),
-            "can_manage": relation in (REL_OWNER, REL_TEACHER_MEMBER),
+            "can_manage": can_manage,
         }
         return {"ok": True, "code": 0, "message": "success", "data": data}
 
@@ -165,7 +174,9 @@ class Permissions:
         r = Permissions.resolve(course_id, user)
         if not r["ok"]:
             return r
-        if not r["data"]["is_owner"]:
+        # is_owner 是「课程行 teacher_id」的快照，同样必须以账号当前角色兜底：
+        # 账号被降级为学生后，其历史创建的课程不再允许删除（级联影响最大）。
+        if not r["data"]["is_owner"] or user.get("role") not in ("teacher", "admin"):
             return Permissions._deny(4003, "无权限：仅课程创建者可删除该课程")
         return r
 

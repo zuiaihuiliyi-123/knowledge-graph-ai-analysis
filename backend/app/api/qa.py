@@ -72,6 +72,8 @@ async def ask_question(request: QuestionRequest, current_user: dict = Depends(ge
         "answer": result["answer"],
         # 结构化引用来源（kp_id/name/category/description），供前端"证据链"展示
         "sources": result["sources"],
+        # 本次实际检索方式：vector / keyword（降级）/ empty。前端据此在降级时给出可见提示。
+        "retrieval_mode": result.get("retrieval_mode"),
     })
 
 

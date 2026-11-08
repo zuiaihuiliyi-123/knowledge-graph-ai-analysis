@@ -98,9 +98,14 @@ class KnowledgeEmbedder:
             return []  # 图谱为空（节点尚未抽取），交给关键词检索兜底
 
         stored = sql_db.get_embedding_kp_ids(course_id, document_id)
-        # 融合状态变过（apply / revoke / 整批撤销）时也要核对一次：
-        # epoch 是权威且顺序无关的信号，不依赖图库可用性。
-        if stored != current or self._fusion_epoch_changed(course_id, document_id):
+        # 模型漂移必须整篇重建，不能走增量同步：旧向量与新查询向量可能维度不同
+        # （矩阵乘法直接报错 → 问答 500），也可能维度相同但语义空间不同（检索
+        # 不报错却毫无意义）。NULL 是迁移前的历史行，无法确认模型，同样按过期处理。
+        stored_models = sql_db.get_embedding_models(course_id, document_id)
+        model_stale = bool(stored) and stored_models != {settings.EMBEDDING_MODEL}
+        if model_stale:
+            self.build_index(course_id, document_id)
+        elif stored != current or self._fusion_epoch_changed(course_id, document_id):
             self.sync_index(course_id, document_id, current=current, stored=stored)
         return sql_db.get_embeddings_by_document(course_id, document_id)
 
@@ -140,7 +145,8 @@ class KnowledgeEmbedder:
                 ]
                 vecs = self.embedding.embed(texts)
                 for r, vec in zip(recs, vecs):
-                    sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
+                    sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec,
+                                               model=settings.EMBEDDING_MODEL)
                 added = len(recs)
                 vector_index.invalidate(kind="kp", course_id=course_id)
 
@@ -186,7 +192,8 @@ class KnowledgeEmbedder:
         ]
         vecs = self.embedding.embed(texts)
         for r, vec in zip(recs, vecs):
-            sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec)
+            sql_db.upsert_kp_embedding(course_id, document_id, r.get("kp_id"), vec,
+                                       model=settings.EMBEDDING_MODEL)
         # 记下「本次索引是按哪个融合 epoch 建的」，供 ensure_index 判新鲜度。
         # 只在文档已有 scope 行时写 —— 未融合过的文档不该因为建索引而凭空多出一行。
         scope = sql_db.fusion_scope_get(course_id, document_id)

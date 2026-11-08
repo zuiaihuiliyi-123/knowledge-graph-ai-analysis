@@ -9,21 +9,26 @@ class EmbeddingsMixin:
 
     # ---------- 知识点向量（RAG 向量检索） ----------
 
-    def upsert_kp_embedding(self, course_id: int, document_id, kp_id: str, embedding: list) -> int:
+    def upsert_kp_embedding(self, course_id: int, document_id, kp_id: str, embedding: list,
+                            model: str = None) -> int:
         """写入/更新知识点向量（**双写**：`embedding` JSON 兼容 + `embedding_blob` float32 快读）
 
         L2 阶段 E：blob 列用于检索（体积 5.2×↓、免 JSON 解析）；JSON 列保留以兼容旧读取方。
+
+        model：生成该向量的 embedding 模型名。写入方必须传当前配置值；
+        留空表示未知（兼容旧调用方），`ensure_index` 会把 NULL 视为过期并重建。
         """
         return self._execute(
             "INSERT INTO t_kp_embedding "
-            "(course_id, document_id, kp_id, embedding, embedding_blob, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
+            "(course_id, document_id, kp_id, embedding, embedding_blob, model, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(course_id, kp_id) DO UPDATE SET "
             "document_id = excluded.document_id, "
             "embedding = excluded.embedding, embedding_blob = excluded.embedding_blob, "
+            "model = excluded.model, "
             "updated_at = excluded.updated_at",
             (course_id, document_id, kp_id, json.dumps(embedding),
-             _vec_to_blob(embedding), _now()),
+             _vec_to_blob(embedding), model, _now()),
         )
 
 
@@ -55,6 +60,23 @@ class EmbeddingsMixin:
             (course_id, document_id),
         )
         return {r["kp_id"] for r in rows}
+
+
+    def get_embedding_models(self, course_id: int, document_id=None) -> set:
+        """该作用域内已存知识点向量分别由哪些模型生成（NULL 表示历史未知）。
+
+        用于 `ensure_index` 的模型漂移判定：集合里只要出现非当前模型（含 NULL），
+        就说明索引是旧模型产物，必须整篇重建，而不是按 kp_id 增量同步。
+        """
+        where, params = ["course_id = ?"], [course_id]
+        if document_id is not None:
+            where.append("document_id = ?")
+            params.append(document_id)
+        rows = self._query(
+            f"SELECT DISTINCT model FROM t_kp_embedding WHERE {' AND '.join(where)}",
+            tuple(params),
+        )
+        return {r["model"] for r in rows}
 
 
     def delete_kp_embeddings(self, course_id: int, document_id, kp_ids) -> int:
@@ -105,16 +127,23 @@ class EmbeddingsMixin:
 
     # ---------- L2 阶段 E：向量的 BLOB 快读通道（检索层用，免 JSON 解析） ----------
 
-    def get_kp_embedding_blobs(self, course_id: int, document_id=None) -> list:
+    def get_kp_embedding_blobs(self, course_id: int, document_id=None,
+                               model: str = None) -> list:
         """取知识点向量的 **float32 原始字节**：`[{kp_id, document_id, blob}]`。
 
         优先读 `embedding_blob`；该列为空（历史行尚未回填）时回落解析 `embedding`(JSON)，
         保证**回填进度不影响读取正确性**。检索层直接 `np.frombuffer` 成矩阵，零解析开销。
+
+        model 传入时只取该模型生成的行：换模型后旧行与新查询向量维度/语义空间都不同，
+        混在一起会让检索结果不可信（维度不同还会让矩阵乘法直接报错）。
         """
         where, params = ["course_id = ?"], [course_id]
         if document_id is not None:
             where.append("document_id = ?")
             params.append(document_id)
+        if model is not None:
+            where.append("model = ?")
+            params.append(model)
         rows = self._query(
             f"SELECT kp_id, document_id, embedding_blob, embedding FROM t_kp_embedding "
             f"WHERE {' AND '.join(where)}", tuple(params))
@@ -122,15 +151,19 @@ class EmbeddingsMixin:
 
 
     def get_question_embedding_blobs(self, course_id: int, document_id=None,
-                                     question_ids=None) -> list:
+                                     question_ids=None, model: str = None) -> list:
         """取题目向量的 float32 原始字节：`[{question_id, blob}]`（口径同 t_question_embedding）。
 
         `question_ids` 传入时只取这些题——召回 R5 只需「学生最近错题的向量」。
+        model 传入时只取该模型生成的行（换模型后的旧缓存不参与检索）。
         """
         where, params = ["course_id = ?"], [course_id]
         if document_id is not None:
             where.append("document_id = ?")
             params.append(document_id)
+        if model is not None:
+            where.append("model = ?")
+            params.append(model)
         ids = [int(q) for q in (question_ids or []) if q is not None]
         if ids:
             where.append(f"question_id IN ({', '.join('?' for _ in ids)})")
@@ -166,19 +199,25 @@ class EmbeddingsMixin:
 
 
     def upsert_question_embedding(self, question_id: int, course_id: int, document_id,
-                                  text_hash: str, embedding: list) -> int:
-        """写入/更新题目向量（**双写**：`embedding` JSON 兼容 + `embedding_blob` float32 快读）"""
+                                  text_hash: str, embedding: list,
+                                  model: str = None) -> int:
+        """写入/更新题目向量（**双写**：`embedding` JSON 兼容 + `embedding_blob` float32 快读）
+
+        model：生成该向量的 embedding 模型名；缓存命中逻辑会比对它，
+        换模型后即使题目文本没变也必须重算。
+        """
         with self._connect() as conn:
             conn.execute(
                 "INSERT INTO t_question_embedding "
                 "(question_id, course_id, document_id, text_hash, embedding, embedding_blob, "
-                " updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) "
+                " model, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(question_id) DO UPDATE SET "
                 "course_id = excluded.course_id, document_id = excluded.document_id, "
                 "text_hash = excluded.text_hash, embedding = excluded.embedding, "
-                "embedding_blob = excluded.embedding_blob, updated_at = excluded.updated_at",
+                "embedding_blob = excluded.embedding_blob, model = excluded.model, "
+                "updated_at = excluded.updated_at",
                 (question_id, course_id, document_id, text_hash,
-                 self._json_text(embedding), _vec_to_blob(embedding), _now()),
+                 self._json_text(embedding), _vec_to_blob(embedding), model, _now()),
             )
             conn.commit()
         return 1
@@ -202,7 +241,7 @@ class EmbeddingsMixin:
     def get_question_embedding(self, question_id: int) -> dict:
         """取单题向量行（含 text_hash，供判断是否需要重算）"""
         row = self._query_one(
-            "SELECT question_id, course_id, document_id, text_hash, embedding "
+            "SELECT question_id, course_id, document_id, text_hash, embedding, model "
             "FROM t_question_embedding WHERE question_id = ?", (question_id,),
         )
         if row is None:

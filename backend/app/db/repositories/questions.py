@@ -576,6 +576,23 @@ class QuestionsMixin:
             return cur.rowcount
 
 
+    def delete_import_batches_by_document(self, course_id: int, document_id) -> int:
+        """删除某文档的题目导入批次记录，返回条数。
+
+        `t_question_import_batch.document_id` 无物理外键、不在任何自动级联里；
+        文档删除后这些批次会变成指向不存在文档的孤儿，前端「导入历史」仍能翻到，
+        点进去却找不到题目。课程级删除已按 course_id 清理（courses.delete_course），
+        这里补齐文档级入口。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_question_import_batch WHERE course_id = ? AND document_id = ?",
+                (course_id, document_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+
     def delete_question_favorites_by_document(self, course_id: int, document_id) -> int:
         """删除某文档题目的收藏记录（须先于题目删除调用），返回条数"""
         with self._connect() as conn:

@@ -80,6 +80,18 @@
                 <!-- 生成结束但结果不完整（截断 / 中断）：明确说明，不假装完整 -->
                 <div v-if="m.note && !m.streaming" class="msg-note">{{ m.note }}</div>
 
+                <!-- 向量检索不可用、已降级为关键词匹配：明确提示回答质量可能下降，避免「变差却不报错」 -->
+                <div
+                  v-if="!m.streaming && !m.error && m.retrievalMode && m.retrievalMode !== 'vector'"
+                  class="msg-degraded"
+                >
+                  <el-icon><WarningFilled /></el-icon>
+                  <span v-if="m.retrievalMode === 'keyword'">
+                    当前向量检索不可用，已降级为关键词匹配，回答仅供参考，请结合教材核对。
+                  </span>
+                  <span v-else>未检索到课程知识点，本回答基于通用知识生成，仅供参考。</span>
+                </div>
+
                 <div v-if="!m.error && m.content && !m.streaming" class="turn-ops">
                   <button class="turn-op" @click="copyAnswer(m)">
                     <el-icon><CopyDocument /></el-icon>复制
@@ -535,6 +547,20 @@ function relativeTime(t) {
   margin-top: 6px;
   font-size: var(--font-size-caption);
   color: var(--color-warning);
+}
+/* 检索降级提示：比「结果不完整」更醒目一层，但仍不打断阅读 */
+.msg-degraded {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-size: var(--font-size-caption);
+  line-height: 1.6;
+  color: var(--color-warning);
+  background: rgba(230, 162, 60, 0.1);
+  border: 1px solid rgba(230, 162, 60, 0.32);
+  border-radius: 8px;
 }
 /* 切换学习资料的分隔行：把两段上下文分开，避免误读成同一轮问答 */
 .chat-divider {

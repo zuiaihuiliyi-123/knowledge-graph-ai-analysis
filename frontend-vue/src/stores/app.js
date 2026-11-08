@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { api } from '../api'
+import { useAiChatStore } from './aiChat'
 
 const TOKEN_KEY = 'kg_token'
 const USER_KEY = 'kg_user'
@@ -127,6 +128,10 @@ export const useAppStore = defineStore('app', {
       localStorage.setItem(USER_KEY, JSON.stringify(this.user))
     },
     logout() {
+      // AI 对话是用户私有内容：必须先作废在途回答并清空内存会话，
+      // 否则同一标签页换账号登录后，新账号会直接看到上一位用户的提问与回答
+      // （localStorage 的 key 已按 user_id 隔离，但内存里的 Pinia 状态不会自动重置）。
+      useAiChatStore().reset()
       this.token = ''
       this.user = null
       this.profile = null

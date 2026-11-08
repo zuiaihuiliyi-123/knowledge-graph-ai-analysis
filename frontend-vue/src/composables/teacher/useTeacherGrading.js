@@ -65,9 +65,10 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
       gradingTotal.value = data.total || 0
       onSummary?.(summary?.pending ?? 0)
       gradingList.value.forEach((it) => {
-        // 待批改默认满分；已批改预填当前分数（便于微调后改判）
+        // 已批改预填当前分数（便于微调后改判）；待批改**不预填**，
+        // 否则教师忘了改分直接点「批改」就会把主观题误给满分。
         if (gradingStatus.value === 'GRADED') gradingScore[it.record_id] = Number(it.score ?? 0)
-        else if (gradingScore[it.record_id] === undefined) gradingScore[it.record_id] = 100
+        else gradingScore[it.record_id] = undefined
         // 学生筛选下拉：累积本课程出现过的学生
         const sid = String(it.student_id ?? '')
         if (sid && !gradingStudentOptions.value.some((o) => o.value === sid)) {
@@ -107,7 +108,13 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
 
   /** 单题批改（就地更新分数与评语；后端按 >=60 记为答对，允许重批覆盖） */
   async function submitGrade(row) {
-    const score = Number(gradingScore[row.record_id])
+    const raw = gradingScore[row.record_id]
+    // 待批改不再默认满分：必须由教师显式输入分数后才允许提交，防止误点把主观题给满分
+    if (raw === null || raw === undefined || raw === '') {
+      ElMessage.warning('请先为该题填写 0-100 的分数')
+      return
+    }
+    const score = Number(raw)
     if (Number.isNaN(score) || score < 0 || score > 100) {
       ElMessage.warning('请填写 0-100 的分数')
       return
@@ -121,7 +128,8 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
           confirmButtonText: '确认给分',
           cancelButtonText: '取消',
           inputPlaceholder: '评语（可选）',
-          inputValue: '',
+          // 回填已有评语，避免只微调分数时把原评语静默清空
+          inputValue: row.comment || '',
         },
       )
       comment = value || ''

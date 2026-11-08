@@ -141,6 +141,8 @@ class CoursesMixin:
         Scope C 的 t_question_embedding（题目向量）与 t_kp_text（知识点文本缓存）同理。
         知识融合的 5 张表（t_kp_fusion_*）同理——它们此前只挂在文档级删除路径上，
         课程级删除会静默残留孤儿融合数据。
+        t_document_task（阶段 4 的断点续跑任务行）有外键指向 t_document 且无级联，
+        也必须先于 t_document 清理，否则课程删除会整体回滚。
         """
         doc_count = self.count_documents_by_course(course_id)
         with self._connect() as conn:
@@ -173,6 +175,17 @@ class CoursesMixin:
                 "(SELECT question_id FROM t_question WHERE course_id = ?)", (course_id,),
             )
             conn.execute("DELETE FROM t_question WHERE course_id = ?", (course_id,))
+            # 阶段 4 的文档处理任务行：`doc_id` 外键指向 t_document，且 DDL 里没有
+            # ON DELETE CASCADE（既有的旧库也无法靠 ALTER 补上）。必须在删文档前显式
+            # 清理，否则只要课程里有处理过的文档，整个删除就会因外键约束回滚——
+            # 而调用方此时已经删掉了本地文件与 Neo4j 图谱，会留下跨库不一致。
+            # 同时按 doc_id 子查询兜底：即使历史行的 course_id 与文档不一致，
+            # 也不能让外键把整门课的删除卡死。
+            conn.execute(
+                "DELETE FROM t_document_task WHERE course_id = ? OR doc_id IN "
+                "(SELECT doc_id FROM t_document WHERE course_id = ?)",
+                (course_id, course_id),
+            )
             conn.execute("DELETE FROM t_document WHERE course_id = ?", (course_id,))
             conn.execute("DELETE FROM t_course WHERE course_id = ?", (course_id,))
             conn.commit()

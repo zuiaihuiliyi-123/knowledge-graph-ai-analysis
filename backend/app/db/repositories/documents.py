@@ -120,17 +120,27 @@ class DocumentsMixin:
         )
 
 
-    def get_document_by_sha256(self, course_id: int, file_sha256: str) -> dict:
-        """按内容哈希查同课程里最近一次上传的同名内容文档（批量上传去重）。
+    def get_document_by_sha256(self, course_id: int, file_sha256: str,
+                               usable_only: bool = False) -> dict:
+        """按内容哈希查同课程里最近一次上传的相同内容文档（上传去重）。
 
         去重范围刻意限定在同一课程内：不同课程的同名文件是两份独立教学资料，
         各自建图，符合「不跨课程融合」的约束。
+
+        usable_only=True 时排除已判失败的文档（parse / extract / graph 任一
+        FAILED）。失败文档不能挡住教师重新上传同一文件——否则「重试」只能改文件名，
+        而旧实现正是让一条 FAILED 记录永久占住这个哈希。
         """
         if not file_sha256:
             return None
+        where = ["course_id = ?", "file_sha256 = ?"]
+        if usable_only:
+            where.append("COALESCE(parse_status, '') <> 'FAILED'")
+            where.append("COALESCE(extract_status, '') <> 'FAILED'")
+            where.append("COALESCE(graph_status, '') <> 'FAILED'")
         return self._query_one(
-            "SELECT * FROM t_document WHERE course_id = ? AND file_sha256 = ? "
-            "ORDER BY doc_id DESC LIMIT 1",
+            f"SELECT * FROM t_document WHERE {' AND '.join(where)} "
+            f"ORDER BY doc_id DESC LIMIT 1",
             (course_id, file_sha256),
         )
 

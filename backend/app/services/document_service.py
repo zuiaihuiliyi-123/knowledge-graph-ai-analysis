@@ -128,6 +128,24 @@ class DocumentService:
         return {"ok": True, "file_name": filename, "file_type": EXT_TO_FILE_TYPE[ext]}
 
     @staticmethod
+    def _find_reusable_duplicate(course_id: int, digest: str) -> dict:
+        """同课程内可复用的同内容文档；没有则返回 None。
+
+        两个必须排除的情形：
+        - 文档已判失败（parse/extract/graph FAILED）：教师重传同一文件是**修复**，
+          不能被一条历史失败记录挡回去；
+        - 记录还在、源文件已丢失：复用它的结果是「上传成功但永远处理不了」，
+          不如按新上传落一份完整文件。
+        """
+        existing = sql_db.get_document_by_sha256(course_id, digest, usable_only=True)
+        if not existing:
+            return None
+        path = resolve_document_path(existing)
+        if not path or not os.path.exists(path):
+            return None
+        return existing
+
+    @staticmethod
     async def _persist_document(course_id: int, teacher_id: int, filename: str,
                                 file_type: str, content: bytes) -> dict:
         """建文档记录 + 落盘，返回 {ok, document_id, file_sha256}。
@@ -235,6 +253,7 @@ class DocumentService:
 
         # 2. 抽取（PENDING -> EXTRACTING -> COMPLETED/FAILED）；有产物则跳过（省一次 LLM 调用）
         DocumentService._task_stage(doc_id, course_id, "EXTRACT")
+        partial_message = None
         cached = task_state.load_extraction(doc_id, sha) if resume else None
         if cached:
             entities = cached["entities"]
@@ -252,12 +271,24 @@ class DocumentService:
                 DocumentService._task_failed(doc_id, course_id, "EXTRACT", message)
                 return {"ok": False, "code": 3003, "message": f"知识抽取失败: {str(e)}"}
 
-            # 抽取结果带 error（JSON 解析失败 / LLM 异常等）时，不应静默当作 0 实体成功
+            # 抽取结果带 error（至少一个分块失败）时分两种情况：
+            # - 有分块成功（succeeded_chunk_count > 0）：**保留可用结果继续入库**。
+            #   长文档按块并发抽取，个别块超时/限流很常见；旧实现让一个块失败就整篇
+            #   作废，教师必须整篇重传，既浪费已成功的 LLM 调用，也丢了可用知识点。
+            #   失败信息写进 error_message 作为「部分完成」提示，不冒充完全成功。
+            # - 全部分块失败（或旧结构没有计数）：维持整篇失败。
+            succeeded_chunks = result.get("succeeded_chunk_count")
             if result.get("error"):
-                message = str(result["error"])
-                sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
-                DocumentService._task_failed(doc_id, course_id, "EXTRACT", message)
-                return {"ok": False, "code": 3003, "message": f"知识抽取失败: {message}"}
+                if not succeeded_chunks:
+                    message = str(result["error"])
+                    sql_db.update_document(doc_id, extract_status="FAILED", error_message=message)
+                    DocumentService._task_failed(doc_id, course_id, "EXTRACT", message)
+                    return {"ok": False, "code": 3003, "message": f"知识抽取失败: {message}"}
+                partial_message = (
+                    f"部分分块抽取失败（成功 {succeeded_chunks}/{result.get('chunk_count', '?')}）："
+                    f"{result['error']}")
+                _logger.warning("文档 %s 部分分块抽取失败，已保留成功部分: %s",
+                                doc_id, partial_message)
 
             entities = result.get("entities", [])
             relations = result.get("relations", [])
@@ -277,7 +308,8 @@ class DocumentService:
             entity_count=len(entities),
             relation_count=len(relations),
             graph_status="BUILDING",
-            error_message=None,
+            # 部分分块失败时保留提示；完全成功时清空历史错误
+            error_message=partial_message,
         )
         DocumentService._task_stage(doc_id, course_id, "BUILD")
         try:
@@ -300,8 +332,10 @@ class DocumentService:
             DocumentService._cleanup_deleted_scope(course_id, doc_id)
             return {"ok": False, "code": 4009, "message": "文档已被删除，任务终止"}
 
-        # 4. 只有图谱真正入库后才标记完成（此时才清中间产物：留着只会占空间）
-        sql_db.update_document(doc_id, graph_status="COMPLETED", error_message=None)
+        # 4. 只有图谱真正入库后才标记完成（此时才清中间产物：留着只会占空间）。
+        # error_message 保留部分分块失败的提示：状态是 COMPLETED，但教师仍应看到
+        # 这篇文档的知识抽取并不完整，必要时可重试。
+        sql_db.update_document(doc_id, graph_status="COMPLETED", error_message=partial_message)
         task_state.clear(doc_id)
         DocumentService._task_done(doc_id, course_id)
 
@@ -522,13 +556,24 @@ class DocumentService:
         if not perm["ok"]:
             return {"ok": False, "code": perm["code"], "message": perm["message"]}
 
-        # 4. 建记录 + 落盘
+        # 4. 同课程内容去重（与批量上传同一口径）：重复提交同一份文件时复用原文档，
+        # 不再重复解析 / 抽取 / 建图（一次抽取是真实 LLM 费用）。
+        # 失败文档与源文件已丢失的文档不参与去重，见 _find_reusable_duplicate。
+        digest = _sha256(content)
+        existing = DocumentService._find_reusable_duplicate(course_id, digest)
+        if existing:
+            payload = DocumentService._success_payload(existing, status="existing")
+            payload["duplicate"] = True
+            return {"ok": True, "code": 0, "message": "相同文件已存在于本课程，已跳过重复建图",
+                    "data": payload}
+
+        # 5. 建记录 + 落盘
         persisted = await DocumentService._persist_document(
             course_id, teacher_id, checked["file_name"], checked["file_type"], content)
         if not persisted["ok"]:
             return persisted
 
-        # 5. 处理：同步（默认）或交给后台任务
+        # 6. 处理：同步（默认）或交给后台任务
         doc_id = persisted["document_id"]
         if background:
             # 异步模式：落库后立即返回，与批量上传共用同一条后台任务入口
@@ -574,10 +619,19 @@ class DocumentService:
         # 同一次提交里的重复文件也去重，避免一个批次里同一内容建两遍图
         batch_hashes = {}
 
+        max_size = settings.MAX_UPLOAD_SIZE
         for upload in files:
             original_name = _clean_filename(upload.filename or "未命名")
+            # 超限文件必须在读入内存前拒掉：批量上传一次可能带多个大文件，
+            # 逐个 `read()` 全部内容再校验会把内存打满（甚至拖垮整个进程）。
+            if upload.size is not None and upload.size > max_size:
+                items.append({"file_name": original_name, "ok": False,
+                              "code": 1002,
+                              "message": f"文件大小超限，最大 {max_size // 1024 // 1024}MB"})
+                failed += 1
+                continue
             try:
-                content = await upload.read()
+                content = await upload.read(max_size + 1)
             except Exception as e:
                 items.append({"file_name": original_name, "ok": False,
                               "code": 5001, "message": f"读取上传文件失败: {str(e)}"})
@@ -600,8 +654,9 @@ class DocumentService:
                 duplicates += 1
                 continue
 
-            # 同课程内已上传过相同内容：复用原文档，不重复建图（重复提交幂等）
-            existing = sql_db.get_document_by_sha256(course_id, digest)
+            # 同课程内已上传过相同内容：复用原文档，不重复建图（重复提交幂等）。
+            # 失败的旧文档、源文件已丢失的旧文档不算可复用（否则重传永远被挡）。
+            existing = DocumentService._find_reusable_duplicate(course_id, digest)
             if existing:
                 batch_hashes[digest] = existing["doc_id"]
                 items.append({"file_name": checked["file_name"], "ok": True,
@@ -879,6 +934,13 @@ class DocumentService:
         except Exception as e:
             return {"ok": False, "code": 5002, "message": f"删除文档题库数据失败: {str(e)}"}
 
+        # 4.7 题目导入批次：document_id 只是普通列（无外键、不在自动级联里），
+        # 不显式清理会在「导入历史」里留下指向已删文档的孤儿批次。
+        try:
+            removed_import_batches = sql_db.delete_import_batches_by_document(cid, doc_id)
+        except Exception as e:
+            return {"ok": False, "code": 5002, "message": f"删除文档题目导入批次失败: {str(e)}"}
+
         # 4.8 文档级知识融合数据（run / candidate / map / conflict / scope）
         # 融合映射按 kp_id 指向本文件的节点，文档一删这些 kp_id 就再无意义；
         # 留下不清理会让 t_kp_fusion_map 里堆积指向不存在节点的"僵尸映射"。
@@ -912,5 +974,6 @@ class DocumentService:
             "removed_questions": removed_questions,
             "removed_question_favorites": removed_question_favorites,
             "removed_answers": removed_answers,
+            "removed_import_batches": removed_import_batches,
             "removed_fusion": removed_fusion,
         }}

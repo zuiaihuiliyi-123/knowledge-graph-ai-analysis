@@ -95,12 +95,15 @@ class KnowledgeGraphManager:
         }
 
     @staticmethod
-    def get_graph_data(course_id: str = None, document_id=None) -> dict:
+    def get_graph_data(course_id: str = None, document_id=None, course_ids=None) -> dict:
         """
         获取知识图谱数据，转为 ECharts 格式
         返回 {"nodes": [...], "links": [...]}
+
+        course_ids：course_id 缺省时的可访问课程白名单（legacy 全库入口的权限收敛）。
+        传空列表即返回空图，绝不退化为整库查询。
         """
-        records = db.get_full_graph(course_id, document_id)
+        records = db.get_full_graph(course_id, document_id, course_ids=course_ids)
 
         nodes = {}
         links = []
@@ -176,6 +179,29 @@ class KnowledgeGraphManager:
             """
 
         records = db.query(cypher, params)
+
+        # 节点总数：LIMIT 只限制「取多少」，不说明「一共有多少」。
+        # 前端据此判断是否被截断，避免用户把「前 N 个」误当成完整图谱。
+        total_params = {"course_id": course_id, "document_id": document_id}
+        if node_type:
+            total_cypher = (
+                "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id, "
+                "category: $node_type}) RETURN count(n) AS total"
+            )
+            total_params["node_type"] = node_type
+        else:
+            total_cypher = (
+                "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id}) "
+                "RETURN count(n) AS total"
+            )
+        try:
+            total_nodes = int((db.query(total_cypher, total_params) or [{}])[0].get("total") or 0)
+        except Exception as e:  # noqa: BLE001 - 计数失败不应阻断读图，但必须留日志
+            _logger.warning(
+                "get_graph_v1 统计节点总数失败，本次按未截断处理 course_id=%s document_id=%s: %s",
+                course_id, document_id, e,
+            )
+            total_nodes = 0
 
         nodes = {}
         edges = []
@@ -266,7 +292,14 @@ class KnowledgeGraphManager:
                 )
         edges = valid_edges
 
-        return {"nodes": list(nodes.values()), "edges": edges}
+        return {
+            "nodes": list(nodes.values()),
+            "edges": edges,
+            # total_nodes 是数据库里匹配该作用域的节点总数；truncated 表示本次因 LIMIT
+            # 没能全部取回。前端据此提示「仅显示前 N 个」，而不是把截断后的图谱当完整的。
+            "total_nodes": total_nodes,
+            "truncated": bool(total_nodes > limit),
+        }
 
     @staticmethod
     def get_raw_graph_v1(course_id: str, document_id, limit: int = 500,

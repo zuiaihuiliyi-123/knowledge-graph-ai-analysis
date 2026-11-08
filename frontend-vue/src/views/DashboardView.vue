@@ -187,7 +187,7 @@ const todayText = computed(() => {
 const quickLinks = [
   { label: '课程管理', desc: '管理课程、图谱与教学监测', icon: Notebook, path: '/teacher?tab=courses', bg: 'linear-gradient(135deg,#4f8df7,#6a5cf6)' },
   { label: '图谱管理', desc: '查看课程知识图谱，可就地切换编辑审核', icon: Search, path: '/teacher?tab=preview', bg: 'linear-gradient(135deg,#22c08a,#14b8d6)' },
-  { label: '上传课程资料', desc: '上传文档，自动构建知识图谱', icon: Upload, path: '/teacher?tab=upload', bg: 'linear-gradient(135deg,#f5a623,#f4794d)' },
+  { label: '上传课程资料', desc: '上传文档，自动构建知识图谱', icon: Upload, path: '/teacher?tab=documents', bg: 'linear-gradient(135deg,#f5a623,#f4794d)' },
   { label: '题库管理', desc: '建设与维护课程配套题库', icon: Collection, path: '/teacher?tab=questions', bg: 'linear-gradient(135deg,#8b5cf6,#c084fc)' },
 ]
 

@@ -58,7 +58,7 @@
 
         <div class="form-footer">
           <el-button link type="primary" @click="router.push('/register')">没有账号？去注册</el-button>
-          <el-button link @click="router.push('/invite')">加课码 / 邀请链接</el-button>
+          <el-button link @click="router.push('/course-center?tab=join')">加课码 / 邀请链接</el-button>
         </div>
       </div>
       <div class="form-status">
@@ -73,7 +73,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, InfoFilled } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
@@ -82,19 +82,26 @@ import BackendStatusCard from '../components/BackendStatusCard.vue'
 import BrandMark from '../components/BrandMark.vue'
 
 const router = useRouter()
+const route = useRoute()
 const store = useAppStore()
 
 const formRef = ref(null)
 const loading = ref(false)
 const form = reactive({ username: '', password: '', role: 'student' })
+// 演示账号一键填充：刻意不提供管理员账号——管理员凭据不能硬编码进前端 bundle
 const demos = [
   { role: 'teacher', label: '教师 demo_teacher', username: 'demo_teacher', password: 'demo123456' },
   { role: 'student', label: '学生 demo_student', username: 'demo_student', password: 'demo123456' },
-  { role: 'admin', label: '管理员 demo_admin', username: 'demo_admin', password: 'demo123456' },
 ]
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+}
+
+/** 路由守卫拦截未登录访问时会带 ?redirect=…；只接受站内相对路径，防开放重定向 */
+function resolveRedirect() {
+  const r = route.query.redirect
+  return typeof r === 'string' && r.startsWith('/') && !r.startsWith('//') ? r : ''
 }
 
 function fillDemo(d) {
@@ -114,7 +121,9 @@ async function handleLogin() {
   try {
     await store.login(form.username, form.password)
     ElMessage.success('登录成功')
-    router.push('/course-center')
+    // 登录成功后回到用户原本想去的页面（例如邀请链接 /invite/:token），而不是一律丢回课程中心
+    const redirect = resolveRedirect()
+    router.push(redirect || '/course-center')
   } catch (e) {
     ElMessage.error(e.message || '登录失败')
   } finally {

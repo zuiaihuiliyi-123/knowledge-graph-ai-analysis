@@ -4,6 +4,7 @@
 
 统一返回 {"ok": bool, "code": int, "message": str, "data": dict}
 """
+import logging
 import os
 
 from ..core.codes import gen_join_code
@@ -12,6 +13,8 @@ from ..core.sql_database import JOIN_MODES, course_is_visible, sql_db
 from ..core.storage import resolve_document_path
 from .document_service import DocumentService
 from .profile_service import ProfileService
+
+_logger = logging.getLogger(__name__)
 
 
 def _member_summary(counts: dict) -> dict:
@@ -303,11 +306,17 @@ class CourseService:
             "member_count": counts.get("approved", 0),
             "pending_count": counts.get("pending", 0),
         }
-        # 加课码只对课程教师可见（学生拿到码也只会重复加入，没有必要暴露）
-        if viewer and (viewer["user_id"] == course["teacher_id"]
-                       or (viewer.get("role") == "teacher"
-                           and sql_db.get_membership(course_id, viewer["user_id"]))):
-            data["join_code"] = course.get("join_code")
+        # 加课码只对课程教师可见（学生拿到码也只会重复加入，没有必要暴露）。
+        # 协作教师必须仍是 **approved** 成员才可见：get_membership 不过滤状态，
+        # 待审核 / 被拒绝 / 已被移除的教师同样有一行成员记录，旧写法会让
+        # （例如刚被移除的）协作者继续拿到可用的加课码，绕开教师审核重新进课。
+        if viewer:
+            viewer_id = viewer["user_id"]
+            is_owner = viewer_id == course["teacher_id"]
+            member = sql_db.get_membership(course_id, viewer_id) if not is_owner else None
+            if is_owner or (viewer.get("role") == "teacher"
+                            and member and member.get("status") == "approved"):
+                data["join_code"] = course.get("join_code")
         return {"ok": True, "code": 0, "message": "success", "data": data}
 
     # ---------- 更新 ----------
@@ -394,31 +403,54 @@ class CourseService:
             return {"ok": False, "code": 4009,
                     "message": "该课程有文档正在处理中，请等待处理完成后再删除"}
 
-        # 1. 删除文档文件（本地文件系统）
+        # 1. 先取删除报告所需的计数与待删文件清单（删完就再也查不到了）
         # 路径解析见 core/storage：历史行的 file_path 可能是其他机器的路径，需回退定位
         docs = sql_db.list_documents_by_course(course_id)
-        for d in docs:
-            p = resolve_document_path(d)
-            if p and os.path.exists(p):
-                try:
-                    os.remove(p)
-                except OSError:
-                    pass
-
-        # 2. 删除 Neo4j 图谱节点与关系
-        removed_nodes, removed_edges = db.delete_course_graph(course_id)
-
-        # 3. 删除 SQLite 记录（成员 + 邀请 + 文档 + 学习记录 + 收藏 + 向量 + 题库
-        #    + 知识融合 + 课程）
         # 题库（题目/答题记录/题目收藏）与融合 5 表在 SQLDatabase.delete_course 内
         # 按子表顺序一并清理，这里先取计数用于返回报告（删除后无法再统计）。
         removed_embeddings = sql_db.count_embeddings_by_course(course_id)
         removed_questions = sql_db.count_questions_by_course(course_id)
         removed_answers = sql_db.count_answers_by_course(course_id)
         removed_fusion = sql_db.count_fusion_by_course(course_id)
-        removed_documents = sql_db.delete_course(course_id)
 
-        return {"ok": True, "code": 0, "message": "success", "data": {
+        # 2. **先删 SQLite**：它是课程归属的唯一权威记录。此步失败时后面的文件与
+        #    Neo4j 删除都不能执行，否则会留下「课程还在、文件与图谱已经没了」的
+        #    跨库不一致（P0：t_document_task 外键曾让这里整体回滚，而文件与图谱
+        #    在前面已经删掉）。失败必须显式返回，不能把异常抛成 500。
+        try:
+            removed_documents = sql_db.delete_course(course_id)
+        except Exception as e:  # noqa: BLE001 - 需把真实原因返回给调用方
+            _logger.error("删除课程 SQLite 数据失败 course_id=%s: %s",
+                          course_id, e, exc_info=True)
+            return {"ok": False, "code": 5002,
+                    "message": f"删除课程数据失败：{str(e)}"}
+
+        # 3. 再删 Neo4j 图谱与本地文件。课程行已经不存在，这两步属于**残留清理**：
+        #    失败只记录日志并写进返回报告，不能反向把「已经删掉的课程」变成失败。
+        graph_error = None
+        try:
+            removed_nodes, removed_edges = db.delete_course_graph(course_id)
+        except Exception as e:  # noqa: BLE001 - 图库不可用不应让删课不可用
+            _logger.warning("课程已从 SQLite 删除，但清理 Neo4j 图谱失败 course_id=%s: %s",
+                            course_id, e, exc_info=True)
+            removed_nodes, removed_edges = 0, 0
+            graph_error = f"{type(e).__name__}: {e}"
+
+        file_errors = []
+        for d in docs:
+            try:
+                p = resolve_document_path(d)
+                if p and os.path.exists(p):
+                    os.remove(p)
+            except OSError as e:
+                _logger.warning("删除课程文件失败 course_id=%s path=%s: %s",
+                                course_id, d.get("file_path"), e)
+                file_errors.append(f"{d.get('file_path')}: {e}")
+            except Exception as e:  # noqa: BLE001 - 路径解析失败同样只记录
+                _logger.warning("解析课程文件路径失败 course_id=%s: %s", course_id, e)
+                file_errors.append(f"{d.get('file_path')}: {e}")
+
+        data = {
             "course_id": course_id,
             "deleted": True,
             "removed_documents": removed_documents,
@@ -428,4 +460,9 @@ class CourseService:
             "removed_questions": removed_questions,
             "removed_answers": removed_answers,
             "removed_fusion": removed_fusion,
-        }}
+        }
+        if graph_error:
+            data["graph_cleanup_error"] = graph_error
+        if file_errors:
+            data["file_cleanup_errors"] = file_errors
+        return {"ok": True, "code": 0, "message": "success", "data": data}

@@ -89,7 +89,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, InfoFilled, Key } from '@element-plus/icons-vue'
 import { useAppStore } from '../stores/app'
@@ -98,7 +98,14 @@ import BackendStatusCard from '../components/BackendStatusCard.vue'
 import BrandMark from '../components/BrandMark.vue'
 
 const router = useRouter()
+const route = useRoute()
 const store = useAppStore()
+
+/** 路由守卫拦截未登录访问时会带 ?redirect=…；只接受站内相对路径，防开放重定向 */
+function resolveRedirect() {
+  const r = route.query.redirect
+  return typeof r === 'string' && r.startsWith('/') && !r.startsWith('//') ? r : ''
+}
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -160,7 +167,9 @@ async function handleRegister() {
     ElMessage.success('注册成功，正在登录…')
     // 注册后自动登录，省去用户再填一次（后端注册接口不返回 token）
     await store.login(username, form.password)
-    router.push('/course-center')
+    // 邀请链接等被路由守卫拦截的页面：注册并登录后回到原目标
+    const redirect = resolveRedirect()
+    router.push(redirect || '/course-center')
   } catch (e) {
     ElMessage.error(e.message || '注册失败')
   } finally {

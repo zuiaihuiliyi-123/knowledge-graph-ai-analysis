@@ -142,7 +142,33 @@ class LearningService:
                 "records": records,
             })
 
-        # 不指定文档：返回该用户全部学习记录（按课程分组）。
+        # 只指定课程、未指定文档：返回**课程级**进度。
+        # 调用方（学生端概览 / 学习路径）只拿到 course_id 时，契约里应当有
+        # mastered_kp_ids；旧实现落到最下面的「全部课程」分支，返回的是
+        # {courses: [...]}，调用方读 progress.mastered_kp_ids 得到 undefined，
+        # 已掌握标记被当成空集合。这里补齐课程级口径（与文档级同名字段）。
+        if course_id is not None and course_id != "":
+            cid = _coerce_int(course_id)
+            if cid is None:
+                return LearningService._fail(4001, "参数错误：course_id 必须为整数")
+            records = sql_db.list_records_by_user_course(user_id, cid)
+            mastered = [r for r in records if r["status"] == "MASTERED"]
+            total = db.query(
+                "MATCH (n:KnowledgePoint {course_id: $cid}) RETURN count(n) AS cnt",
+                {"cid": cid},
+            )
+            total_nodes = total[0]["cnt"] if total else 0
+            return LearningService._ok({
+                "course_id": cid,
+                "document_id": None,
+                "total_nodes": total_nodes,
+                "mastered_count": len(mastered),
+                "mastered_kp_ids": [r["kp_id"] for r in mastered],
+                "progress": round(len(mastered) / total_nodes * 100, 1) if total_nodes else 0.0,
+                "records": records,
+            })
+
+        # 不指定课程：返回该用户全部学习记录（按课程分组）。
         all_records = sql_db.list_records_by_user(user_id)
         by_course = {}
         for r in all_records:

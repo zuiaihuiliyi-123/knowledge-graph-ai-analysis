@@ -96,6 +96,22 @@ class UsersMixin:
         )
 
 
+    def count_active_admins(self, exclude_user_id: int = None) -> int:
+        """统计启用状态的 admin 账号数（「最后一个管理员」保护用）。
+
+        exclude_user_id 用于排除即将被注销/降级的本人，避免「自己算在自己之外」
+        的经典错误——那样系统只剩一个管理员时也会被判定为「还有别人」。
+        """
+        if exclude_user_id is None:
+            return self._query_one(
+                "SELECT count(*) AS c FROM t_user WHERE role = 'admin' AND is_active = 1"
+            )["c"]
+        return self._query_one(
+            "SELECT count(*) AS c FROM t_user WHERE role = 'admin' AND is_active = 1 "
+            "AND user_id != ?", (exclude_user_id,),
+        )["c"]
+
+
     def list_users(self) -> list:
         return self._query("SELECT * FROM t_user ORDER BY user_id")
 

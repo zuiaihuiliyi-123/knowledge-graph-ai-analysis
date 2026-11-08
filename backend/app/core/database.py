@@ -279,8 +279,26 @@ class Neo4jDB:
                 written += int(res[0]["written"])
         return written
 
-    def get_full_graph(self, course_id: str = None, document_id=None):
-        """获取完整知识图谱（document_id 为 None 时回退课程级，仅兼容旧聚合入口）"""
+    def get_full_graph(self, course_id: str = None, document_id=None, course_ids=None):
+        """获取完整知识图谱（document_id 为 None 时回退课程级，仅兼容旧聚合入口）。
+
+        course_ids：可访问课程白名单。仅在 course_id 缺省（全库聚合）时生效，
+        用于把 legacy 的 /api/kg/all 收敛到「当前用户可读的课程」而不是整库导出。
+        空列表语义是「无可见课程」→ 直接返回空，绝不退化成全库查询。
+        """
+        if course_id is None and course_ids is not None:
+            allowed = list(course_ids)
+            if not allowed:
+                return []
+            cypher = """
+            MATCH (n:KnowledgePoint)
+            WHERE n.course_id IN $course_ids
+            OPTIONAL MATCH (n)-[r]->(m:KnowledgePoint)
+            WHERE m.course_id IN $course_ids
+            RETURN n, r, m
+            """
+            return self.query(cypher, {"course_ids": allowed})
+
         if course_id is not None and document_id is not None:
             cypher = """
             MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id})

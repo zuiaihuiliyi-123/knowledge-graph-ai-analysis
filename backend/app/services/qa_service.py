@@ -19,6 +19,7 @@ from openai import OpenAI
 from ..core.config import settings
 from ..core.database import db
 from ..core.metrics import track_llm_call
+from ..core.sql_database import sql_db
 from .embedding import EmbeddingClient, KnowledgeEmbedder
 from .fusion.rag_bridge import RagFusionView
 from .vector_index import vector_index
@@ -187,13 +188,22 @@ class QAService:
         return out
 
     def _vector_search(self, question: str, course_id, document_id, top_k: int) -> List[dict]:
-        """真向量检索：问题与文档知识点 embedding 做余弦相似度排序，返回结构化节点列表"""
+        """真向量检索：问题与知识点 embedding 做余弦相似度排序，返回结构化节点列表。
+
+        作用域：
+        - `course_id + document_id`：文档级检索（原有路径）；
+        - 仅 `course_id`：**课程级检索**——遍历该课程下已有向量索引的文档分别检索，
+          按 kp_id 合并最高分。旧实现直接在缺少 document_id 时返回空，导致学生
+          在课程首页提问永远走关键词降级；而课程级问答正是最常用的入口之一。
+          只为「已有向量」的文档建索引：首次课程级提问不为整门课凭空触发外部
+          embedding 计费，缺索引的文档仍由关键词检索兜底。
+        """
         cid = _coerce_course_id(course_id)
         did = _coerce_document_id(document_id)
-        if cid is None or did is None:
-            return []  # 缺少文档作用域，退回关键词
+        if cid is None:
+            return []  # 没有课程作用域，无法做有意义的向量检索
+
         try:
-            self.indexer.ensure_index(cid, did)
             q_vec = self.embedder.embed([question])[0]
         except Exception as e:
             # embedding 不可用（未配置 key / 网络异常等）退回关键词检索。
@@ -202,25 +212,64 @@ class QAService:
             _logger.warning("向量检索不可用，本次退回关键词检索: %s", e, exc_info=True)
             return []
 
-        # L2 阶段 E：检索改走 VectorIndex（numpy 矩阵 + 进程内缓存），
-        # 不再每次「全量读库 + 逐条纯 Python 余弦」；无向量时返回空 → 上层退回关键词检索
-        ranked = vector_index.kp_search(cid, did, q_vec, top_k)
-        if not ranked:
-            return []
+        # scores[kp_id] = 最高余弦；kp_doc[kp_id] = 该向量所属文档（融合视图按文档隔离）
+        scores, kp_doc = {}, {}
 
-        # 按 kp_id 回查节点元数据，拼接上下文（限定文档）
-        fusion = RagFusionView(cid, did)
-        # 索引构建时已排除被融合的源节点，这里再折一次是**防御性**的：
-        # 万一拿到的是尚未重建的旧索引（跨进程缓存 / 刚 apply 完），
-        # 也不能让图谱上已经不存在的节点重新冒到问答上下文里。
-        wanted = [(fusion.root_of(kp_id), score) for kp_id, score in ranked]
-        kp_ids = sorted({k for k, _ in wanted})
+        def _collect(doc_id, ranked):
+            for kp_id, score in ranked:
+                if score > scores.get(kp_id, -2.0):
+                    scores[kp_id] = score
+                    kp_doc[kp_id] = doc_id
+
+        if did is not None:
+            try:
+                self.indexer.ensure_index(cid, did)
+            except Exception as e:
+                _logger.warning("文档向量索引同步失败 cid=%s did=%s: %s",
+                                cid, did, e, exc_info=True)
+                return []
+            _collect(did, vector_index.kp_search(cid, did, q_vec, top_k))
+        else:
+            for doc in sql_db.list_documents_by_course(cid):
+                doc_id = doc["doc_id"]
+                # 无向量的文档跳过：ensure_index 会为它全量调用 embedding API，
+                # 课程级提问（可能频繁）不该成为隐式计费触发点。
+                if not sql_db.get_embedding_kp_ids(cid, doc_id):
+                    continue
+                try:
+                    self.indexer.ensure_index(cid, doc_id)
+                    ranked = vector_index.kp_search(cid, doc_id, q_vec, top_k)
+                except Exception as e:
+                    _logger.warning("课程级向量检索跳过文档 cid=%s did=%s: %s",
+                                    cid, doc_id, e, exc_info=True)
+                    continue
+                _collect(doc_id, ranked)
+
+        if not scores:
+            return []
+        ranked = sorted(scores.items(), key=lambda item: (-item[1], str(item[0])))[:top_k]
+
+        # 按 kp_id 回查节点元数据，拼接上下文（限定课程）。
+        # 融合映射是**文档级**的，必须用节点所属文档构造 RagFusionView。
+        wanted, seen_roots = [], set()
+        for kp_id, score in ranked:
+            doc_id = kp_doc.get(kp_id, did)
+            fusion = RagFusionView(cid, doc_id)
+            # 索引构建时已排除被融合的源节点，这里再折一次是**防御性**的：
+            # 万一拿到的是尚未重建的旧索引（跨进程缓存 / 刚 apply 完），
+            # 也不能让图谱上已经不存在的节点重新冒到问答上下文里。
+            root = fusion.root_of(kp_id)
+            if root in seen_roots:
+                continue
+            seen_roots.add(root)
+            wanted.append((root, score, fusion))
+        kp_ids = sorted({k for k, _, _ in wanted})
 
         nodes = {}
         recs = db.query(
-            "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did}) "
+            "MATCH (n:KnowledgePoint {course_id: $cid}) "
             "WHERE n.kp_id IN $ids RETURN n",
-            {"cid": cid, "did": did, "ids": kp_ids},
+            {"cid": cid, "ids": kp_ids},
         )
         for rec in recs:
             n = rec.get("n")
@@ -228,7 +277,7 @@ class QAService:
                 nodes[n.get("kp_id")] = n
 
         out, seen = [], set()
-        for kp_id, _score in wanted:
+        for kp_id, _score, fusion in wanted:
             if kp_id in seen or kp_id not in nodes:
                 continue
             seen.add(kp_id)
@@ -286,32 +335,19 @@ class QAService:
         fusion = RagFusionView(cid, did)
         contexts = self._fold_to_root(records, fusion, cid, did)
 
-        # 结果不足 top_k 时，用同文档节点兜底补足（**同样要排除已折掉的源节点**）
-        if len(contexts) < top_k:
+        # 结果不足 top_k 时，用**同一文档**的节点兜底补足（同样排除已折掉的源节点）。
+        # 课程级 / 全库范围刻意不做这种兜底：关键词完全没命中说明问题与知识库
+        # 没有字面关联，再从整门课/整库随机抓满 top_k 个节点喂给 LLM，只会让回答
+        # 看起来有依据、实际答非所问（sources 也会误导学生）。此时返回空，
+        # 由上层标记 retrieval_mode='empty'。
+        if len(contexts) < top_k and cid is not None and did is not None:
             existing_names = {c["name"] for c in contexts}
             fused = sorted(fusion.sources)
-            if cid is not None and did is not None:
-                records = db.query(
-                    "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id}) "
-                    "WHERE NOT n.kp_id IN $fused RETURN n LIMIT $top_k",
-                    {"course_id": cid, "document_id": did, "top_k": top_k, "fused": fused},
-                )
-            elif cid is not None:
-                records = db.query(
-                    "MATCH (n:KnowledgePoint {course_id: $course_id}) "
-                    "WHERE NOT n.kp_id IN $fused RETURN n LIMIT $top_k",
-                    {"course_id": cid, "top_k": top_k, "fused": fused},
-                )
-            else:
-                fallback_cypher = "MATCH (n:KnowledgePoint)"
-                fallback_params = {"top_k": top_k, "fused": fused}
-                conditions = ["NOT n.kp_id IN $fused"]
-                if allowed_ids is not None:
-                    conditions.append("n.course_id IN $allowed_course_ids")
-                    fallback_params["allowed_course_ids"] = list(allowed_ids)
-                fallback_cypher += " WHERE " + " AND ".join(conditions)
-                fallback_cypher += " RETURN n LIMIT $top_k"
-                records = db.query(fallback_cypher, fallback_params)
+            records = db.query(
+                "MATCH (n:KnowledgePoint {course_id: $course_id, document_id: $document_id}) "
+                "WHERE NOT n.kp_id IN $fused RETURN n LIMIT $top_k",
+                {"course_id": cid, "document_id": did, "top_k": top_k, "fused": fused},
+            )
             # 兜底分支同样走一遍折叠。Cypher 里已经有 `NOT n.kp_id IN $fused`，
             # 正常情况下不会被折掉的节点根本进不来；这里再折一次是**纵深的第二道**，
             # 避免"排除条件"和"映射表"万一不同步时把已折掉的节点漏进上下文。
@@ -328,10 +364,26 @@ class QAService:
     def search_related_nodes(self, question: str, course_id=None, document_id=None,
                              top_k: int = 5, allowed_ids: List[int] = None) -> List[dict]:
         """检索相关知识（优先向量，失败退回关键词），返回结构化节点（含 kp_id/name/category/description）"""
-        nodes = self._vector_search(question, course_id, document_id, top_k)
-        if not nodes:
-            nodes = self._keyword_search(question, course_id, document_id, top_k, allowed_ids)
+        nodes, _mode = self.search_related_nodes_with_mode(
+            question, course_id, document_id, top_k, allowed_ids)
         return nodes
+
+    def search_related_nodes_with_mode(self, question: str, course_id=None, document_id=None,
+                                       top_k: int = 5, allowed_ids: List[int] = None):
+        """检索相关知识，并返回本次实际使用的检索方式。
+
+        返回 `(nodes, mode)`，mode 取值：
+        - `vector`  ：向量语义检索命中（正常质量）
+        - `keyword` ：向量检索不可用 / 无结果，退回 Cypher 关键词匹配（**降级**，回答质量可能下降）
+        - `empty`   ：两种检索都没有命中
+
+        前端据此在降级时给出可见提示，避免「回答变差却不报错」。
+        """
+        nodes = self._vector_search(question, course_id, document_id, top_k)
+        if nodes:
+            return nodes, "vector"
+        nodes = self._keyword_search(question, course_id, document_id, top_k, allowed_ids)
+        return nodes, ("keyword" if nodes else "empty")
 
     def search_related_knowledge(self, question: str, course_id=None, document_id=None,
                                  top_k: int = 5, allowed_ids: List[int] = None) -> List[str]:
@@ -368,9 +420,10 @@ class QAService:
                       allowed_ids: List[int] = None) -> dict:
         """`ask_with_sources()` 的同步实现体。**运行在线程池中，禁止在此使用 asyncio API。**"""
         # 1. 检索相关知识（向量优先，文档作用域）
-        # 结构化节点既作喂给 LLM 的上下文，也作返回前端的引用来源——同一份数据，必然一致
-        sources = self.search_related_nodes(question, course_id, document_id,
-                                            allowed_ids=allowed_ids)
+        # 结构化节点既作喂给 LLM 的上下文，也作返回前端的引用来源——同一份数据，必然一致。
+        # 同时拿到本次检索方式，供前端在「降级为关键词检索」时给出可见提示。
+        sources, retrieval_mode = self.search_related_nodes_with_mode(
+            question, course_id, document_id, allowed_ids=allowed_ids)
         contexts = [_format_node(n) for n in sources]
         context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
 
@@ -390,7 +443,7 @@ class QAService:
             answer = response.choices[0].message.content.strip()
         except Exception as e:
             answer = f"抱歉，问答服务暂时不可用：{str(e)}"
-        return {"answer": answer, "sources": sources}
+        return {"answer": answer, "sources": sources, "retrieval_mode": retrieval_mode}
 
     async def stream_answer(self, question: str, course_id=None, document_id=None,
                             allowed_ids: List[int] = None):
@@ -417,7 +470,7 @@ class QAService:
         """
         # 检索可能较慢（首次还要建索引），期间给保活帧，避免代理/浏览器把空闲连接掐掉
         search_task = asyncio.create_task(asyncio.to_thread(
-            self.search_related_nodes, question, course_id, document_id, 5, allowed_ids))
+            self.search_related_nodes_with_mode, question, course_id, document_id, 5, allowed_ids))
         # 客户端提前断开时，检索任务若接着抛错也要把异常取走（否则日志里全是
         # "Task exception was never retrieved"）
         search_task.add_done_callback(_drain_task_exception)
@@ -426,8 +479,8 @@ class QAService:
             if done:
                 break
             yield {"event": "ping", "data": {}}
-        sources = search_task.result()
-        yield {"event": "sources", "data": {"sources": sources}}
+        sources, retrieval_mode = search_task.result()
+        yield {"event": "sources", "data": {"sources": sources, "retrieval_mode": retrieval_mode}}
 
         contexts = [_format_node(n) for n in sources]
         context_text = "\n".join(contexts) if contexts else "暂无相关课程知识"
@@ -504,6 +557,7 @@ class QAService:
                     yield {"event": "done",
                            "data": {"answer": "".join(parts).strip(),
                                     "sources": sources,
+                                    "retrieval_mode": retrieval_mode,
                                     "finish_reason": payload}}
                     return
                 else:

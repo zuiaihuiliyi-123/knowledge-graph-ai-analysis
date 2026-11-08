@@ -80,6 +80,13 @@ def main():
     with open(tmp, "w") as f:
         f.write("x")
     sql_db.update_document(doc_id, file_path=tmp)
+    # 回归：阶段 4 的任务行外键指向 t_document 且无 ON DELETE CASCADE。
+    # 课程删除必须在删文档前清掉它，否则整个删除会回滚（P0）。
+    with sql_db._connect() as conn:
+        conn.execute(
+            "INSERT INTO t_document_task (doc_id, course_id, stage, status) "
+            "VALUES (?, ?, 'DONE', 'DONE')", (doc_id, aid))
+        conn.commit()
     db.create_knowledge_node(aid, doc_id, "线性表", "概念", "测试节点")
     db.create_knowledge_node(aid, doc_id, "顺序表", "概念", "测试节点")
     db.create_relationship(aid, doc_id, "线性表", "顺序表", "CONTAINS")
@@ -101,9 +108,12 @@ def main():
     print("=" * 60)
     r = CourseService.delete_course(aid, confirm=False)
     print(f"  confirm=false: code={r['code']} message={r['message']}")
-    r = CourseService.delete_course(aid, confirm=True)
-    print(f"  confirm=true: {r['data']}")
+    del_result = CourseService.delete_course(aid, confirm=True)
+    print(f"  confirm=true: {del_result['data']}")
     print(f"  本地文件已删除: {not os.path.exists(tmp)}")
+    task_left = sql_db._query(
+        "SELECT COUNT(*) AS c FROM t_document_task WHERE course_id = ?", (aid,))[0]["c"]
+    print(f"  任务行已清理: {task_left == 0}")
     r = CourseService.get_course_detail(aid)
     print(f"  再查详情: code={r['code']} message={r['message']}")
 
@@ -116,6 +126,8 @@ def main():
         and d["node_count"] == 2
         and d["edge_count"] == 1
         and not os.path.exists(tmp)
+        and del_result["ok"] is True
+        and task_left == 0
         and r["code"] == 2001
     )
     if ok:

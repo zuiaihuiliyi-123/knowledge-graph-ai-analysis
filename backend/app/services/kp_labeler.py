@@ -19,9 +19,10 @@
 import hashlib
 import json
 
+from ..core.config import settings
 from ..core.database import db
 from ..core.sql_database import _blob_to_vec, sql_db
-from .embedding import EmbeddingClient
+from .embedding import EmbeddingClient, KnowledgeEmbedder
 from .vector_index import vector_index, cosine_pairs
 
 # ---------- 调参与阈值（集中在此，便于实验与参数冻结） ----------
@@ -263,7 +264,10 @@ def ensure_question_vectors(questions: list, course_id: int, embedder) -> int:
         text = question_text(q)
         hashed = text_hash(text)
         cached = sql_db.get_question_embedding(q["question_id"])
-        if cached and cached.get("text_hash") == hashed and cached.get("embedding"):
+        # 文本没变还不算命中：换了 embedding 模型后，旧向量与当前查询向量
+        # 不在同一语义空间（甚至维度不同），必须按新模型重算。
+        if (cached and cached.get("text_hash") == hashed and cached.get("embedding")
+                and cached.get("model") == settings.EMBEDDING_MODEL):
             continue
         pending.append((q, text, hashed))
     written = 0
@@ -277,6 +281,7 @@ def ensure_question_vectors(questions: list, course_id: int, embedder) -> int:
             try:
                 sql_db.upsert_question_embedding(
                     q["question_id"], course_id, q.get("document_id"), hashed, vec,
+                    model=settings.EMBEDDING_MODEL,
                 )
                 written += 1
             except Exception:
@@ -298,7 +303,8 @@ def _load_question_vectors(questions: list, course_id: int) -> dict:
     if not ids:
         return {}
     try:
-        rows = sql_db.get_question_embedding_blobs(course_id, question_ids=ids)
+        rows = sql_db.get_question_embedding_blobs(
+            course_id, question_ids=ids, model=settings.EMBEDDING_MODEL)
     except Exception:
         return {}
     out = {}
@@ -365,9 +371,20 @@ def _load_kp_vectors(course_id: int, document_id) -> dict:
     实测 5,000 条 JSON 解析需 1,707ms，BLOB 为 0.02ms 量级；N=50,000 时差距达 18 秒。
     """
     try:
-        rows = sql_db.get_kp_embedding_blobs(course_id, document_id)
+        rows = sql_db.get_kp_embedding_blobs(
+            course_id, document_id, model=settings.EMBEDDING_MODEL)
     except Exception:
         rows = []
+    # 模型漂移（或迁移前的 NULL 历史行）会让这里一条都取不到。文档级标注有明确
+    # 作用域时可懒重建一次；否则本次向量路不可用，退回字面匹配，不拿旧模型向量
+    # 去算「看似有分」的余弦。
+    if not rows and document_id is not None:
+        try:
+            if KnowledgeEmbedder().ensure_index(course_id, document_id):
+                rows = sql_db.get_kp_embedding_blobs(
+                    course_id, document_id, model=settings.EMBEDDING_MODEL)
+        except Exception:
+            rows = []
     vectors = {}
     for r in rows:
         if r.get("kp_id") and r.get("blob"):

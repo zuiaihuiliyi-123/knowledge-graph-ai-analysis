@@ -158,6 +158,14 @@ class AuthService:
         if not verify_password(password, db_user["password_hash"]):
             return AuthService._fail(2002, "密码不正确")
 
+        # 最后管理员保护：注销后若没有任何启用的 admin，平台将再无人能恢复治理入口
+        # （管理员端的所有操作都需要 admin 登录）。管理员接口侧的
+        # `_guard_self_and_last_admin` 不覆盖本人自助注销，必须在这里单独拦。
+        if db_user.get("role") == "admin" \
+                and sql_db.count_active_admins(exclude_user_id=user_id) == 0:
+            return AuthService._fail(
+                4003, "不能注销最后一个管理员账号：请先创建或启用另一位管理员")
+
         sql_db.deactivate_user(user_id)
         invalidate_user_state(user_id)
         return AuthService._ok({"user_id": user_id})

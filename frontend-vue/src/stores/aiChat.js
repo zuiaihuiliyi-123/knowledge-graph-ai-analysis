@@ -15,10 +15,12 @@ import { isAbortError } from '../composables/useLatestRequest'
  * - 回答走 SSE 流式（api/qaStream.js）逐字渲染；不支持流式时回落到同步 api.ask
  */
 
-// v2：每个课程存 { activeId, sessions: [{ id, title, updatedAt, messages }] }
-const CHAT_KEY = 'kg_ai_chat_v2'
-// 旧版：v1 悬浮窗 / 问答页各存一份「每课程一个消息数组」，首次加载时迁移过来
-const LEGACY_KEYS = ['kg_ai_chat_v1', 'kg_qa_chat_v1']
+// v3：按「用户 + 课程」隔离存储 { activeId, sessions: [{ id, title, updatedAt, messages }] }
+// v2 及更早的 key 里没有用户维度，同一台设备换账号登录会把上一位用户的对话读出来。
+// 隐私优先：**不迁移**旧数据（迁移等于把无归属的历史强行归给当前登录者），
+// 旧 key 原样留在浏览器里，由用户自行清理。
+const CHAT_KEY = 'kg_ai_chat_v3'
+const USER_KEY = 'kg_user'
 const MAX_SESSIONS = 30
 const MAX_MESSAGES = 80
 const MAX_SOURCE_PER_MSG = 10
@@ -53,9 +55,20 @@ export const useAiChatStore = defineStore('aiChat', () => {
   function createSession() {
     return { id: newId(), title: '', updatedAt: Date.now(), messages: [] }
   }
+  /** 当前登录用户 id（登录响应写入 kg_user）；未登录时为空串 */
+  function currentUserId() {
+    try {
+      const user = JSON.parse(localStorage.getItem(USER_KEY) || 'null')
+      return user && user.user_id ? String(user.user_id) : ''
+    } catch {
+      return ''
+    }
+  }
   function storageKey(cid) {
     const id = cid === undefined ? courseId.value : cid
-    return `chat_${id || 'none'}`
+    // 用户维度必须在 key 里：只按课程存会让 A 学生退出后 B 学生看到 A 的提问与回答。
+    // 未登录（理论上进不来问答页）用 anon 兜底，绝不与任何真实用户共用空间。
+    return `chat_${currentUserId() || 'anon'}_${id || 'none'}`
   }
   function readAll(key) {
     try { return JSON.parse(localStorage.getItem(key) || '{}') } catch { return {} }
@@ -76,6 +89,8 @@ export const useAiChatStore = defineStore('aiChat', () => {
       // 结果不完整的说明（撞上 max_tokens、连接中断等）：与 error 分开，
       // 因为「有半成品正文」时仍应把正文显示出来
       note: typeof m.note === 'string' ? m.note : '',
+      // 本次回答使用的检索方式：vector / keyword（降级）/ empty；用于在降级时给出可见提示
+      retrievalMode: typeof m.retrievalMode === 'string' ? m.retrievalMode : '',
       // 存盘的是结果：重新载入时不可能还在流式生成，不保留中间态
       streaming: false,
       ctxKey: typeof m.ctxKey === 'string' ? m.ctxKey : '',
@@ -97,10 +112,6 @@ export const useAiChatStore = defineStore('aiChat', () => {
       messages: normalizeMessages(raw.messages),
     }
   }
-  function titleFromMessages(msgs) {
-    const first = msgs.find((m) => m.role === 'user' && m.content)
-    return first ? truncateTitle(first.content) : ''
-  }
   function truncateTitle(text) {
     const t = (text || '').replace(/\s+/g, ' ').trim()
     return t.length > TITLE_LEN ? `${t.slice(0, TITLE_LEN)}…` : t
@@ -117,25 +128,6 @@ export const useAiChatStore = defineStore('aiChat', () => {
     if (payload && Array.isArray(payload.sessions)) {
       list = payload.sessions.map(normalizeSession)
       nextActive = list.some((s) => s.id === payload.activeId) ? payload.activeId : ''
-    } else {
-      // 迁移旧版：每课程一个消息数组（可能来自 kg_ai_chat_v1 / kg_qa_chat_v1）
-      let legacy = Array.isArray(payload) ? payload : null
-      if (!legacy || !legacy.length) {
-        for (const k of LEGACY_KEYS) {
-          const v = readAll(k)[key]
-          if (Array.isArray(v) && v.length) { legacy = v; break }
-        }
-      }
-      if (legacy && legacy.length) {
-        const msgs = normalizeMessages(legacy)
-        list = [{
-          id: newId(),
-          title: titleFromMessages(msgs),
-          updatedAt: msgs.length ? (msgs[msgs.length - 1].time || Date.now()) : Date.now(),
-          messages: msgs,
-        }]
-        nextActive = list[0].id
-      }
     }
 
     if (!list.length) list = [createSession()]
@@ -162,6 +154,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
           errDetail: m.errDetail || '',
           errorMessage: m.errorMessage || '',
           note: m.note || '',
+          retrievalMode: m.retrievalMode || '',
           ctxKey: m.ctxKey || '',
           ctxLabel: m.ctxLabel || '',
           time: m.time || 0,
@@ -295,7 +288,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     // 变化（请求结束）才一次性出现，流式等于白做。这里持有代理即可逐帧渲染。
     const bubble = reactive({
       mid: ++midSeq, role: 'ai', content: '', sources: [], error: false, errDetail: '',
-      errorMessage: '', note: '', streaming: true, ...ctx, time: Date.now(),
+      errorMessage: '', note: '', retrievalMode: '', streaming: true, ...ctx, time: Date.now(),
     })
     session.messages.push(bubble)
     touch(session)
@@ -316,6 +309,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
         if (mySeq !== seq) return // 上下文/会话已切换或新提问已接管，本次回答作废
         if (ev.event === 'sources') {
           bubble.sources = (ev.data?.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+          bubble.retrievalMode = ev.data?.retrieval_mode || ''
         } else if (ev.event === 'delta') {
           received += ev.data?.text || ''
           bubble.content = received
@@ -324,6 +318,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
           if (ev.data?.sources) {
             bubble.sources = ev.data.sources.map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
           }
+          if (ev.data?.retrieval_mode) bubble.retrievalMode = ev.data.retrieval_mode
           // 后端透传 finish_reason：length 说明撞上 max_tokens，正文被截断
           if (ev.data?.finish_reason === 'length') {
             bubble.note = '回答达到长度上限，可能未完整'
@@ -377,6 +372,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
         if (mySeq !== seq) return
         bubble.content = res.answer || '（无回答）'
         bubble.sources = (res.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+        bubble.retrievalMode = res.retrieval_mode || ''
         bubble.error = isLlmError(res.answer)
         bubble.streaming = false
       } catch (e2) {
@@ -399,6 +395,22 @@ export const useAiChatStore = defineStore('aiChat', () => {
   /** 停止当前生成：只中断请求，不改变对话历史 */
   function stop() {
     if (abort) abort.abort()
+  }
+
+  /**
+   * 退出登录 / 切换账号：作废在途回答并清空内存状态。
+   *
+   * 不主动删除 localStorage：存储 key 已带 user_id，下一位用户根本读不到；
+   * 保留数据能让本人下次登录恢复自己的历史。万一旧版本遗留了无用户维度的
+   * key，本方法也不会去读它（v3 不再迁移）。
+   */
+  function reset() {
+    abortInFlight()
+    sessions.value = []
+    activeId.value = ''
+    courseId.value = ''
+    documentId.value = ''
+    documentName.value = ''
   }
 
   /** 清空当前会话的消息（会话本身保留，界面上就是重新开一个话题） */
@@ -441,5 +453,6 @@ export const useAiChatStore = defineStore('aiChat', () => {
     send,
     stop,
     clear,
+    reset,
   }
 })
