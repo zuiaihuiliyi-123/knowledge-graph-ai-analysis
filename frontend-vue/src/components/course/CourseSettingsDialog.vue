@@ -4,6 +4,7 @@
     title="课程设置"
     width="540px"
     :close-on-click-modal="false"
+    :before-close="handleBeforeClose"
     @update:model-value="$emit('update:modelValue', $event)"
     @open="syncForm"
   >
@@ -55,7 +56,7 @@
     </div>
 
     <template #footer>
-      <el-button @click="$emit('update:modelValue', false)">取消</el-button>
+      <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" :loading="saving" @click="save">保存</el-button>
     </template>
   </el-dialog>
@@ -97,12 +98,44 @@ function syncForm() {
   form.join_mode = c.join_mode || 'approval'
   form.isPublicBool = c.is_public !== 0
   form.join_code = c.join_code || ''
+  baseline = dirtyKey()
   // 卡片数据里可能没有 join_code（列表接口对教师也会返回），保险起见再拉一次
   if (!form.join_code && c.course_id) {
     api.getJoinCode(c.course_id)
       .then((d) => { form.join_code = d.join_code || '' })
       .catch(() => {})
   }
+}
+
+// ===== 未保存修改保护：表单和打开时的快照比对，关闭前确认 =====
+// 加课码不算「修改」——刷新加课码是独立动作，不改表单字段
+let baseline = ''
+
+function dirtyKey() {
+  return JSON.stringify([
+    form.course_name, form.description, form.category,
+    form.organization, form.join_mode, form.isPublicBool,
+  ])
+}
+
+function isDirty() {
+  return baseline !== '' && dirtyKey() !== baseline
+}
+
+function handleBeforeClose(done) {
+  if (!isDirty()) {
+    done()
+    return
+  }
+  ElMessageBox.confirm(
+    '课程设置有改动还没保存，关闭后会丢失。确定关闭吗？',
+    '放弃修改',
+    { type: 'warning', confirmButtonText: '放弃', cancelButtonText: '继续编辑' },
+  ).then(() => done()).catch(() => {})
+}
+
+function handleCancel() {
+  handleBeforeClose(() => emit('update:modelValue', false))
 }
 
 async function save() {

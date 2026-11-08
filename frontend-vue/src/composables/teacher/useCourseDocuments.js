@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../../api'
+import { useDeferredAction } from '../useDeferredAction'
 import {
   docGraphStatus,
   docIsInFlight,
@@ -29,6 +30,8 @@ export function useCourseDocuments({
   reloadDocuments,
   refreshDocuments,
 }) {
+  // 删除先走「撤销窗口」，5 秒后才真正提交
+  const { schedule: scheduleDelete } = useDeferredAction()
   const uploadFileList = ref([])
   const uploading = ref(false)
   // 每条：{ uid, file_name, file_size, document_id, upload_failed, duplicate, error, ... }
@@ -341,28 +344,55 @@ export function useCourseDocuments({
     }
   }
 
+  // 删除不再弹确认框：先移除、5 秒内可撤销；撤销时重新拉列表即可恢复（请求还没发）
+  function pickOff(list) {
+    const ids = list.map((d) => d.doc_id)
+    const rest = (documents.value || []).filter((d) => !ids.includes(d.doc_id))
+    // documents 是父组件传来的数组，这里沿用同一份引用做「乐观移除」
+    documents.value.splice(0, documents.value.length, ...rest)
+    return ids
+  }
+
   async function deleteDocument(doc) {
-    try {
-      await ElMessageBox.confirm(
-        '删除该文档后，该文档对应的资源将被删除，是否继续？',
-        '删除文档',
-        {
-          type: 'warning',
-          confirmButtonText: '删除',
-          cancelButtonText: '取消',
-          confirmButtonClass: 'el-button--danger',
-        },
-      )
-    } catch {
-      return
-    }
-    try {
-      await api.deleteDocument(doc.doc_id)
-      ElMessage.success('文档已删除')
-      await reloadDocuments()
-    } catch (e) {
-      ElMessage.error(`删除失败：${e.message}`)
-    }
+    const ids = pickOff([doc])
+    scheduleDelete({
+      text: `已删除《${doc.file_name}》`,
+      run: async () => {
+        try {
+          await api.deleteDocument(ids[0])
+        } finally {
+          await reloadDocuments()
+        }
+      },
+      onUndo: () => reloadDocuments(),
+    })
+  }
+
+  /** 批量删除：先确认一次，再进入 5 秒撤销窗口 */
+  async function batchDeleteDocuments(rows) {
+    const list = rows || []
+    if (!list.length) return
+    const ok = await ElMessageBox.confirm(
+      `确定删除选中的 ${list.length} 个文档吗？其知识图谱、向量与关联题目会一并清理。`,
+      '批量删除文档',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
+    ).catch(() => false)
+    if (!ok) return
+    const ids = pickOff(list)
+    scheduleDelete({
+      text: `已删除 ${ids.length} 个文档`,
+      run: async () => {
+        for (const id of ids) {
+          try {
+            await api.deleteDocument(id)
+          } catch {
+            /* 单条失败不阻断其余，最后统一刷新 */
+          }
+        }
+        await reloadDocuments()
+      },
+      onUndo: () => reloadDocuments(),
+    })
   }
 
   // ---------------- 进度轮询 ----------------
@@ -452,6 +482,7 @@ export function useCourseDocuments({
     isDocRetrying,
     clearBatchItems,
     deleteDocument,
+    batchDeleteDocuments,
     recoverBatchItemsFromDocuments,
     startPolling,
     stopPolling,

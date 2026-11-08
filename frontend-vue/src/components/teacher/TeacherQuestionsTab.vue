@@ -10,11 +10,21 @@
     />
 
     <template v-else>
+      <!-- 与课程文档/图谱管理/学生管理保持一致：当前课程 + 可切换课程 -->
+      <TeacherContextBar
+        back-text="返回课程列表"
+        :course-name="courseName"
+        :courses="courses"
+        :course-id="courseId"
+        show-switcher
+        @back="emit('go-courses')"
+        @update:course-id="emit('update:courseId', $event)"
+      />
+
       <!-- 第一层：题库总览（题量 / 题型分布 / 作答正确率 / 收藏） -->
       <el-card class="page-card">
         <div class="chart-title-line">
           <el-icon><Collection /></el-icon> 题库总览
-          <span class="class-note">（{{ courseName }}）</span>
         </div>
         <div v-loading="questionsLoading" class="class-summary">
           <div class="class-kpi">
@@ -173,7 +183,23 @@
           <el-button :icon="Star" @click="favoritesVisible = true">题目收藏情况</el-button>
         </div>
 
-        <el-table :data="questionList" v-loading="questionsLoading" row-key="question_id">
+        <!-- 批量操作条：勾选后出现 -->
+        <div v-if="selectedRows.length" class="batch-bar">
+          <span class="batch-count">已选 <b>{{ selectedRows.length }}</b> 道题</span>
+          <el-button size="small" @click="runBatchActive(true)">批量启用</el-button>
+          <el-button size="small" @click="runBatchActive(false)">批量停用</el-button>
+          <el-button size="small" type="danger" plain @click="runBatchRemove">批量删除</el-button>
+          <el-button size="small" link @click="clearSelection">取消选择</el-button>
+        </div>
+
+        <el-table
+          ref="tableRef"
+          :data="questionList"
+          v-loading="questionsLoading"
+          row-key="question_id"
+          @selection-change="onSelectionChange"
+        >
+          <el-table-column type="selection" width="46" fixed="left" />
           <el-table-column prop="stem" label="题干" min-width="260" show-overflow-tooltip />
           <el-table-column label="题型" width="90">
             <template #default="{ row }">
@@ -265,7 +291,7 @@
 </template>
 
 <script setup>
-import { toRef } from 'vue'
+import { ref, toRef } from 'vue'
 import {
   Collection, Aim, WarningFilled, CircleCheckFilled, Files, Refresh, Plus, MagicStick, Upload, Star, Search,
 } from '@element-plus/icons-vue'
@@ -274,6 +300,7 @@ import QuestionFormDialog from './QuestionFormDialog.vue'
 import AutoLabelDialog from './AutoLabelDialog.vue'
 import QuestionImportDialog from './QuestionImportDialog.vue'
 import QuestionFavoritesDialog from './QuestionFavoritesDialog.vue'
+import TeacherContextBar from './TeacherContextBar.vue'
 import { useTeacherQuestions } from '../../composables/teacher/useTeacherQuestions'
 import { QUESTION_TYPES } from '../../utils/question'
 
@@ -317,6 +344,8 @@ const {
   saveQuestion,
   toggleQuestionActive,
   removeQuestion,
+  batchSetActive,
+  batchRemoveQuestions,
   questionTypeLabel,
 } = useTeacherQuestions({
   courseId: toRef(props, 'courseId'),
@@ -324,6 +353,33 @@ const {
   documents: toRef(props, 'documents'),
   ensureDocuments: () => props.ensureDocuments?.(),
 })
+
+// ---------------- 批量选择 ----------------
+const tableRef = ref(null)
+const selectedRows = ref([])
+
+function onSelectionChange(rows) {
+  selectedRows.value = rows
+}
+
+function clearSelection() {
+  tableRef.value?.clearSelection()
+  selectedRows.value = []
+}
+
+async function runBatchActive(activeFlag) {
+  const rows = selectedRows.value
+  if (!rows.length) return
+  await batchSetActive(rows, activeFlag)
+  clearSelection()
+}
+
+async function runBatchRemove() {
+  const rows = selectedRows.value
+  if (!rows.length) return
+  await batchRemoveQuestions(rows)
+  clearSelection()
+}
 
 /** 透传给 el-select 的 @change（事件会带新值，这里显式忽略） */
 function applyFilters() {
@@ -427,6 +483,28 @@ function applyFilters() {
 .table-pagination {
   margin-top: 12px;
   justify-content: flex-end;
+}
+
+/* 批量操作条：勾选后从工具条下方浮出 */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f2f6ff;
+  border: 1px solid #d8e4ff;
+}
+
+.batch-count {
+  font-size: 13px;
+  color: #3d4d66;
+  margin-right: 4px;
+}
+
+.batch-count b {
+  color: #2f6fd0;
 }
 
 /* v2 视觉增强 */

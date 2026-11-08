@@ -140,7 +140,20 @@
             <el-button :icon="Refresh" circle size="small" aria-label="刷新文档列表" @click="reloadDocuments" />
           </div>
         </template>
-        <el-table :data="documents" v-loading="documentsLoading" class="doc-table">
+        <div v-if="selectedDocs.length" class="batch-bar">
+          <span class="batch-count">已选 <b>{{ selectedDocs.length }}</b> 个文档</span>
+          <el-button size="small" type="danger" plain @click="runBatchDelete">批量删除</el-button>
+          <el-button size="small" link @click="clearDocSelection">取消选择</el-button>
+        </div>
+        <el-table
+          ref="docTableRef"
+          :data="documents"
+          v-loading="documentsLoading"
+          class="doc-table"
+          row-key="doc_id"
+          @selection-change="onDocSelectionChange"
+        >
+          <el-table-column type="selection" width="46" fixed="left" :selectable="(row) => !row.is_placeholder" />
           <el-table-column prop="file_name" label="文件名" min-width="180" show-overflow-tooltip />
           <el-table-column prop="file_type" label="类型" width="80" align="center" />
           <el-table-column label="大小" width="100" align="center">
@@ -210,7 +223,7 @@
 </template>
 
 <script setup>
-import { toRef } from 'vue'
+import { ref, toRef } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   UploadFilled, Upload, Refresh, Reading, Download, UserFilled, Delete,
@@ -261,6 +274,7 @@ const {
   isDocRetrying,
   clearBatchItems,
   deleteDocument,
+  batchDeleteDocuments,
 } = useCourseDocuments({
   courseId: toRef(props, 'courseId'),
   active: toRef(props, 'active'),
@@ -271,6 +285,25 @@ const {
 
 function fmtSize(bytes) {
   return formatBytes(bytes)
+}
+
+// ---------------- 批量选择 ----------------
+const docTableRef = ref(null)
+const selectedDocs = ref([])
+
+function onDocSelectionChange(rows) {
+  selectedDocs.value = rows.filter((r) => !r.is_placeholder)
+}
+
+function clearDocSelection() {
+  docTableRef.value?.clearSelection()
+  selectedDocs.value = []
+}
+
+async function runBatchDelete() {
+  if (!selectedDocs.value.length) return
+  await batchDeleteDocuments(selectedDocs.value)
+  clearDocSelection()
 }
 
 async function downloadRow(row) {
@@ -338,6 +371,28 @@ async function downloadRow(row) {
   background: var(--color-bg-soft);
   color: var(--color-text-regular);
   font-weight: var(--font-weight-semibold);
+}
+
+/* 批量操作条：勾选后出现在表格上方 */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f2f6ff;
+  border: 1px solid #d8e4ff;
+}
+
+.batch-count {
+  font-size: 13px;
+  color: #3d4d66;
+  margin-right: 4px;
+}
+
+.batch-count b {
+  color: #2f6fd0;
 }
 
 /* v2 视觉增强 */

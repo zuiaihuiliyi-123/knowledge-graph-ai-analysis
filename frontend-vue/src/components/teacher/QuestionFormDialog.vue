@@ -4,6 +4,7 @@
     :title="question ? '编辑题目' : '新增题目'"
     width="720px"
     :close-on-click-modal="false"
+    :before-close="handleBeforeClose"
     @update:model-value="emit('update:modelValue', $event)"
   >
     <el-form label-width="96px">
@@ -105,7 +106,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="emit('update:modelValue', false)">取消</el-button>
+      <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" :loading="saving" @click="submit">保存</el-button>
     </template>
   </el-dialog>
@@ -165,7 +166,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { api } from '../../api'
 import { QUESTION_TYPES } from '../../utils/question'
@@ -254,6 +255,31 @@ function initForm() {
     form.options = emptyOptions()
   }
   kpCandVisible.value = false
+  // 记录打开时的快照，用于「有未保存内容就拦一层」的关闭确认
+  baseline = JSON.stringify(form)
+}
+
+// ===== 未保存修改保护：关闭弹窗（点 X / Esc / 取消）前确认 =====
+let baseline = ''
+
+function isDirty() {
+  return baseline !== '' && JSON.stringify(form) !== baseline
+}
+
+function handleBeforeClose(done) {
+  if (!isDirty()) {
+    done()
+    return
+  }
+  ElMessageBox.confirm(
+    '题目还没保存，关闭后填写的内容会丢失。确定关闭吗？',
+    '放弃编辑',
+    { type: 'warning', confirmButtonText: '放弃', cancelButtonText: '继续编辑' },
+  ).then(() => done()).catch(() => {})
+}
+
+function handleCancel() {
+  handleBeforeClose(() => emit('update:modelValue', false))
 }
 
 watch(() => props.modelValue, (visible) => {

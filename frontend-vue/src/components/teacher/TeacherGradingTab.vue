@@ -10,6 +10,17 @@
     />
 
     <template v-else>
+      <!-- 与课程文档/图谱管理/题库管理保持一致：当前课程 + 可切换课程 -->
+      <TeacherContextBar
+        back-text="返回课程列表"
+        :course-name="courseName"
+        :courses="courses"
+        :course-id="courseId"
+        show-switcher
+        @back="emit('go-courses')"
+        @update:course-id="emit('update:courseId', $event)"
+      />
+
       <el-card class="page-card">
         <div class="chart-title-line">
           <el-icon><EditPen /></el-icon> 批改进度
@@ -153,16 +164,18 @@
 import { toRef } from 'vue'
 import { EditPen, DocumentChecked } from '@element-plus/icons-vue'
 import TeacherCoursePicker from './TeacherCoursePicker.vue'
+import TeacherContextBar from './TeacherContextBar.vue'
 import { useTeacherGrading } from '../../composables/teacher/useTeacherGrading'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
   courses: { type: Array, default: () => [] },
   courseId: { type: [String, Number], default: '' },
+  courseName: { type: String, default: '' },
   documents: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['update:courseId', 'pending-change'])
+const emit = defineEmits(['update:courseId', 'pending-change', 'go-courses'])
 
 const {
   gradingSummary,
