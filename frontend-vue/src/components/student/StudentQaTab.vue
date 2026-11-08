@@ -71,6 +71,16 @@
                 <div v-if="m.error" class="turn-error msg-error" :title="m.errDetail || ''">
                   <el-icon><WarningFilled /></el-icon>
                   <span>{{ m.errorMessage || 'AI 服务暂时不可用，请稍后重试' }}</span>
+                  <el-button
+                    size="small"
+                    text
+                    type="primary"
+                    class="msg-retry"
+                    :disabled="asking"
+                    @click="retryMessage(m)"
+                  >
+                    <el-icon class="icon-gap"><RefreshRight /></el-icon>重试
+                  </el-button>
                 </div>
                 <div v-else class="turn-text md" v-html="renderMarkdown(m.content)"></div>
                 <!-- 流式生成中：正文还在增长时的轻提示 -->
@@ -100,6 +110,22 @@
                     <el-icon><Document /></el-icon>参考来源<span v-if="m.sources && m.sources.length"> {{ m.sources.length }}</span>
                     <el-icon class="op-arrow" :class="{ open: !!openCites[m.mid] }"><ArrowDown /></el-icon>
                   </button>
+                </div>
+
+                <!-- 参考来源默认收起，但先用一行 chip 露出来：关键依据不该藏在一次点击后面 -->
+                <div v-if="!openCites[m.mid] && m.sources && m.sources.length" class="cite-preview">
+                  <span class="cite-preview-label">参考来源</span>
+                  <el-tag
+                    v-for="(s, j) in m.sources.slice(0, 3)"
+                    :key="s.kp_id || s.name || j"
+                    size="small"
+                    effect="plain"
+                    :type="categoryTagType(s.category)"
+                    class="cite-preview-tag"
+                    @click="emit('jump-kp', s)"
+                  >{{ s.name }}</el-tag>
+                  <span v-if="m.sources.length > 3" class="cite-preview-more">+{{ m.sources.length - 3 }}</span>
+                  <button class="turn-op cite-preview-more-btn" @click="toggleCites(m.mid)">展开全部</button>
                 </div>
 
                 <div v-if="openCites[m.mid]" class="cite-list">
@@ -186,7 +212,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import {
   ArrowDown, ChatDotRound, Collection, CopyDocument, Delete, Document, InfoFilled,
-  MagicStick, Plus, Right, Star, StarFilled, Top, VideoPause, WarningFilled,
+  MagicStick, Plus, RefreshRight, Right, Star, StarFilled, Top, VideoPause, WarningFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { categoryTagType } from '../../utils/graphStyle'
@@ -263,10 +289,23 @@ function isFav(kpId) {
 async function sendQuestion() {
   const q = question.value.trim()
   if (!q || asking.value) return
+  const beforeLen = messages.value.length
   question.value = ''
   resetInputHeight()
   scrollChatToBottom()
   await chat.send(q)
+  // 失败时把问题还回输入框，避免用户重打一遍；用户已在等待期间输入新内容则不覆盖
+  const bubble = messages.value[messages.value.length - 1]
+  if (messages.value.length > beforeLen && bubble?.error && !question.value.trim()) {
+    question.value = q
+    nextTick(autoGrow)
+  }
+  scrollChatToBottom()
+}
+
+/** 重试失败的问答：复用共享会话的 retry（删除错误气泡，用原提问重新发送） */
+async function retryMessage(m) {
+  await chat.retry(m.mid)
   scrollChatToBottom()
 }
 
@@ -533,6 +572,30 @@ function relativeTime(t) {
   font-size: var(--font-size-label);
 }
 .turn-ops { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+.msg-retry { margin-left: 4px; padding: 0 4px; }
+/* 参考来源预览：收起状态下也把依据亮出来 */
+.cite-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cite-preview-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.cite-preview-tag {
+  cursor: pointer;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cite-preview-more {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.cite-preview-more-btn { padding: 0; }
 /* 流式生成中：正文还在增长时的轻提示 */
 .msg-streaming {
   display: flex;

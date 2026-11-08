@@ -48,11 +48,16 @@
         </el-form-item>
         <div class="form-actions">
           <!-- 强制改密期间不提供「返回」：此时没有可返回的业务页面，
-               守卫会把任何其它路由再送回来，按钮点了也像没反应 -->
+               守卫会把任何其它路由再送回来，按钮点了也像没反应。
+               但必须留「退出登录」这一出口，否则用户会被困在改密页。 -->
           <el-button v-if="!forced" :disabled="changingPwd" @click="goBack">返回</el-button>
+          <el-button v-else :disabled="changingPwd" @click="logoutForced">退出登录</el-button>
           <el-button type="primary" :loading="changingPwd" @click="changePassword">确认修改</el-button>
         </div>
       </el-form>
+      <div v-if="forced" class="pwd-help">
+        忘记了当前密码？请联系管理员重置后再登录。
+      </div>
     </el-card>
   </div>
 </template>
@@ -60,7 +65,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
 import { api } from '../api'
 import { useAppStore } from '../stores/app'
@@ -79,6 +84,21 @@ const changingPwd = ref(false)
 
 function goBack() {
   router.back()
+}
+
+/** 强制改密页的出口：退出登录后回登录页（重新登录仍会被要求改密，但不会被卡死） */
+async function logoutForced() {
+  try {
+    await ElMessageBox.confirm(
+      '退出后需要使用当前密码重新登录，登录后仍需修改密码。确定退出吗？',
+      '退出登录',
+      { type: 'warning', confirmButtonText: '退出登录', cancelButtonText: '取消' },
+    )
+  } catch {
+    return
+  }
+  store.logout()
+  router.replace('/login')
 }
 
 /** 按角色回到首页（强制改密成功后离开改密页） */
@@ -124,5 +144,11 @@ async function changePassword() {
   justify-content: flex-end;
   gap: var(--space-2);
   margin-top: var(--space-4);
+}
+.pwd-help {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-label);
+  color: var(--color-text-secondary);
+  text-align: right;
 }
 </style>

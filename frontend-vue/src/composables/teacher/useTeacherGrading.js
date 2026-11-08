@@ -153,6 +153,24 @@ export function useTeacherGrading({ courseId, active, onSummary }) {
       ElMessage.warning('请填写 0-100 的分数')
       return
     }
+    // 批量给分一次性覆盖多条记录、且改判没有撤销入口：必须让教师看清条数与分数再确认
+    const count = gradingSelection.value.length
+    const comment = (gradingBatchComment.value || '').trim()
+    try {
+      await ElMessageBox.confirm(
+        `将把已选中的 ${count} 条作答统一批为 ${score} 分`
+        + `${comment ? `，评语「${comment.length > 30 ? `${comment.slice(0, 30)}…` : comment}」` : ''}。`
+        + `批量批改会覆盖这些作答原有的分数与评语，确定继续吗？`,
+        '确认批量批改',
+        {
+          type: 'warning',
+          confirmButtonText: `确认批改 ${count} 条`,
+          cancelButtonText: '取消',
+        },
+      )
+    } catch {
+      return // 教师取消：不写库
+    }
     try {
       const data = await api.gradeAnswersBatch(
         gradingSelection.value, score, gradingBatchComment.value || undefined,

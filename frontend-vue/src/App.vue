@@ -50,6 +50,7 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile" :icon="User">个人中心</el-dropdown-item>
+            <el-dropdown-item command="password" :icon="Lock">修改密码</el-dropdown-item>
             <el-dropdown-item
               v-if="store.isLoggedIn"
               command="logout"
@@ -85,6 +86,7 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile" :icon="User">个人中心</el-dropdown-item>
+            <el-dropdown-item command="password" :icon="Lock">修改密码</el-dropdown-item>
             <el-dropdown-item
               v-if="store.isLoggedIn"
               command="logout"
@@ -386,6 +388,7 @@ async function handleLogout() {
 // 账号菜单：侧栏用户块与顶栏头像共用同一套命令，退出登录不再是一个没有文字的图标按钮
 function onUserCommand(command) {
   if (command === 'profile') router.push('/profile')
+  else if (command === 'password') router.push('/profile?tab=password')
   else if (command === 'logout') handleLogout()
 }
 

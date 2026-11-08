@@ -89,11 +89,17 @@ export function useCourseDocuments({
     return documents.value.find((d) => String(d.doc_id) === String(item.document_id)) || null
   }
 
-  /** 后端文档状态 -> 统一阶段（每阶段文案与百分比都对应真实库状态） */
+  /**
+   * 后端文档状态 -> 统一阶段。
+   *
+   * 处理中的阶段只用「阶段名 + 不确定进度条」表示：后端并不提供真实的完成百分比，
+   * 之前写死的 35/70/90 会让用户误以为是真实进度（抽一篇 69 条的文档与 5 条的文档
+   * 耗时天差地别，同一个数字毫无信息量）。percentage 仅用于批次汇总的粗排序。
+   */
   function batchStage(item) {
-    const base = { text: '待处理', type: 'info', percentage: 0, inFlight: false, completed: false, failed: false, message: '' }
+    const base = { text: '待处理', type: 'info', percentage: 0, indeterminate: false, inFlight: false, completed: false, failed: false, message: '' }
     if (item.uploading) {
-      return { ...base, text: '上传中', type: 'warning', percentage: 10, inFlight: true, message: '正在上传文件…' }
+      return { ...base, text: '上传中', type: 'warning', percentage: 10, indeterminate: true, inFlight: true, message: '正在上传文件…' }
     }
     if (item.upload_failed && !item.document_id) {
       return { ...base, text: '失败', type: 'danger', percentage: 100, failed: true, progressStatus: 'exception', message: item.error || '上传失败' }
@@ -114,21 +120,21 @@ export function useCourseDocuments({
       return { ...base, text: '已完成', type: 'success', percentage: 100, completed: true, progressStatus: 'success', message: '' }
     }
     if (graph === 'BUILDING') {
-      return { ...base, text: '图谱构建中', type: 'warning', percentage: 90, inFlight: true, message: '正在写入 Neo4j…' }
+      return { ...base, text: '图谱构建中', type: 'warning', percentage: 90, indeterminate: true, inFlight: true, message: '正在写入 Neo4j…' }
     }
     if (doc.extract_status === 'EXTRACTING') {
-      return { ...base, text: '知识抽取中', type: 'warning', percentage: 70, inFlight: true, message: '正在抽取知识点与关系…' }
+      return { ...base, text: '知识抽取中', type: 'warning', percentage: 70, indeterminate: true, inFlight: true, message: '正在抽取知识点与关系…' }
     }
     if (doc.parse_status === 'PARSING') {
-      return { ...base, text: '解析中', type: 'warning', percentage: 35, inFlight: true, message: '正在解析文档…' }
+      return { ...base, text: '解析中', type: 'warning', percentage: 35, indeterminate: true, inFlight: true, message: '正在解析文档…' }
     }
     if (doc.parse_status === 'PARSED' && doc.extract_status === 'COMPLETED') {
-      return { ...base, text: '图谱构建中', type: 'warning', percentage: 85, inFlight: true, message: '准备写入图谱…' }
+      return { ...base, text: '图谱构建中', type: 'warning', percentage: 85, indeterminate: true, inFlight: true, message: '准备写入图谱…' }
     }
     if (doc.parse_status === 'PARSED') {
-      return { ...base, text: '待抽取', type: 'info', percentage: 50, inFlight: true, message: '排队等待知识抽取…' }
+      return { ...base, text: '待抽取', type: 'info', percentage: 50, indeterminate: true, inFlight: true, message: '排队等待知识抽取…' }
     }
-    return { ...base, text: '待处理', percentage: 5, inFlight: true, message: '排队等待处理…' }
+    return { ...base, text: '待处理', percentage: 5, indeterminate: true, inFlight: true, message: '排队等待处理…' }
   }
 
   const batchSummary = computed(() => {
@@ -368,6 +374,10 @@ export function useCourseDocuments({
   // ---------------- 进度轮询 ----------------
   let pollTimer = null
   let pollStartedAt = 0
+  // 连续轮询失败次数：偶尔失败下一轮照常重试，连续失败才提示（否则网络抖动会刷屏）
+  let pollFailures = 0
+  // 超过 30 分钟仍在处理的文档：停止轮询并明确告知，而不是让进度条永远停在「处理中」
+  const pollTimedOut = ref(false)
   const hasInFlightDoc = computed(() => documents.value.some(docIsInFlight))
 
   function stopPolling() {
@@ -381,6 +391,7 @@ export function useCourseDocuments({
     const prev = new Map(documents.value.map((d) => [d.doc_id, `${d.parse_status}|${d.extract_status}`]))
     const list = await refreshDocuments()
     if (!list) return // 已被更新的请求取代
+    pollFailures = 0
     recoverBatchItemsFromDocuments(list)
     for (const d of list) {
       const key = `${d.parse_status}|${d.extract_status}|${docGraphStatus(d)}`
@@ -402,25 +413,42 @@ export function useCourseDocuments({
   function startPolling() {
     if (pollTimer) return
     pollStartedAt = Date.now()
+    pollTimedOut.value = false
+    pollFailures = 0
     pollTimer = setInterval(() => {
       // 教师切去其它 Tab 时页内数据照样更新（el-tabs 的 pane 是 v-show 保活，
       // 进度表不会冻住）；完成/失败仍走全局 ElMessage，不在本页也能收到。
       // 无课程、无进行中任务或超过 30 分钟兜底时自动停止。
-      if (
-        !courseId.value
-        || !hasInFlightDoc.value
-        || Date.now() - pollStartedAt > DOC_POLL_TIMEOUT
-      ) {
+      if (!courseId.value || !hasInFlightDoc.value) {
         stopPolling()
         return
       }
-      pollDocuments().catch(() => { /* 轮询失败静默，下一轮自动重试 */ })
+      if (Date.now() - pollStartedAt > DOC_POLL_TIMEOUT) {
+        stopPolling()
+        pollTimedOut.value = true
+        ElMessage.warning(
+          '已连续跟踪 30 分钟仍有文档未处理完，进度自动刷新已停止。可稍后重新进入本页查看，或对卡住的文档点「重试」',
+        )
+        return
+      }
+      pollDocuments().catch(() => {
+        // 偶发失败下一轮自动重试；连续失败说明后端可能已不可达，提示一次避免用户干等
+        pollFailures += 1
+        if (pollFailures === 3) {
+          ElMessage.warning('处理进度刷新失败，正在继续重试；若长时间无变化请检查后端服务')
+        }
+      })
     }, DOC_POLL_INTERVAL)
   }
 
   watch([hasInFlightDoc, courseId], ([inFlight, cid]) => {
-    if (inFlight && cid) startPolling()
-    else stopPolling()
+    if (inFlight && cid) {
+      startPolling()
+    } else {
+      stopPolling()
+      // 没有在途文档了，「超时」提示自然失效
+      pollTimedOut.value = false
+    }
   }, { immediate: true })
 
   // 每次从别的 Tab 切回文档页刷新一次（原页 activeTab watcher 的行为）；
@@ -445,6 +473,7 @@ export function useCourseDocuments({
     batchSummary,
     batchDocument,
     batchStage,
+    pollTimedOut,
     canRetryBatchItem,
     doBatchUpload,
     retryBatchItem,

@@ -106,10 +106,16 @@ function syncForm() {
 }
 
 async function save() {
+  // 课程名是列表、邀请、成绩单上的唯一标识，空名会让课程在界面上变成一张「无名卡片」
+  const name = (form.course_name || '').trim()
+  if (!name) {
+    ElMessage.warning('课程名称不能为空')
+    return
+  }
   saving.value = true
   try {
     await api.updateCourse(props.course.course_id, {
-      course_name: form.course_name?.trim() || undefined,
+      course_name: name,
       description: form.description?.trim() ?? undefined,
       category: form.category?.trim() || null,
       organization: form.organization?.trim() || null,

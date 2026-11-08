@@ -75,8 +75,10 @@
           <el-icon class="ai-close" :size="18" title="收起" aria-label="收起" @click="toggle"><Close /></el-icon>
         </div>
         <div class="ai-header-bottom">
-          <div class="ai-context-chip" :class="{ empty: !hasContext }">
-            <template v-if="hasContext">当前课程：{{ effCourseName || effCourseId }}</template>
+          <div class="ai-context-chip" :class="{ empty: !hasContext }" :title="contextText">
+            <template v-if="hasContext">
+              课程：{{ effCourseName || ('#' + effCourseId) }} · 资料：{{ effDocumentName || ('#' + effDocumentId) }}
+            </template>
             <template v-else>未选择课程 · 可在页面上方选择学习资料</template>
           </div>
           <span class="ai-clear" title="开一段新对话，旧对话保留在问答页的历史里" @click="newChat">
@@ -96,7 +98,16 @@
           <div class="ai-msg-main">
             <div v-if="m.role === 'ai' && m.greeting" class="ai-tag">AI 助教</div>
             <div class="ai-bubble">
-              <div v-if="m.error" class="ai-error msg-error" :title="m.errDetail || ''">⚠️ {{ m.errorMessage || 'AI 服务暂时不可用，请稍后重试' }}</div>
+              <div v-if="m.error" class="ai-error msg-error" :title="m.errDetail || ''">
+                <span>⚠️ {{ m.errorMessage || 'AI 服务暂时不可用，请稍后重试' }}</span>
+                <button
+                  v-if="m.mid"
+                  class="ai-retry"
+                  type="button"
+                  :disabled="asking"
+                  @click="retryMessage(m)"
+                >重试</button>
+              </div>
               <template v-else>
                 <div v-if="m.role === 'ai'" class="ai-msg-text ai-md" v-html="renderMarkdown(m.content)"></div>
                 <div v-else class="ai-msg-text">{{ m.content }}</div>
@@ -170,6 +181,16 @@ const effCourseName = computed(() => {
   const c = store.courseById(cid)
   return c ? c.course_name : ''
 })
+// 当前学习资料名：只显示课程而不显示文档时，用户无法判断 AI 到底在读哪份资料
+const effDocumentName = computed(() => {
+  const did = effDocumentId.value
+  if (!did) return ''
+  const d = store.learningContext.documentList.find((x) => String(x.doc_id) === String(did))
+  return d ? d.file_name : ''
+})
+const contextText = computed(() => (hasContext.value
+  ? `课程：${effCourseName.value || effCourseId.value} · 资料：${effDocumentName.value || effDocumentId.value}`
+  : '未选择课程和学习资料'))
 
 const open = ref(false)
 const question = ref('')
@@ -343,8 +364,12 @@ const lastStreaming = computed(() => {
 })
 
 // 课程 / 学习资料上下文变化交给共享会话：切课程载入该课程历史，切文档只作废在途回答
-watch(effCourseId, (cid) => chat.bindContext(cid, effDocumentId.value), { immediate: true })
-watch(effDocumentId, (did) => chat.bindContext(effCourseId.value, did))
+watch(effCourseId, (cid) => chat.bindContext(cid, effDocumentId.value, effDocumentName.value), { immediate: true })
+watch(effDocumentId, (did) => chat.bindContext(effCourseId.value, did, effDocumentName.value))
+// 文档列表晚于上下文到达时补上资料名（只影响历史分隔行，不触发重新加载）
+watch(effDocumentName, (name) => {
+  if (name) chat.bindContext(effCourseId.value, effDocumentId.value, name)
+})
 
 // 问答页里切了会话，悬浮窗跟着回到最新一条
 watch(() => chat.activeId, () => {
@@ -367,9 +392,21 @@ function onEnter(e) {
 async function send() {
   const q = question.value.trim()
   if (!q || asking.value) return
+  const beforeLen = messages.value.length
   question.value = ''
   scrollToBottom()
   await chat.send(q)
+  // 失败时把问题还回输入框，避免用户重打一遍
+  const bubble = messages.value[messages.value.length - 1]
+  if (messages.value.length > beforeLen && bubble?.error && !question.value.trim()) {
+    question.value = q
+  }
+  scrollToBottom()
+}
+
+/** 重试失败的问答（复用共享会话：删错误气泡，用原提问重发） */
+async function retryMessage(m) {
+  await chat.retry(m.mid)
   scrollToBottom()
 }
 
@@ -665,6 +702,18 @@ watch(() => messages.value.length, () => {
 .ai-error {
   color: #f0b8c4;
 }
+.msg-error { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ai-retry {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.ai-retry:disabled { opacity: 0.5; cursor: not-allowed; }
 /* 结果不完整（截断 / 中断）的说明：浅黄，提示但不打断阅读 */
 .ai-note {
   margin-top: 6px;

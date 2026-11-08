@@ -212,6 +212,8 @@ _SCHEMA_SQL = [
         course_id       INTEGER NOT NULL,
         document_id     INTEGER,
         kp_id           TEXT NOT NULL,
+        -- 知识点名快照：重新抽取会整体更换 kp_id，名字快照用于把旧掌握记录映射回同名新节点
+        kp_name         TEXT,
         status          TEXT NOT NULL DEFAULT 'MASTERED'
                         CHECK (status IN ('MASTERED', 'LEARNING', 'RECOMMENDED')),
         mastery_level   INTEGER NOT NULL DEFAULT 100 CHECK (mastery_level BETWEEN 0 AND 100),

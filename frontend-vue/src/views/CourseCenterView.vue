@@ -82,6 +82,14 @@
           <el-button type="primary" @click="searchDiscover">搜索</el-button>
         </div>
 
+        <el-alert
+          class="discover-hint"
+          type="info"
+          :closable="false"
+          show-icon
+          title="已加入或正在审核的课程不会在这里重复显示，可在下方「申请中 / 未通过」或「我的课程」查看"
+        />
+
         <div v-loading="loadingDiscover" class="discover-wrap">
           <el-empty
             v-if="!loadingDiscover && !discoverCourses.length"
@@ -210,6 +218,25 @@
         <el-table-column label="申请时间" width="140">
           <template #default="{ row }">{{ fmtTime(row.created_at) }}</template>
         </el-table-column>
+        <el-table-column label="操作" width="120" align="right">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.my_status === 'rejected'"
+              size="small"
+              type="primary"
+              plain
+              :loading="pendingActionId === row.course_id"
+              @click="reapply(row)"
+            >再次申请</el-button>
+            <el-button
+              v-else
+              size="small"
+              plain
+              :loading="pendingActionId === row.course_id"
+              @click="cancelApplication(row)"
+            >撤回申请</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -303,6 +330,8 @@ const applyVisible = ref(false)
 const applying = ref(null)
 const applyReason = ref('')
 const applying2 = ref(false)
+// 「申请中 / 未通过」行内操作（撤回 / 再次申请）的 loading，值为 course_id
+const pendingActionId = ref(null)
 
 const JOIN_MODE = {
   auto: { text: '直接加入', type: 'success' },
@@ -333,8 +362,11 @@ async function loadMine() {
       page_size: 100,
     })
     mineCourses.value = data.items || []
-    // 同步到全局课程列表，供教师/学生端既有的课程下拉框使用
-    store.fetchCourses(true).catch(() => {})
+    // 同步到全局课程列表，供教师/学生端既有的课程下拉框使用。
+    // 这是次要同步：失败不影响本页列表，但必须提示，否则下拉框会停在旧数据且毫无迹象。
+    store.fetchCourses(true).catch(() => {
+      ElMessage.warning('课程下拉数据同步失败，页面顶部课程选择可能不是最新，请稍后刷新')
+    })
     await loadPending()
   } catch (e) {
     ElMessage.error(e?.message || '加载我的课程失败')
@@ -503,6 +535,32 @@ async function doApply() {
   }
 }
 
+/** 未通过 → 再次申请：复用发现页的申请弹窗（后端对 rejected 记录允许重新申请） */
+function reapply(row) {
+  openApply(row)
+}
+
+/** 审核中 → 撤回申请：删除待审核记录，课程会重新出现在发现页 */
+async function cancelApplication(row) {
+  const ok = await ElMessageBox.confirm(
+    `确定撤回对「${row.course_name}」的加入申请吗？撤回后可随时重新申请。`,
+    '撤回申请',
+    { type: 'warning', confirmButtonText: '确认撤回', cancelButtonText: '取消' },
+  ).catch(() => false)
+  if (!ok) return
+  pendingActionId.value = row.course_id
+  try {
+    await api.cancelApplication(row.course_id)
+    ElMessage.success('已撤回申请')
+    await loadPending()
+    if (activeTab.value === 'discover') await loadDiscover()
+  } catch (e) {
+    ElMessage.error(e?.message || '撤回失败')
+  } finally {
+    pendingActionId.value = null
+  }
+}
+
 /** 从「加入课程」页粘贴邀请链接：抽取 token 后跳到落地页 */
 function openInviteLink() {
   const raw = (inviteLink.value || '').trim()
@@ -555,6 +613,9 @@ onMounted(() => {
   margin-bottom: var(--space-3);
 }
 
+.discover-hint {
+  margin-bottom: var(--space-3);
+}
 .discover-wrap {
   min-height: 200px;
 }

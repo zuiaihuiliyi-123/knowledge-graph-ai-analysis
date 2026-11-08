@@ -26,6 +26,8 @@ const MAX_MESSAGES = 80
 const MAX_SOURCE_PER_MSG = 10
 const MAX_CONTENT_LEN = 20000
 const TITLE_LEN = 24
+// 流式回答的「无新内容」超时：超过该时长没有任何事件就主动中断，避免无限转圈
+const ANSWER_TIMEOUT_MS = 60000
 
 export const useAiChatStore = defineStore('aiChat', () => {
   // 当前课程的历史会话（按最近更新排在前面，与主流 AI 的历史列表一致）
@@ -270,17 +272,20 @@ export const useAiChatStore = defineStore('aiChat', () => {
    * `delta` 边到边追加（逐字输出），`done` 收尾。非流式响应（权限拒绝 / 代理不支持 SSE）
    * 或网络异常时回落到同步 api.ask。
    */
-  async function send(question) {
+  async function send(question, options = {}) {
     const q = (question || '').trim()
     if (!q || asking.value) return
     const session = ensureSession()
     const mySeq = ++seq
     const ctx = { ctxKey: ctxKeyOf(), ctxLabel: ctxLabelOf() }
 
-    session.messages.push({
-      mid: ++midSeq, role: 'user', content: q, sources: [], error: false, errDetail: '',
-      streaming: false, ...ctx, time: Date.now(),
-    })
+    // 重试时 appendUser=false：用户提问已在对话里，不能重复插入一条
+    if (options.appendUser !== false) {
+      session.messages.push({
+        mid: ++midSeq, role: 'user', content: q, sources: [], error: false, errDetail: '',
+        streaming: false, ...ctx, time: Date.now(),
+      })
+    }
     // 会话标题取首个提问，和主流 AI 的历史列表一致
     if (!session.title) session.title = truncateTitle(q)
     // 必须是响应式对象：消息 push 进 reactive 数组后，数组里存的是它的 raw target，
@@ -303,9 +308,21 @@ export const useAiChatStore = defineStore('aiChat', () => {
       signal: controller.signal,
     }
     let received = ''
+    // 无新内容超时：每个事件重置计时；超时后主动 abort，走「超时」而非「用户停止」分支
+    let timer = null
+    let timedOut = false
+    const armTimeout = () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        timedOut = true
+        controller.abort()
+      }, ANSWER_TIMEOUT_MS)
+    }
+    armTimeout()
     try {
       const events = await askStream({ question: q, ...scope })
       for await (const ev of events) {
+        armTimeout()
         if (mySeq !== seq) return // 上下文/会话已切换或新提问已接管，本次回答作废
         if (ev.event === 'sources') {
           bubble.sources = (ev.data?.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
@@ -347,8 +364,20 @@ export const useAiChatStore = defineStore('aiChat', () => {
     } catch (e) {
       if (mySeq !== seq) return
       if (isAbortError(e)) {
-        // 用户点「停止生成」：一个字都没收到就给一句明确提示，否则保留半成品
         bubble.streaming = false
+        if (timedOut) {
+          // 超时中断：有半成品就保留并说明，没有正文则明确报错并提供重试入口
+          if (received || bubble.content) {
+            bubble.content = received || bubble.content
+            bubble.note = `AI 响应超时（${ANSWER_TIMEOUT_MS / 1000} 秒无新内容），以上为已生成内容`
+          } else {
+            bubble.error = true
+            bubble.errorMessage = `AI 响应超时（${ANSWER_TIMEOUT_MS / 1000} 秒无响应），请重试`
+            bubble.errDetail = 'timeout'
+          }
+          return
+        }
+        // 用户点「停止生成」：一个字都没收到就给一句明确提示，否则保留半成品
         if (!bubble.content) bubble.content = '（已停止生成）'
         return
       }
@@ -386,10 +415,33 @@ export const useAiChatStore = defineStore('aiChat', () => {
         bubble.errDetail = e2?.message || ''
       }
     } finally {
+      if (timer) clearTimeout(timer)
       if (mySeq === seq) { asking.value = false; abort = null }
       touch(session)
       persist()
     }
+  }
+
+  /**
+   * 重试某条失败的 AI 回答：删掉错误气泡，用前一条用户提问重新发送（不重复插入提问）。
+   * 只对当前会话有效；正在生成时忽略。
+   */
+  async function retry(mid) {
+    if (asking.value) return
+    const session = ensureSession()
+    const idx = session.messages.findIndex((m) => m.mid === mid)
+    if (idx < 0) return
+    let question = ''
+    for (let i = idx - 1; i >= 0; i--) {
+      if (session.messages[i].role === 'user') {
+        question = session.messages[i].content
+        break
+      }
+    }
+    if (!question) return
+    session.messages.splice(idx, 1)
+    persist()
+    return send(question, { appendUser: false })
   }
 
   /** 停止当前生成：只中断请求，不改变对话历史 */
@@ -451,6 +503,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     selectSession,
     removeSession,
     send,
+    retry,
     stop,
     clear,
     reset,

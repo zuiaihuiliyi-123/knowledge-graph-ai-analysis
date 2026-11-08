@@ -66,9 +66,10 @@
         </div>
         <div class="dsb-progress-meta">
           <span v-if="progress.totalPages > 1">第 {{ progress.page }} / {{ progress.totalPages }} 页</span>
-          <span v-else>已读 {{ progress.percent }}%</span>
+          <span v-else>{{ readingProgressLabel(progress.percent) }}</span>
           <button class="dsb-link" type="button" @click="emit('restart')">从头开始</button>
         </div>
+        <p class="dsb-note">阅读进度仅保存在当前浏览器，换设备或清理浏览器数据后不会保留</p>
       </div>
 
       <dl class="dsb-dl">
@@ -147,6 +148,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { DArrowLeft, Files } from '@element-plus/icons-vue'
+import { readingProgressLabel } from '../../utils/readingProgress'
 
 const props = defineProps({
   mode: { type: String, default: 'none' }, // pdf | text | docx | none
@@ -483,6 +485,12 @@ function setPref(key, value) {
   align-items: center;
   font-size: 12px;
   color: #909399;
+}
+.dsb-note {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #b1b3b8;
 }
 .dsb-link {
   border: none;

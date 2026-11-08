@@ -191,3 +191,11 @@ async def apply_to_course(course_id: int, body: ApplyRequest | None = None,
     reason = body.reason if body else None
     result = MemberService.apply_to_course(current_user["user_id"], course_id, reason)
     return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
+
+
+@router.delete("/{course_id}/apply")
+async def cancel_application(course_id: int,
+                             current_user: dict = Depends(get_current_user)):
+    """撤回自己的加入申请（仅 pending 状态；撤回后课程重新出现在发现页）"""
+    result = MemberService.cancel_application(current_user["user_id"], course_id)
+    return success(result["data"]) if result["ok"] else error(result["code"], result["message"])

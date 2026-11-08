@@ -53,6 +53,12 @@ class MigrationMixin:
                     f"SELECT d.doc_id FROM t_document d WHERE d.course_id = {table}.{fk} LIMIT 1"
                     f") WHERE document_id IS NULL"
                 )
+            # 知识点名快照：重新抽取知识点会整体更换 kp_id，只有 kp_id 的掌握记录
+            # 在新图谱里全部变成孤儿（已掌握数瞬间归零）。补一列名字用于按同名回挂。
+            lr_columns = {row["name"] for row in
+                          conn.execute("PRAGMA table_info(t_learning_record)").fetchall()}
+            if "kp_name" not in lr_columns:
+                conn.execute("ALTER TABLE t_learning_record ADD COLUMN kp_name TEXT")
             # 向量取数一律按 (course_id, document_id) 过滤，但 t_kp_embedding 的主键是
             # (course_id, kp_id)，document_id 上没有索引 → 只能走主键前缀命中 course_id，
             # 再逐行过滤 document_id（course 5 有 117 行，其中目标文档只占 69 行，多扫的

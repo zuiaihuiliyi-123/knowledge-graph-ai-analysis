@@ -22,6 +22,7 @@
       v-model:search-value="searchQuery"
       :sidebar-open="sidebarOpen"
       :panel-open="panelOpen"
+      :downloading="downloading"
       @back="goBack"
       @switch-document="switchDocument"
       @download="download"
@@ -141,7 +142,7 @@
             <p class="drv-state-sub">
               当前支持 PDF、TXT、MD 与 DOCX。可以下载原文件后用本地应用打开。
             </p>
-            <el-button size="small" type="primary" plain @click="download">下载原文件</el-button>
+            <el-button size="small" type="primary" plain :loading="downloading" @click="download">下载原文件</el-button>
           </template>
         </div>
       </main>
@@ -186,7 +187,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Clock, Close, CollectionTag, Document as DocumentIcon, EditPen, Loading, MagicStick, WarningFilled,
 } from '@element-plus/icons-vue'
@@ -207,7 +208,8 @@ import {
   fetchDocumentMeta, probeContentStatus, resolveViewerKind,
 } from '../utils/documentContent'
 import {
-  clearReadingProgress, getReaderPrefs, getReadingProgress, saveReaderPrefs, saveReadingProgress,
+  clearReadingProgress, getReaderPrefs, getReadingProgress, readingProgressLabel,
+  saveReaderPrefs, saveReadingProgress,
 } from '../utils/readingProgress'
 
 const route = useRoute()
@@ -296,7 +298,7 @@ function togglePanel() {
 }
 
 const searchQuery = ref('')
-const searchState = ref({ scanning: '', total: null, index: 0 })
+const searchState = ref({ scanning: '', total: null, index: 0, capped: false })
 
 const contentUrl = computed(() => documentContentUrl(docId.value))
 
@@ -319,7 +321,10 @@ const searchStatus = computed(() => {
   if (searchState.value.scanning) return searchState.value.scanning
   if (!searchQuery.value) return ''
   if (searchState.value.total === 0) return '未找到'
-  if (searchState.value.total) return `${searchState.value.index}/${searchState.value.total}`
+  if (searchState.value.total) {
+    // capped：命中数达到扫描上限，结果被截断，用 + 明确告知后面还有
+    return `${searchState.value.index}/${searchState.value.total}${searchState.value.capped ? '+' : ''}`
+  }
   return ''
 })
 
@@ -416,7 +421,7 @@ function bootstrapRestore() {
   restoreState.value = saved
   if (saved && (saved.percent > 1 || saved.page > 1)) {
     const where = saved.totalPages > 1 ? `第 ${saved.page} 页` : ''
-    resumeNotice.value = `已恢复到上次阅读位置${where ? '（' + where + '）' : ''}，已读 ${saved.percent}%`
+    resumeNotice.value = `已恢复到上次阅读位置${where ? '（' + where + '）' : ''}，${readingProgressLabel(saved.percent)}`
     percent.value = saved.percent || 0
     page.value = saved.page || 1
     window.setTimeout(() => {
@@ -487,9 +492,13 @@ function onSearchProgress({ done, total }) {
   searchState.value = { ...searchState.value, scanning: `扫描 ${done}/${total}` }
 }
 
-function onSearchResult({ total }) {
-  searchState.value = { scanning: '', total, index: total ? 1 : 0 }
-  if (searchQuery.value && total === 0) ElMessage.info(`未找到「${searchQuery.value}」`)
+function onSearchResult({ total, capped }) {
+  searchState.value = { scanning: '', total, index: total ? 1 : 0, capped: !!capped }
+  if (searchQuery.value && total === 0) {
+    ElMessage.info(`未找到「${searchQuery.value}」`)
+  } else if (searchQuery.value && capped) {
+    ElMessage.warning(`「${searchQuery.value}」匹配过多，仅展示前 ${total} 条结果，可换更精确的关键词`)
+  }
 }
 
 function onSearchIndex({ index, total }) {
@@ -706,9 +715,18 @@ function resetDocumentState() {
  * 只改路由，内容加载、权限校验、进度恢复全部复用既有流程；用 replace 而不是 push，
  * 避免「返回」把用户一篇篇文档地倒回去。
  */
-function switchDocument(target) {
+async function switchDocument(target) {
   const nextId = String(target?.doc_id ?? '')
   if (!nextId || nextId === docId.value) return
+  // 切文档会清空当前文档的学习助手对话，先确认，避免学生毫无提示地丢掉问答
+  if (panelRef.value?.hasChat) {
+    const ok = await ElMessageBox.confirm(
+      '切换文档会清空当前文档的学习助手对话记录，确定切换吗？',
+      '切换文档',
+      { type: 'warning', confirmButtonText: '切换', cancelButtonText: '取消' },
+    ).catch(() => false)
+    if (!ok) return
+  }
   if (saveTimer) {
     window.clearTimeout(saveTimer)
     saveTimer = 0
@@ -749,7 +767,11 @@ function goBack() {
   router.push(target)
 }
 
+const downloading = ref(false)
+
 async function download() {
+  if (downloading.value) return
+  downloading.value = true
   try {
     const buffer = await fetchDocumentBuffer(docId.value)
     const blob = new Blob([buffer])
@@ -764,6 +786,8 @@ async function download() {
     setTimeout(() => URL.revokeObjectURL(url), 10000)
   } catch (e) {
     ElMessage.error(`下载失败：${e.message}`)
+  } finally {
+    downloading.value = false
   }
 }
 

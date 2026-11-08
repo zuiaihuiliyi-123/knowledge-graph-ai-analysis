@@ -105,6 +105,8 @@
           :current-node="currentKnowledgePoint"
           :overview-focus-list="overviewFocusList"
           :favorite-ids="favoriteIds"
+          :knowledge-options="knowledgeOptions"
+          :mastered-names="masteredNames"
           @locate="locateKnowledgePoint"
           @view-focus="onOverviewViewFocus"
           @toggle-favorite="toggleFavoriteSafe"
@@ -118,6 +120,7 @@
         <template #label><span class="tab-label"><el-icon><StarFilled /></el-icon>收藏夹</span></template>
         <StudentFavoritesTab
           :ctx-key="ctxKey"
+          :document-name="currentDocumentName"
           :favorite-ids="favoriteIds"
           :graph-nodes="graphNodes"
           :loading="!!ctxKey && (!graphDataChecked || favoritesLoading)"
@@ -169,6 +172,7 @@
       :expanded="drawerExpanded"
       :related="drawerRelated"
       :predecessors="drawerPredecessors"
+      :successors="drawerSuccessors"
       :state="drawerLearningState"
       @toggle-mastery="onToggleMastery"
       @toggle-favorite="onToggleFavorite"
@@ -228,7 +232,10 @@ const {
   drawerNode,
   drawerRelated,
   drawerPredecessors,
+  drawerSuccessors,
   drawerExpanded,
+  knowledgeOptions,
+  masteredNames,
   drawerMastered,
   drawerFavorited,
   drawerLearningState,
@@ -285,6 +292,7 @@ function jumpToKp(kp) {
   }
   drawerRelated.value = []
   drawerPredecessors.value = []
+  drawerSuccessors.value = []
   drawerExpanded.value = false
   drawerVisible.value = true
   highlightPathNodes.value = [String(kp.kp_id ?? kp.name)]
@@ -296,7 +304,8 @@ function locateKnowledgePoint(node) {
   activeTab.value = 'browse'
   drawerNode.value = node
   const nb = neighborsOf(node.id)
-  drawerRelated.value = [...nb.successors, ...nb.related]
+  drawerSuccessors.value = nb.successors
+  drawerRelated.value = nb.related
   drawerPredecessors.value = nb.predecessors
   drawerExpanded.value = browseTabRef.value?.isExpanded(String(node.id)) ?? false
   drawerVisible.value = true

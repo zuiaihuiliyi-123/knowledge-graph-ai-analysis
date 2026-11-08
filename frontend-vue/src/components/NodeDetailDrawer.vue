@@ -108,6 +108,24 @@
           </li>
         </ul>
 
+        <template v-if="successors.length">
+          <el-divider content-position="left">后继知识</el-divider>
+          <ul class="prereq-list">
+            <li
+              v-for="s in successors"
+              :key="s.id || s.label"
+              class="related-item"
+              @click="$emit('jump-to', s)"
+            >
+              <el-tag size="small" effect="plain" :type="categoryTagType(s.properties?.category)">
+                {{ s.properties?.category || '知识点' }}
+              </el-tag>
+              <span class="prereq-name">{{ s.label }}</span>
+              <el-icon class="related-jump"><Right /></el-icon>
+            </li>
+          </ul>
+        </template>
+
         <template v-if="related.length">
           <el-divider content-position="left">相关知识</el-divider>
           <ul class="prereq-list">
@@ -171,6 +189,8 @@ const props = defineProps({
   related: { type: Array, default: () => [] },
   /** P7：直接前置知识（客户端一阶前置，点击可跳转聚焦） */
   predecessors: { type: Array, default: () => [] },
+  /** 直接后继知识（PRECEDES 反向：学完本节点后可继续学习的节点） */
+  successors: { type: Array, default: () => [] },
   /** P7：节点学习状态（current/recommended，用于展示状态标签） */
   state: { type: String, default: '' },
   /** 学生端：是否显示"收藏"按钮 */

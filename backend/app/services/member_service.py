@@ -302,6 +302,26 @@ class MemberService:
             "status": status, "join_mode": join_mode}}
 
     @staticmethod
+    def cancel_application(user_id: int, course_id: int) -> dict:
+        """撤回尚未审核的加入申请。
+
+        学生此前只能等教师处理：待审核记录既不出现在「发现课程」里，
+        也没有任何入口能撤销。这里删除 pending 行，课程会重新出现在发现页，
+        学生可随时再次申请。
+        """
+        course = sql_db.get_course(course_id)
+        if course is None:
+            return MemberService._fail(2001, f"课程不存在: course_id={course_id}")
+        member = sql_db.get_membership(course_id, user_id)
+        if member is None or member["status"] != "pending":
+            return MemberService._fail(2004, "当前没有可撤回的申请")
+        removed = sql_db.delete_membership(course_id, user_id)
+        if not removed:
+            return MemberService._fail(2004, "申请状态已变化，请刷新后重试")
+        return {"ok": True, "code": 0, "message": "success", "data": {
+            "course_id": course_id, "user_id": user_id, "status": "cancelled"}}
+
+    @staticmethod
     def leave_course(user_id: int, course_id: int) -> dict:
         """学生主动退出课程：置为 removed，保留其学习记录与收藏"""
         course = sql_db.get_course(course_id)

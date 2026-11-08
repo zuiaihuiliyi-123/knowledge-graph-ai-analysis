@@ -10,7 +10,8 @@ class LearningMixin:
 
     def upsert_learning_record(self, user_id: int, course_id: int, document_id, kp_id: str,
                                status: str = "MASTERED", mastery_level: int = 100,
-                               source: str = "MANUAL", last_learned_at: str = None) -> int:
+                               source: str = "MANUAL", last_learned_at: str = None,
+                               kp_name: str = None) -> int:
         """
         写入学习记录；依赖 UNIQUE(user_id, course_id, kp_id) 冲突时更新，
         保证同一学生、同一课程、同一知识点仅一条记录。
@@ -18,23 +19,27 @@ class LearningMixin:
         Phase 8B：document_id 作为业务作用域字段写入（kp_id 全局唯一，UNIQUE 无需改为四列；
         具体见规划文档「数据库约束」）。注：ON CONFLICT DO UPDATE 为 SQLite 语法，
         迁 MySQL 时改为 ON DUPLICATE KEY UPDATE。
+
+        kp_name 是知识点名快照：重新抽取知识点会整体更换 kp_id，仅凭 kp_id 无法把
+        旧掌握记录映射回新节点；写入时尽量带上名字（取不到时保留旧值）。
         """
         now = _now()
         sql = """
         INSERT INTO t_learning_record
-            (user_id, course_id, document_id, kp_id, status, mastery_level, source, last_learned_at,
-             created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, course_id, document_id, kp_id, kp_name, status, mastery_level, source,
+             last_learned_at, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id, course_id, kp_id) DO UPDATE SET
             document_id = excluded.document_id,
+            kp_name = COALESCE(excluded.kp_name, t_learning_record.kp_name),
             status = excluded.status,
             mastery_level = excluded.mastery_level,
             source = excluded.source,
             last_learned_at = excluded.last_learned_at,
             updated_at = excluded.updated_at
         """
-        return self._execute(sql, (user_id, course_id, document_id, kp_id, status, mastery_level,
-                                   source, last_learned_at, now, now))
+        return self._execute(sql, (user_id, course_id, document_id, kp_id, kp_name, status,
+                                   mastery_level, source, last_learned_at, now, now))
 
 
     def list_records_by_user_course(self, user_id: int, course_id: int, document_id=None) -> list:
@@ -74,6 +79,25 @@ class LearningMixin:
                 "DELETE FROM t_learning_record "
                 "WHERE user_id = ? AND course_id = ? AND document_id = ? AND kp_id = ?",
                 (user_id, course_id, document_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
+    def delete_learning_records_by_name(self, user_id: int, course_id: int,
+                                        document_id, kp_name: str) -> int:
+        """按知识点名删除学习记录（撤销掌握时的兜底）。
+
+        重新抽取知识点会更换 kp_id：前端按名字快照把旧记录显示为「已掌握」，
+        学生点「取消掌握」时带来的却是新 kp_id，按 kp_id 删不到任何行。
+        这里按同名补删，避免「取消失败却看起来成功」。
+        """
+        if not kp_name:
+            return 0
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_learning_record "
+                "WHERE user_id = ? AND course_id = ? AND document_id = ? AND kp_name = ?",
+                (user_id, course_id, document_id, kp_name),
             )
             conn.commit()
             return cur.rowcount

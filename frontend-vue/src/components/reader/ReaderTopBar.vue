@@ -114,8 +114,14 @@
         <button class="rtb-icon-btn" type="button" title="全屏" @click="emit('fullscreen')">
           <el-icon><FullScreen /></el-icon>
         </button>
-        <button class="rtb-icon-btn" type="button" title="下载原文件" @click="emit('download')">
-          <el-icon><Download /></el-icon>
+        <button
+          class="rtb-icon-btn"
+          type="button"
+          :disabled="downloading"
+          :title="downloading ? '正在下载…' : '下载原文件'"
+          @click="emit('download')"
+        >
+          <el-icon :class="{ spin: downloading }"><Download v-if="!downloading" /><Loading v-else /></el-icon>
         </button>
         <button
           class="rtb-icon-btn"
@@ -129,10 +135,10 @@
       </div>
     </div>
 
-    <!-- 阅读进度：细线 + 百分比，不遮挡正文 -->
-    <div class="rtb-progress" :title="`已读 ${percent}%`">
+    <!-- 阅读进度：细线 + 百分比，不遮挡正文；滚到底显示「已读完」，与文档列表口径一致 -->
+    <div class="rtb-progress" :title="progressLabel">
       <div class="rtb-progress-fill" :style="{ width: percent + '%' }" />
-      <span class="rtb-progress-text">已读 {{ percent }}%</span>
+      <span class="rtb-progress-text">{{ progressLabel }}</span>
     </div>
   </header>
 </template>
@@ -141,9 +147,10 @@
 import { computed, ref } from 'vue'
 import {
   ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Close, Download, FullScreen,
-  List, Reading, Search, ZoomIn, ZoomOut,
+  List, Loading, Reading, Search, ZoomIn, ZoomOut,
 } from '@element-plus/icons-vue'
 import DocumentSwitcher from './DocumentSwitcher.vue'
+import { readingProgressLabel } from '../../utils/readingProgress'
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -172,6 +179,8 @@ const props = defineProps({
 
   sidebarOpen: { type: Boolean, default: true },
   panelOpen: { type: Boolean, default: true },
+  /** 下载原文件进行中（按钮显示加载并禁用，避免重复点击） */
+  downloading: { type: Boolean, default: false },
 })
 
 const emit = defineEmits([
@@ -182,6 +191,7 @@ const emit = defineEmits([
 
 const searchInputEl = ref(null)
 const searchable = computed(() => props.searchable)
+const progressLabel = computed(() => readingProgressLabel(props.percent))
 
 // 只在用户输入时触发搜索；页面程序化写入搜索词（如知识点定位）时由页面自己发起，
 // 避免同一次定位触发两遍全文扫描
@@ -356,6 +366,12 @@ defineExpose({
 .rtb-icon-btn:hover:not(:disabled) {
   background: #eef1fe;
   color: #4f6ef7;
+}
+.rtb-icon-btn .spin {
+  animation: rtb-spin 0.9s linear infinite;
+}
+@keyframes rtb-spin {
+  to { transform: rotate(360deg); }
 }
 .rtb-icon-btn:disabled {
   color: #c0c4cc;

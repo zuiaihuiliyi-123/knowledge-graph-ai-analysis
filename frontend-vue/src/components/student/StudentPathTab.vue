@@ -86,7 +86,7 @@
               </div>
               <div v-if="i < pathChain.length - 1" class="chain-link">
                 <el-icon><ArrowDown /></el-icon>
-                <span>前置知识</span>
+                <span>学习顺序</span>
               </div>
             </template>
           </div>
@@ -130,6 +130,8 @@
           :ctx-key="ctxKey"
           :course-id="courseId"
           :document-id="documentId"
+          :knowledge-options="knowledgeOptions"
+          :mastered-names="masteredNames"
         />
       </el-col>
 
@@ -139,6 +141,7 @@
           :ctx-key="ctxKey"
           :course-id="courseId"
           :document-id="documentId"
+          :knowledge-options="knowledgeOptions"
           @highlight-path="emit('highlight-path', $event)"
           @go-browse="emit('go-browse')"
         />
@@ -146,6 +149,7 @@
           :ctx-key="ctxKey"
           :course-id="courseId"
           :document-id="documentId"
+          :knowledge-options="knowledgeOptions"
         />
       </el-col>
     </el-row>
@@ -173,6 +177,10 @@ const props = defineProps({
   currentNode: { type: Object, default: null },
   overviewFocusList: { type: Array, default: () => [] },
   favoriteIds: { type: Array, default: () => [] },
+  /** 当前文档图谱节点（{ id, label }），供三个查询面板做候选选择 */
+  knowledgeOptions: { type: Array, default: () => [] },
+  /** 已在图谱中标记为已掌握的知识点名称 */
+  masteredNames: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['locate', 'view-focus', 'toggle-favorite', 'highlight-path', 'go-browse'])
@@ -451,7 +459,7 @@ function startLearning() {
   padding: 2px 0;
   color: var(--brand-400);
 }
-.chain-link .el-icon { transform: rotate(180deg); }
+/* 箭头朝下：路径链按「已掌握 → 当前 → 推荐」自上而下阅读 */
 .ov-focus-item:hover {
   background: var(--brand-50);
   border-color: var(--brand-200);

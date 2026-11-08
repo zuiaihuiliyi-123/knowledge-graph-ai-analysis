@@ -3,9 +3,25 @@
     <template #header>
       <b><el-icon class="icon-gap" color="var(--color-primary)"><Guide /></el-icon>到达目标知识点的学习路径</b>
     </template>
-    <p class="tip">输入目标知识点，系统自动生成从入门到该知识点的最短学习路径</p>
+    <p class="tip">选择目标知识点，系统自动生成从入门到该知识点的最短学习路径</p>
     <div class="btn-row">
-      <el-input v-model="targetKnowledge" placeholder="目标知识点，如：二叉树的遍历" style="max-width: 320px" />
+      <el-select
+        v-model="targetKnowledge"
+        filterable
+        allow-create
+        default-first-option
+        clearable
+        placeholder="搜索或选择目标知识点"
+        style="max-width: 320px; width: 100%"
+        :no-data-text="knowledgeOptions.length ? '无匹配知识点' : '当前文档暂无知识点，可直接输入名称后回车'"
+      >
+        <el-option
+          v-for="o in knowledgeOptions"
+          :key="o.id ?? o.label"
+          :label="o.label"
+          :value="o.label"
+        />
+      </el-select>
       <el-button type="primary" :loading="loading" @click="doPathToTarget">
         生成路径
       </el-button>
@@ -67,6 +83,8 @@ const props = defineProps({
   ctxKey: { type: String, default: '' },
   courseId: { type: [String, Number], default: '' },
   documentId: { type: [String, Number], default: '' },
+  /** 当前文档图谱节点（{ id, label }），用于候选选择 */
+  knowledgeOptions: { type: Array, default: () => [] },
 })
 
 // 有真实路径时请求父级把路径高亮到图谱并切到「图谱浏览」
@@ -83,8 +101,8 @@ const reason = ref('')
 const request = useLatestRequest()
 
 async function doPathToTarget() {
-  if (!targetKnowledge.value.trim()) {
-    ElMessage.warning('请输入目标知识点')
+  if (!String(targetKnowledge.value || '').trim()) {
+    ElMessage.warning('请选择目标知识点')
     return
   }
   const key = props.ctxKey

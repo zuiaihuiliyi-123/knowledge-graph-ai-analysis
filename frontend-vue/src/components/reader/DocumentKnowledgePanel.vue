@@ -158,6 +158,10 @@
               </span>
             </div>
             <div v-else class="dkp-msg-body">{{ m.text }}</div>
+            <!-- 上下文被截断时明确告知：否则用户以为 AI 读的是全文 -->
+            <div v-if="m.clipped" class="dkp-clip-note">
+              本次仅发送正文前 {{ MAX_CONTEXT }} 字（当前内容共 {{ m.rawLen }} 字），超出部分 AI 未读到
+            </div>
 
             <div v-if="m.sources?.length" class="dkp-msg-src">
               <span class="dkp-src-label">依据</span>
@@ -599,7 +603,7 @@ function clipContext(text) {
 function runAction(key, contextOverride) {
   const action = resolvedActions.value[key]
   if (!action) return
-  const raw = contextOverride || props.visibleText
+  const raw = String(contextOverride || props.visibleText || '')
   const context = clipContext(raw)
   if (!context) {
     ElMessage.info('正文还没准备好，稍后再试')
@@ -609,6 +613,8 @@ function runAction(key, contextOverride) {
     label: action.label,
     prompt: action.build(context),
     preview: context.slice(0, 60),
+    clipped: raw.trim().length > MAX_CONTEXT,
+    rawLen: raw.trim().length,
   })
 }
 
@@ -625,10 +631,16 @@ function explainNode(node) {
  * 由阅读器（含选中浮动菜单）发起一次 AI 阅读动作。
  * 面板持有对话状态，所以统一从这里进，避免出现第二份会话。
  */
-async function askWithContext({ label, prompt, preview }) {
+async function askWithContext({ label, prompt, preview, clipped = false, rawLen = 0 }) {
   tab.value = 'ai'
   if (!prompt || asking.value) return
-  chat.value.push({ role: 'user', text: label, display: { label, preview } })
+  chat.value.push({
+    role: 'user',
+    text: label,
+    display: { label, preview },
+    clipped,
+    rawLen,
+  })
   await scrollChat()
   asking.value = true
   try {
@@ -818,7 +830,10 @@ watch(tab, (value) => {
   if (value === 'notes') loadNotes()
 })
 
-defineExpose({ runAction, askWithContext, saveSelectionNote })
+// hasChat 供阅读器在切换文档前确认：切文档会清空当前文档的学习助手对话
+const hasChat = computed(() => chat.value.length > 0)
+
+defineExpose({ runAction, askWithContext, saveSelectionNote, hasChat })
 </script>
 
 <style scoped>
@@ -1202,6 +1217,14 @@ defineExpose({ runAction, askWithContext, saveSelectionNote })
 .dkp-msg-body.is-typing {
   color: #909399;
   font-size: 12px;
+}
+
+.dkp-clip-note {
+  margin-top: 4px;
+  max-width: 92%;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--el-color-warning, #e6a23c);
 }
 
 .dkp-msg-src {

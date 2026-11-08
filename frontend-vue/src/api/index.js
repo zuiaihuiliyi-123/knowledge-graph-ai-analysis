@@ -76,6 +76,9 @@ export const api = {
   /** 从发现课程申请加入公开课 */
   applyToCourse: (courseId, reason = null) =>
     request.post(`/api/v1/courses/${courseId}/apply`, { reason }),
+  /** 撤回自己的加入申请（仅待审核状态；撤回后可重新申请） */
+  cancelApplication: (courseId) =>
+    request.delete(`/api/v1/courses/${courseId}/apply`),
   /** 查看加课码（仅该课程教师） */
   getJoinCode: (courseId) => request.get(`/api/v1/courses/${courseId}/join-code`),
   /** 刷新加课码（旧码立即失效） */

@@ -239,6 +239,36 @@ def main():
     check("题目维度不一致返回空",
           vector_index.question_max_similarity(cid, 1, [[1.0, 0.0, 0.0]]) == {})
 
+    # ---------- 11. 撤回加入申请 ----------
+    print("\nStep 11: 撤回加入申请只对待审核行生效")
+    cid5 = sql_db.create_course("撤回验证课程", teacher_id)
+    sql_db.upsert_membership(cid5, student_id, "student", "pending", "apply")
+    res = MemberService.cancel_application(student_id, cid5)
+    check("待审核申请可撤回", res["ok"] is True, str(res)[:80])
+    check("成员行已删除", sql_db.get_membership(cid5, student_id) is None)
+    again = MemberService.cancel_application(student_id, cid5)
+    check("重复撤回返回可读错误", again["ok"] is False and again["code"] == 2004,
+          str(again)[:80])
+    sql_db.upsert_membership(cid5, student_id, "student", "approved", "apply")
+    approved = MemberService.cancel_application(student_id, cid5)
+    check("已通过成员不能撤回", approved["ok"] is False and approved["code"] == 2004,
+          str(approved)[:80])
+
+    # ---------- 12. 掌握记录保存知识点名快照 ----------
+    print("\nStep 12: 学习记录保存知识点名快照（重新抽取后可按同名回挂）")
+    sql_db.upsert_learning_record(student_id, cid5, 1, "kp_snapshot", kp_name="二叉树")
+    row = next((r for r in sql_db.list_records_by_user_course(student_id, cid5, 1)
+                if r["kp_id"] == "kp_snapshot"), None)
+    check("kp_name 已写入", bool(row) and row.get("kp_name") == "二叉树", str(row))
+    sql_db.upsert_learning_record(student_id, cid5, 1, "kp_snapshot", kp_name=None)
+    row = next((r for r in sql_db.list_records_by_user_course(student_id, cid5, 1)
+                if r["kp_id"] == "kp_snapshot"), None)
+    check("再次写入未带名字时保留旧快照",
+          bool(row) and row.get("kp_name") == "二叉树", str(row))
+    sql_db.upsert_learning_record(student_id, cid5, 1, "kp_snapshot2", kp_name="图")
+    removed_by_name = sql_db.delete_learning_records_by_name(student_id, cid5, 1, "图")
+    check("按名字兜底删除掌握记录", removed_by_name == 1, str(removed_by_name))
+
     print(f"\n通过 {total - len(failures)}/{total}" if not failures
           else f"\n失败 {len(failures)}/{total}：{failures}")
     return 0 if not failures else 1

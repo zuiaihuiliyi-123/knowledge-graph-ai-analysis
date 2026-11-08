@@ -61,6 +61,8 @@
               type="primary"
               class="submit-btn"
               :loading="loading"
+              :disabled="store.healthChecked && !store.backendOnline"
+              :title="store.healthChecked && !store.backendOnline ? '后端服务未连接，请先启动后端服务' : ''"
               @click="handleRegister"
             >
               {{ loading ? '注册中…' : '注 册' }}
@@ -156,6 +158,8 @@ async function handleRegister() {
   if (loading.value) return
   loading.value = true
   const username = form.username.trim()
+
+  // 第一步：注册。失败就是注册失败，绝不能因为后面的自动登录失败而误报「注册失败」
   try {
     await store.register({
       username,
@@ -164,14 +168,23 @@ async function handleRegister() {
       // 后端只认 teacher_invite_code；学生注册不需要，传 undefined 让请求体保持干净
       teacher_invite_code: form.role === 'teacher' ? form.teacherInviteCode.trim() : undefined,
     })
-    ElMessage.success('注册成功，正在登录…')
-    // 注册后自动登录，省去用户再填一次（后端注册接口不返回 token）
+  } catch (e) {
+    ElMessage.error(e.message || '注册失败')
+    loading.value = false
+    return
+  }
+
+  // 第二步：自动登录。失败时账号已经创建成功，只需引导去登录页并带上用户名
+  try {
     await store.login(username, form.password)
     // 邀请链接等被路由守卫拦截的页面：注册并登录后回到原目标
     const redirect = resolveRedirect()
     router.push(redirect || '/course-center')
   } catch (e) {
-    ElMessage.error(e.message || '注册失败')
+    ElMessage.warning(
+      `注册成功，但自动登录失败${e?.message ? `（${e.message}）` : ''}，请使用刚注册的账号手动登录`,
+    )
+    router.push({ path: '/login', query: { username } })
   } finally {
     loading.value = false
   }

@@ -125,7 +125,9 @@
     </el-collapse>
 
     <template #footer>
-      <el-button @click="emit('update:modelValue', false)">关闭</el-button>
+      <el-button :type="importReport ? 'primary' : ''" @click="emit('update:modelValue', false)">
+        {{ importReport ? '完成' : '关闭' }}
+      </el-button>
       <el-button :disabled="!selection.length" :loading="importLoading" @click="submit(false)">
         导入为暂存题（已选 {{ selection.length }}）
       </el-button>
@@ -272,9 +274,13 @@ async function submit(activate) {
       activate,
     })
     importReport.value = data
+    // 导入成功后清空预览与勾选：否则同一批题还能再点一次提交，等于重复导入一遍
+    importItems.value = []
+    selection.value = []
+    importStats.value = null
     ElMessage.success(activate
-      ? `已导入并启用 ${data.imported} 题`
-      : `已导入 ${data.imported} 题为暂存题（默认停用）`)
+      ? `已导入并启用 ${data.imported} 题，可关闭本窗口`
+      : `已导入 ${data.imported} 题为暂存题（默认停用），可关闭本窗口`)
     emit('imported')
   } catch (e) {
     ElMessage.error(`导入失败：${e.message}`)

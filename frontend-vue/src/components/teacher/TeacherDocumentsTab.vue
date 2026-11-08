@@ -83,8 +83,20 @@
               :stroke-width="12"
               :striped="batchSummary.processing > 0"
               :striped-flow="batchSummary.processing > 0"
+              :indeterminate="batchSummary.processing > 0"
+              :duration="3"
+              :format="() => (batchSummary.processing > 0 ? '处理中' : `${batchSummary.percentage}%`)"
             />
           </div>
+          <el-alert
+            v-if="pollTimedOut && batchSummary.processing > 0"
+            type="warning"
+            show-icon
+            :closable="false"
+            class="batch-timeout"
+            title="进度自动刷新已停止"
+            description="仍有文档超过 30 分钟未处理完，可能是后端队列卡住或 LLM 调用失败。可稍后重新进入本页查看，或对卡住的文档点「重试」。"
+          />
           <el-table :data="batchItems" size="small" class="batch-table">
             <el-table-column prop="file_name" label="文件" min-width="180" show-overflow-tooltip />
             <el-table-column label="状态" width="120" align="center">
@@ -100,6 +112,9 @@
                   :stroke-width="8"
                   :striped="batchStage(row).inFlight"
                   :striped-flow="batchStage(row).inFlight"
+                  :indeterminate="batchStage(row).indeterminate"
+                  :duration="2"
+                  :format="() => batchStage(row).text"
                 />
               </template>
             </el-table-column>
@@ -254,6 +269,7 @@ const {
   batchSummary,
   batchDocument,
   batchStage,
+  pollTimedOut,
   canRetryBatchItem,
   doBatchUpload,
   retryBatchItem,
@@ -318,6 +334,7 @@ async function downloadRow(row) {
 .batch-summary__stats .is-success b { color: var(--el-color-success); }
 .batch-summary__stats .is-danger b { color: var(--el-color-danger); }
 .batch-summary__stats .is-muted b { color: var(--color-text-secondary); }
+.batch-timeout { margin: 8px 0; }
 .batch-summary__progress {
   flex: 1;
   min-width: 220px;

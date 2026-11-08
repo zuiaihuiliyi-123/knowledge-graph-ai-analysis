@@ -36,6 +36,8 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
   const drawerNode = ref(null)
   const drawerRelated = ref([])
   const drawerPredecessors = ref([])
+  // 后继知识与前置对称展示：此前被并进 related，详情抽屉里看不出来
+  const drawerSuccessors = ref([])
   const drawerExpanded = ref(false)
 
   const pathRequest = useLatestRequest()
@@ -71,15 +73,29 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
       if (!pathRequest.isLatest(token) || ctxKey.value !== key) return
       graphNodes.value = graph.nodes || []
       graphEdges.value = graph.edges || []
-      masteredCache[key] = progress.mastered_kp_ids || []
       graphDataChecked.value = true
 
       // 已掌握 kp_id → 名称（recommendNext 入参需名称）
       const byId = new Map(graphNodes.value.map((n) => [String(n.id), n]))
       const nameToId = new Map(graphNodes.value.map((n) => [n.label, String(n.id)]))
-      const masteredNames = (progress.mastered_kp_ids || [])
-        .map((id) => byId.get(String(id))?.label)
-        .filter(Boolean)
+      // 重新抽取会整体更换 kp_id：优先按 kp_id 命中，命中不到再按后端存的
+      // 名字快照映射回同名新节点。否则「已掌握」会全部变成孤儿，
+      // 推荐路径也会把学过的知识点重新推一遍。
+      const records = (progress.records || []).filter((r) => r.status === 'MASTERED')
+      const learned = records.length
+        ? records
+        : (progress.mastered_kp_ids || []).map((id) => ({ kp_id: id }))
+      const effectiveIds = new Set()
+      const masteredNames = []
+      for (const r of learned) {
+        const id = byId.has(String(r.kp_id))
+          ? String(r.kp_id)
+          : nameToId.get(r.kp_name)
+        if (!id || effectiveIds.has(id)) continue
+        effectiveIds.add(id)
+        masteredNames.push(byId.get(id)?.label || r.kp_name)
+      }
+      masteredCache[key] = [...effectiveIds]
       // 推荐失败只影响推荐结果，不能连带清空已成功取回的图谱（否则总览/收藏归零）
       try {
         const res = await api.recommendNext(
@@ -222,11 +238,25 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
 
   function onNodeClick(node, info) {
     drawerNode.value = node
-    drawerRelated.value = [...(info?.successors || []), ...(info?.related || [])]
+    drawerSuccessors.value = info?.successors || []
+    drawerRelated.value = info?.related || []
     drawerPredecessors.value = info?.predecessors || []
     drawerExpanded.value = !!info?.expanded
     drawerVisible.value = true
   }
+
+  /** 图谱节点 → 下拉候选（学习路径面板用，避免用户手输名称对不上） */
+  const knowledgeOptions = computed(() =>
+    graphNodes.value.map((n) => ({ id: n.id, label: n.label, category: n.properties?.category || '' })),
+  )
+
+  /** 已掌握 kp_id → 名称（学习路径面板默认选中项） */
+  const masteredNames = computed(() => {
+    const byId = new Map(graphNodes.value.map((n) => [String(n.id), n.label]))
+    return (masteredCache[ctxKey.value] || [])
+      .map((id) => byId.get(String(id)))
+      .filter(Boolean)
+  })
 
   /** 基于当前文档图谱构建客户端一阶邻接（与 GraphCanvas.neighborInfo 同口径） */
   function neighborsOf(nodeId) {
@@ -458,6 +488,7 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     drawerNode.value = null
     drawerRelated.value = []
     drawerPredecessors.value = []
+    drawerSuccessors.value = []
     drawerExpanded.value = false
     if (key) {
       loadPathData()
@@ -487,7 +518,10 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     drawerNode,
     drawerRelated,
     drawerPredecessors,
+    drawerSuccessors,
     drawerExpanded,
+    knowledgeOptions,
+    masteredNames,
     drawerMastered,
     drawerFavorited,
     drawerLearningState,

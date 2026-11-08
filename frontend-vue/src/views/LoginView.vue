@@ -33,6 +33,8 @@
               type="primary"
               class="login-btn"
               :loading="loading"
+              :disabled="store.healthChecked && !store.backendOnline"
+              :title="store.healthChecked && !store.backendOnline ? '后端服务未连接，请先启动后端服务' : ''"
               @click="handleLogin"
             >
               {{ loading ? '登录中…' : '登 录' }}
@@ -132,6 +134,9 @@ async function handleLogin() {
 }
 
 onMounted(() => {
+  // 注册成功但自动登录失败时会带 ?username=… 跳过来，预填用户名省一次输入
+  const u = route.query.username
+  if (typeof u === 'string' && u) form.username = u
   store.checkHealth().catch(() => {})
 })
 </script>

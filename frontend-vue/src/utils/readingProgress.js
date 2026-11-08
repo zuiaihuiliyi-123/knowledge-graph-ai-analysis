@@ -61,6 +61,16 @@ function nowIso() {
 
 // ---------- 阅读进度 ----------
 
+/**
+ * 进度文案：滚到底时各浏览器算出的百分比可能是 99 而不是 100，
+ * 列表里标「已读完」、阅读器里却写「已读 99%」会让用户以为还没读完。
+ * 统一以 99 为「读完」阈值，两处共用这一份判断。
+ */
+export function readingProgressLabel(percent) {
+  const p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)))
+  return p >= 99 ? '已读完' : `已读 ${p}%`
+}
+
 /** 读取某文档的阅读进度；从未读过返回 null */
 export function getReadingProgress(docId) {
   if (docId == null) return null

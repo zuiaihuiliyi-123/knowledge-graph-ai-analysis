@@ -58,20 +58,22 @@ class LearningService:
         if not (0 <= mastery_level <= 100):
             return LearningService._fail(4001, "参数错误：mastery_level 应在 0-100 之间")
 
-        # 校验知识点存在（文档级），避免写入孤立学习记录。
+        # 校验知识点存在（文档级），避免写入孤立学习记录；顺便存名字快照，
+        # 重新抽取导致 kp_id 全换时还能按同名映射回新节点
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did, kp_id: $kp_id}) "
-            "RETURN n.kp_id AS kp_id",
+            "RETURN n.kp_id AS kp_id, n.name AS kp_name",
             {"cid": cid, "did": did, "kp_id": kp_id},
         )
         if not recs:
             return LearningService._fail(
                 4002, f"知识点不存在：course_id={cid}, document_id={did}, kp_id={kp_id}")
+        kp_name = recs[0].get("kp_name")
 
         record_id = sql_db.upsert_learning_record(
             user_id=current_user["user_id"], course_id=cid, document_id=did,
             kp_id=kp_id, status=status, mastery_level=mastery_level,
-            source="MANUAL", last_learned_at=_now(),
+            source="MANUAL", last_learned_at=_now(), kp_name=kp_name,
         )
         return LearningService._ok({
             "record_id": record_id,
@@ -100,6 +102,21 @@ class LearningService:
             return LearningService._fail(4001, "参数错误：kp_id 不能为空")
 
         deleted = sql_db.delete_learning_record(user_id, cid, did, kp_id)
+        if not deleted:
+            # 重新抽取会换掉 kp_id，前端是按「名字快照」显示为已掌握的：
+            # 学生点击取消掌握时带来的是新 kp_id，按名补删才不会「看起来成功、刷新又回来」。
+            # 这里只做兜底，Neo4j 不可用时保持原有 deleted=0 语义，不影响正常取消。
+            try:
+                recs = db.query(
+                    "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did, kp_id: $kp_id}) "
+                    "RETURN n.name AS kp_name",
+                    {"cid": cid, "did": did, "kp_id": kp_id},
+                )
+            except Exception:
+                recs = []
+            if recs:
+                deleted = sql_db.delete_learning_records_by_name(
+                    user_id, cid, did, recs[0].get("kp_name"))
         return LearningService._ok({"course_id": cid, "document_id": did,
                                     "kp_id": kp_id, "deleted": deleted})
 

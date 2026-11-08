@@ -3,8 +3,25 @@
     <template #header>
       <b><el-icon class="icon-gap" color="var(--color-primary)"><Search /></el-icon>前置知识查询</b>
     </template>
+    <p class="tip">选择一个知识点，查询它依赖的全部前置知识</p>
     <div class="btn-row">
-      <el-input v-model="prereqName" placeholder="知识点名称" style="max-width: 320px" />
+      <el-select
+        v-model="prereqName"
+        filterable
+        allow-create
+        default-first-option
+        clearable
+        placeholder="搜索或选择知识点"
+        style="max-width: 320px; width: 100%"
+        :no-data-text="knowledgeOptions.length ? '无匹配知识点' : '当前文档暂无知识点，可直接输入名称后回车'"
+      >
+        <el-option
+          v-for="o in knowledgeOptions"
+          :key="o.id ?? o.label"
+          :label="o.label"
+          :value="o.label"
+        />
+      </el-select>
       <el-button :loading="loading" @click="doQueryPrereqs">查询</el-button>
     </div>
     <template v-if="result && result.count">
@@ -37,6 +54,8 @@ const props = defineProps({
   ctxKey: { type: String, default: '' },
   courseId: { type: [String, Number], default: '' },
   documentId: { type: [String, Number], default: '' },
+  /** 当前文档图谱节点（{ id, label }），用于候选选择 */
+  knowledgeOptions: { type: Array, default: () => [] },
 })
 
 const prereqName = ref('')
@@ -45,8 +64,8 @@ const loading = ref(false)
 const request = useLatestRequest()
 
 async function doQueryPrereqs() {
-  if (!prereqName.value.trim()) {
-    ElMessage.warning('请输入知识点名称')
+  if (!String(prereqName.value || '').trim()) {
+    ElMessage.warning('请选择知识点')
     return
   }
   const key = props.ctxKey
@@ -55,7 +74,7 @@ async function doQueryPrereqs() {
   result.value = null
   try {
     const data = await api.getPrerequisites(
-      prereqName.value.trim(), props.courseId, props.documentId, { signal },
+      String(prereqName.value).trim(), props.courseId, props.documentId, { signal },
     )
     if (!request.isLatest(token) || props.ctxKey !== key) return
     result.value = data

@@ -41,7 +41,7 @@
               <span class="dsw-item-type">{{ d.file_type }}</span>
               <span v-if="sizeText(d.file_size)">{{ sizeText(d.file_size) }}</span>
               <span v-if="progressOf(d)" class="dsw-item-progress" :class="{ 'is-done': progressOf(d) >= 99 }">
-                {{ progressOf(d) >= 99 ? '已读完' : '已读 ' + progressOf(d) + '%' }}
+                {{ readingProgressLabel(progressOf(d)) }}
               </span>
             </span>
           </span>
@@ -62,7 +62,7 @@
  */
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { ArrowDown, Select } from '@element-plus/icons-vue'
-import { getReadingProgress } from '../../utils/readingProgress'
+import { getReadingProgress, readingProgressLabel } from '../../utils/readingProgress'
 
 const props = defineProps({
   title: { type: String, default: '' },

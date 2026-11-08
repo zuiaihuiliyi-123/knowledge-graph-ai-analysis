@@ -2,6 +2,18 @@
   <div class="profile-view">
     <PageHeader title="个人中心" desc="完善个人资料，资料会展示在你所加入课程的成员列表中" />
 
+    <!-- 页内快速导航：侧栏折叠时也能直接切到密码管理 / 停用账号 -->
+    <div class="profile-nav">
+      <el-button
+        v-for="s in NAV_ITEMS"
+        :key="s.key"
+        size="small"
+        :type="activeSection === s.key ? 'primary' : 'default'"
+        :plain="activeSection !== s.key"
+        @click="goSection(s.key)"
+      >{{ s.label }}</el-button>
+    </div>
+
     <!-- 基本资料（含头像） -->
     <div v-show="activeSection === 'basic'" class="panel">
       <el-card class="page-card" shadow="never">
@@ -205,18 +217,19 @@
       </el-card>
     </div>
 
-    <!-- 注销账号 -->
+    <!-- 停用账号（后端实际语义是 is_active=0，数据保留） -->
     <div v-show="activeSection === 'deactivate'" class="panel">
       <el-card class="page-card" shadow="never">
-        <el-divider content-position="left">注销账号</el-divider>
+        <el-divider content-position="left">停用账号</el-divider>
         <div class="danger-zone">
           <div class="danger-text">
-            <div class="danger-title">注销当前账号</div>
+            <div class="danger-title">停用当前账号</div>
             <div class="danger-desc">
-              注销后账号将被停用，无法再次登录，该操作不可撤销。你的历史学习数据仍会保留。
+              停用后账号将无法登录，该操作不可撤销。你的学习记录、收藏与课程数据都会保留；
+              如需彻底删除账号及数据，请联系管理员处理。
             </div>
           </div>
-          <el-button type="danger" @click="openDeactivate">注销账号</el-button>
+          <el-button type="danger" @click="openDeactivate">停用账号</el-button>
         </div>
       </el-card>
     </div>
@@ -257,12 +270,18 @@
       </div>
     </el-dialog>
 
-    <!-- 注销确认弹窗 -->
-    <el-dialog v-model="deactivateDialog" title="注销账号" width="420px" align-center>
+    <!-- 停用确认弹窗：密码 + 二次勾选，避免误触不可逆操作 -->
+    <el-dialog
+      v-model="deactivateDialog"
+      title="停用账号"
+      width="420px"
+      align-center
+      :close-on-click-modal="false"
+    >
       <div class="deactivate-body">
         <el-icon class="deactivate-warn"><WarningFilled /></el-icon>
         <p class="deactivate-tip">
-          注销后账号将无法登录，且该操作不可撤销。请输入登录密码以确认注销。
+          停用后账号将无法登录，且该操作不可撤销。数据会保留，如需恢复请联系管理员。
         </p>
         <el-input
           v-model="deactivateForm.password"
@@ -270,10 +289,18 @@
           show-password
           placeholder="请输入登录密码"
         />
+        <el-checkbox v-model="deactivateForm.ack" class="deactivate-ack">
+          我已知晓停用后无法登录，且该操作不可撤销
+        </el-checkbox>
       </div>
       <template #footer>
         <el-button :disabled="deactivating" @click="deactivateDialog = false">取消</el-button>
-        <el-button type="danger" :loading="deactivating" @click="confirmDeactivate">确认注销</el-button>
+        <el-button
+          type="danger"
+          :loading="deactivating"
+          :disabled="!deactivateForm.ack"
+          @click="confirmDeactivate"
+        >确认停用</el-button>
       </template>
     </el-dialog>
   </div>
@@ -295,10 +322,20 @@ const router = useRouter()
 // 菜单在最左侧应用导航栏（App.vue 侧栏）中的「个人中心」分组下，
 // 这里根据路由参数 tab 决定展示哪个面板
 const SECTIONS = ['basic', 'password', 'deactivate']
+const NAV_ITEMS = [
+  { key: 'basic', label: '基本资料' },
+  { key: 'password', label: '密码管理' },
+  { key: 'deactivate', label: '停用账号' },
+]
 const activeSection = computed(() => {
   const t = route.query.tab
   return SECTIONS.includes(t) ? t : 'basic'
 })
+
+function goSection(tab) {
+  if (activeSection.value === tab) return
+  router.replace({ path: '/profile', query: { tab } })
+}
 
 const isTeacher = computed(() => store.role === 'teacher')
 const isStudent = computed(() => store.role === 'student')
@@ -321,9 +358,9 @@ const avatarDialog = ref(false)
 const pwdForm = reactive({ old_password: '', new_password: '', confirm_password: '' })
 const changingPwd = ref(false)
 
-// 注销账号
+// 停用账号
 const deactivateDialog = ref(false)
-const deactivateForm = reactive({ password: '' })
+const deactivateForm = reactive({ password: '', ack: false })
 const deactivating = ref(false)
 
 const FIELDS = ['avatar_url', 'real_name', 'nickname', 'gender', 'school', 'college', 'bio',
@@ -450,20 +487,22 @@ function downloadAvatar() {
 // ---- 注销账号 ----
 function openDeactivate() {
   deactivateForm.password = ''
+  deactivateForm.ack = false
   deactivateDialog.value = true
 }
 
 async function confirmDeactivate() {
   if (!deactivateForm.password) { ElMessage.warning('请输入登录密码'); return }
+  if (!deactivateForm.ack) { ElMessage.warning('请先勾选确认项'); return }
   deactivating.value = true
   try {
     await api.deactivateAccount({ password: deactivateForm.password })
     deactivateDialog.value = false
-    ElMessage.success('账号已注销')
+    ElMessage.success('账号已停用')
     store.logout()
     router.push('/login')
   } catch (e) {
-    ElMessage.error(e?.message || '注销失败')
+    ElMessage.error(e?.message || '停用失败')
   } finally {
     deactivating.value = false
   }
@@ -475,6 +514,20 @@ onMounted(load)
 <style scoped>
 .profile-view {
   width: 100%;
+}
+
+/* 页内快速导航（侧栏折叠时的兜底入口） */
+.profile-nav {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+.deactivate-ack {
+  margin-top: var(--space-3);
+  white-space: normal;
+  height: auto;
+  align-items: flex-start;
 }
 
 /* 内容区收窄，避免基本资料横向铺得过开 */

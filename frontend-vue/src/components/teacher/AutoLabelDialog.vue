@@ -1,8 +1,12 @@
 <template>
+  <!-- 标注过程会真实写库：误点遮罩/按 Esc 关闭会让教师在不知情下离开，运行中一律不允许关闭 -->
   <el-dialog
     :model-value="modelValue"
     title="批量知识点自动标注"
     width="880px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="!loading"
+    :before-close="beforeClose"
     @update:model-value="emit('update:modelValue', $event)"
   >
     <div class="question-toolbar">
@@ -111,6 +115,15 @@ watch(() => props.modelValue, (visible) => {
   preview.value = null
   form.document_id = props.defaultDocumentId ? String(props.defaultDocumentId) : ''
 })
+
+/** 标注请求进行中不允许关闭（请求不会因此取消，关闭只会让结果无人看见） */
+function beforeClose(done) {
+  if (loading.value) {
+    ElMessage.warning('正在标注，请等待本次请求完成')
+    return
+  }
+  done()
+}
 
 /** apply=false 仅预览；apply=true 写入「建议分 ≥ 阈值且非仅关系推断」的题 */
 async function run(apply) {

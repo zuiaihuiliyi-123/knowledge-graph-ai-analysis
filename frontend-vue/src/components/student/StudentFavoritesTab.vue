@@ -19,6 +19,13 @@
       </div>
     </div>
 
+    <div v-if="ctxKey" class="fav-scope">
+      <span class="fav-scope-label">
+        当前学习资料{{ documentName ? `「${documentName}」` : '' }}的收藏
+      </span>
+      <span class="fav-scope-tip">收藏按学习资料分别保存，切换上方学习资料可查看其它资料的收藏</span>
+    </div>
+
     <div v-if="ctxKey" class="fav-count">
       共收藏 <b class="num">{{ favoriteIds.length }}</b> 个知识点
       <span v-if="orphanCount > 0" class="fav-orphan-tip">
@@ -96,6 +103,7 @@ import { categoryTagType } from '../../utils/graphStyle'
 
 const props = defineProps({
   ctxKey: { type: String, default: '' },
+  documentName: { type: String, default: '' },
   favoriteIds: { type: Array, default: () => [] },
   graphNodes: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
@@ -156,6 +164,16 @@ const favoriteList = computed(() => {
 }
 
 /* ===== 收藏夹 ===== */
+.fav-scope {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: var(--font-size-label);
+}
+.fav-scope-label { color: var(--color-text-regular); font-weight: var(--font-weight-semibold); }
+.fav-scope-tip { color: var(--color-text-muted); font-size: var(--font-size-caption); }
 .fav-count {
   margin: var(--space-3) 0 var(--space-2);
   font-size: var(--font-size-body);

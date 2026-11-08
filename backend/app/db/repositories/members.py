@@ -104,6 +104,22 @@ class MembersMixin:
             return cur.rowcount
 
 
+    def delete_membership(self, course_id: int, user_id: int) -> int:
+        """撤回申请：删除待审核的成员行（返回影响行数）。
+
+        只允许删除 pending 记录（条件写进 SQL，避免调用方先读后写产生竞态）。
+        删除而非置 removed：撤回后该课程应重新出现在「发现课程」里，
+        而 list_discover 会排除一切仍有成员行的课程。
+        """
+        with self._connect() as conn:
+            cur = conn.execute(
+                "DELETE FROM t_course_member "
+                "WHERE course_id = ? AND user_id = ? AND status = 'pending'",
+                (course_id, user_id),
+            )
+            conn.commit()
+            return cur.rowcount
+
     # 说明：按 kp 分组统计与「未挂知识点」计数统一走 count_questions_grouped_by_kp（关联表口径），
     # 不再另设 count_questions_grouped_by_kps / count_unlinked_questions 两个近似方法——
     # 一题多 kp 的明细由 get_question_kps_map() 提供，避免同一语义有多个入口。
