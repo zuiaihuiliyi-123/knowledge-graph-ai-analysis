@@ -5,6 +5,7 @@
 原实现引入的 passlib/bcrypt 未写入 requirements.txt 且 passlib 已停止维护，
 会导致后端 import 即崩溃（ModuleNotFoundError），故替换。
 """
+import math
 import threading
 import time
 
@@ -51,10 +52,25 @@ def _prune_failures(key: str, now: float) -> list[float]:
     return items
 
 
-def _is_login_locked(key: str) -> bool:
+def _failure_count(key: str) -> int:
+    """窗口内的连续失败次数（顺带清理过期记录）。"""
     now = time.monotonic()
     with _login_lock:
-        return len(_prune_failures(key, now)) >= _LOGIN_MAX_FAILURES
+        return len(_prune_failures(key, now))
+
+
+def _lock_remaining_seconds(key: str) -> int:
+    """仍处于锁定时返回还需等待的秒数，未锁定返回 0。
+
+    解锁时刻按窗口内**最早**一次失败推算：这样「已锁」和「还剩多久」来自同一份数据，
+    不会出现提示说锁了、实际却没锁（或反之）的矛盾。
+    """
+    now = time.monotonic()
+    with _login_lock:
+        items = _prune_failures(key, now)
+        if len(items) < _LOGIN_MAX_FAILURES:
+            return 0
+        return max(1, int(_LOGIN_WINDOW_SECONDS - (now - min(items))))
 
 
 def _record_login_failure(key: str) -> None:
@@ -103,10 +119,12 @@ def register(user: UserRegister):
 def login(user: UserLogin, request: Request):
     """用户登录，成功返回 JWT。连续失败 8 次锁定 10 分钟（按用户名 + 直连 IP）。"""
     login_key = _login_key(user.username, request)
-    if _is_login_locked(login_key):
+    waiting = _lock_remaining_seconds(login_key)
+    if waiting:
+        minutes = max(1, math.ceil(waiting / 60))
         return JSONResponse(
             status_code=429,
-            content=error(4290, "登录失败次数过多，请 10 分钟后再试"),
+            content=error(4290, f"登录失败次数过多，请 {minutes} 分钟后再试"),
         )
     result = AuthService.login(user.username, user.password, request)
     if result.get("ok"):
@@ -115,6 +133,14 @@ def login(user: UserLogin, request: Request):
         # 只把「用户名或密码错误」计入失败次数：停用账号、参数错误等不应
         # 继续累加，否则正常用户可能因一次误操作被锁 10 分钟。
         _record_login_failure(login_key)
+        # 明确告诉用户「还能试几次」：现场演示/答辩最怕不知道剩余次数就撞上锁定。
+        left = _LOGIN_MAX_FAILURES - _failure_count(login_key)
+        if left > 0:
+            result["message"] = f"{result.get('message') or '用户名或密码错误'}，还可尝试 {left} 次"
+        else:
+            result["message"] = (
+                f"用户名或密码错误，已连续失败 {_LOGIN_MAX_FAILURES} 次，账号锁定 10 分钟"
+            )
     return _reply(result)
 
 

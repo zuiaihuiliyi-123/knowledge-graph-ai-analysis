@@ -36,6 +36,11 @@ export const useAiChatStore = defineStore('aiChat', () => {
   // 当前学习资料名：写进消息标记，用于「切换资料后历史消息属于哪份资料」的分隔行
   const documentName = ref('')
 
+  // 等待时长（秒）：等待阶段显示「已等待 N 秒」，让用户知道系统在干活而不是卡住。
+  // 全局只开一个计时器，问答页与悬浮窗共用同一读数。
+  const elapsedSeconds = ref(0)
+  let elapsedTimer = null
+
   let abort = null
   // 上下文切换 / 切会话 / 新提问时自增：迟到的旧回调发现序号变了就丢弃
   let seq = 0
@@ -52,6 +57,18 @@ export const useAiChatStore = defineStore('aiChat', () => {
   }
   function createSession() {
     return { id: newId(), title: '', updatedAt: Date.now(), messages: [] }
+  }
+
+  /** 开始计时（提问那一刻）；重复调用会重置，避免上一次的读数漏到下一次 */
+  function startElapsed() {
+    stopElapsed()
+    elapsedTimer = setInterval(() => { elapsedSeconds.value += 1 }, 1000)
+  }
+
+  /** 停止计时并归零：等待结束后不再提示 */
+  function stopElapsed() {
+    if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null }
+    elapsedSeconds.value = 0
   }
   function storageKey(cid) {
     const id = cid === undefined ? courseId.value : cid
@@ -176,6 +193,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     seq++
     if (abort) { abort.abort(); abort = null }
     asking.value = false
+    stopElapsed()
     // 正在生成的那条占位消息要收尾：保留半成品，一个字都没有就留一句明确的中断说明，
     // 否则切回来会看到一条永远「正在生成…」的空气泡
     for (const s of sessions.value) {
@@ -296,10 +314,15 @@ export const useAiChatStore = defineStore('aiChat', () => {
     const bubble = reactive({
       mid: ++midSeq, role: 'ai', content: '', sources: [], error: false, errDetail: '',
       errorMessage: '', note: '', streaming: true, ...ctx, time: Date.now(),
+      // 等待阶段：retrieving（检索知识库）→ generating（已拿到来源，正在组织回答）。
+      // 首次建索引 / 改过知识点描述后重建向量时，检索这一步可能要好几秒，
+      // 只说「正在思考…」会让人以为卡死。
+      phase: 'retrieving',
     })
     session.messages.push(bubble)
     touch(session)
     asking.value = true
+    startElapsed()
     persist()
 
     const controller = new AbortController()
@@ -316,9 +339,12 @@ export const useAiChatStore = defineStore('aiChat', () => {
         if (mySeq !== seq) return // 上下文/会话已切换或新提问已接管，本次回答作废
         if (ev.event === 'sources') {
           bubble.sources = (ev.data?.sources || []).map(normalizeSource).slice(0, MAX_SOURCE_PER_MSG)
+          // 检索完成：从这里到首字之间是 LLM 生成，提示改口
+          bubble.phase = 'generating'
         } else if (ev.event === 'delta') {
           received += ev.data?.text || ''
           bubble.content = received
+          bubble.phase = 'generating'
         } else if (ev.event === 'done') {
           bubble.content = ev.data?.answer || received || '（无回答）'
           if (ev.data?.sources) {
@@ -390,7 +416,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
         bubble.errDetail = e2?.message || ''
       }
     } finally {
-      if (mySeq === seq) { asking.value = false; abort = null }
+      if (mySeq === seq) { asking.value = false; abort = null; stopElapsed() }
       touch(session)
       persist()
     }
@@ -432,6 +458,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     courseId,
     documentId,
     documentName,
+    elapsedSeconds,
     activeSession,
     sessionList,
     bindContext,

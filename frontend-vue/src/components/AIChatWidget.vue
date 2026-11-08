@@ -102,7 +102,8 @@
                 <div v-else class="ai-msg-text">{{ m.content }}</div>
                 <div v-if="m.role === 'ai' && m.streaming" class="ai-streaming">
                   <span class="ai-dot"></span>
-                  <span>{{ m.content ? '正在生成…' : '正在思考…' }}</span>
+                  <span>{{ phaseText(m) }}</span>
+                  <span v-if="elapsedSecs >= 3" class="ai-elapsed">已等待 {{ elapsedSecs }} 秒</span>
                 </div>
                 <!-- 结果不完整（截断 / 中断）时明确说明，不假装完整 -->
                 <div v-if="m.role === 'ai' && m.note && !m.streaming" class="ai-note">{{ m.note }}</div>
@@ -341,6 +342,17 @@ const lastStreaming = computed(() => {
   const last = messages.value[messages.value.length - 1]
   return !!(last && last.streaming)
 })
+
+// 等待秒数（超过 3 秒才显示）与阶段文案：检索 → 生成，两个入口口径一致
+const elapsedSecs = computed(() => (asking.value ? chat.elapsedSeconds : 0))
+function phaseText(m) {
+  if (m.content) return '正在输出回答…'
+  if (m.phase === 'generating') {
+    const n = (m.sources || []).length
+    return n ? `已命中 ${n} 个知识点，正在组织回答…` : '未命中知识点，正在基于通用知识回答…'
+  }
+  return '正在检索知识库…'
+}
 
 // 课程 / 学习资料上下文变化交给共享会话：切课程载入该课程历史，切文档只作废在途回答
 watch(effCourseId, (cid) => chat.bindContext(cid, effDocumentId.value), { immediate: true })
@@ -713,6 +725,11 @@ watch(() => messages.value.length, () => {
   margin-top: 6px;
   font-size: 12px;
   color: #9d98b5;
+}
+/* 已等待秒数：等太久才出现，避免每次问答都闪数字 */
+.ai-elapsed {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
 }
 
 /* 正在输入动画 */
