@@ -50,7 +50,9 @@ export function useDocumentList(courseId) {
             documents.value = []
             ElMessage.warning(`文档列表加载失败：${e.message}`)
           }
-          return []
+          // 静默轮询失败返回 null（=「这次没拿到列表」），调用方据此跳过比对，
+          // 不能返回空数组——那会被当成「所有文档都被删了」。
+          return silent ? null : []
         }
         return null
       } finally {

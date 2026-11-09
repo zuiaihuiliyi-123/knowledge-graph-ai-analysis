@@ -522,13 +522,20 @@ class DocumentService:
         if not perm["ok"]:
             return {"ok": False, "code": perm["code"], "message": perm["message"]}
 
-        # 4. 建记录 + 落盘
+        # 4. 内容去重：同课程已存在 sha256 相同的文件时直接拒绝，
+        #    与批量上传（process_batch）口径一致——同一份内容不建第二遍图。
+        digest = _sha256(content)
+        existing = sql_db.get_document_by_sha256(course_id, digest)
+        if existing:
+            return {"ok": False, "code": 4009, "message": "文件已存在，请勿重复上传"}
+
+        # 5. 建记录 + 落盘
         persisted = await DocumentService._persist_document(
             course_id, teacher_id, checked["file_name"], checked["file_type"], content)
         if not persisted["ok"]:
             return persisted
 
-        # 5. 处理：同步（默认）或交给后台任务
+        # 6. 处理：同步（默认）或交给后台任务
         doc_id = persisted["document_id"]
         if background:
             # 异步模式：落库后立即返回，与批量上传共用同一条后台任务入口
@@ -596,7 +603,7 @@ class DocumentService:
                 items.append({"file_name": checked["file_name"], "ok": True,
                               "duplicate": True,
                               "document_id": batch_hashes[digest],
-                              "message": "本次提交中内容重复，已跳过"})
+                              "message": "文件已存在，请勿重复上传"})
                 duplicates += 1
                 continue
 
@@ -608,7 +615,7 @@ class DocumentService:
                               "duplicate": True,
                               "document_id": existing["doc_id"],
                               "status": "existing",
-                              "message": "相同文件已存在于本课程，已跳过重复建图"})
+                              "message": "文件已存在，请勿重复上传"})
                 duplicates += 1
                 continue
 
