@@ -14,6 +14,8 @@ export const api = {
   login: (data) => request.post('/api/auth/login', data),
   register: (data) => request.post('/api/auth/register', data),
   changePassword: (data) => request.post('/api/auth/change-password', data),
+  /** 登出：后端递增 token_version，使已签发 token 全部失效 */
+  logout: () => request.post('/api/auth/logout'),
   /** 注销账号（软停用：置 is_active=0，需校验当前密码） */
   deactivateAccount: (data) => request.post('/api/auth/deactivate', data),
 

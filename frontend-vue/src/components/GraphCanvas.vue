@@ -14,8 +14,13 @@
 
     <div ref="containerRef" class="graph-container"></div>
 
-    <!-- 筛选 / 聚焦控制（右上，轻量悬浮工具条） -->
+    <!-- 筛选 / 聚焦 / 缩放控制（右上，轻量悬浮工具条） -->
     <div class="graph-controls">
+      <el-button-group class="zoom-group">
+        <el-button size="small" :icon="ZoomIn" title="放大" aria-label="放大" @click="zoomIn" />
+        <el-button size="small" :icon="ZoomOut" title="缩小" aria-label="缩小" @click="zoomOut" />
+        <el-button size="small" :icon="Aim" title="适配视图" aria-label="适配视图" @click="fitView" />
+      </el-button-group>
       <el-popover trigger="click" width="236" placement="bottom-end">
         <template #reference>
           <el-button size="small" :icon="Filter">筛选</el-button>
@@ -91,9 +96,17 @@
       </div>
     </div>
 
-    <!-- 空状态（无数据 / 加载失败） -->
+    <!-- 加载失败：与"暂无数据"区分开，给出原因与重试 -->
+    <div v-if="!loading && loadFailed" class="graph-error">
+      <el-result icon="error" title="图谱加载失败" :sub-title="loadError || '请稍后重试'">
+        <template #extra>
+          <el-button type="primary" @click="loadGraph">重试</el-button>
+        </template>
+      </el-result>
+    </div>
+    <!-- 空状态（无数据） -->
     <el-empty
-      v-if="!loading && empty"
+      v-else-if="!loading && empty"
       :description="emptyText"
       :image-size="90"
       class="graph-empty"
@@ -105,6 +118,10 @@
       :image-size="90"
       class="graph-empty"
     />
+    <!-- 节点数触达上限：明确告知"图不完整"，而不是把截断后的数量当总数 -->
+    <div v-if="!loading && !loadFailed && truncated" class="graph-truncated">
+      当前仅加载前 {{ NODE_LIMIT }} 个节点，图谱可能不完整
+    </div>
     <!-- 加载状态 -->
     <div v-if="loading" class="graph-loading">
       <div class="graph-loading-card">
@@ -118,7 +135,7 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Graph } from '@antv/g6'
-import { Filter, ArrowDown, Loading, WarningFilled } from '@element-plus/icons-vue'
+import { Filter, ArrowDown, Loading, WarningFilled, ZoomIn, ZoomOut, Aim } from '@element-plus/icons-vue'
 import { api } from '../api'
 import {
   NODE_TYPES,
@@ -162,6 +179,10 @@ const containerRef = ref(null)
 const loading = ref(false)
 const empty = ref(false)
 const emptyText = ref('暂无图谱数据')
+const loadFailed = ref(false)
+const loadError = ref('')
+const truncated = ref(false)
+const NODE_LIMIT = 800
 let graph = null
 // 后端原始节点 / 边数据。刻意保留普通变量（G6 渲染与多处读取都直接用它们），
 // 但它们**不是响应式的**，而 coreIds / neighborMap / highlightForceIds 是 computed：
@@ -332,7 +353,7 @@ const visibleEmpty = computed(
 )
 
 // 是否被后端 LIMIT 截断：图太大时只取回前 N 个，必须让用户知道，而不是把截断当完整图谱
-const truncated = ref(false)
+// （truncated 的声明在文件上方，紧邻 NODE_LIMIT）
 const totalNodes = ref(0)
 const loadedNodeCount = ref(0)
 
@@ -347,6 +368,9 @@ async function loadGraph() {
   if (!props.courseId || !props.documentId) {
     empty.value = true
     emptyText.value = '请先选择课程和学习资料'
+    loadFailed.value = false
+    loadError.value = ''
+    truncated.value = false
     rawNodes = []
     rawEdges = []
     truncated.value = false
@@ -360,8 +384,11 @@ async function loadGraph() {
   }
   loading.value = true
   empty.value = false
+  loadFailed.value = false
+  loadError.value = ''
+  truncated.value = false
   try {
-    const data = await api.getGraphV1(props.courseId, props.documentId, { limit: 800 })
+    const data = await api.getGraphV1(props.courseId, props.documentId, { limit: NODE_LIMIT })
     if (token !== loadToken) return   // 已有更新的加载请求，本次结果作废（不要覆盖画布）
     rawNodes = data.nodes || []
     rawEdges = data.edges || []
@@ -378,8 +405,14 @@ async function loadGraph() {
     centerOnPath()
   } catch (e) {
     if (token !== loadToken) return
-    empty.value = true
-    emptyText.value = `图谱加载失败：${e.message}`
+    // 加载失败不再伪装成"暂无数据"：清空画布，展示错误卡片与重试入口
+    loadFailed.value = true
+    loadError.value = e?.message || '请检查网络或稍后重试'
+    truncated.value = false
+    empty.value = false
+    rawNodes = []
+    rawEdges = []
+    dataVersion.value++
     clearCanvas()
   } finally {
     if (token === loadToken) loading.value = false   // 作废的请求不许关掉新请求的加载态
@@ -885,6 +918,14 @@ function fitView() {
   if (graph) graph.fitView()
 }
 
+function zoomIn() {
+  if (graph) graph.zoomBy(1.2, { duration: 160 })
+}
+
+function zoomOut() {
+  if (graph) graph.zoomBy(1 / 1.2, { duration: 160 })
+}
+
 function clearFocus() {
   if (!focusedId.value) return
   focusedId.value = null
@@ -898,6 +939,8 @@ function clearFocus() {
 defineExpose({
   refresh: loadGraph,
   fitView,
+  zoomIn,
+  zoomOut,
   focusNode,
   selectNode,
   clearFocus,
@@ -1243,6 +1286,55 @@ function centerOnSearch() {
   justify-content: center;
   z-index: 5;
   pointer-events: none;
+}
+
+/* 加载中禁止拖动画布，避免在空画布上误操作 */
+.graph-loading {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* 加载失败：可点击重试，因此需要接收指针事件 */
+.graph-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.72);
+}
+.graph-error :deep(.el-result) {
+  padding: var(--space-6) var(--space-8);
+  background: #fff;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hover);
+}
+
+/* 节点数触达上限提示 */
+.graph-truncated {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 6;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #8a5a00;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.zoom-group {
+  display: flex;
+}
+.zoom-group :deep(.el-button) {
+  flex: 1;
+  width: auto;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 /* 空状态：居中浮层卡片（显示条件 v-if 不变，仅视觉） */

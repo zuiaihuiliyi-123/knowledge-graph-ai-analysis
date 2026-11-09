@@ -15,7 +15,7 @@
 而 `require_teacher` 恰是题库/上传/管课这类写操作的唯一闸门。
 """
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from .config import settings
@@ -25,9 +25,21 @@ from .user_state import load_user_state
 # auto_error=False：无 Authorization 头时由 get_current_user 统一返回 401，而非 FastAPI 默认的 403
 security = HTTPBearer(auto_error=False)
 
+# 首次登录强制改密期间仍允许访问的端点（改密本身、注销、个人资料、邀请预览/接受）。
+# 路径按前缀匹配，覆盖 /api/v1/profile 及其子路径。
+_MUST_CHANGE_ALLOWED_PREFIXES = (
+    "/api/auth/change-password",
+    "/api/auth/deactivate",
+    "/api/v1/profile",
+    "/api/v1/invites",
+)
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    """校验 JWT 并返回当前用户 {user_id:int, username:str, role:str}；失败抛 401"""
+
+def get_current_user(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> dict:
+    """校验 JWT + 账号态，返回当前用户 {user_id:int, username:str, role:str}；失败抛 401/403"""
     if credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="未登录或缺少凭证")
 
@@ -56,6 +68,26 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     if not state["is_active"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="该账号已被停用，请重新登录")
+
+    # token_version 不一致 = 改密 / 禁用 / 角色变更 / 主动登出后签发的旧 token。
+    # 旧 token 没有 ver 声明时按 0 处理，保证升级前的正常登录态不被误杀。
+    try:
+        token_version = int(payload.get("ver", 0))
+    except (TypeError, ValueError):
+        token_version = 0
+    if token_version != int(state.get("token_version") or 0):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="登录状态已失效，请重新登录")
+
+    # 后台强制改密：只看前端路由守卫是不够的——直接调用 API 就能绕过。
+    # 改密 / 注销 / 个人资料 / 邀请预览属于改密期间的必要操作，放行。
+    if state.get("must_change_password"):
+        path = request.url.path
+        if not any(path.startswith(p) for p in _MUST_CHANGE_ALLOWED_PREFIXES):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="请先修改初始密码后再使用其他功能",
+            )
 
     return {
         "user_id": user_id,

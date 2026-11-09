@@ -248,6 +248,7 @@ import { Notebook, CircleCheck, Hide, Box, WarningFilled } from '@element-plus/i
 import PageHeader from '../../components/PageHeader.vue'
 import MetricTile from '../../components/admin/MetricTile.vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 import {
   bizLabel, bizTagType, govLabel, govTagType, governanceActionDisabled,
   visibleToStudents,
@@ -272,7 +273,7 @@ const transferVisible = ref(false)
 const govForm = reactive({ note: '' })
 const transferForm = reactive({ teacher_id: null })
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 const fmtDate = (t) => (t ? String(t).slice(0, 10) : '—')
 const memberRoleLabel = (r) =>
   ({ owner: '创建者', teacher: '协作教师', student: '学生', assistant: '助教' }[r] || r || '—')

@@ -289,6 +289,7 @@ import MyCourseGrid from '../components/course/MyCourseGrid.vue'
 import CreateCourseDialog from '../components/course/CreateCourseDialog.vue'
 import CourseSettingsDialog from '../components/course/CourseSettingsDialog.vue'
 import { api } from '../api'
+import { formatDateTime } from '../utils/format'
 import { useAppStore } from '../stores/app'
 
 const store = useAppStore()
@@ -340,7 +341,7 @@ const JOIN_MODE = {
 }
 const joinModeText = (m) => (JOIN_MODE[m] || JOIN_MODE.approval).text
 const joinModeType = (m) => (JOIN_MODE[m] || JOIN_MODE.approval).type
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 
 /** 拉取「申请中 / 未通过」的课程（my_status 由后端在 /courses/my 中返回，pending 状态同时含被拒绝） */
 async function loadPending() {

@@ -157,7 +157,7 @@
                 {{ m.display.preview }}
               </span>
             </div>
-            <div v-else class="dkp-msg-body">{{ m.text }}</div>
+            <div v-else class="dkp-msg-body is-md" v-html="renderMarkdown(m.text)"></div>
             <!-- 上下文被截断时明确告知：否则用户以为 AI 读的是全文 -->
             <div v-if="m.clipped" class="dkp-clip-note">
               本次仅发送正文前 {{ MAX_CONTEXT }} 字（当前内容共 {{ m.rawLen }} 字），超出部分 AI 未读到
@@ -340,6 +340,7 @@ import {
   DocumentCopy, EditPen, Location, MagicStick, Notebook, Search, Select, Share, Star, StarFilled,
 } from '@element-plus/icons-vue'
 import { api } from '../../api'
+import { renderMarkdown } from '../../utils/markdown'
 import { addNote, deleteNote, listNotes } from '../../utils/studyNotes'
 import { isStudentUser } from '../../utils/userRole'
 
@@ -1179,6 +1180,63 @@ defineExpose({ runAction, askWithContext, saveSelectionNote, hasChat })
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+}
+/* AI 回答走 Markdown（renderMarkdown 已做 HTML 转义），需要恢复块级排版 */
+.dkp-msg-body.is-md {
+  white-space: normal;
+}
+.dkp-msg-body.is-md :deep(p) {
+  margin: 0 0 6px;
+}
+.dkp-msg-body.is-md :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.dkp-msg-body.is-md :deep(ul),
+.dkp-msg-body.is-md :deep(ol) {
+  margin: 4px 0 6px;
+  padding-left: 18px;
+}
+.dkp-msg-body.is-md :deep(li) {
+  margin: 2px 0;
+}
+.dkp-msg-body.is-md :deep(code) {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(31, 45, 61, 0.08);
+  font-size: 12px;
+}
+.dkp-msg-body.is-md :deep(pre) {
+  margin: 6px 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #1f2430;
+  color: #e6e9f0;
+  overflow-x: auto;
+}
+.dkp-msg-body.is-md :deep(pre code) {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+.dkp-msg-body.is-md :deep(strong) {
+  font-weight: 600;
+}
+.dkp-msg-body.is-md :deep(a) {
+  color: #4f6ef7;
+}
+.dkp-msg-body.is-md :deep(h1),
+.dkp-msg-body.is-md :deep(h2),
+.dkp-msg-body.is-md :deep(h3),
+.dkp-msg-body.is-md :deep(h4) {
+  margin: 6px 0 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.dkp-msg-body.is-md :deep(blockquote) {
+  margin: 4px 0;
+  padding-left: 8px;
+  border-left: 3px solid #d9dee8;
+  color: #606266;
 }
 .dkp-msg.is-user .dkp-msg-body {
   background: #4f6ef7;

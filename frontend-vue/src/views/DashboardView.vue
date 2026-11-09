@@ -17,6 +17,14 @@
       </div>
     </div>
 
+    <!-- 数据加载失败：明确提示 + 重试，而不是把 KPI 全渲染成 0 -->
+    <el-alert v-if="statsError" type="error" show-icon :closable="false" class="dash-error">
+      <div class="dash-error-body">
+        <span>数据加载失败：{{ statsError }}</span>
+        <el-button size="small" type="primary" plain @click="refreshStats">重试</el-button>
+      </div>
+    </el-alert>
+
     <!-- 核心指标 -->
     <div class="stats-row" v-loading="loading">
       <div
@@ -35,9 +43,9 @@
       </div>
     </div>
 
-    <!-- 课程图谱建设一览 + 平台数据构成 -->
+    <!-- 课程图谱建设一览 + 快速入口：入口放在首屏，教师进来第一步不用先往下滚 -->
     <el-row :gutter="14" class="chart-row" v-loading="loading">
-      <el-col :xs="24" :md="16">
+      <el-col :xs="24" :md="12">
         <div class="chart-card">
           <div class="chart-title">
             <span class="title-chip chip-blue"><el-icon :size="13"><Notebook /></el-icon></span>
@@ -66,30 +74,6 @@
           </div>
         </div>
       </el-col>
-      <el-col :xs="24" :md="8">
-        <div class="chart-card">
-          <div class="chart-title">
-            <span class="title-chip chip-violet"><el-icon :size="13"><DataAnalysis /></el-icon></span>
-            平台数据构成
-            <span class="chart-extra">知识点 / 关系 / 文档</span>
-          </div>
-          <div ref="donutChartRef" class="chart-body"></div>
-        </div>
-      </el-col>
-    </el-row>
-
-    <!-- 关系类型分布 + 快速入口 -->
-    <el-row :gutter="14" class="chart-row" v-loading="loading">
-      <el-col :xs="24" :md="12">
-        <div class="chart-card">
-          <div class="chart-title">
-            <span class="title-chip chip-pink"><el-icon :size="13"><Connection /></el-icon></span>
-            关系类型分布
-            <span class="chart-extra">共 {{ fmt(stats.edge_count) }} 条</span>
-          </div>
-          <div ref="relChartRef" class="chart-body"></div>
-        </div>
-      </el-col>
       <el-col :xs="24" :md="12">
         <div class="chart-card">
           <div class="chart-title">
@@ -113,6 +97,30 @@
         </div>
       </el-col>
     </el-row>
+
+    <!-- 平台数据构成 + 关系类型分布 -->
+    <el-row :gutter="14" class="chart-row" v-loading="loading">
+      <el-col :xs="24" :md="12">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span class="title-chip chip-violet"><el-icon :size="13"><DataAnalysis /></el-icon></span>
+            平台数据构成
+            <span class="chart-extra">知识点 / 关系 / 文档</span>
+          </div>
+          <div ref="donutChartRef" class="chart-body"></div>
+        </div>
+      </el-col>
+      <el-col :xs="24" :md="12">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span class="title-chip chip-pink"><el-icon :size="13"><Connection /></el-icon></span>
+            关系类型分布
+            <span class="chart-extra">共 {{ fmt(stats.edge_count) }} 条</span>
+          </div>
+          <div ref="relChartRef" class="chart-body"></div>
+        </div>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -120,7 +128,6 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
-import { ElMessage } from 'element-plus'
 import {
   DataAnalysis, Aim, Connection, Compass, ArrowRight, Search,
   Collection, Document, User, UserFilled, Upload, Notebook,
@@ -151,6 +158,7 @@ const defaultStats = () => ({
 
 const stats = ref(defaultStats())
 const loading = ref(true)
+const statsError = ref('')
 
 const fmt = (n) => Number(n || 0).toLocaleString('zh-CN')
 
@@ -220,15 +228,30 @@ function emptyGraphic() {
 
 async function fetchStats() {
   loading.value = true
+  statsError.value = ''
   try {
     const data = await api.getDashboardStats()
     stats.value = { ...defaultStats(), ...data }
   } catch (e) {
-    ElMessage.warning(`数据总览加载失败：${e.message}`)
-    stats.value = defaultStats()
+    // 保留上一次成功的数据（首屏则为空），由页面顶部错误条提供重试入口。
+    // 旧行为把 stats 清零，视觉上等同于"平台数据被清空"，极易误导。
+    statsError.value = e?.message || '请稍后重试'
   } finally {
     loading.value = false
   }
+}
+
+/** 重试：重新取数后再重建图表（chart 实例仍指向旧数据，必须 dispose 后重init） */
+async function refreshStats() {
+  await fetchStats()
+  if (statsError.value) return
+  await nextTick()
+  donutChart?.dispose()
+  relChart?.dispose()
+  donutChart = null
+  relChart = null
+  initDonutChart()
+  initRelationChart()
 }
 
 const AXIS_LABEL = '#8590a8'
@@ -335,10 +358,7 @@ function handleResize() {
 }
 
 onMounted(async () => {
-  await fetchStats()
-  await nextTick()
-  initDonutChart()
-  initRelationChart()
+  await refreshStats()
   window.addEventListener('resize', handleResize)
 })
 
@@ -450,6 +470,17 @@ onBeforeUnmount(() => {
 }
 
 /* ===== KPI 卡 ===== */
+.dash-error {
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+}
+.dash-error-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .stats-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -700,13 +731,16 @@ onBeforeUnmount(() => {
   margin-bottom: 2px;
 }
 .tile-label { font-size: 14px; font-weight: 700; }
+/* 卡片改成半宽后说明文字会变窄：允许两行再截断，避免「可就地切换编辑…」这种断句 */
 .tile-desc {
   font-size: 11.5px;
   color: rgba(255, 255, 255, .85);
-  white-space: nowrap;
+  max-width: 92%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 86%;
+  line-height: 1.35;
 }
 .tile-arrow {
   position: absolute;

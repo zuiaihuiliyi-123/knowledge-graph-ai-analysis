@@ -80,8 +80,8 @@
         </div>
       </div>
       <div class="form-status">
-        <span class="status-dot" :class="store.backendOnline ? 'on' : 'off'" />
-        {{ store.backendOnline ? '后端服务在线，可正常注册' : '后端服务未连接，请先启动后端服务' }}
+        <span class="status-dot" :class="statusClass" />
+        {{ statusText }}
       </div>
     </div>
 
@@ -90,7 +90,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, InfoFilled, Key } from '@element-plus/icons-vue'
@@ -99,19 +99,24 @@ import AuthBrandPanel from '../components/AuthBrandPanel.vue'
 import BackendStatusCard from '../components/BackendStatusCard.vue'
 import BrandMark from '../components/BrandMark.vue'
 
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 const store = useAppStore()
-
-/** 路由守卫拦截未登录访问时会带 ?redirect=…；只接受站内相对路径，防开放重定向 */
-function resolveRedirect() {
-  const r = route.query.redirect
-  return typeof r === 'string' && r.startsWith('/') && !r.startsWith('//') ? r : ''
-}
 
 const formRef = ref(null)
 const loading = ref(false)
 const form = reactive({ username: '', password: '', confirm: '', role: 'student', teacherInviteCode: '' })
+
+const statusClass = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return 'checking'
+  return store.backendOnline ? 'on' : 'off'
+})
+const statusText = computed(() => {
+  if (store.healthChecking || !store.healthChecked) return '正在检测后端服务…'
+  return store.backendOnline
+    ? '后端服务在线，可正常注册'
+    : '服务暂时不可用，请稍后重试或联系管理员'
+})
 
 const rules = {
   username: [
@@ -148,6 +153,16 @@ const rules = {
   ],
 }
 
+function safeRedirect() {
+  const raw = route.query.redirect
+  const target = Array.isArray(raw) ? raw[0] : raw
+  // 只接受站内绝对路径，避免被构造成 //evil.com 之类的开放重定向
+  if (typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')) {
+    return target
+  }
+  return '/course-center?tab=mine'
+}
+
 async function handleRegister() {
   if (!formRef.value) return
   try {
@@ -177,9 +192,8 @@ async function handleRegister() {
   // 第二步：自动登录。失败时账号已经创建成功，只需引导去登录页并带上用户名
   try {
     await store.login(username, form.password)
-    // 邀请链接等被路由守卫拦截的页面：注册并登录后回到原目标
-    const redirect = resolveRedirect()
-    router.push(redirect || '/course-center')
+    // 邀请链接等被路由守卫拦截的页面：注册并登录后回到原目标（只接受站内路径）
+    router.replace(safeRedirect())
   } catch (e) {
     ElMessage.warning(
       `注册成功，但自动登录失败${e?.message ? `（${e.message}）` : ''}，请使用刚注册的账号手动登录`,
@@ -277,6 +291,15 @@ onMounted(() => {
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 .status-dot.on { background: #18b87a; box-shadow: 0 0 8px rgba(24,184,122,.7); }
 .status-dot.off { background: #f5475d; box-shadow: 0 0 8px rgba(245,71,93,.6); }
+.status-dot.checking {
+  background: #f0a020;
+  box-shadow: 0 0 8px rgba(240,160,32,.6);
+  animation: kg-status-pulse 1.2s ease-in-out infinite;
+}
+@keyframes kg-status-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
 
 /* ============ 响应式 ============ */
 @media (max-width: 960px) {

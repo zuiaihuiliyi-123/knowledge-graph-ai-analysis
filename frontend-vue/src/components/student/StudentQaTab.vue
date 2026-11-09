@@ -83,9 +83,11 @@
                   </el-button>
                 </div>
                 <div v-else class="turn-text md" v-html="renderMarkdown(m.content)"></div>
-                <!-- 流式生成中：正文还在增长时的轻提示 -->
+                <!-- 流式生成中：分阶段说明（检索 → 生成），长时间等待才显示秒数 -->
                 <div v-if="m.streaming" class="msg-streaming">
-                  {{ m.content ? '正在生成…' : '正在思考…' }}
+                  <span class="ms-dot"></span>
+                  <span>{{ phaseText(m) }}</span>
+                  <span v-if="elapsedSecs >= 3" class="ms-time">已等待 {{ elapsedSecs }} 秒</span>
                 </div>
                 <!-- 生成结束但结果不完整（截断 / 中断）：明确说明，不假装完整 -->
                 <div v-if="m.note && !m.streaming" class="msg-note">{{ m.note }}</div>
@@ -223,6 +225,8 @@ const props = defineProps({
   courseId: { type: [String, Number], default: '' },
   documentId: { type: [String, Number], default: '' },
   courseName: { type: String, default: '' },
+  // 当前学习资料名：标题栏显示、并随消息记录，用于「同一课程切换资料」的分隔说明
+  documentName: { type: String, default: '' },
   ctxKey: { type: String, default: '' },
   favoriteIds: { type: Array, default: () => [] },
 })
@@ -253,6 +257,23 @@ const lastStreaming = computed(() => {
   const last = messages.value[messages.value.length - 1]
   return !!(last && last.streaming)
 })
+
+// 等待秒数（超过 3 秒才显示，避免短问答闪一下数字）
+const elapsedSecs = computed(() => (asking.value ? chat.elapsedSeconds : 0))
+
+/**
+ * 等待中的阶段说明。
+ * 后端是「先检索知识库（embedding + 余弦排序 + 回查 Neo4j），再交给 LLM 生成」，
+ * 两段耗时量级差很多（首次建索引可达数秒），混成一句「正在思考」会让人以为卡死。
+ */
+function phaseText(m) {
+  if (m.content) return '正在输出回答…'
+  if (m.phase === 'generating') {
+    const n = (m.sources || []).length
+    return n ? `已命中 ${n} 个知识点，正在组织回答…` : '未命中知识点，正在基于通用知识回答…'
+  }
+  return '正在检索知识库…'
+}
 
 /** 相邻两条消息来自不同的学习资料时，中间插一条分隔说明 */
 function showCtxDivider(index) {
@@ -596,7 +617,7 @@ function relativeTime(t) {
   color: var(--color-text-muted);
 }
 .cite-preview-more-btn { padding: 0; }
-/* 流式生成中：正文还在增长时的轻提示 */
+/* 流式生成中：分阶段说明（检索 → 生成） */
 .msg-streaming {
   display: flex;
   align-items: center;
@@ -604,6 +625,24 @@ function relativeTime(t) {
   margin-top: 6px;
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
+}
+/* 呼吸点：只做「在动」的暗示，不做花哨动画 */
+.ms-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  animation: ms-pulse 1.2s ease-in-out infinite;
+}
+@keyframes ms-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 0.9; transform: scale(1); }
+}
+.ms-time {
+  color: var(--color-text-muted);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
 }
 /* 结果不完整（截断 / 中断）的说明：警告色，但不打断阅读 */
 .msg-note {

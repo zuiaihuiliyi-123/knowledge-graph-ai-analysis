@@ -3,6 +3,8 @@ import { useAppStore } from '../stores/app'
 import { Close, CircleCheckFilled, WarningFilled, Loading } from '@element-plus/icons-vue'
 
 const store = useAppStore()
+// 开发命令只在开发环境显示；生产/演示包给终端用户看启动命令只会造成困惑
+const isDev = import.meta.env.DEV
 </script>
 
 <template>
@@ -20,13 +22,15 @@ const store = useAppStore()
       </div>
       <div class="status-meta">
         <div class="status-title">
-          {{ store.backendOnline ? '后端服务在线' : store.healthChecked ? '后端服务离线' : '检查后端服务…' }}
+          {{ store.backendOnline ? '后端服务在线' : store.healthChecked ? '服务暂时不可用' : '检查后端服务…' }}
         </div>
         <div class="status-desc">
           {{
             store.backendOnline
-              ? '所有功能可正常使用'
-              : '请启动后端：python -m uvicorn app.main:app --reload'
+              ? '服务已连接'
+              : store.healthChecked
+                ? (isDev ? '请启动后端：python -m uvicorn app.main:app --reload' : '请稍后重试或联系管理员')
+                : '正在检测服务状态…'
           }}
         </div>
       </div>

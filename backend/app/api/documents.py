@@ -28,6 +28,12 @@ def _coerce_int(value):
         return None
 
 
+def _too_large(file: UploadFile) -> bool:
+    """按 UploadFile.size 提前拦截超限文件，避免先读进内存再发现超限。"""
+    size = getattr(file, "size", None)
+    return size is not None and size > settings.MAX_UPLOAD_SIZE
+
+
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(..., description="上传的文档文件（PDF/TXT/DOCX/MD）"),
@@ -44,12 +50,15 @@ async def upload_document(
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
-    # 先看 Content-Length/分片解析得到的大小，超限直接拒绝，不把整个文件读进内存；
-    # 再以 read(limit+1) 兜底（file.size 在部分客户端/代理下可能为 None）。
-    max_size = settings.MAX_UPLOAD_SIZE
-    if file.size is not None and file.size > max_size:
-        return error(1002, f"文件大小超限，最大 {max_size // 1024 // 1024}MB")
-    content = await file.read(max_size + 1)
+    # 先按 file.size 拦截超限，不把整个文件读进内存；
+    # 再以 read(limit+1) 兜底（file.size 在部分客户端/代理下可能为 None），
+    # 真超限时由 DocumentService 对 len(content) 的校验拒绝。
+    if _too_large(file):
+        return error(
+            1002,
+            f"文件大小超限，最大 {settings.MAX_UPLOAD_SIZE // 1024 // 1024}MB",
+        )
+    content = await file.read(settings.MAX_UPLOAD_SIZE + 1)
     result = await DocumentService.process_upload(
         content=content,
         filename=file.filename or "未命名",
@@ -77,6 +86,15 @@ async def batch_upload_documents(
     cid = _coerce_int(course_id)
     if cid is None:
         return error(4001, "参数错误：course_id 必须为整数")
+    if len(files) > settings.MAX_BATCH_FILES:
+        return error(1001, f"单次最多上传 {settings.MAX_BATCH_FILES} 个文件")
+    for f in files:
+        if _too_large(f):
+            return error(
+                1002,
+                f"文件「{f.filename or '未命名'}」大小超限，单文件最大 "
+                f"{settings.MAX_UPLOAD_SIZE // 1024 // 1024}MB",
+            )
     result = await DocumentService.process_batch(files, cid, current_user["user_id"])
     if not result["ok"]:
         return error(result["code"], result["message"])

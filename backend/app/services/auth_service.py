@@ -30,11 +30,16 @@ class AuthService:
 
     @staticmethod
     def issue_token(user: dict) -> str:
-        """签发 HS256 JWT，载荷含 user_id/username/role，有效期 24 小时。"""
+        """签发 HS256 JWT，载荷含 user_id/username/role/ver，有效期 24 小时。
+
+        ver 用于服务端吊销：改密 / 禁用 / 改角色 / 登出时 t_user.token_version +1，
+        旧 token 的 ver 与之不一致，get_current_user 会直接拒绝。
+        """
         payload = {
             "sub": str(user["user_id"]),
             "username": user["username"],
             "role": user["role"],
+            "ver": int(user.get("token_version") or 0),
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24),
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
@@ -47,10 +52,15 @@ class AuthService:
         username = (username or "").strip()
         if not username:
             return AuthService._fail(1001, "用户名不能为空")
+        if not (3 <= len(username) <= 20):
+            return AuthService._fail(1001, "用户名长度需在 3-20 个字符之间")
         if username.startswith(ARCHIVED_USERNAME_PREFIX):
             return AuthService._fail(1001, "用户名不合法，请更换")
         if not password:
             return AuthService._fail(1001, "密码不能为空")
+        if len(password) < settings.MIN_PASSWORD_LENGTH:
+            return AuthService._fail(
+                1001, f"密码长度至少 {settings.MIN_PASSWORD_LENGTH} 位")
 
         role = (role or "student").strip().lower()
         if role not in ("teacher", "student"):
@@ -129,8 +139,9 @@ class AuthService:
         new_password = new_password or ""
         if not old_password:
             return AuthService._fail(1001, "请输入原密码")
-        if len(new_password) < 6:
-            return AuthService._fail(1001, "新密码长度至少 6 位")
+        if len(new_password) < settings.MIN_PASSWORD_LENGTH:
+            return AuthService._fail(
+                1001, f"新密码长度至少 {settings.MIN_PASSWORD_LENGTH} 位")
 
         db_user = sql_db.get_user_by_id(user_id)
         if not db_user:
@@ -143,7 +154,17 @@ class AuthService:
         sql_db.update_password(user_id, hash_password(new_password))
         # 只有本人持旧密码主动修改才能清除该标记；管理员重置密码时会重新置 1。
         sql_db.set_must_change_password(user_id, False)
-        return AuthService._ok({"user_id": user_id})
+        # 账号态缓存里还留着改密前的 must_change_password=1，必须立即失效，
+        # 否则用户改完密码后仍会被后端挡 30 秒。
+        invalidate_user_state(user_id)
+        # update_password 已递增 token_version，旧 token 立即失效。
+        # 这里按新版本号再签一个，避免用户「改完密码就被踢回登录页」。
+        updated = sql_db.get_user_by_id(user_id)
+        return AuthService._ok({
+            "user_id": user_id,
+            "access_token": AuthService.issue_token(updated),
+            "token_type": "bearer",
+        })
 
     @staticmethod
     def deactivate(user_id: int, password: str) -> dict:
@@ -167,5 +188,12 @@ class AuthService:
                 4003, "不能注销最后一个管理员账号：请先创建或启用另一位管理员")
 
         sql_db.deactivate_user(user_id)
+        invalidate_user_state(user_id)
+        return AuthService._ok({"user_id": user_id})
+
+    @staticmethod
+    def logout(user_id: int) -> dict:
+        """登出：递增 token_version，使该用户已签发的全部 token 立即失效。"""
+        sql_db.bump_token_version(user_id)
         invalidate_user_state(user_id)
         return AuthService._ok({"user_id": user_id})

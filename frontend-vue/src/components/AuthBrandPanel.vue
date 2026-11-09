@@ -52,9 +52,9 @@ const features = [
 ]
 const stats = [
   { value: '4', label: '类知识关系' },
-  { value: '20+', label: '知识点/篇' },
-  { value: '5', label: '类文档格式' },
-  { value: '100%', label: '图谱可编辑' },
+  { value: '4', label: '类知识点' },
+  { value: '4', label: '类文档格式' },
+  { value: '3', label: '角色协同' },
 ]
 
 /* ---------- 动态知识网络动画（轻量 canvas，无依赖） ---------- */

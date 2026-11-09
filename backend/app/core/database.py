@@ -1,13 +1,17 @@
 """
 Neo4j 图数据库连接管理（对齐规划文档第四章：KnowledgePoint 节点 + 英文关系类型）
 """
+import logging
 import time
 import uuid
 from datetime import datetime, timezone
 
 from neo4j import GraphDatabase
+from neo4j.exceptions import ServiceUnavailable, SessionExpired
 
 from .config import settings
+
+logger = logging.getLogger(__name__)
 
 # 连接超时（秒）：Neo4j 5.x 驱动默认 30s，图库宕机时会把每次调用都拖到 30s。
 # 本项目「图库不可用 → 静默降级」的路径很多（graph_context / 召回 R3 / kp_labeler 目录），
@@ -80,12 +84,19 @@ class Neo4jDB:
         try:
             with self.driver.session() as session:
                 return list(session.run(cypher, params or {}))
-        except Exception:
-            self._down_until = now + _CIRCUIT_OPEN_SECONDS
+        except Exception as exc:
+            # 只有「连接不上/会话过期」才熔断。Cypher 语法错、约束冲突、权限不足
+            # 属于查询本身的问题，不应让全站图查询跟着停摆 30 秒。
+            if isinstance(exc, (ServiceUnavailable, SessionExpired)):
+                self._down_until = now + _CIRCUIT_OPEN_SECONDS
             raise
 
-    def init_schema(self):
-        """初始化索引与约束（对齐规划文档 4.1.3）"""
+    def init_schema(self) -> bool:
+        """初始化索引与约束（对齐规划文档 4.1.3）。
+
+        返回 True 表示全部语句执行成功；False 表示图库不可达、已提前跳过剩余语句。
+        单条语句失败不阻断启动，但必须留下日志——否则索引缺失会静默拖慢所有 MERGE。
+        """
         statements = [
             # 知识点业务主键唯一约束
             "CREATE CONSTRAINT kp_id_unique IF NOT EXISTS "
@@ -109,9 +120,14 @@ class Neo4jDB:
         for stmt in statements:
             try:
                 self.query(stmt)
-            except Exception:
-                # 不同 Neo4j 版本对 IF NOT EXISTS 支持略有差异，忽略重复创建报错
-                pass
+            except Exception as exc:
+                # 不同 Neo4j 版本对 IF NOT EXISTS 支持略有差异；重复创建/权限不足时
+                # 不应阻断启动，但必须留下日志，否则索引缺失会静默拖慢所有 MERGE。
+                logger.warning("初始化 Neo4j 约束/索引失败：%s", exc)
+                if self.circuit_open():
+                    logger.warning("Neo4j 不可达，跳过剩余索引初始化")
+                    return False
+        return True
 
     def create_knowledge_node(self, course_id: str, document_id, name: str, category: str,
                               description: str = "", properties: dict = None):

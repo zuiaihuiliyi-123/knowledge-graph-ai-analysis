@@ -2,6 +2,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { api } from '../../api'
 import { useLatestRequest } from '../useLatestRequest'
+import { useDeferredAction } from '../useDeferredAction'
 import { questionTypeLabel } from '../../utils/question'
 
 /**
@@ -11,6 +12,8 @@ import { questionTypeLabel } from '../../utils/question'
  * 这里只负责「弹窗保存后刷新列表」这类页面级联动。
  */
 export function useTeacherQuestions({ courseId, active, documents, ensureDocuments }) {
+  // 删除先走「撤销窗口」，5 秒后才真正提交
+  const { schedule: scheduleDelete } = useDeferredAction()
   const questionList = ref([])
   const questionsLoading = ref(false)
   const questionTotal = ref(0)
@@ -238,23 +241,72 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
     }
   }
 
+  // 删除不再弹确认框：改成「先移除、5 秒内可撤销」，撤销时不发请求（列表刷新即可恢复）
   async function removeQuestion(row) {
-    try {
-      await ElMessageBox.confirm(
-        '删除后学生将无法再做该题；若已有作答记录，系统会自动改为「停用」以保护答题数据。是否继续？',
-        '删除题目',
-        { type: 'warning' },
-      )
-    } catch {
+    const id = row.question_id
+    const index = questionList.value.findIndex((q) => q.question_id === id)
+    if (index >= 0) questionList.value.splice(index, 1)
+    questionTotal.value = Math.max(0, questionTotal.value - 1)
+    scheduleDelete({
+      text: '已删除 1 道题',
+      run: async () => {
+        const data = await api.deleteQuestion(id)
+        if (data?.soft_deleted) ElMessage.info('该题已有作答记录，已停用（未物理删除）')
+        await refreshAll()
+      },
+      onUndo: () => refreshAll(),
+    })
+  }
+
+  /** 批量启用 / 停用（立即生效，无需撤销） */
+  async function batchSetActive(rows, activeFlag) {
+    const targets = (rows || []).filter((r) => Boolean(r.is_active) !== activeFlag)
+    if (!targets.length) {
+      ElMessage.info(activeFlag ? '选中的题目都已是启用状态' : '选中的题目都已是停用状态')
       return
     }
-    try {
-      const data = await api.deleteQuestion(row.question_id)
-      ElMessage.success(data?.soft_deleted ? '该题已有作答记录，已停用（未物理删除）' : '题目已删除')
-      await refreshAll()
-    } catch (e) {
-      ElMessage.error(`删除失败：${e.message}`)
+    const results = await Promise.allSettled(
+      targets.map((r) => api.setQuestionActive(r.question_id, activeFlag)),
+    )
+    const okCount = results.filter((r) => r.status === 'fulfilled').length
+    if (okCount === targets.length) {
+      ElMessage.success(`已${activeFlag ? '启用' : '停用'} ${okCount} 道题`)
+    } else {
+      ElMessage.warning(`已${activeFlag ? '启用' : '停用'} ${okCount} 道，${targets.length - okCount} 道失败`)
     }
+    await refreshAll()
+  }
+
+  /** 批量删除（先确认一次，再进入 5 秒撤销窗口） */
+  async function batchRemoveQuestions(rows) {
+    const list = rows || []
+    if (!list.length) return
+    const ok = await ElMessageBox.confirm(
+      `确定删除选中的 ${list.length} 道题吗？若题目已有作答记录，会自动改为「停用」以保护答题数据。`,
+      '批量删除题目',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
+    ).catch(() => false)
+    if (!ok) return
+    const ids = list.map((r) => r.question_id)
+    questionList.value = questionList.value.filter((q) => !ids.includes(q.question_id))
+    questionTotal.value = Math.max(0, questionTotal.value - ids.length)
+    scheduleDelete({
+      text: `已删除 ${ids.length} 道题`,
+      run: async () => {
+        let softDeleted = 0
+        for (const id of ids) {
+          try {
+            const data = await api.deleteQuestion(id)
+            if (data?.soft_deleted) softDeleted += 1
+          } catch {
+            /* 单条失败不阻断其余，最后统一刷新 */
+          }
+        }
+        if (softDeleted) ElMessage.info(`${softDeleted} 道题已有作答记录，已停用（未物理删除）`)
+        await refreshAll()
+      },
+      onUndo: () => refreshAll(),
+    })
   }
 
   // 切课：失效所有在途读请求并清空课程级数据；题库筛选条件保留（与原页一致）
@@ -322,6 +374,8 @@ export function useTeacherQuestions({ courseId, active, documents, ensureDocumen
     saveQuestion,
     toggleQuestionActive,
     removeQuestion,
+    batchSetActive,
+    batchRemoveQuestions,
     questionTypeLabel,
   }
 }

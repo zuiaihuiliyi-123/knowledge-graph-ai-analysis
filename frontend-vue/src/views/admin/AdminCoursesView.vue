@@ -366,6 +366,7 @@ import { useRoute } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 import {
   bizLabel, bizTagType, govLabel, govTagType, visibleToStudents,
 } from '../../utils/courseGovernance'
@@ -393,7 +394,7 @@ const transferVisible = ref(false)
 const govForm = reactive({ note: '' })
 const transferForm = reactive({ teacher_id: null })
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 const fmtDate = (t) => (t ? String(t).slice(0, 10) : '—')
 // 业务状态 / 治理状态 / 学生可见性的展示口径统一放在 utils/courseGovernance.js：
 // 它同时被「课程管理」与「课程治理」两个页面使用，且与后端 course_is_visible 同源。

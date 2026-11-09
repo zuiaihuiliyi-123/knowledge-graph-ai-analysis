@@ -163,7 +163,8 @@ python -m uvicorn app.main:app --reload
 ```
 
 - 接口文档：<http://localhost:8000/docs>
-- 健康检查：`curl http://localhost:8000/health` → `{"status":"ok"}`
+- 健康检查：`curl http://localhost:8000/health` → `{"status":"ok"}`（只表示进程存活，不查库，避免图库故障拖慢登录页）
+- 依赖检查：`curl http://localhost:8000/health/deps` → SQLite / Neo4j 的真实连通状态（允许较慢，供运维使用；依赖不可用时返回 `status=degraded` 而非 500）
 - SQLite 表结构在首次启动时自动创建（`sql_db.init_tables()`），**克隆仓库后无需准备任何数据库文件**
 
 ### 手动启动：2. 启动前端
@@ -193,6 +194,8 @@ npm run build      # 输出 dist/
 
 若未配置上述环境变量，系统会随机生成 16 位口令并**只在启动日志中打印一次**，同时要求首次登录后立即改密。学生账号通过注册页（`/register`）创建，默认角色为 `student`；**教师注册需要 `.env` 里的 `TEACHER_INVITE_CODE`**，未配置时该通道关闭（教师改由管理员在「用户管理」中创建或提升角色）。
 
+认证安全约定：同一用户名 + 直连 IP 连续登录失败 8 次锁定 10 分钟（HTTP 429）；`must_change_password=1` 时后端会拒绝除改密/个人资料等白名单外的业务接口；改密、登出、禁用、改角色都会递增 `t_user.token_version`，旧 JWT 立即失效（HTTP 401）。
+
 ### 环境变量说明
 
 | 变量 | 说明 |
@@ -205,6 +208,9 @@ npm run build      # 输出 dist/
 | `SECRET_KEY` | JWT 签名密钥，长度 ≥ 32。未配置时回落到本地随机密钥文件 `backend/data/.secret_key`（不纳入版本库），**删除它会让所有已登录 token 失效** |
 | `SECRET_KEY_FILE` | 可选，本地随机密钥文件的位置 |
 | `APP_ENV` | `dev`（默认）/ `production`。`production` 要求 `SECRET_KEY` 必须来自环境变量，否则启动失败 |
+| `CORS_ORIGINS` | 允许跨域的前端地址，逗号分隔，默认 `http://localhost:5173,http://127.0.0.1:5173`；生产环境请填实际域名，不要用 `*` |
+| `LOG_LEVEL` | 日志级别，默认 `INFO`（`DEBUG` / `INFO` / `WARNING` / `ERROR`） |
+| `MIN_PASSWORD_LENGTH` | 注册与改密的最小密码长度，默认 `6`（不会低于 6） |
 | `TEACHER_INVITE_CODE` | 教师注册邀请码。**不配置 = 教师自助注册关闭**（学生注册不受影响，教师由管理员创建/提升） |
 | `AUTO_BACKUP` / `AUTO_BACKUP_KEEP` | 启动前自动备份开关（默认 `1`）与保留份数（默认 `10`），快照写入 `backend/backup/auto/` |
 | `DEFAULT_ADMIN_*` / `DEFAULT_TEACHER_PASSWORD` | 可选，固定引导账号口令 |

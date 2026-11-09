@@ -125,9 +125,11 @@
           :active="activeTab === 'grading'"
           :courses="store.courses"
           :course-id="currentCourseId"
+          :course-name="currentCourseName"
           :documents="documents"
           @update:course-id="selectCourseForTab"
           @pending-change="gradingPending = $event"
+          @go-courses="goCourses"
         />
       </el-tab-pane>
     </el-tabs>
@@ -149,8 +151,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Notebook, FolderOpened, UserFilled, View, Collection, EditPen,
@@ -488,6 +490,30 @@ watch(activeTab, (tab) => {
   if (tab === 'courses') store.fetchCourses(true).catch(() => {})
   if (tab === 'preview' && currentCourseId.value && !documents.value.length) loadDocuments()
 })
+
+// ===== 未保存保护：编辑模式下离开页面，未提交的节点/关系表单会丢失 =====
+// 页内切 Tab 不拦：el-tab-pane 是 v-show 保活，表单内容还在（拦了反而烦）
+onBeforeRouteLeave(async (to) => {
+  if (to.path === '/teacher' || !graphEditMode.value) return true
+  try {
+    await ElMessageBox.confirm(
+      '图谱处于编辑模式，离开后未保存的节点/关系编辑内容会丢失。确定离开吗？',
+      '离开编辑模式',
+      { type: 'warning', confirmButtonText: '离开', cancelButtonText: '留在本页' },
+    )
+    return true
+  } catch {
+    return false
+  }
+})
+
+function handleBeforeUnload(e) {
+  if (!graphEditMode.value) return
+  e.preventDefault()
+  e.returnValue = ''
+}
+window.addEventListener('beforeunload', handleBeforeUnload)
+onBeforeUnmount(() => window.removeEventListener('beforeunload', handleBeforeUnload))
 
 // 教师端也复用全局 AI 悬浮窗：把当前课程/文档同步到 store.learningContext。
 // immediate 必须加：深链进来时 route watcher 已在 setup 阶段写好 currentCourseId。

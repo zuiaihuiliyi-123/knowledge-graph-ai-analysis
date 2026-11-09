@@ -64,6 +64,12 @@ class ConnectionMixin:
         return conn
 
 
+    def ping(self) -> bool:
+        """轻量连通性检查（健康检查用，不依赖任何业务表）。"""
+        with self._connect() as conn:
+            return conn.execute("SELECT 1").fetchone()[0] == 1
+
+
     def _apply_journal_mode(self) -> dict:
         """设置库级持久 pragma `journal_mode`（阶段 G），返回**事实**供启动自查/验收。
 

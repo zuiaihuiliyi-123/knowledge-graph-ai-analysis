@@ -4,9 +4,13 @@ FastAPI 应用入口
 import logging
 import time
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
 from .core.config import settings
 from .core import metrics
 from .core.database import db
@@ -17,6 +21,10 @@ from .api import (auth, courses, knowledge_graph, qa, learning_path, graph, docu
                   course_members, invites, profile, questions, practice, grading,
                   admin, admin_fusion)
 
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 _logger = logging.getLogger(__name__)
 
 
@@ -74,7 +82,10 @@ async def lifespan(app: FastAPI):
     # 批量建图与图谱读取都会慢一个量级，`kp_id` 唯一约束也缺失。
     # 图库不可用时只告警：不能让「没装 Neo4j」阻止整个服务启动（既有降级路径保留）。
     try:
-        db.init_schema()
+        if db.init_schema():
+            _logger.info("Neo4j 约束与索引初始化完成")
+        else:
+            _logger.warning("Neo4j 不可达，已跳过约束/索引初始化（服务仍可启动，图谱功能会降级）")
     except Exception as exc:  # noqa: BLE001
         _logger.warning("初始化 Neo4j 索引/约束失败（图谱功能可能变慢或降级）：%s", exc)
     try:
@@ -101,27 +112,84 @@ async def collect_request_metrics(request: Request, call_next):
 
     只做内存计数，不写库、不落日志：监控数据本身不应该成为新的故障点或性能负担。
     计数在响应返回后追加，异常路径也计入（errors），故 5xx 不会被漏掉。
+
+    指标 key 使用路由模板（如 /api/v1/documents/{doc_id}）而不是原始 URL：
+    否则每个文档 id / 用户 id 都会生成一个独立桶，长跑进程内存持续增长，
+    管理端的「按路径统计」也会被大量一次性路径淹没。
     """
     started = time.perf_counter()
     try:
         response = await call_next(request)
     except Exception:
-        metrics.record_request(request.url.path, 500,
+        metrics.record_request(_metric_path(request), 500,
                                (time.perf_counter() - started) * 1000)
         raise
-    metrics.record_request(request.url.path, response.status_code,
+    metrics.record_request(_metric_path(request), response.status_code,
                            (time.perf_counter() - started) * 1000)
     return response
 
 
-# CORS 配置（允许前端跨域访问）
+def _metric_path(request: Request) -> str:
+    """路由匹配成功时用模板路径，否则回退到原始 path（未匹配的 404 数量通常有限）。"""
+    route = request.scope.get("route")
+    return getattr(route, "path", None) or request.url.path
+
+
+# CORS 配置：白名单来自 CORS_ORIGINS，生产环境不要使用 *。
+# 前端使用 Authorization: Bearer（localStorage），不依赖 Cookie，故关闭 credentials。
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _error_response(status_code: int, code: int, message: str) -> JSONResponse:
+    """统一错误响应形状：{code, message, detail, data, timestamp}。
+
+    保留 detail 字段与 FastAPI 默认习惯兼容，前端拦截器会优先读 detail。
+    """
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "code": code,
+            "message": message,
+            "detail": message,
+            "data": None,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """把 FastAPI 默认的英文 422 数组转换成一条可读的中文错误。
+
+    之前前端会把 detail 数组 JSON.stringify 后塞进 toast，用户看到的是
+    [{"type":"missing","loc":["body","course_id"],...}] 这类内容。
+    """
+    errors = exc.errors() or []
+    first = errors[0] if errors else {}
+    loc = ".".join(str(x) for x in first.get("loc", []) if x != "body")
+    msg = first.get("msg", "参数不合法")
+    # 常见 Pydantic 英文错误转中文，避免把 "Field required" 这类文本直接给终端用户
+    msg = {
+        "Field required": "缺少必填字段",
+        "Input should be a valid integer": "必须是整数",
+        "Input should be a valid string": "必须是字符串",
+        "Input should be a valid list": "必须是列表",
+    }.get(msg, msg)
+    field = f"「{loc}」" if loc else "请求体"
+    return _error_response(422, 4001, f"参数校验失败：{field}{msg}")
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """兜底未捕获异常：记录完整堆栈到服务端日志，对外只返回固定文案。"""
+    _logger.exception("未捕获异常 %s %s", request.method, request.url.path)
+    return _error_response(500, 5000, "服务器内部错误，请稍后重试")
 
 # 注册路由
 app.include_router(auth.router)
@@ -160,4 +228,33 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    """存活检查（liveness）：只表示进程能响应，不查数据库。
+
+    为什么不能在这里查 Neo4j：图库不可达时，驱动连接超时是 2 秒（IPv6/IPv4 各一次），
+    单次请求会到 4 秒；前端健康检查只等 3 秒，会被误判为「服务不可用」。
+    依赖状态请访问 /health/deps（readiness，允许慢）。
+    """
     return {"status": "ok"}
+
+
+@app.get("/health/deps")
+async def health_dependencies():
+    """依赖检查（readiness）：SQLite 与 Neo4j 的真实连通状态，允许较慢。
+
+    运维/管理端使用；前端登录页不使用该接口，避免 Neo4j 故障拖慢登录页。
+    """
+    deps = {"sqlite": "ok", "neo4j": "ok"}
+    try:
+        sql_db.ping()
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("健康检查：SQLite 不可用：%s", exc)
+        deps["sqlite"] = "error"
+    try:
+        db.query("RETURN 1 AS ok")
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("健康检查：Neo4j 不可用：%s", exc)
+        deps["neo4j"] = "error"
+    return {
+        "status": "ok" if all(v == "ok" for v in deps.values()) else "degraded",
+        "dependencies": deps,
+    }

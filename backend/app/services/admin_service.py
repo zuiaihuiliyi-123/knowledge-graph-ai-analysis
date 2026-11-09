@@ -405,6 +405,8 @@ class AdminService:
         # 管理员屏幕上 —— 一律要求用户首次登录后自行改掉，避免「重置密码」变成
         # 长期共享凭据。用户改完密码后该标记由 /api/auth/change-password 清除。
         sql_db.set_must_change_password(user_id, True)
+        # 让下一次请求立刻看到 must_change_password=1（否则最多延迟一个缓存 TTL）。
+        invalidate_user_state(user_id)
         AdminService.write_audit(
             operator, "user.reset_password", "user", user_id,
             detail=f"重置了 {target['username']} 的密码"

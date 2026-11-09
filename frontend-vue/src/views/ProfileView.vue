@@ -313,6 +313,7 @@ import { ElMessage } from 'element-plus'
 import { Camera, Delete, WarningFilled } from '@element-plus/icons-vue'
 import PageHeader from '../components/PageHeader.vue'
 import { api } from '../api'
+import { formatDateTime } from '../utils/format'
 import { useAppStore } from '../stores/app'
 
 const store = useAppStore()
@@ -378,7 +379,7 @@ const editableFields = computed(() => {
 
 const form = reactive(Object.fromEntries(FIELDS.map((f) => [f, ''])))
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 
 function fillForm(p) {
   for (const f of FIELDS) form[f] = p?.[f] ?? ''

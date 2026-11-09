@@ -97,6 +97,7 @@ import { ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -112,7 +113,7 @@ const invites = ref([])
 const justCreated = ref(null)
 
 function fmtTime(t) {
-  return t ? String(t).slice(0, 16) : '—'
+  return formatDateTime(t)
 }
 
 /** 拼出可直接发给学生的完整地址（用当前站点 origin，避免后端返回相对路径无法直接粘贴） */

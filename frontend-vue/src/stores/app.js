@@ -155,7 +155,9 @@ export const useAppStore = defineStore('app', {
     async checkHealth() {
       this.healthChecking = true
       try {
-        const resp = await fetch('/health', { signal: AbortSignal.timeout(3000) })
+        // 与 axios 实例共用 VITE_API_BASE：前端单独部署时不能假定后端同源。
+        const base = import.meta.env.VITE_API_BASE || ''
+        const resp = await fetch(`${base}/health`, { signal: AbortSignal.timeout(3000) })
         this.backendOnline = resp.ok
       } catch {
         this.backendOnline = false

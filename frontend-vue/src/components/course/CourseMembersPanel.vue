@@ -47,7 +47,22 @@
           <el-button :icon="Refresh" @click="reload">刷新</el-button>
         </div>
 
-        <el-table :data="memberRows" v-loading="loading" size="small" empty-text="暂无成员">
+        <div v-if="selectedMembers.length" class="batch-bar">
+          <span class="batch-count">已选 <b>{{ selectedMembers.length }}</b> 名成员</span>
+          <el-button size="small" type="danger" plain @click="runBatchRemoveMembers">批量移除</el-button>
+          <el-button size="small" link @click="clearMemberSelection">取消选择</el-button>
+        </div>
+
+        <el-table
+          ref="memberTableRef"
+          :data="memberRows"
+          v-loading="loading"
+          size="small"
+          empty-text="暂无成员"
+          row-key="user_id"
+          @selection-change="onMemberSelectionChange"
+        >
+          <el-table-column type="selection" width="46" :selectable="(row) => row.role !== 'owner'" />
           <el-table-column label="成员" min-width="150">
             <template #default="{ row }">
               <div class="member-cell">
@@ -251,7 +266,9 @@ import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search } from '@element-plus/icons-vue'
 import { api } from '../../api'
+import { formatDateTime } from '../../utils/format'
 import { useAppStore } from '../../stores/app'
+import { useDeferredAction } from '../../composables/useDeferredAction'
 
 const props = defineProps({
   courseId: { type: [String, Number], required: true },
@@ -262,6 +279,8 @@ const props = defineProps({
 const emit = defineEmits(['refresh'])
 
 const store = useAppStore()
+// 移除成员先走「撤销窗口」，5 秒后才真正提交
+const { schedule: scheduleRemove } = useDeferredAction()
 
 const activeTab = ref('approved')
 const pendingRows = ref([])
@@ -273,6 +292,24 @@ const pageSize = ref(20)
 const keyword = ref('')
 const roleFilter = ref('')
 const loading = ref(false)
+
+// ---------------- 批量选择 ----------------
+const memberTableRef = ref(null)
+const selectedMembers = ref([])
+
+function onMemberSelectionChange(rows) {
+  selectedMembers.value = rows
+}
+
+function clearMemberSelection() {
+  memberTableRef.value?.clearSelection()
+  selectedMembers.value = []
+}
+
+async function runBatchRemoveMembers() {
+  await batchRemoveMembers()
+  clearMemberSelection()
+}
 
 const rejectVisible = ref(false)
 const rejectComment = ref('')
@@ -295,7 +332,7 @@ const progressColor = [
 ]
 
 function fmtTime(t) {
-  return t ? String(t).slice(0, 16) : '—'
+  return formatDateTime(t)
 }
 
 const SOURCE_TEXT = { create: '创建', code: '加课码', invite: '邀请', apply: '申请', import: '导入' }
@@ -380,21 +417,53 @@ async function approve(row) {
   }
 }
 
+// 移除不再弹确认框：先从列表移除、5 秒内可撤销；撤销只刷新列表（请求尚未发出）
 async function remove(row) {
+  const index = memberRows.value.findIndex((m) => m.user_id === row.user_id)
+  if (index >= 0) memberRows.value.splice(index, 1)
+  scheduleRemove({
+    text: `已将「${row.name || row.username}」移出课程`,
+    run: async () => {
+      await api.removeMember(props.courseId, row.user_id, true)
+      await reload()
+      emit('refresh')
+    },
+    onUndo: () => reload(),
+  })
+}
+
+/** 批量移除：先确认一次，再进入 5 秒撤销窗口；课程所有者与自己不参与批量移除 */
+async function batchRemoveMembers() {
+  const rows = selectedMembers.value.filter((m) => m.role !== 'owner' && m.user_id !== store.user?.user_id)
+  const skipped = selectedMembers.value.length - rows.length
+  if (!rows.length) {
+    ElMessage.info('选中的成员里没有可移除的对象（课程所有者不能移除）')
+    return
+  }
   const ok = await ElMessageBox.confirm(
-    `确定把「${row.name || row.username}」移出本课程吗？\n\n他/她的学习记录与收藏会保留（属于学生自己的数据），但将无法再访问本课程内容。`,
-    '移除成员',
+    `确定把选中的 ${rows.length} 名成员移出本课程吗？他们的学习记录与收藏会保留，但将无法再访问本课程内容。`,
+    '批量移除成员',
     { type: 'warning', confirmButtonText: '确认移除', cancelButtonText: '取消' },
   ).catch(() => false)
   if (!ok) return
-  try {
-    await api.removeMember(props.courseId, row.user_id, true)
-    ElMessage.success('已移除该成员')
-    await reload()
-    emit('refresh')
-  } catch (e) {
-    ElMessage.error(e?.message || '移除失败')
-  }
+  const ids = rows.map((m) => m.user_id)
+  memberRows.value = memberRows.value.filter((m) => !ids.includes(m.user_id))
+  if (skipped > 0) ElMessage.info(`已跳过 ${skipped} 名不可移除的成员（课程所有者）`)
+  scheduleRemove({
+    text: `已移除 ${ids.length} 名成员`,
+    run: async () => {
+      for (const id of ids) {
+        try {
+          await api.removeMember(props.courseId, id, true)
+        } catch {
+          /* 单条失败不阻断其余，最后统一刷新 */
+        }
+      }
+      await reload()
+      emit('refresh')
+    },
+    onUndo: () => reload(),
+  })
 }
 
 function openDetail(row) {
@@ -452,6 +521,28 @@ watch(() => props.courseId, () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 批量操作条：勾选后出现在表格上方 */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f2f6ff;
+  border: 1px solid #d8e4ff;
+}
+
+.batch-count {
+  font-size: 13px;
+  color: #3d4d66;
+  margin-right: 4px;
+}
+
+.batch-count b {
+  color: #2f6fd0;
 }
 .member-name {
   min-width: 0;

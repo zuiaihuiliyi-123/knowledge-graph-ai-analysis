@@ -1,6 +1,8 @@
 """
 图谱查询与手动编辑 API（对齐规划文档 6.3.2 查询 + 6.3.3/6.3.4 手动编辑）
 """
+import logging
+
 from fastapi import APIRouter, Query, Depends
 
 from ..core.response import success, error
@@ -12,6 +14,8 @@ from ..schemas.graph import (
     NodeUpdate,
     EdgeCreate,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/graph", tags=["知识图谱"])
 
@@ -76,8 +80,9 @@ async def get_graph(
         return error(1001, str(e))
     try:
         graph = KnowledgeGraphManager.get_graph_v1(course_id_int, did, limit=limit, node_type=node_type)
-    except Exception as e:
-        return error(3000, f"图谱查询失败: {str(e)}")
+    except Exception:
+        logger.exception("图谱查询失败 course_id=%s document_id=%s", course_id_int, did)
+        return error(3000, "图谱查询失败，请稍后重试")
     return success(graph)
 
 

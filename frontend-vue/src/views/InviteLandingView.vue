@@ -12,6 +12,19 @@
 
       <div v-if="loading" class="state" v-loading="true" element-loading-text="正在校验邀请…"></div>
 
+      <div v-else-if="needsLogin" class="state">
+        <el-result
+          icon="info"
+          title="你收到一个课程邀请"
+          sub-title="登录或注册后即可查看课程详情并接受邀请。"
+        >
+          <template #extra>
+            <el-button type="primary" @click="goLogin">登录后接受</el-button>
+            <el-button @click="goRegister">注册新账号</el-button>
+          </template>
+        </el-result>
+      </div>
+
       <div v-else-if="error" class="state">
         <el-result icon="warning" title="邀请不可用" :sub-title="error">
           <template #extra>
@@ -93,6 +106,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { DataAnalysis } from '@element-plus/icons-vue'
 import { api } from '../api'
+import { formatDateTime } from '../utils/format'
 import { useAppStore } from '../stores/app'
 
 const route = useRoute()
@@ -103,6 +117,9 @@ const loading = ref(true)
 const error = ref('')
 const info = ref({})
 const accepting = ref(false)
+// 邀请页现在是公开路由：未登录用户先看到登录/注册引导，
+// 登录成功后由 redirect 带回本页，再拉取课程详情。
+const needsLogin = ref(false)
 
 const token = computed(() => String(route.params.token || ''))
 const alreadyMember = computed(() => info.value.my_relation === 'MEMBER'
@@ -117,11 +134,17 @@ const STATUS_TEXT = {
 }
 const statusText = (s) => STATUS_TEXT[s] || '该邀请链接当前不可用'
 
-const fmtTime = (t) => (t ? String(t).slice(0, 16) : '—')
+const fmtTime = (t) => formatDateTime(t)
 
 async function load() {
   loading.value = true
   error.value = ''
+  needsLogin.value = false
+  if (!store.isLoggedIn) {
+    needsLogin.value = true
+    loading.value = false
+    return
+  }
   try {
     info.value = await api.previewInvite(token.value)
   } catch (e) {
@@ -129,6 +152,14 @@ async function load() {
   } finally {
     loading.value = false
   }
+}
+
+function goLogin() {
+  router.push({ path: '/login', query: { redirect: route.fullPath } })
+}
+
+function goRegister() {
+  router.push({ path: '/register', query: { redirect: route.fullPath } })
 }
 
 async function accept() {

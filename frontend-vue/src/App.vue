@@ -215,6 +215,7 @@ import {
   Picture, Lock, CircleClose, Folder, Monitor, Document, Guide, Star, Connection, ChatDotRound, ArrowDown,
 } from '@element-plus/icons-vue'
 import { useAppStore } from './stores/app'
+import { api } from './api'
 import AIChatWidget from './components/AIChatWidget.vue'
 import BrandMark from './components/BrandMark.vue'
 
@@ -223,7 +224,7 @@ const route = useRoute()
 const router = useRouter()
 
 // 这些路由自带整页布局，不显示侧边栏 / 顶栏 / 全局 AI 悬浮球
-const STANDALONE_ROUTES = new Set(['login', 'register', 'invite', 'reader'])
+const STANDALONE_ROUTES = new Set(['login', 'register', 'invite', 'reader', 'not-found'])
 const isStandalone = computed(() => STANDALONE_ROUTES.has(route.name))
 
 const teacherMenu = [
@@ -380,6 +381,9 @@ const healthText = computed(() => {
 async function handleLogout() {
   try {
     await ElMessageBox.confirm('确定要退出登录吗？', '提示', { type: 'warning' })
+    // 服务端吊销：递增 token_version，即使 token 被复制也无法继续使用。
+    // 网络失败也继续本地登出，不能把用户困在已登录状态。
+    try { await api.logout() } catch { /* token 已失效或网络不可用时忽略 */ }
     store.logout()
     await router.replace('/login')
   } catch { /* 取消 */ }
