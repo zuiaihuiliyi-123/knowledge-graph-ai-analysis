@@ -50,6 +50,7 @@ export function useCourseDocuments({
         document_id: it.document_id ?? null,
         upload_failed: !!it.upload_failed,
         duplicate: !!it.duplicate,
+        removed: !!it.removed,
         error: it.error || '',
         created_at: it.created_at || '',
       }))
@@ -107,9 +108,25 @@ export function useCourseDocuments({
     if (item.upload_failed && !item.document_id) {
       return { ...base, text: '失败', type: 'danger', percentage: 100, failed: true, progressStatus: 'exception', message: item.error || '上传失败' }
     }
+    // 文档被删除（本地删除或别处删除）：批次行必须进终态，
+    // 否则会永远停在「等待后端建档…」并让汇总条一直显示「进行中 1」。
+    if (item.removed) {
+      return {
+        ...base, text: '已删除', type: 'info', percentage: 100, removed: true,
+        message: item.error || '文档已删除，本次构建已作废',
+      }
+    }
+    // 重复文件：后端复用了已有记录，document_id 指向老文档，若按文档状态渲染会显示成
+    // 「已完成」，教师会误以为这次又建了一遍。这里提前拦掉，明确显示「已存在」。
+    if (item.duplicate) {
+      return {
+        ...base, text: '已存在', type: 'info', percentage: 100, duplicate: true,
+        message: item.error || '文件已存在，请勿重复上传',
+      }
+    }
     const doc = batchDocument(item)
     if (!doc) {
-      return { ...base, text: '待处理', percentage: 5, message: '等待后端建档…' }
+      return { ...base, text: '待建档', percentage: 5, message: '排队等待后端建档…' }
     }
     const graph = docGraphStatus(doc)
     if (doc.parse_status === 'FAILED' || doc.extract_status === 'FAILED' || graph === 'FAILED') {
@@ -123,7 +140,7 @@ export function useCourseDocuments({
       return { ...base, text: '已完成', type: 'success', percentage: 100, completed: true, progressStatus: 'success', message: '' }
     }
     if (graph === 'BUILDING') {
-      return { ...base, text: '图谱构建中', type: 'warning', percentage: 90, indeterminate: true, inFlight: true, message: '正在写入 Neo4j…' }
+      return { ...base, text: '入图中', type: 'warning', percentage: 90, indeterminate: true, inFlight: true, message: '正在写入 Neo4j…' }
     }
     if (doc.extract_status === 'EXTRACTING') {
       return { ...base, text: '知识抽取中', type: 'warning', percentage: 70, indeterminate: true, inFlight: true, message: '正在抽取知识点与关系…' }
@@ -132,12 +149,12 @@ export function useCourseDocuments({
       return { ...base, text: '解析中', type: 'warning', percentage: 35, indeterminate: true, inFlight: true, message: '正在解析文档…' }
     }
     if (doc.parse_status === 'PARSED' && doc.extract_status === 'COMPLETED') {
-      return { ...base, text: '图谱构建中', type: 'warning', percentage: 85, indeterminate: true, inFlight: true, message: '准备写入图谱…' }
+      return { ...base, text: '待入图', type: 'warning', percentage: 85, indeterminate: true, inFlight: true, message: '抽取完成，准备写入图谱…' }
     }
     if (doc.parse_status === 'PARSED') {
       return { ...base, text: '待抽取', type: 'info', percentage: 50, indeterminate: true, inFlight: true, message: '排队等待知识抽取…' }
     }
-    return { ...base, text: '待处理', percentage: 5, indeterminate: true, inFlight: true, message: '排队等待处理…' }
+    return { ...base, text: '排队中', percentage: 5, indeterminate: true, inFlight: true, message: '排队等待处理…' }
   }
 
   const batchSummary = computed(() => {
@@ -145,16 +162,20 @@ export function useCourseDocuments({
     let success = 0
     let failed = 0
     let processing = 0
+    let duplicate = 0
+    let removed = 0
     let sum = 0
     for (const item of batchItems.value) {
       const stage = batchStage(item)
       if (stage.completed) success += 1
       else if (stage.failed) failed += 1
+      else if (stage.duplicate) duplicate += 1
+      else if (stage.removed) removed += 1
       else processing += 1
       sum += stage.percentage
     }
     return {
-      total, success, failed, processing,
+      total, success, failed, processing, duplicate, removed,
       percentage: total ? Math.round(sum / total) : 0,
     }
   })
@@ -242,15 +263,19 @@ export function useCourseDocuments({
         } else if (r.ok) {
           item.document_id = r.document_id
           item.duplicate = !!r.duplicate
-          item.error = r.duplicate ? (r.message || '相同文件已存在，已跳过') : ''
+          item.error = r.duplicate ? (r.message || '文件已存在，请勿重复上传') : ''
         } else {
           item.upload_failed = true
           item.error = r.message || '上传失败'
         }
       })
-      const accepted = validItems.filter((i) => i.document_id).length
+      // 重复文件后端也返回 document_id（复用原记录），所以 accepted 要把它们排除，
+      // 否则「3 个文件全是重复」也会提示成「已接收 3 个文件」。
+      const duplicateCount = validItems.filter((i) => i.duplicate).length
+      const accepted = validItems.filter((i) => i.document_id && !i.duplicate).length
       const failedCount = items.filter((i) => i.upload_failed).length
       if (accepted) ElMessage.success(`已接收 ${accepted} 个文件，后台正在逐篇构建知识图谱`)
+      if (duplicateCount) ElMessage.warning(`${duplicateCount} 个文件已存在，未重复上传`)
       if (failedCount) ElMessage.warning(`${failedCount} 个文件未能进入处理队列，请查看失败原因`)
 
       await reloadDocuments()
@@ -359,8 +384,42 @@ export function useCourseDocuments({
     return ids
   }
 
+  /** 把指定文档对应的批次行标成「已删除」终态（删完列表里就查不到它了） */
+  function markBatchItemsRemoved(ids) {
+    const set = new Set((ids || []).map((id) => String(id)))
+    if (!set.size) return
+    let changed = false
+    for (const item of batchItems.value) {
+      if (!item.document_id || item.removed) continue
+      if (!set.has(String(item.document_id))) continue
+      item.removed = true
+      item.error = '文档已删除'
+      changed = true
+    }
+    if (changed) batchItems.value = [...batchItems.value]
+  }
+
+  /**
+   * 列表刷新后兜底：已经在后端不存在的文档，其批次行同样进终态。
+   * 只在**确定拿到列表**时调用（list 为 null 表示请求失败，不能当成「全被删了」）。
+   */
+  function markMissingBatchItemsRemoved(list) {
+    if (!Array.isArray(list)) return
+    const alive = new Set(list.map((d) => String(d.doc_id)))
+    let changed = false
+    for (const item of batchItems.value) {
+      if (!item.document_id || item.removed) continue
+      if (alive.has(String(item.document_id))) continue
+      item.removed = true
+      item.error = '文档已删除'
+      changed = true
+    }
+    if (changed) batchItems.value = [...batchItems.value]
+  }
+
   async function deleteDocument(doc) {
     const ids = pickOff([doc])
+    markBatchItemsRemoved(ids)
     scheduleDelete({
       text: `已删除《${doc.file_name}》`,
       run: async () => {
@@ -385,6 +444,7 @@ export function useCourseDocuments({
     ).catch(() => false)
     if (!ok) return
     const ids = pickOff(list)
+    markBatchItemsRemoved(ids)
     scheduleDelete({
       text: `已删除 ${ids.length} 个文档`,
       run: async () => {
@@ -423,6 +483,7 @@ export function useCourseDocuments({
     if (!list) return // 已被更新的请求取代
     pollFailures = 0
     recoverBatchItemsFromDocuments(list)
+    markMissingBatchItemsRemoved(list)
     for (const d of list) {
       const key = `${d.parse_status}|${d.extract_status}|${docGraphStatus(d)}`
       const oldKey = prev.get(d.doc_id)

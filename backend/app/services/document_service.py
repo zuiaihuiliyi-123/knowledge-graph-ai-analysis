@@ -575,14 +575,15 @@ class DocumentService:
             return {"ok": False, "code": perm["code"], "message": perm["message"]}
 
         # 4. 同课程内容去重（与批量上传同一口径）：重复提交同一份文件时复用原文档，
-        # 不再重复解析 / 抽取 / 建图（一次抽取是真实 LLM 费用）。
-        # 失败文档与源文件已丢失的文档不参与去重，见 _find_reusable_duplicate。
+        # 不再重复解析 / 抽取 / 建图（一次抽取是真实 LLM 费用），并明确告知用户
+        # 「文件已存在，请勿重复上传」。失败文档与源文件已丢失的文档不参与去重，
+        # 见 _find_reusable_duplicate（usable_only=True 保证失败后可以重新上传）。
         digest = _sha256(content)
         existing = DocumentService._find_reusable_duplicate(course_id, digest)
         if existing:
             payload = DocumentService._success_payload(existing, status="existing")
             payload["duplicate"] = True
-            return {"ok": True, "code": 0, "message": "相同文件已存在于本课程，已跳过重复建图",
+            return {"ok": True, "code": 0, "message": "文件已存在，请勿重复上传",
                     "data": payload}
 
         # 5. 建记录 + 落盘
@@ -668,7 +669,7 @@ class DocumentService:
                 items.append({"file_name": checked["file_name"], "ok": True,
                               "duplicate": True,
                               "document_id": batch_hashes[digest],
-                              "message": "本次提交中内容重复，已跳过"})
+                              "message": "文件已存在，请勿重复上传"})
                 duplicates += 1
                 continue
 
@@ -681,7 +682,7 @@ class DocumentService:
                               "duplicate": True,
                               "document_id": existing["doc_id"],
                               "status": "existing",
-                              "message": "相同文件已存在于本课程，已跳过重复建图"})
+                              "message": "文件已存在，请勿重复上传"})
                 duplicates += 1
                 continue
 

@@ -74,6 +74,8 @@
               <span>总数 <b>{{ batchSummary.total }}</b></span>
               <span class="is-success">成功 <b>{{ batchSummary.success }}</b></span>
               <span class="is-danger">失败 <b>{{ batchSummary.failed }}</b></span>
+              <span v-if="batchSummary.duplicate" class="is-muted">已存在 <b>{{ batchSummary.duplicate }}</b></span>
+              <span v-if="batchSummary.removed" class="is-muted">已删除 <b>{{ batchSummary.removed }}</b></span>
               <span class="is-muted">进行中 <b>{{ batchSummary.processing }}</b></span>
             </div>
             <el-progress
