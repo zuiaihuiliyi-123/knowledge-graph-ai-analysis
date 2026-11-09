@@ -59,6 +59,10 @@ class MigrationMixin:
                           conn.execute("PRAGMA table_info(t_learning_record)").fetchall()}
             if "kp_name" not in lr_columns:
                 conn.execute("ALTER TABLE t_learning_record ADD COLUMN kp_name TEXT")
+            fav_columns = {row["name"] for row in
+                           conn.execute("PRAGMA table_info(t_student_favorite)").fetchall()}
+            if "kp_name" not in fav_columns:
+                conn.execute("ALTER TABLE t_student_favorite ADD COLUMN kp_name TEXT")
             # 向量取数一律按 (course_id, document_id) 过滤，但 t_kp_embedding 的主键是
             # (course_id, kp_id)，document_id 上没有索引 → 只能走主键前缀命中 course_id，
             # 再逐行过滤 document_id（course 5 有 117 行，其中目标文档只占 69 行，多扫的

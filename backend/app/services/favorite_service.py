@@ -3,9 +3,13 @@
 Phase 2 从 api/favorites.py 下沉：收藏按 (user_id, course_id, document_id, kp_id)
 隔离，user_id 始终取自 JWT；新增收藏前校验课程成员身份与知识点存在性。
 """
+import logging
+
 from ..core.database import db
 from ..core.permissions import Permissions
 from ..core.sql_database import sql_db
+
+logger = logging.getLogger(__name__)
 
 
 def _coerce_int(value):
@@ -47,14 +51,50 @@ class FavoriteService:
             if did is None:
                 return FavoriteService._fail(4001, "参数错误：document_id 必须为整数")
             rows = sql_db.list_favorites_by_user_course(user_id, cid, did)
+            FavoriteService._backfill_names(user_id, cid, did, rows)
         elif course_id is not None and course_id != "":
             cid = _coerce_int(course_id)
             if cid is None:
                 return FavoriteService._fail(4001, "参数错误：course_id 必须为整数")
             rows = sql_db.list_favorites_by_user_course(user_id, cid)
+            FavoriteService._backfill_names(user_id, cid, None, rows)
         else:
             rows = sql_db.list_favorites_by_user(user_id)
         return FavoriteService._ok({"items": rows, "count": len(rows)})
+
+    @staticmethod
+    def _backfill_names(user_id: int, course_id: int, document_id, rows: list) -> None:
+        """为缺少名字快照的旧收藏补名字。
+
+        早期收藏只存 kp_id；一旦文档重新抽取（kp_id 整体更换），这些收藏就永远无法
+        映射回任何知识点。这里趁节点还在，按 kp_id 从 Neo4j 取名字写回 SQLite，
+        以后再抽取就能按同名回挂。Neo4j 不可用时保持原样（读收藏不应因此失败）。
+        """
+        missing = [r for r in rows if not r.get("kp_name")]
+        if not missing:
+            return
+        kp_ids = [r["kp_id"] for r in missing if r.get("kp_id")]
+        if not kp_ids:
+            return
+        try:
+            recs = db.query(
+                "MATCH (n:KnowledgePoint {course_id: $cid}) WHERE n.kp_id IN $kp_ids "
+                "RETURN n.kp_id AS kp_id, n.name AS kp_name",
+                {"cid": course_id, "kp_ids": kp_ids},
+            )
+        except Exception as e:  # noqa: BLE001 - 补名字是尽力而为，失败不能影响收藏列表
+            logger.warning("收藏补名字失败 course_id=%s: %s", course_id, e)
+            return
+        name_by_id = {r["kp_id"]: r.get("kp_name") for r in recs if r.get("kp_name")}
+        for r in missing:
+            kp_name = name_by_id.get(r.get("kp_id"))
+            if not kp_name:
+                continue
+            r["kp_name"] = kp_name
+            sql_db.update_favorite_kp_name(
+                user_id, course_id, document_id if document_id is not None else r.get("document_id"),
+                r["kp_id"], kp_name,
+            )
 
     @staticmethod
     def add(current_user: dict, course_id, document_id, kp_id: str) -> dict:
@@ -75,16 +115,17 @@ class FavoriteService:
 
         recs = db.query(
             "MATCH (n:KnowledgePoint {course_id: $cid, document_id: $did, kp_id: $kp_id}) "
-            "RETURN n.kp_id AS kp_id",
+            "RETURN n.kp_id AS kp_id, n.name AS kp_name",
             {"cid": cid, "did": did, "kp_id": kp_id},
         )
         if not recs:
             return FavoriteService._fail(
                 4002, f"知识点不存在：course_id={cid}, document_id={did}, kp_id={kp_id}")
 
-        created = sql_db.add_favorite(current_user["user_id"], cid, did, kp_id)
+        kp_name = recs[0].get("kp_name")
+        created = sql_db.add_favorite(current_user["user_id"], cid, did, kp_id, kp_name)
         return FavoriteService._ok({"course_id": cid, "document_id": did,
-                                    "kp_id": kp_id, "created": created})
+                                    "kp_id": kp_id, "kp_name": kp_name, "created": created})
 
     @staticmethod
     def remove(user_id: int, course_id, document_id, kp_id: str) -> dict:

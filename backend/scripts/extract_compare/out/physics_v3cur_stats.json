@@ -1,0 +1,32 @@
+{
+ "text": "eval_data\\第2章_运动学_Kinematics_中文版.txt",
+ "text_id": "物理_第2章_运动学_Kinematics",
+ "chars": 36659,
+ "temperature": 0.0,
+ "domain": "physics",
+ "runs": {
+  "v3": {
+   "name": "v3",
+   "entities": 85,
+   "relations": 55,
+   "raw_relations": 99,
+   "dropped_counts": {
+    "invalid_evidence": 19,
+    "duplicate": 22,
+    "dangling_endpoint": 3
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 61,
+   "unmatched_mentions": 4,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 38.9,
+   "calls": 8,
+   "failed_calls": 0,
+   "prompt_tokens": 79172,
+   "completion_tokens": 16694,
+   "total_tokens": 95866
+  }
+ }
+}

@@ -1,0 +1,1865 @@
+{
+ "entities": [
+  {
+   "name": "运动学",
+   "category": "概念",
+   "description": "不考虑运动原因的运动研究。",
+   "descriptions": [
+    "不考虑运动原因的运动研究。",
+    "研究物体运动规律的科学。",
+    "不考虑原因的运动研究"
+   ],
+   "alt_descriptions": [
+    "研究物体运动规律的科学。",
+    "不考虑原因的运动研究"
+   ]
+  },
+  {
+   "name": "一维运动",
+   "category": "概念",
+   "description": "沿直线的运动。",
+   "descriptions": [
+    "沿直线的运动。",
+    "物体沿直线运动。",
+    "沿直线的运动"
+   ],
+   "alt_descriptions": [
+    "物体沿直线运动。",
+    "沿直线的运动"
+   ]
+  },
+  {
+   "name": "位置",
+   "category": "概念",
+   "description": "物体在特定时间相对于参考系的位置。",
+   "descriptions": [
+    "物体在特定时间相对于参考系的位置。",
+    "物体在空间中的所在处。",
+    "物体在特定时间的位置"
+   ],
+   "alt_descriptions": [
+    "物体在空间中的所在处。",
+    "物体在特定时间的位置"
+   ]
+  },
+  {
+   "name": "位移",
+   "category": "概念",
+   "description": "物体位置的变化，是矢量。",
+   "descriptions": [
+    "物体位置的变化，是矢量。",
+    "物体位置的变化量，是矢量。",
+    "物体位置的变化"
+   ],
+   "alt_descriptions": [
+    "物体位置的变化量，是矢量。",
+    "物体位置的变化"
+   ]
+  },
+  {
+   "name": "距离",
+   "category": "概念",
+   "description": "两个位置之间位移的大小，是标量。",
+   "descriptions": [
+    "两个位置之间位移的大小，是标量。",
+    "两点之间的直线长度，是标量。",
+    "两个位置之间位移的大小"
+   ],
+   "alt_descriptions": [
+    "两点之间的直线长度，是标量。",
+    "两个位置之间位移的大小"
+   ]
+  },
+  {
+   "name": "路程",
+   "category": "概念",
+   "description": "两个位置之间走过的路径的总长度。",
+   "descriptions": [
+    "两个位置之间走过的路径的总长度。",
+    "物体运动轨迹的长度，是标量。",
+    "两个位置之间走过的路径的总长度"
+   ],
+   "alt_descriptions": [
+    "物体运动轨迹的长度，是标量。",
+    "两个位置之间走过的路径的总长度"
+   ]
+  },
+  {
+   "name": "参考系",
+   "category": "概念",
+   "description": "描述物体位置时选定的参照物。",
+   "descriptions": [
+    "描述物体位置时选定的参照物。",
+    "描述物体运动时选作参考的物体。",
+    "描述物体运动时选作参考的物体",
+    "用于描述位置的参照系统"
+   ],
+   "alt_descriptions": [
+    "描述物体运动时选作参考的物体。",
+    "描述物体运动时选作参考的物体",
+    "用于描述位置的参照系统"
+   ]
+  },
+  {
+   "name": "坐标系",
+   "category": "概念",
+   "description": "在参考系内指定方向的一维坐标线。",
+   "descriptions": [
+    "在参考系内指定方向的一维坐标线。",
+    "用于定量描述物体位置的系统。",
+    "用于定量描述位置的系统",
+    "用于指定位置和方向的坐标系统"
+   ],
+   "alt_descriptions": [
+    "用于定量描述物体位置的系统。",
+    "用于定量描述位置的系统",
+    "用于指定位置和方向的坐标系统"
+   ]
+  },
+  {
+   "name": "矢量",
+   "category": "概念",
+   "description": "既有大小又有方向的物理量。",
+   "descriptions": [
+    "既有大小又有方向的物理量。",
+    "用大小和方向两者描述的量"
+   ],
+   "alt_descriptions": [
+    "用大小和方向两者描述的量"
+   ]
+  },
+  {
+   "name": "标量",
+   "category": "概念",
+   "description": "只有大小没有方向的物理量。",
+   "descriptions": [
+    "只有大小没有方向的物理量。",
+    "只用大小描述、不用方向的量"
+   ],
+   "alt_descriptions": [
+    "只用大小描述、不用方向的量"
+   ]
+  },
+  {
+   "name": "时间",
+   "category": "概念",
+   "description": "变化或变化发生的间隔。",
+   "descriptions": [
+    "变化或变化发生的间隔。",
+    "描述运动持续性的物理量。",
+    "变化，或发生变化的间隔"
+   ],
+   "alt_descriptions": [
+    "描述运动持续性的物理量。",
+    "变化，或发生变化的间隔"
+   ]
+  },
+  {
+   "name": "经过时间",
+   "category": "概念",
+   "description": "运动结束时间与开始时间之差。",
+   "descriptions": [
+    "运动结束时间与开始时间之差。",
+    "从初始时刻到末时刻的时间间隔。",
+    "结束时间与开始时间之差"
+   ],
+   "alt_descriptions": [
+    "从初始时刻到末时刻的时间间隔。",
+    "结束时间与开始时间之差"
+   ]
+  },
+  {
+   "name": "速度",
+   "category": "概念",
+   "description": "位移除以时间，是矢量。",
+   "descriptions": [
+    "位移除以时间，是矢量。",
+    "描述物体运动快慢和方向的物理量，是矢量。",
+    "描述物体运动快慢和方向的物理量",
+    "位移的变化率，是矢量"
+   ],
+   "alt_descriptions": [
+    "描述物体运动快慢和方向的物理量，是矢量。",
+    "描述物体运动快慢和方向的物理量",
+    "位移的变化率，是矢量"
+   ]
+  },
+  {
+   "name": "平均速度",
+   "category": "概念",
+   "description": "位移除以经过时间。",
+   "descriptions": [
+    "位移除以经过时间。",
+    "位移与发生这段位移所用时间的比值。",
+    "位移除以发生该位移的时间"
+   ],
+   "alt_descriptions": [
+    "位移与发生这段位移所用时间的比值。",
+    "位移除以发生该位移的时间"
+   ]
+  },
+  {
+   "name": "瞬时速度",
+   "category": "概念",
+   "description": "某一瞬间或无穷小时间间隔内的平均速度。",
+   "descriptions": [
+    "某一瞬间或无穷小时间间隔内的平均速度。",
+    "物体在某一时刻或某一位置的速度。",
+    "特定瞬间的速度，或无穷小时间间隔内的平均速度"
+   ],
+   "alt_descriptions": [
+    "物体在某一时刻或某一位置的速度。",
+    "特定瞬间的速度，或无穷小时间间隔内的平均速度"
+   ]
+  },
+  {
+   "name": "速率",
+   "category": "概念",
+   "description": "速度的大小，是标量。",
+   "descriptions": [
+    "速度的大小，是标量。",
+    "速度的大小",
+    "路程的变化率，是标量"
+   ],
+   "alt_descriptions": [
+    "速度的大小",
+    "路程的变化率，是标量"
+   ]
+  },
+  {
+   "name": "平均速率",
+   "category": "概念",
+   "description": "走过的路程除以经过时间。",
+   "descriptions": [
+    "走过的路程除以经过时间。",
+    "路程与时间的比值。",
+    "走过的距离除以发生运动的这段时间"
+   ],
+   "alt_descriptions": [
+    "路程与时间的比值。",
+    "走过的距离除以发生运动的这段时间"
+   ]
+  },
+  {
+   "name": "瞬时速率",
+   "category": "概念",
+   "description": "瞬时速度的大小。",
+   "descriptions": [
+    "瞬时速度的大小。",
+    "瞬时速度的大小"
+   ],
+   "alt_descriptions": [
+    "瞬时速度的大小"
+   ]
+  },
+  {
+   "name": "加速度",
+   "category": "概念",
+   "description": "速度变化的速率，是矢量。",
+   "descriptions": [
+    "速度变化的速率，是矢量。",
+    "描述速度变化快慢的物理量，是矢量。",
+    "速度的变化率",
+    "速度变化的速率，是矢量"
+   ],
+   "alt_descriptions": [
+    "描述速度变化快慢的物理量，是矢量。",
+    "速度的变化率",
+    "速度变化的速率，是矢量"
+   ]
+  },
+  {
+   "name": "平均加速度",
+   "category": "概念",
+   "description": "速度变化除以时间变化。",
+   "descriptions": [
+    "速度变化除以时间变化。",
+    "速度变化量与发生这一变化所用时间的比值。",
+    "速度变化除以发生该变化的时间",
+    "速度变化量除以发生该变化的时间"
+   ],
+   "alt_descriptions": [
+    "速度变化量与发生这一变化所用时间的比值。",
+    "速度变化除以发生该变化的时间",
+    "速度变化量除以发生该变化的时间"
+   ]
+  },
+  {
+   "name": "瞬时加速度",
+   "category": "概念",
+   "description": "某一瞬间的加速度。",
+   "descriptions": [
+    "某一瞬间的加速度。",
+    "物体在某一时刻的加速度。",
+    "特定时间点的加速度"
+   ],
+   "alt_descriptions": [
+    "物体在某一时刻的加速度。",
+    "特定时间点的加速度"
+   ]
+  },
+  {
+   "name": "减速",
+   "category": "概念",
+   "description": "加速度方向与运动方向相反，使速率降低。",
+   "descriptions": [
+    "加速度方向与运动方向相反，使速率降低。",
+    "加速度方向与速度方向相反的运动状态。",
+    "与速度方向相反的加速度；导致速度减小的加速度"
+   ],
+   "alt_descriptions": [
+    "加速度方向与速度方向相反的运动状态。",
+    "与速度方向相反的加速度；导致速度减小的加速度"
+   ]
+  },
+  {
+   "name": "重力加速度",
+   "category": "概念",
+   "description": "自由落体加速度，方向竖直向下。",
+   "descriptions": [
+    "自由落体加速度，方向竖直向下。",
+    "物体仅受重力作用时的加速度。",
+    "物体因引力而产生的加速度",
+    "地球表面自由落体物体的恒定加速度，g = 9.80 m/s²"
+   ],
+   "alt_descriptions": [
+    "物体仅受重力作用时的加速度。",
+    "物体因引力而产生的加速度",
+    "地球表面自由落体物体的恒定加速度，g = 9.80 m/s²"
+   ]
+  },
+  {
+   "name": "匀加速运动",
+   "category": "概念",
+   "description": "加速度恒定的运动。",
+   "descriptions": [
+    "加速度恒定的运动。",
+    "加速度保持不变的运动。",
+    "加速度恒定的运动"
+   ],
+   "alt_descriptions": [
+    "加速度保持不变的运动。",
+    "加速度恒定的运动"
+   ]
+  },
+  {
+   "name": "自由落体",
+   "category": "概念",
+   "description": "仅在重力作用下从静止下落的运动。",
+   "descriptions": [
+    "仅在重力作用下从静止下落的运动。",
+    "只在重力作用下从静止开始下落的运动。",
+    "仅由引力作用产生的运动状态"
+   ],
+   "alt_descriptions": [
+    "只在重力作用下从静止开始下落的运动。",
+    "仅由引力作用产生的运动状态"
+   ]
+  },
+  {
+   "name": "运动学方程",
+   "category": "公式",
+   "description": "描述匀加速运动的位置、速度、加速度和时间关系的方程。",
+   "descriptions": [
+    "描述匀加速运动的位置、速度、加速度和时间关系的方程。",
+    "描述匀加速运动规律的方程，如 v = v0 + at 等。",
+    "描述匀加速运动的位置、速度、加速度和时间关系的方程",
+    "描述匀加速运动的速度、位移与时间关系的方程"
+   ],
+   "alt_descriptions": [
+    "描述匀加速运动规律的方程，如 v = v0 + at 等。",
+    "描述匀加速运动的位置、速度、加速度和时间关系的方程",
+    "描述匀加速运动的速度、位移与时间关系的方程"
+   ]
+  },
+  {
+   "name": "图像分析",
+   "category": "方法",
+   "description": "利用位置-时间图、速度-时间图等分析运动的方法。",
+   "descriptions": [
+    "利用位置-时间图、速度-时间图等分析运动的方法。",
+    "通过位置-时间图、速度-时间图等分析运动的方法。",
+    "利用图像分析运动规律的方法",
+    "通过运动图分析运动的方法"
+   ],
+   "alt_descriptions": [
+    "通过位置-时间图、速度-时间图等分析运动的方法。",
+    "利用图像分析运动规律的方法",
+    "通过运动图分析运动的方法"
+   ]
+  },
+  {
+   "name": "位置-时间图",
+   "category": "概念",
+   "description": "表示位置随时间变化的图像。",
+   "descriptions": [
+    "表示位置随时间变化的图像。",
+    "以时间为横轴、位置为纵轴的图像",
+    "以位置为纵轴、时间为横轴的图"
+   ],
+   "alt_descriptions": [
+    "以时间为横轴、位置为纵轴的图像",
+    "以位置为纵轴、时间为横轴的图"
+   ]
+  },
+  {
+   "name": "速度-时间图",
+   "category": "概念",
+   "description": "表示速度随时间变化的图像。",
+   "descriptions": [
+    "表示速度随时间变化的图像。",
+    "以时间为横轴、速度为纵轴的图像",
+    "以速度为纵轴、时间为横轴的图"
+   ],
+   "alt_descriptions": [
+    "以时间为横轴、速度为纵轴的图像",
+    "以速度为纵轴、时间为横轴的图"
+   ]
+  },
+  {
+   "name": "加速度-时间图",
+   "category": "概念",
+   "description": "表示加速度随时间变化的图像。",
+   "descriptions": [
+    "表示加速度随时间变化的图像。",
+    "以时间为横轴、加速度为纵轴的图像",
+    "以加速度为纵轴、时间为横轴的图"
+   ],
+   "alt_descriptions": [
+    "以时间为横轴、加速度为纵轴的图像",
+    "以加速度为纵轴、时间为横轴的图"
+   ]
+  },
+  {
+   "name": "解题步骤",
+   "category": "方法",
+   "description": "解决一维运动学问题的系统步骤。",
+   "descriptions": [
+    "解决一维运动学问题的系统步骤。",
+    "解决一维运动学问题的一般步骤。",
+    "解决物理问题的一般步骤",
+    "物理学中解决一维运动学问题的六个基本步骤"
+   ],
+   "alt_descriptions": [
+    "解决一维运动学问题的一般步骤。",
+    "解决物理问题的一般步骤",
+    "物理学中解决一维运动学问题的六个基本步骤"
+   ]
+  },
+  {
+   "name": "斜率",
+   "category": "概念",
+   "description": "图像中直线的倾斜程度，表示变化率。",
+   "descriptions": [
+    "图像中直线的倾斜程度，表示变化率。",
+    "直线上两点的y值之差除以x值之差",
+    "一条直线上两点的y值之差除以x值之差"
+   ],
+   "alt_descriptions": [
+    "直线上两点的y值之差除以x值之差",
+    "一条直线上两点的y值之差除以x值之差"
+   ]
+  },
+  {
+   "name": "自变量",
+   "category": "概念",
+   "description": "在函数关系中独立变化的量。",
+   "descriptions": [
+    "在函数关系中独立变化的量。",
+    "因变量相对于它测量的变量",
+    "因变量相对于它测量的变量；通常沿x轴作图"
+   ],
+   "alt_descriptions": [
+    "因变量相对于它测量的变量",
+    "因变量相对于它测量的变量；通常沿x轴作图"
+   ]
+  },
+  {
+   "name": "因变量",
+   "category": "概念",
+   "description": "在函数关系中随自变量变化的量。",
+   "descriptions": [
+    "在函数关系中随自变量变化的量。",
+    "被测量的变量",
+    "被测量的变量；通常沿y轴作图"
+   ],
+   "alt_descriptions": [
+    "被测量的变量",
+    "被测量的变量；通常沿y轴作图"
+   ]
+  },
+  {
+   "name": "y截距",
+   "category": "概念",
+   "description": "x=0时的值，或图与y轴相交时的值",
+   "descriptions": [
+    "x=0时的值，或图与y轴相交时的值",
+    "x = 0 时的值，或图与y轴相交时的值"
+   ],
+   "alt_descriptions": [
+    "x = 0 时的值，或图与y轴相交时的值"
+   ]
+  },
+  {
+   "name": "模型",
+   "category": "概念",
+   "description": "只包含描述物理情境所需元素的简化描述",
+   "descriptions": [
+    "只包含描述物理情境所需元素的简化描述"
+   ]
+  }
+ ],
+ "relations": [
+  {
+   "source": "运动学",
+   "target": "一维运动",
+   "type": "CONTAINS",
+   "evidence": "在本章中，我们研究最简单的运动类型——即沿直线的运动，或一维运动。",
+   "confidence": 0.95
+  },
+  {
+   "source": "矢量",
+   "target": "位移",
+   "type": "CONTAINS",
+   "evidence": "位移是矢量（vector）量的一个例子。",
+   "confidence": 0.95
+  },
+  {
+   "source": "矢量",
+   "target": "速度",
+   "type": "CONTAINS",
+   "evidence": "注意这个定义表明速度是矢量，因为位移是矢量。",
+   "confidence": 0.95
+  },
+  {
+   "source": "标量",
+   "target": "距离",
+   "type": "CONTAINS",
+   "evidence": "距离是标量（scalar）量的一个例子。",
+   "confidence": 0.95
+  },
+  {
+   "source": "标量",
+   "target": "速率",
+   "type": "CONTAINS",
+   "evidence": "因此速率是标量。",
+   "confidence": 0.95
+  },
+  {
+   "source": "速度",
+   "target": "平均速度",
+   "type": "CONTAINS",
+   "evidence": "平均速度是位移（位置的变化）除以行驶时间。",
+   "confidence": 0.95
+  },
+  {
+   "source": "速度",
+   "target": "瞬时速度",
+   "type": "CONTAINS",
+   "evidence": "瞬时速度是某个特定瞬间（或无穷小时间间隔内）的平均速度。",
+   "confidence": 0.95
+  },
+  {
+   "source": "速率",
+   "target": "平均速率",
+   "type": "CONTAINS",
+   "evidence": "平均速率是走过的距离除以经过时间。",
+   "confidence": 0.95
+  },
+  {
+   "source": "速率",
+   "target": "瞬时速率",
+   "type": "CONTAINS",
+   "evidence": "瞬时速率是瞬时速度的大小。",
+   "confidence": 0.95
+  },
+  {
+   "source": "加速度",
+   "target": "平均加速度",
+   "type": "CONTAINS",
+   "evidence": "平均加速度是速度变化的速率。",
+   "confidence": 0.95
+  },
+  {
+   "source": "加速度",
+   "target": "瞬时加速度",
+   "type": "CONTAINS",
+   "evidence": "瞬时加速度 a，或某个特定瞬间的加速度。",
+   "confidence": 0.95
+  },
+  {
+   "source": "加速度",
+   "target": "减速",
+   "type": "CONTAINS",
+   "evidence": "当物体减速时，它的加速度与运动方向相反。这被称为减速（deceleration）。",
+   "confidence": 0.95
+  },
+  {
+   "source": "加速度",
+   "target": "重力加速度",
+   "type": "CONTAINS",
+   "evidence": "重力加速度是自由落体的加速度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "匀加速运动",
+   "target": "自由落体",
+   "type": "CONTAINS",
+   "evidence": "自由落体是匀加速运动的一个特例。",
+   "confidence": 0.9
+  },
+  {
+   "source": "图像分析",
+   "target": "位置-时间图",
+   "type": "CONTAINS",
+   "evidence": "绘制位置或速度随时间变化的图可能非常有用。",
+   "confidence": 0.9
+  },
+  {
+   "source": "图像分析",
+   "target": "速度-时间图",
+   "type": "CONTAINS",
+   "evidence": "绘制位置或速度随时间变化的图可能非常有用。",
+   "confidence": 0.9
+  },
+  {
+   "source": "图像分析",
+   "target": "加速度-时间图",
+   "type": "CONTAINS",
+   "evidence": "图2.17显示了两种截然不同运动的瞬时加速度-时间图。",
+   "confidence": 0.9
+  },
+  {
+   "source": "参考系",
+   "target": "坐标系",
+   "type": "CONTAINS",
+   "evidence": "为了描述矢量量的方向，你必须在参考系内指定一个坐标系。",
+   "confidence": 0.95
+  },
+  {
+   "source": "时间",
+   "target": "经过时间",
+   "type": "CONTAINS",
+   "evidence": "经过时间是结束时间 t_f 和开始时间 t_0 之差。",
+   "confidence": 0.95
+  },
+  {
+   "source": "图像分析",
+   "target": "一维运动",
+   "type": "APPLIES_TO",
+   "evidence": "另一种可视化物体运动的方法是使用图像。绘制位置或速度随时间变化的图可能非常有用。",
+   "confidence": 0.9
+  },
+  {
+   "source": "解题步骤",
+   "target": "一维运动",
+   "type": "APPLIES_TO",
+   "evidence": "一维运动学解题基础。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位移",
+   "target": "位置",
+   "type": "RELATED_TO",
+   "evidence": "位移是物体位置的变化。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位移",
+   "target": "距离",
+   "type": "RELATED_TO",
+   "evidence": "距离被定义为两个位置之间位移的大小或尺寸。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位移",
+   "target": "路程",
+   "type": "RELATED_TO",
+   "evidence": "路程是两个位置之间走过的路径的总长度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位置",
+   "target": "参考系",
+   "type": "RELATED_TO",
+   "evidence": "你需要指定它相对于一个方便的参考系的位置。",
+   "confidence": 0.9
+  },
+  {
+   "source": "坐标系",
+   "target": "矢量",
+   "type": "RELATED_TO",
+   "evidence": "为了描述矢量量的方向，你必须在参考系内指定一个坐标系。",
+   "confidence": 0.9
+  },
+  {
+   "source": "矢量",
+   "target": "标量",
+   "type": "RELATED_TO",
+   "evidence": "位移是矢量量的一个例子。距离是标量量的一个例子。",
+   "confidence": 0.9
+  },
+  {
+   "source": "速度",
+   "target": "速率",
+   "type": "RELATED_TO",
+   "evidence": "速率是速度的大小。",
+   "confidence": 0.9
+  },
+  {
+   "source": "平均速度",
+   "target": "位移",
+   "type": "RELATED_TO",
+   "evidence": "平均速度是位移除以时间。",
+   "confidence": 0.9
+  },
+  {
+   "source": "平均速度",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "平均速度变成瞬时速度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "平均速率",
+   "target": "平均速度",
+   "type": "RELATED_TO",
+   "evidence": "平均速率可以大于平均速度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "瞬时速率",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "瞬时速率是瞬时速度的大小。",
+   "confidence": 0.9
+  },
+  {
+   "source": "加速度",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "加速度是速度变化的速率。",
+   "confidence": 0.9
+  },
+  {
+   "source": "匀加速运动",
+   "target": "加速度",
+   "type": "RELATED_TO",
+   "evidence": "匀加速运动是加速度恒定的运动。",
+   "confidence": 0.9
+  },
+  {
+   "source": "平均加速度",
+   "target": "瞬时加速度",
+   "type": "RELATED_TO",
+   "evidence": "瞬时加速度通过与瞬时速度相同的过程获得。",
+   "confidence": 0.9
+  },
+  {
+   "source": "瞬时加速度",
+   "target": "瞬时速度",
+   "type": "RELATED_TO",
+   "evidence": "瞬时加速度通过与瞬时速度相同的过程获得。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位置-时间图",
+   "target": "位移",
+   "type": "RELATED_TO",
+   "evidence": "位置-时间图显示位置随时间的变化。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位置-时间图",
+   "target": "速度",
+   "type": "RELATED_TO",
+   "evidence": "在给定位置-时间图的情况下导出速度-时间图。",
+   "confidence": 0.9
+  },
+  {
+   "source": "位置-时间图",
+   "target": "速度-时间图",
+   "type": "RELATED_TO",
+   "evidence": "在给定位置-时间图的情况下导出速度-时间图。",
+   "confidence": 0.9
+  },
+  {
+   "source": "速度-时间图",
+   "target": "加速度",
+   "type": "RELATED_TO",
+   "evidence": "速度-时间图的斜率表示加速度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "速度-时间图",
+   "target": "加速度-时间图",
+   "type": "RELATED_TO",
+   "evidence": "速度-时间图与加速度-时间图相关。",
+   "confidence": 0.9
+  },
+  {
+   "source": "自由落体",
+   "target": "重力加速度",
+   "type": "RELATED_TO",
+   "evidence": "自由落体是仅在重力作用下的运动，其加速度为重力加速度。",
+   "confidence": 0.9
+  },
+  {
+   "source": "运动学方程",
+   "target": "匀加速运动",
+   "type": "RELATED_TO",
+   "evidence": "运动学方程描述匀加速运动。",
+   "confidence": 0.9
+  },
+  {
+   "source": "运动学方程",
+   "target": "自由落体",
+   "type": "RELATED_TO",
+   "evidence": "运动学方程也适用于自由落体。",
+   "confidence": 0.9
+  },
+  {
+   "source": "斜率",
+   "target": "位置-时间图",
+   "type": "RELATED_TO",
+   "evidence": "斜率与位置-时间图相关",
+   "confidence": 0.9
+  },
+  {
+   "source": "自变量",
+   "target": "因变量",
+   "type": "RELATED_TO",
+   "evidence": "自变量与因变量相关",
+   "confidence": 0.9
+  },
+  {
+   "source": "距离",
+   "target": "路程",
+   "type": "RELATED_TO",
+   "evidence": "距离与路程相关",
+   "confidence": 0.9
+  }
+ ],
+ "raw_relation_count": 186,
+ "dropped_relations": [
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "平均速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "瞬时速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "平均加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "减速",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学",
+   "type": "CONTAINS",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "位置-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "CONTAINS",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "参考系",
+   "type": "CONTAINS",
+   "target": "坐标系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "时间",
+   "type": "CONTAINS",
+   "target": "经过时间",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "解题步骤",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "位置",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "路程",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置",
+   "type": "RELATED_TO",
+   "target": "参考系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "坐标系",
+   "type": "RELATED_TO",
+   "target": "矢量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "RELATED_TO",
+   "target": "标量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "RELATED_TO",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速率",
+   "type": "RELATED_TO",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时速率",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "自由落体",
+   "type": "RELATED_TO",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "匀加速运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学",
+   "type": "CONTAINS",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "平均速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "瞬时速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "平均加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "减速",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "CONTAINS",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "位置-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "参考系",
+   "type": "CONTAINS",
+   "target": "坐标系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "时间",
+   "type": "CONTAINS",
+   "target": "经过时间",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "解题步骤",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "队列",
+   "type": "RELATED_TO",
+   "target": "广度优先遍历",
+   "reason_code": "dangling_endpoint",
+   "detail": "端点不在 entities 中"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "位置",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "路程",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置",
+   "type": "RELATED_TO",
+   "target": "参考系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "坐标系",
+   "type": "RELATED_TO",
+   "target": "矢量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "RELATED_TO",
+   "target": "标量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "RELATED_TO",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速率",
+   "type": "RELATED_TO",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时速率",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "斜率",
+   "type": "RELATED_TO",
+   "target": "位置-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "自变量",
+   "type": "RELATED_TO",
+   "target": "因变量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "自由落体",
+   "type": "RELATED_TO",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "距离",
+   "type": "RELATED_TO",
+   "target": "路程",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "匀加速运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学",
+   "type": "CONTAINS",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "CONTAINS",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "标量",
+   "type": "CONTAINS",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "CONTAINS",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "平均速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速率",
+   "type": "CONTAINS",
+   "target": "瞬时速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "平均加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "CONTAINS",
+   "target": "减速",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "时间",
+   "type": "CONTAINS",
+   "target": "经过时间",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "参考系",
+   "type": "CONTAINS",
+   "target": "坐标系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "CONTAINS",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "位置-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "CONTAINS",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "图像分析",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "解题步骤",
+   "type": "APPLIES_TO",
+   "target": "一维运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "位置",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "距离",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位移",
+   "type": "RELATED_TO",
+   "target": "路程",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置",
+   "type": "RELATED_TO",
+   "target": "参考系",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "位置-时间图",
+   "type": "RELATED_TO",
+   "target": "速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度-时间图",
+   "type": "RELATED_TO",
+   "target": "加速度-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "加速度",
+   "type": "RELATED_TO",
+   "target": "速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "匀加速运动",
+   "type": "RELATED_TO",
+   "target": "加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "坐标系",
+   "type": "RELATED_TO",
+   "target": "矢量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "矢量",
+   "type": "RELATED_TO",
+   "target": "标量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "速度",
+   "type": "RELATED_TO",
+   "target": "速率",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时加速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "位移",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速度",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "平均速率",
+   "type": "RELATED_TO",
+   "target": "平均速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "瞬时速率",
+   "type": "RELATED_TO",
+   "target": "瞬时速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "斜率",
+   "type": "RELATED_TO",
+   "target": "位置-时间图",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "自变量",
+   "type": "RELATED_TO",
+   "target": "因变量",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "自由落体",
+   "type": "RELATED_TO",
+   "target": "重力加速度",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "距离",
+   "type": "RELATED_TO",
+   "target": "路程",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "匀加速运动",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  },
+  {
+   "source": "运动学方程",
+   "type": "RELATED_TO",
+   "target": "自由落体",
+   "reason_code": "duplicate",
+   "detail": "重复三元组（多因分块重叠）"
+  }
+ ],
+ "dropped_counts": {
+  "duplicate": 138,
+  "dangling_endpoint": 1
+ },
+ "dropped_entity_count": 0,
+ "chunk_count": 4,
+ "failed_chunk_count": 0,
+ "succeeded_chunk_count": 4,
+ "entity_duplicates": 100,
+ "duplicate_names": [
+  "位移",
+  "路程",
+  "距离",
+  "速度",
+  "速率",
+  "平均速度",
+  "瞬时速度",
+  "平均速率",
+  "瞬时速率",
+  "加速度",
+  "平均加速度",
+  "瞬时加速度",
+  "重力加速度",
+  "减速",
+  "匀加速运动",
+  "自由落体",
+  "运动学",
+  "一维运动",
+  "运动学方程",
+  "图像分析",
+  "位置-时间图",
+  "速度-时间图",
+  "加速度-时间图",
+  "解题步骤",
+  "矢量",
+  "标量",
+  "参考系",
+  "坐标系",
+  "位置",
+  "时间",
+  "经过时间",
+  "斜率",
+  "自变量",
+  "因变量",
+  "y截距"
+ ]
+}

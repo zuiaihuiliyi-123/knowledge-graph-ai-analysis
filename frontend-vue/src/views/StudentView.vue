@@ -85,7 +85,7 @@
           :course-name="currentCourseName"
           :document-name="currentDocumentName"
           :ctx-key="ctxKey"
-          :favorite-ids="favoriteIds"
+          :favorite-ids="favoriteIdsEffective"
           @jump-kp="jumpToKp"
           @toggle-favorite="toggleFavoriteSafe"
         />
@@ -104,7 +104,7 @@
           :path-data-checked="pathDataChecked"
           :current-node="currentKnowledgePoint"
           :overview-focus-list="overviewFocusList"
-          :favorite-ids="favoriteIds"
+          :favorite-ids="favoriteIdsEffective"
           :knowledge-options="knowledgeOptions"
           :mastered-names="masteredNames"
           @locate="locateKnowledgePoint"
@@ -122,11 +122,13 @@
           :ctx-key="ctxKey"
           :document-name="currentDocumentName"
           :favorite-ids="favoriteIds"
+          :favorite-names="favoriteNames[ctxKey] || {}"
           :graph-nodes="graphNodes"
           :loading="!!ctxKey && (!graphDataChecked || favoritesLoading)"
           :loaded="graphDataChecked && favoritesLoaded"
           @view="locateKnowledgePoint"
           @unfavorite="toggleFavoriteSafe"
+          @cleanup-orphans="removeFavoritesSafe"
           @go-browse="goBrowse"
         />
       </el-tab-pane>
@@ -228,6 +230,8 @@ const {
   favoritesLoaded,
   favoriteLoading,
   favoriteIds,
+  favoriteIdsEffective,
+  favoriteNames,
   drawerVisible,
   drawerNode,
   drawerRelated,
@@ -252,6 +256,7 @@ const {
   overviewKpis,
   overviewStateList,
   toggleFavoriteSafe,
+  removeFavoritesSafe,
   onToggleFavorite,
   onToggleMastery,
   onNodeClick,

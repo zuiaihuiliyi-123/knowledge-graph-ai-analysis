@@ -105,19 +105,43 @@ class LearningMixin:
 
     # ---------- 学生收藏（收藏 = 个人知识点书签，独立于学习状态） ----------
 
-    def add_favorite(self, user_id: int, course_id: int, document_id, kp_id: str) -> bool:
+    def add_favorite(self, user_id: int, course_id: int, document_id, kp_id: str,
+                     kp_name: str = None) -> bool:
         """新增收藏（INSERT OR IGNORE 幂等）；返回是否新插入（True=新增，False=已存在未重复）。
 
         Phase 8B：document_id 作为业务作用域字段写入（kp_id 全局唯一，UNIQUE 无需改为四列）。
+        kp_name 是知识点名快照：重新抽取会整体更换 kp_id，仅凭 kp_id 无法找回原知识点。
+        已存在的行也顺带补名字（旧数据可能没有快照），不改变幂等语义。
         """
         with self._connect() as conn:
             cur = conn.execute(
-                "INSERT OR IGNORE INTO t_student_favorite (user_id, course_id, document_id, kp_id) "
-                "VALUES (?, ?, ?, ?)",
-                (user_id, course_id, document_id, kp_id),
+                "INSERT OR IGNORE INTO t_student_favorite "
+                "(user_id, course_id, document_id, kp_id, kp_name) VALUES (?, ?, ?, ?, ?)",
+                (user_id, course_id, document_id, kp_id, kp_name),
             )
+            if cur.rowcount == 0 and kp_name:
+                conn.execute(
+                    "UPDATE t_student_favorite SET kp_name = ? "
+                    "WHERE user_id = ? AND course_id = ? AND kp_id = ? AND kp_name IS NULL",
+                    (kp_name, user_id, course_id, kp_id),
+                )
             conn.commit()
             return cur.rowcount > 0
+
+    def update_favorite_kp_name(self, user_id: int, course_id: int, document_id,
+                                kp_id: str, kp_name: str) -> int:
+        """回填收藏的知识点名快照（旧数据升级用；幂等）"""
+        if not kp_name:
+            return 0
+        with self._connect() as conn:
+            cur = conn.execute(
+                "UPDATE t_student_favorite SET kp_name = ? "
+                "WHERE user_id = ? AND course_id = ? AND document_id = ? AND kp_id = ? "
+                "AND (kp_name IS NULL OR kp_name = '')",
+                (kp_name, user_id, course_id, document_id, kp_id),
+            )
+            conn.commit()
+            return cur.rowcount
 
 
     def remove_favorite(self, user_id: int, course_id: int, document_id, kp_id: str) -> int:
@@ -136,12 +160,14 @@ class LearningMixin:
         """查询某用户某文档的收藏（按收藏时间倒序）；document_id 为 None 时退化为课程级"""
         if document_id is not None:
             return self._query(
-                "SELECT kp_id, course_id, document_id, created_at FROM t_student_favorite "
+                "SELECT kp_id, kp_name, course_id, document_id, created_at "
+                "FROM t_student_favorite "
                 "WHERE user_id = ? AND course_id = ? AND document_id = ? ORDER BY id DESC",
                 (user_id, course_id, document_id),
             )
         return self._query(
-            "SELECT kp_id, course_id, created_at FROM t_student_favorite "
+            "SELECT kp_id, kp_name, course_id, document_id, created_at "
+            "FROM t_student_favorite "
             "WHERE user_id = ? AND course_id = ? ORDER BY id DESC",
             (user_id, course_id),
         )
@@ -150,7 +176,8 @@ class LearningMixin:
     def list_favorites_by_user(self, user_id: int) -> list:
         """查询某用户全部课程的收藏（按课程 + 收藏时间倒序）"""
         return self._query(
-            "SELECT kp_id, course_id, created_at FROM t_student_favorite "
+            "SELECT kp_id, kp_name, course_id, document_id, created_at "
+            "FROM t_student_favorite "
             "WHERE user_id = ? ORDER BY course_id, id DESC",
             (user_id,),
         )

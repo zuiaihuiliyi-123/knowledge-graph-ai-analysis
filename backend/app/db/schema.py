@@ -251,6 +251,8 @@ _SCHEMA_SQL = [
         course_id   INTEGER NOT NULL,
         document_id INTEGER,
         kp_id       TEXT NOT NULL,
+        -- 知识点名快照：重新抽取会更换 kp_id，收藏需要按同名回挂到新节点
+        kp_name     TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         FOREIGN KEY (user_id) REFERENCES t_user(user_id),
         FOREIGN KEY (course_id) REFERENCES t_course(course_id),

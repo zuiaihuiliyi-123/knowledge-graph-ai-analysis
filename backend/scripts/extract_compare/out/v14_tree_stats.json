@@ -1,0 +1,64 @@
+{
+ "text": "eval_data\\第7章_树.txt",
+ "text_id": "Hello算法_第7章_树",
+ "chars": 12416,
+ "temperature": 0.0,
+ "domain": "general",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 60,
+   "relations": 34,
+   "raw_relations": 38,
+   "dropped_counts": {
+    "duplicate": 3,
+    "low_confidence": 1
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 8,
+   "unmatched_mentions": 8,
+   "diagnostics": {
+    "source_available": true,
+    "entities": {
+     "total": 60,
+     "evidence": {
+      "exact_match": 58,
+      "normalized_match": 0,
+      "paraphrase": 2,
+      "missing": 0
+     },
+     "name_changed": 0,
+     "name_in_source": 58,
+     "name_not_in_source": 2
+    },
+    "relations": {
+     "total": 34,
+     "evidence": {
+      "exact_match": 34,
+      "normalized_match": 0,
+      "paraphrase": 0,
+      "missing": 0
+     },
+     "direction_basis": {
+      "present": 34,
+      "empty": 0,
+      "missing": 0
+     }
+    },
+    "unmatched_mentions": {
+     "total": 8
+    }
+   },
+   "relation_duplicates": 3,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 19.8,
+   "calls": 2,
+   "failed_calls": 0,
+   "prompt_tokens": 19188,
+   "completion_tokens": 6555,
+   "total_tokens": 25743
+  }
+ }
+}

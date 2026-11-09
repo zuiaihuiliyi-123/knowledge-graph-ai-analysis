@@ -1,0 +1,63 @@
+{
+ "text": "eval_data\\第2章_运动学_Kinematics_中文版.txt",
+ "text_id": "物理_第2章_运动学_Kinematics",
+ "chars": 36659,
+ "temperature": 0.0,
+ "domain": "general",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 35,
+   "relations": 48,
+   "raw_relations": 181,
+   "dropped_counts": {
+    "duplicate": 133
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 97,
+   "unmatched_mentions": 0,
+   "diagnostics": {
+    "source_available": true,
+    "entities": {
+     "total": 35,
+     "evidence": {
+      "exact_match": 26,
+      "normalized_match": 1,
+      "paraphrase": 8,
+      "missing": 0
+     },
+     "name_changed": 0,
+     "name_in_source": 35,
+     "name_not_in_source": 0
+    },
+    "relations": {
+     "total": 48,
+     "evidence": {
+      "exact_match": 41,
+      "normalized_match": 0,
+      "paraphrase": 7,
+      "missing": 0
+     },
+     "direction_basis": {
+      "present": 48,
+      "empty": 0,
+      "missing": 0
+     }
+    },
+    "unmatched_mentions": {
+     "total": 0
+    }
+   },
+   "relation_duplicates": 47,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 16.35,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 47212,
+   "completion_tokens": 15944,
+   "total_tokens": 63156
+  }
+ }
+}

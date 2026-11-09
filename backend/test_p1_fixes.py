@@ -269,6 +269,24 @@ def main():
     removed_by_name = sql_db.delete_learning_records_by_name(student_id, cid5, 1, "图")
     check("按名字兜底删除掌握记录", removed_by_name == 1, str(removed_by_name))
 
+    # ---------- 13. 收藏保存知识点名快照 ----------
+    print("\nStep 13: 收藏保存知识点名快照（重新抽取后可按同名回挂）")
+    created = sql_db.add_favorite(student_id, cid5, 1, "kp_fav", "二叉树")
+    check("新收藏写入名字快照", created is True, str(created))
+    favs = sql_db.list_favorites_by_user_course(student_id, cid5, 1)
+    fav = next((f for f in favs if f["kp_id"] == "kp_fav"), None)
+    check("文档级收藏列表返回 kp_name", bool(fav) and fav.get("kp_name") == "二叉树", str(fav))
+    check("重复收藏保持幂等", sql_db.add_favorite(student_id, cid5, 1, "kp_fav", "二叉树") is False)
+    # 模拟旧数据：只有 kp_id、没有名字快照的收藏
+    sql_db.add_favorite(student_id, cid5, 1, "kp_fav_old")
+    check("按 kp_id 回填名字快照",
+          sql_db.update_favorite_kp_name(student_id, cid5, 1, "kp_fav_old", "图") == 1)
+    check("已有名字时不重复覆盖",
+          sql_db.update_favorite_kp_name(student_id, cid5, 1, "kp_fav_old", "另一个名字") == 0)
+    favs = sql_db.list_favorites_by_user(student_id)
+    old = next((f for f in favs if f["kp_id"] == "kp_fav_old"), None)
+    check("全量收藏列表也返回 kp_name", bool(old) and old.get("kp_name") == "图", str(old))
+
     print(f"\n通过 {total - len(failures)}/{total}" if not failures
           else f"\n失败 {len(failures)}/{total}：{failures}")
     return 0 if not failures else 1

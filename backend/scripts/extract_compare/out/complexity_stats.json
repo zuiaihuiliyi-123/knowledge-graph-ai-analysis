@@ -1,0 +1,51 @@
+{
+ "text": "eval_data\\第2章_复杂度分析.txt",
+ "text_id": "数据结构_第2章_复杂度分析",
+ "chars": 16410,
+ "temperature": 0.0,
+ "domain": "complexity",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 38,
+   "relations": 43,
+   "raw_relations": 60,
+   "dropped_counts": {
+    "duplicate": 17
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 24,
+   "unmatched_mentions": 0,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 11.5,
+   "calls": 2,
+   "failed_calls": 0,
+   "prompt_tokens": 21156,
+   "completion_tokens": 5161,
+   "total_tokens": 26317
+  },
+  "v3": {
+   "name": "v3",
+   "entities": 45,
+   "relations": 23,
+   "raw_relations": 49,
+   "dropped_counts": {
+    "invalid_evidence": 26
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 11,
+   "unmatched_mentions": 0,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 25.18,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 24744,
+   "completion_tokens": 8966,
+   "total_tokens": 33710
+  }
+ }
+}

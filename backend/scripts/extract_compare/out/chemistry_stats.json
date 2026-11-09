@@ -1,0 +1,54 @@
+{
+ "text": "eval_data\\第2章_原子分子与离子_中文版.txt",
+ "text_id": "化学_第2章_原子分子与离子",
+ "chars": 40093,
+ "temperature": 0.0,
+ "domain": "chemistry",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 66,
+   "relations": 81,
+   "raw_relations": 212,
+   "dropped_counts": {
+    "duplicate": 131
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 129,
+   "unmatched_mentions": 0,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 20.68,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 47805,
+   "completion_tokens": 16644,
+   "total_tokens": 64449
+  },
+  "v3": {
+   "name": "v3",
+   "entities": 139,
+   "relations": 30,
+   "raw_relations": 46,
+   "dropped_counts": {
+    "invalid_evidence": 7,
+    "duplicate": 9
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 1,
+   "entity_duplicates": 65,
+   "unmatched_mentions": 1,
+   "error": "模型输出达到 max_tokens 上限",
+   "error_types": [
+    "truncated"
+   ],
+   "wall_seconds": 39.06,
+   "calls": 8,
+   "failed_calls": 0,
+   "prompt_tokens": 63471,
+   "completion_tokens": 24629,
+   "total_tokens": 88100
+  }
+ }
+}

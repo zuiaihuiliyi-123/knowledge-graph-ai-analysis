@@ -29,9 +29,29 @@
     <div v-if="ctxKey" class="fav-count">
       共收藏 <b class="num">{{ favoriteIds.length }}</b> 个知识点
       <span v-if="orphanCount > 0" class="fav-orphan-tip">
-        （其中 {{ orphanCount }} 个已失效，可在下方取消收藏清理）
+        （其中 {{ orphanCount }} 个已失效，可在下方取消收藏或一键清理）
       </span>
     </div>
+
+    <el-alert
+      v-if="orphanCount > 0"
+      class="fav-orphan-alert"
+      type="warning"
+      :closable="false"
+      show-icon
+    >
+      <template #title>有 {{ orphanCount }} 个收藏已失效</template>
+      这些收藏指向的知识点在学习资料重新抽取后更换了内部编号，已无法对应到图谱里的节点。
+      <el-button
+        size="small"
+        type="warning"
+        plain
+        class="fav-orphan-clean"
+        @click="emit('cleanup-orphans', orphanIds)"
+      >
+        清理全部失效收藏
+      </el-button>
+    </el-alert>
 
     <div v-loading="loading" class="fav-list">
       <el-empty
@@ -62,11 +82,13 @@
             {{ node.properties?.category || (node._orphan ? '已失效' : '知识点') }}
           </el-tag>
           <span class="fav-row-desc">
-            {{ node._orphan ? '已从图谱移除或合并，可取消收藏清理' : (node.description || '暂无描述') }}
+            {{ node._orphan
+              ? '已从图谱移除或合并，可取消收藏清理'
+              : (node._remapped ? '（重新抽取后按同名匹配）' : '') + (node.description || '暂无描述') }}
           </span>
           <div class="fav-row-actions">
             <el-button v-if="!node._orphan" size="small" type="primary" plain @click="emit('view', node)">查看</el-button>
-            <el-button size="small" type="danger" plain @click="emit('unfavorite', node.id)">取消收藏</el-button>
+            <el-button size="small" type="danger" plain @click="emit('unfavorite', node._favId)">取消收藏</el-button>
           </div>
         </div>
       </div>
@@ -80,13 +102,14 @@
             </el-tag>
           </div>
           <div class="fav-desc">
+            <span v-if="node._remapped" class="fav-remapped">重新抽取后按同名匹配 · </span>
             {{ node._orphan ? '已从图谱移除或合并，可取消收藏清理' : (node.description || '暂无描述') }}
           </div>
           <div class="fav-actions">
             <el-button v-if="!node._orphan" size="small" type="primary" plain @click="emit('view', node)">
               查看知识点
             </el-button>
-            <el-button size="small" type="danger" plain @click="emit('unfavorite', node.id)">
+            <el-button size="small" type="danger" plain @click="emit('unfavorite', node._favId)">
               取消收藏
             </el-button>
           </div>
@@ -105,12 +128,14 @@ const props = defineProps({
   ctxKey: { type: String, default: '' },
   documentName: { type: String, default: '' },
   favoriteIds: { type: Array, default: () => [] },
+  /** kp_id -> 知识点名快照：重新抽取换了 kp_id 后，凭它把旧收藏按同名回挂 */
+  favoriteNames: { type: Object, default: () => ({}) },
   graphNodes: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
   loaded: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['view', 'unfavorite', 'go-browse'])
+const emit = defineEmits(['view', 'unfavorite', 'go-browse', 'cleanup-orphans'])
 
 const favSearch = ref('')
 const favCategory = ref('')
@@ -120,35 +145,44 @@ watch(favView, (v) => {
 })
 
 // 收藏的 kp_id 在当前图谱里找不到节点时（节点被删 / 重新抽取换了 id / 被融合折叠），
-// 不再静默丢弃——否则「共收藏 N 个」与列表条数对不上。给一个占位条目供清理。
-const orphanCount = computed(() => {
-  const nodeById = new Map(props.graphNodes.map((n) => [String(n.id), n]))
-  return props.favoriteIds.filter((id) => !nodeById.has(String(id))).length
+// 先按收藏时记下的名字快照回挂到同名节点；实在找不到再算失效。
+// 失效条目仍保留占位（带名字快照），让「共收藏 N 个」与列表对得上，并提供清理入口。
+const resolvedFavorites = computed(() => {
+  const byId = new Map(props.graphNodes.map((n) => [String(n.id), n]))
+  const idByName = new Map()
+  props.graphNodes.forEach((n) => {
+    if (n.label) idByName.set(String(n.label), String(n.id))
+  })
+  return props.favoriteIds.map((raw) => {
+    const favId = String(raw)
+    const node = byId.get(favId)
+    if (node) return { ...node, _favId: favId, _remapped: false, _orphan: false }
+    const name = props.favoriteNames?.[favId]
+    const mapped = name ? byId.get(idByName.get(String(name))) : null
+    if (mapped) return { ...mapped, _favId: favId, _remapped: true, _orphan: false }
+    return {
+      id: favId,
+      label: name || '',
+      description: '',
+      properties: { category: '' },
+      _favId: favId,
+      _remapped: false,
+      _orphan: true,
+    }
+  })
 })
 
+const orphanIds = computed(() => resolvedFavorites.value.filter((n) => n._orphan).map((n) => n._favId))
+const orphanCount = computed(() => orphanIds.value.length)
+
 const favoriteList = computed(() => {
-  const nodeById = new Map(props.graphNodes.map((n) => [String(n.id), n]))
   const kw = favSearch.value.trim().toLowerCase()
   const cat = favCategory.value
-  return props.favoriteIds
-    .map((id) => {
-      const node = nodeById.get(String(id))
-      if (node) return { ...node, _orphan: false }
-      // 孤儿收藏：kp_id 在当前图谱找不到节点。保留占位条目，让计数与列表对得上，
-      // 并提供「取消收藏」入口把失效记录清掉。
-      return {
-        id: String(id),
-        label: '',
-        description: '',
-        properties: { category: '' },
-        _orphan: true,
-      }
-    })
+  return resolvedFavorites.value
     .filter((n) => !cat || (n.properties?.category || '') === cat)
     .filter((n) => {
       if (!kw) return true
-      // 有关键词搜索时，孤儿条目（无名称/描述）不命中，自然不显示
-      if (n._orphan) return false
+      // 有名字快照的失效条目也能被搜到（否则用户无法按名字定位它去清理）
       return String(n.label).toLowerCase().includes(kw)
         || String(n.description || '').toLowerCase().includes(kw)
     })
@@ -189,6 +223,16 @@ const favoriteList = computed(() => {
   margin-left: var(--space-1);
   font-size: var(--font-size-caption);
   color: var(--color-warning);
+}
+.fav-orphan-alert {
+  margin-bottom: var(--space-3);
+}
+.fav-orphan-clean {
+  margin-left: var(--space-2);
+}
+.fav-remapped {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
 }
 .fav-list { min-height: 220px; }
 .fav-grid {

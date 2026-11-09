@@ -28,6 +28,8 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
   const masteredCache = reactive({})
   const masteryLoading = ref(false)
   const favoriteCache = reactive({})
+  // kp_id -> 知识点名快照（后端随收藏返回）：重新抽取更换 kp_id 后用于按同名回挂
+  const favoriteNames = reactive({})
   const favoritesLoading = ref(false)
   const favoritesLoaded = ref(false)
   const favoriteLoading = ref(false)
@@ -150,7 +152,11 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     try {
       const res = await api.getFavorites(cid, currentDocumentId.value, { signal })
       if (!favoritesRequest.isLatest(token) || ctxKey.value !== key) return
-      favoriteCache[key] = (res.items || []).map((f) => f.kp_id)
+      const items = res.items || []
+      favoriteCache[key] = items.map((f) => f.kp_id)
+      favoriteNames[key] = Object.fromEntries(
+        items.filter((f) => f.kp_id && f.kp_name).map((f) => [String(f.kp_id), f.kp_name]),
+      )
       favoritesLoaded.value = true
     } catch {
       if (favoritesRequest.isLatest(token) && ctxKey.value === key) {
@@ -162,10 +168,42 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     }
   }
 
+  /** 旧收藏的 kp_id → 当前图谱里同名节点的 id（重新抽取换了 kp_id 时按名字回挂） */
+  function currentIdOfFavorite(rawId) {
+    const key = ctxKey.value
+    if (!key) return null
+    const raw = String(rawId)
+    if (graphNodes.value.some((n) => String(n.id) === raw)) return raw
+    const name = (favoriteNames[key] || {})[raw]
+    if (!name) return null
+    const node = graphNodes.value.find((n) => n.label === name)
+    return node ? String(node.id) : null
+  }
+
+  /** 当前节点对应的原始收藏 id（可能是重新抽取前的旧 kp_id）；取消收藏必须用它 */
+  function rawFavoriteIdFor(kpId) {
+    const key = ctxKey.value
+    if (!key) return null
+    const kp = String(kpId)
+    const rawIds = (favoriteCache[key] || []).map(String)
+    if (rawIds.includes(kp)) return kp
+    return rawIds.find((id) => currentIdOfFavorite(id) === kp) || null
+  }
+
   function isFavorited(kpId) {
     if (!ctxKey.value || kpId == null) return false
-    return (favoriteCache[ctxKey.value] || []).includes(String(kpId))
+    return rawFavoriteIdFor(kpId) !== null
   }
+
+  /** 收藏态（回挂后的当前 kp_id）：学习路径 / 问答来源 / 知识点面板用它判断 ★ */
+  const favoriteIdsEffective = computed(() => {
+    const ids = new Set()
+    ;(favoriteCache[ctxKey.value] || []).forEach((raw) => {
+      const id = currentIdOfFavorite(raw)
+      if (id) ids.add(id)
+    })
+    return [...ids]
+  })
 
   /** 收藏 / 取消收藏（详情抽屉 / 学习路径 / QA 来源 / 收藏夹统一入口） */
   async function toggleFavorite(kpId) {
@@ -174,15 +212,45 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     const did = currentDocumentId.value
     if (!key || !cid || kpId == null) return
     const kp = String(kpId)
-    if (isFavorited(kp)) {
-      await api.removeFavorite(cid, did, kp)
-      favoriteCache[key] = (favoriteCache[key] || []).filter((id) => id !== kp)
+    const rawId = rawFavoriteIdFor(kp)
+    if (rawId) {
+      await api.removeFavorite(cid, did, rawId)
+      favoriteCache[key] = (favoriteCache[key] || []).filter((id) => String(id) !== rawId)
+      if (favoriteNames[key]) delete favoriteNames[key][rawId]
       ElMessage.success('已取消收藏')
     } else {
       await api.addFavorite(cid, did, kp)
       favoriteCache[key] = [...(favoriteCache[key] || []), kp]
+      // 记下名字快照，后面图谱重新抽取时仍能按同名找到它
+      const label = graphNodes.value.find((n) => String(n.id) === kp)?.label
+      if (label) {
+        if (!favoriteNames[key]) favoriteNames[key] = {}
+        favoriteNames[key][kp] = label
+      }
       ElMessage.success('已收藏')
     }
+  }
+
+  /** 批量清理失效收藏（图谱重新抽取后 kp_id 已不存在的记录） */
+  async function removeFavoritesSafe(ids) {
+    const key = ctxKey.value
+    const cid = currentCourseId.value
+    const did = currentDocumentId.value
+    if (!key || !cid || !Array.isArray(ids) || !ids.length) return
+    let removed = 0
+    let failed = 0
+    for (const id of ids) {
+      try {
+        await api.removeFavorite(cid, did, String(id))
+        removed += 1
+      } catch {
+        failed += 1
+      }
+    }
+    const set = new Set(ids.map(String))
+    favoriteCache[key] = (favoriteCache[key] || []).filter((id) => !set.has(String(id)))
+    if (removed) ElMessage.success(`已清理 ${removed} 个失效收藏`)
+    if (failed) ElMessage.error(`${failed} 个失效收藏清理失败，请稍后重试`)
   }
 
   /** 轻量入口（QA 来源卡 / 学习路径 / 收藏夹）：无独立 loading，仅提示 + 状态同步 */
@@ -510,6 +578,8 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     masteredKpIds,
     pathMasteredIds,
     favoriteCache,
+    favoriteNames,
+    favoriteIdsEffective,
     favoritesLoading,
     favoritesLoaded,
     favoriteLoading,
@@ -546,6 +616,7 @@ export function useStudentLearningData({ currentCourseId, currentDocumentId, ctx
     isFavorited,
     toggleFavorite,
     toggleFavoriteSafe,
+    removeFavoritesSafe,
     onToggleFavorite,
     onToggleMastery,
     onNodeClick,

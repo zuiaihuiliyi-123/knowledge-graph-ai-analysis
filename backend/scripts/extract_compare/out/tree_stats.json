@@ -1,0 +1,52 @@
+{
+ "text": "eval_data\\第7章_树.txt",
+ "text_id": "数据结构_第7章_树",
+ "chars": 12416,
+ "temperature": 0.0,
+ "domain": "computer_science",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 55,
+   "relations": 34,
+   "raw_relations": 37,
+   "dropped_counts": {
+    "duplicate": 3
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 7,
+   "unmatched_mentions": 0,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 14.03,
+   "calls": 2,
+   "failed_calls": 0,
+   "prompt_tokens": 18568,
+   "completion_tokens": 3729,
+   "total_tokens": 22297
+  },
+  "v3": {
+   "name": "v3",
+   "entities": 51,
+   "relations": 25,
+   "raw_relations": 32,
+   "dropped_counts": {
+    "invalid_evidence": 6,
+    "duplicate": 1
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 4,
+   "unmatched_mentions": 3,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 23.76,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 19869,
+   "completion_tokens": 7716,
+   "total_tokens": 27585
+  }
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "text": "eval_data\\第2章_原子分子与离子_中文版.txt",
+ "text_id": "化学_第2章_原子分子与离子",
+ "chars": 40093,
+ "temperature": 0.0,
+ "domain": "general",
+ "runs": {
+  "current": {
+   "name": "current",
+   "entities": 63,
+   "relations": 78,
+   "raw_relations": 158,
+   "dropped_counts": {
+    "duplicate": 80
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 88,
+   "unmatched_mentions": 18,
+   "diagnostics": {
+    "source_available": true,
+    "entities": {
+     "total": 63,
+     "evidence": {
+      "exact_match": 47,
+      "normalized_match": 0,
+      "paraphrase": 16,
+      "missing": 0
+     },
+     "name_changed": 0,
+     "name_in_source": 62,
+     "name_not_in_source": 1
+    },
+    "relations": {
+     "total": 78,
+     "evidence": {
+      "exact_match": 55,
+      "normalized_match": 0,
+      "paraphrase": 23,
+      "missing": 0
+     },
+     "direction_basis": {
+      "present": 78,
+      "empty": 0,
+      "missing": 0
+     }
+    },
+    "unmatched_mentions": {
+     "total": 18
+    }
+   },
+   "relation_duplicates": 55,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 27.18,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 49045,
+   "completion_tokens": 19399,
+   "total_tokens": 68444
+  }
+ }
+}

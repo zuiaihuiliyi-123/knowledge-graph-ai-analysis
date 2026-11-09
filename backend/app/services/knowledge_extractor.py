@@ -12,6 +12,7 @@ from ..core.config import settings
 from ..core.database import VALID_RELATION_TYPES
 from ..utils.text_processor import chunk_text_for_llm
 from . import extraction_cache
+from . import extraction_diagnostics as diagnostics
 
 _PROMPT_FP_CACHE = {}
 
@@ -41,6 +42,7 @@ EXTRACTION_PROMPT = """你是高校课程知识图谱构建专家。请从给定
 - name：知识点名称，简洁、规范、稳定
 - category：只能是「概念」「定理」「公式」「方法」之一（无法归类时用「概念」）
 - description：一句话描述该知识点在课程中的含义
+- evidence（可选）：支持该实体的原文短句，尽量逐字摘录；找不到逐字依据时省略，不要编造
 
 category 判定（易错区，务必注意）：
 - 具体的遍历方式、算法步骤、操作、表示法 → 「方法」。例如：前序遍历、中序遍历、后序遍历、层序遍历、广度优先遍历、深度优先遍历、旋转、插入节点、数组表示，全部属于「方法」，不得标为「概念」。
@@ -284,6 +286,9 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 ## 八、每条关系必须携带证据与置信度
 - evidence：支持该关系的原文短句（必须来自输入文本，不得编造）
 - confidence：0~1 的置信度，如实反映证据强弱，不确定就降低
+- direction_basis（可选）：一句话说明关系类型与方向依据。CONTAINS 写清上位/下位，
+  PRECEDES 写清先修方向，APPLIES_TO 写清方法/应用对象，RELATED_TO 写清方向约定。
+  不确定时省略，不要为了填字段而编造依据（缺失不影响该关系的保留）。
 
 ## 九、输出约束
 - source 与 target 必须都出现在 entities 中，且 source ≠ target
@@ -300,12 +305,23 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
 ## 十、输出格式
 {
   "entities": [
-    {"name": "实体名", "category": "概念", "description": "一句话描述"}
+    {"name": "实体名", "category": "概念", "description": "一句话描述", "evidence": "可选：原文短句"}
   ],
   "relations": [
-    {"source": "源实体名", "target": "目标实体名", "type": "PRECEDES", "evidence": "原文证据", "confidence": 0.95}
+    {"source": "源实体名", "target": "目标实体名", "type": "PRECEDES", "evidence": "原文证据", "confidence": 0.95, "direction_basis": "可选：类型与方向依据"}
+  ],
+  "unmatched_mentions": [
+    {"name": "可选：原文中像知识点但未纳入实体的术语", "evidence": "原文短句", "reason": "未纳入原因"}
   ]
 }
+
+## 十一、可选诊断字段（只记录，不改变上面的抽取判定）
+以下字段都可以省略、为空或输出 []，缺失不会导致实体/关系被删除：
+- 实体 evidence：支持该实体的原文短句。
+- 关系 direction_basis：关系类型与 source→target 方向的简要依据。
+- unmatched_mentions：原文中像课程知识点、但你没有纳入 entities 的术语，最多 10 条。
+  只作漏抽诊断线索：它们不会自动成为实体，也不会用于建立关系。
+  不要放普通名词、变量、代码符号、动作短语、章节标题；没有就输出 []。
 
 ## 课程文本
 {text}
@@ -511,13 +527,18 @@ def _validate_extraction_payload(payload) -> tuple:
         if not isinstance(name, str) or not name.strip():
             dropped += 1
             continue
-        clean_entities.append({
+        clean_entity = {
             **item,
             "name": name,
             "category": item.get("category") if isinstance(item.get("category"), str) else "概念",
             "description": (item.get("description")
                             if isinstance(item.get("description"), str) else ""),
-        })
+        }
+        # v1.4 诊断字段：类型异常时降级为空串/空值，绝不因此丢弃实体。
+        if "evidence" in clean_entity:
+            clean_entity["evidence"] = (clean_entity["evidence"]
+                                        if isinstance(clean_entity["evidence"], str) else "")
+        clean_entities.append(clean_entity)
 
     clean_relations = []
     for item in relations:
@@ -528,15 +549,30 @@ def _validate_extraction_payload(payload) -> tuple:
                    for k in ("source", "target", "type")):
             dropped += 1
             continue
-        clean_relations.append({
+        clean_relation = {
             **item,
             "source": item["source"],
             "target": item["target"],
             "type": item["type"],
             "evidence": item.get("evidence") if isinstance(item.get("evidence"), str) else "",
-        })
+        }
+        # direction_basis 只在模型真的给出时保留：缺失与空值是两种诊断状态，
+        # 不能在这里统一补成 ""，否则诊断层无法区分「没写」与「写了空」。
+        if "direction_basis" in clean_relation:
+            clean_relation["direction_basis"] = diagnostics.sanitize_direction_basis(
+                clean_relation["direction_basis"])
+        clean_relations.append(clean_relation)
 
-    return {"entities": clean_entities, "relations": clean_relations}, dropped
+    # v1.4：unmatched_mentions 是顶层诊断字段，旧实现会在此处丢弃。
+    # 清洗失败只会得到空列表，不影响实体/关系的结构校验与整块成败。
+    unmatched_mentions = diagnostics.sanitize_unmatched_mentions(
+        payload.get("unmatched_mentions"))
+
+    return {
+        "entities": clean_entities,
+        "relations": clean_relations,
+        "unmatched_mentions": unmatched_mentions,
+    }, dropped
 
 
 class KnowledgeExtractor:
@@ -591,7 +627,7 @@ class KnowledgeExtractor:
         # （其 docstring 声明「数据完整性约束不依赖 LLM，全部在此兜底」）。
         # 原实现单块直接返回原始解析结果，绕过了这些约束，会出现
         # 「DB 记 48 个实体、图里只有 33 个节点」（重复名在入图 MERGE 时被折叠）这类对不上的账。
-        return self._merge_results(results)
+        return self._merge_results(results, source_text=text, source_chunks=chunks)
 
     def _request_completion(self, text: str, use_json_mode: bool):
         """发一次抽取请求；JSON mode 由调用方决定，便于供应商不支持时回退。"""
@@ -627,7 +663,9 @@ class KnowledgeExtractor:
                 text, settings.LLM_MODEL, self.temperature, _prompt_fingerprint())
             cached = extraction_cache.load(cache_key)
             if cached is not None:
-                return cached
+                # 旧缓存的 payload 没有 diagnostics 字段：这里按当前分块文本补算，
+                # 保证缓存命中与真实请求返回的结构一致，同时不把诊断写进缓存。
+                return self._with_chunk_diagnostics(cached, text)
         try:
             response = self._request_completion(text, use_json_mode)
         except Exception as e:
@@ -661,9 +699,11 @@ class KnowledgeExtractor:
             clean, dropped = _validate_extraction_payload(payload)
             if dropped:
                 _logger.warning("抽取结果中丢弃结构非法的条目 %d 条", dropped)
+            # 缓存只存模型原始结果（不含 diagnostics）：诊断依赖分块原文，
+            # 每次读取时按当前文本计算，避免缓存里带着过期统计。
             if cache_key:
                 extraction_cache.store(cache_key, clean)   # 只缓存成功结果
-            return clean
+            return self._with_chunk_diagnostics(clean, text)
 
         except ExtractionSchemaError as e:
             _logger.warning("抽取结果结构非法: %s", e)
@@ -675,6 +715,14 @@ class KnowledgeExtractor:
             error_type, message, retryable = _classify_extraction_error(e)
             _logger.warning("抽取结果处理失败: type=%s %s", error_type, message)
             return _error_result(error_type, message, retryable)
+
+    @staticmethod
+    def _with_chunk_diagnostics(payload: dict, text: str) -> dict:
+        """给单块结果附加诊断；不改动实体/关系，也不把诊断写回缓存。"""
+        annotated = dict(payload)
+        annotated["diagnostics"] = diagnostics.build_diagnostics(
+            payload, text, normalize_name=_normalize_entity_name)
+        return annotated
 
     @staticmethod
     def _parse_json(content: str) -> dict:
@@ -713,7 +761,11 @@ class KnowledgeExtractor:
         raise ValueError("无法从 LLM 返回内容中解析出 JSON")
 
     @staticmethod
-    def _merge_results(results: List[dict]) -> dict:
+    def _merge_results(
+        results: List[dict],
+        source_text: str = "",
+        source_chunks: List[str] | None = None,
+    ) -> dict:
         """
         合并多个提取结果（数据完整性约束不依赖 LLM，全部在此兜底）：
         - 实体：轻量规范化后按规范名去重
@@ -724,6 +776,10 @@ class KnowledgeExtractor:
         关系一进这里就消失，上层看到的只是"少了 N 条"，无从知道少了什么、
         为什么少。评测侧据此才能把"抽到了但被阈值砍掉"（low_confidence）
         与"压根没抽到"（missed_core）区分开，否则后者会被系统性高估。
+
+        v1.4 参数说明：``source_text`` / ``source_chunks`` 只用于生成诊断，
+        有默认值以兼容既有只传 ``results`` 的调用方（测试、评测脚本）。
+        诊断字段不参与去重、过滤与 Gold 评分。
         """
         # 分块成功/失败计数：上层据此区分「整篇失败」与「部分分块失败但仍有可用结果」。
         # error 仍保留「至少有一个分块失败」的旧语义，兼容既有调用方。
@@ -757,16 +813,24 @@ class KnowledgeExtractor:
                 if category not in ("概念", "定理", "公式", "方法"):
                     category = "概念"
                 description = (entity.get("description") or "").strip()
+                # v1.4：实体级证据只做累积与诊断，不参与去重、不过滤任何实体。
+                # 模型没给 evidence 时保持字段缺失（与「给了空串」区分开）。
+                evidence = entity.get("evidence")
+                evidence = evidence.strip() if isinstance(evidence, str) else ""
 
                 host = merged_entities.get(name)
                 if host is None:
-                    merged_entities[name] = {
+                    host = {
                         "name": name,
                         "category": category,
                         "description": description,
                         # 主描述排第一；空描述不入列表，避免下游把 "" 当成一条证据
                         "descriptions": [description] if description else [],
                     }
+                    if evidence:
+                        host["evidence"] = evidence
+                        host["evidences"] = [evidence]
+                    merged_entities[name] = host
                     continue
 
                 # ---- 同名：只累积，不覆盖主字段 ----
@@ -780,12 +844,24 @@ class KnowledgeExtractor:
                     variants = host.setdefault("category_variants", [])
                     if category not in variants:
                         variants.append(category)
+                if evidence:
+                    # 首条非空证据保留为 evidence，其余进 alt_evidences；
+                    # 这里只追加，绝不因证据缺失/重复而改动实体本身。
+                    host.setdefault("evidence", evidence)
+                    evidences = host.setdefault("evidences", [])
+                    if evidence not in evidences:
+                        evidences.append(evidence)
 
         # 主描述之外的备选描述单独列出来，供融合/RAG/前端直接消费
         for host in merged_entities.values():
             descriptions = host.get("descriptions") or []
             if len(descriptions) > 1:
                 host["alt_descriptions"] = descriptions[1:]
+            # 多分块给出的不同证据：主 evidence 之外的放 alt_evidences。
+            # 没有同名重复时不留 evidences 中间字段，避免结果里出现空数组噪音。
+            evidences = host.pop("evidences", None)
+            if evidences and len(evidences) > 1:
+                host["alt_evidences"] = evidences[1:]
         entity_names = set(merged_entities.keys())
 
         # 第二遍：关系校验（source/target 使用同一套规范化，保证与实体名对齐）
@@ -796,14 +872,39 @@ class KnowledgeExtractor:
         raw_relation_count = 0
         dropped = []
         dropped_counts = {}
+        # v1.4：同一三元组跨分块/跨条目出现的次数与不同 evidence。
+        # 只统计，不参与去重；去重仍由下方 seen_relations 决定。
+        relation_occurrences = {}
 
-        for result in results:
+        for chunk_index, result in enumerate(results):
             for relation in result.get("relations", []):
                 raw_relation_count += 1
 
                 source = _normalize_entity_name(relation.get("source", ""))
                 target = _normalize_entity_name(relation.get("target", ""))
                 rel_type = (relation.get("type", "") or "").strip().upper()
+
+                occurrence = None
+                if source and target and rel_type:
+                    occ_key = (source, target, rel_type)
+                    occurrence = relation_occurrences.get(occ_key)
+                    if occurrence is None:
+                        occurrence = {
+                            "source": source,
+                            "target": target,
+                            "type": rel_type,
+                            "occurrences": 0,
+                            "evidences": [],
+                            "chunks": [],
+                            "kept": False,
+                        }
+                        relation_occurrences[occ_key] = occurrence
+                    occurrence["occurrences"] += 1
+                    evidence_text = (relation.get("evidence") or "").strip()
+                    if evidence_text and evidence_text not in occurrence["evidences"]:
+                        occurrence["evidences"].append(evidence_text)
+                    if chunk_index not in occurrence["chunks"]:
+                        occurrence["chunks"].append(chunk_index)
 
                 def _drop(reason_code: str, detail: str = "") -> None:
                     dropped_counts[reason_code] = dropped_counts.get(reason_code, 0) + 1
@@ -847,18 +948,109 @@ class KnowledgeExtractor:
                     _drop("low_confidence", f"confidence={confidence} < 阈值 {threshold}")
                     continue
 
-                merged_relations.append({
+                merged_relation = {
                     "source": source,
                     "target": target,
                     "type": rel_type,
                     "evidence": (relation.get("evidence") or "").strip(),
                     "confidence": confidence if confidence is not None else _DEFAULT_RELATION_CONFIDENCE,
-                })
+                }
+                # v1.4：方向依据原样保留（校验层已规整为字符串）。缺失时不补空串，
+                # 以便诊断层区分「模型没写」与「写了空」。
+                if "direction_basis" in relation:
+                    merged_relation["direction_basis"] = relation.get("direction_basis") or ""
+                merged_relations.append(merged_relation)
+                if occurrence is not None:
+                    occurrence["kept"] = True
 
             if result.get("error"):
                 errors.append(result["error"])
                 if result.get("error_type"):
                     error_types.append(result["error_type"])
+
+        # ---- v1.4 诊断汇总（只记录，不改变上方任何去重/过滤结果）----
+        # 重复证据：occurrences > 1 表示同一三元组被多个分块/条目抽出，
+        # distinct_evidences > 1 表示模型给了不同证据。去重仍由 seen_relations 负责，
+        # 这里只回答「重复了几次、证据是否一致、跨了几个分块」。
+        relation_duplicates = []
+        for occurrence in relation_occurrences.values():
+            if occurrence["occurrences"] <= 1 and len(occurrence["evidences"]) <= 1:
+                continue
+            relation_duplicates.append({
+                "source": occurrence["source"],
+                "target": occurrence["target"],
+                "type": occurrence["type"],
+                "occurrences": occurrence["occurrences"],
+                "distinct_evidences": len(occurrence["evidences"]),
+                "evidences": occurrence["evidences"][:5],
+                "chunk_count": len(occurrence["chunks"]),
+                "chunks": occurrence["chunks"][:20],
+                # kept=False 表示该三元组最终因白名单/悬空/阈值等原因没有入图
+                "kept": occurrence["kept"],
+            })
+        relation_duplicates.sort(
+            key=lambda item: (-item["occurrences"], -item["distinct_evidences"]))
+        relation_duplicates = relation_duplicates[:_MAX_DROPPED_RECORDED]
+
+        # 跨分块合并 unmatched_mentions：去重、限量；绝不补入 entities、不建关系。
+        unmatched_items = []
+        for result in results:
+            unmatched_items.extend(result.get("unmatched_mentions") or [])
+        unmatched_mentions = diagnostics.merge_unmatched_mentions(unmatched_items)
+
+        # 分块级诊断：优先使用 _extract_single 已算好的结果；旧缓存或只传 results
+        # 的调用方没有 diagnostics，则按对应分块原文现场补算，保证汇总不丢。
+        chunk_summaries = []
+        chunk_details = []
+        name_records = []
+        seen_name_records = set()
+        for chunk_index, result in enumerate(results):
+            chunk_diag = result.get("diagnostics")
+            if not isinstance(chunk_diag, dict):
+                if source_chunks and chunk_index < len(source_chunks):
+                    chunk_text = source_chunks[chunk_index]
+                else:
+                    chunk_text = source_text
+                chunk_diag = diagnostics.build_diagnostics(
+                    result, chunk_text, normalize_name=_normalize_entity_name)
+            chunk_summary = {
+                "chunk_index": chunk_index,
+                "succeeded": not bool(result.get("error")),
+                "error_type": result.get("error_type"),
+                "summary": diagnostics.summarize_diagnostics(chunk_diag),
+            }
+            chunk_summaries.append(chunk_summary)
+            # 分块明细（含丢弃前的关系与对应证据）也保留一份，避免汇总时只剩计数。
+            chunk_details.append({
+                **chunk_summary,
+                "entities": (chunk_diag.get("entities") or [])[:diagnostics.MAX_DIAGNOSTIC_ITEMS],
+                "relations": (chunk_diag.get("relations") or [])[:diagnostics.MAX_DIAGNOSTIC_ITEMS],
+                "unmatched_mentions": chunk_diag.get("unmatched_mentions") or [],
+            })
+            # 原始名 -> 规范名、是否在原文出现：合并后实体名已被规范化，
+            # 这部分信息只能在分块诊断里保留，故单独汇总一份 name_records。
+            for record in chunk_diag.get("entities", []) or []:
+                if len(name_records) >= diagnostics.MAX_DIAGNOSTIC_ITEMS:
+                    break
+                record_key = (record.get("name"), record.get("normalized_name"))
+                if record_key in seen_name_records:
+                    continue
+                seen_name_records.add(record_key)
+                name_records.append(record)
+
+        merged_diagnostics = diagnostics.build_diagnostics(
+            {
+                "entities": list(merged_entities.values()),
+                "relations": merged_relations,
+                "unmatched_mentions": unmatched_mentions,
+            },
+            source_text,
+            normalize_name=_normalize_entity_name,
+        )
+        merged_diagnostics["name_records"] = name_records
+        merged_diagnostics["chunks"] = chunk_summaries
+        merged_diagnostics["chunk_details"] = chunk_details
+        merged_diagnostics["relation_duplicates"] = relation_duplicates
 
         merged = {
             "entities": list(merged_entities.values()),
@@ -877,6 +1069,10 @@ class KnowledgeExtractor:
             # 「本来就只有 N 个实体」与「N+3 个被同名合并掉了」
             "entity_duplicates": entity_duplicates,
             "duplicate_names": duplicate_names,
+            # v1.4 诊断字段：不参与入图与 F1 评分，仅供质量分析与人工复核
+            "unmatched_mentions": unmatched_mentions,
+            "relation_duplicates": relation_duplicates,
+            "diagnostics": merged_diagnostics,
         }
         # 分块错误透传（最多携带前 3 条，避免信息过长），供上层判断抽取是否真正成功
         if errors:

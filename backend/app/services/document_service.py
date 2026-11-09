@@ -18,6 +18,7 @@ from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
 from .kg_manager import KnowledgeGraphManager
 from . import task_state
+from . import extraction_diagnostics as extraction_diag
 
 _logger = logging.getLogger(__name__)
 
@@ -294,6 +295,23 @@ class DocumentService:
             relations = result.get("relations", [])
             # 抽取成功后立刻落盘：这是最贵的一步，任何后续失败（建图/重启）都不应重花钱
             task_state.save_extraction(doc_id, sha, entities, relations)
+
+        # v1.4：抽取诊断只写日志，不落核心表、不改 API/前端 schema。
+        # 新抽取直接复用 _merge_results 的汇总；断点续跑复用旧产物时现场补算，
+        # 让「复用产物」与「重新抽取」在日志里都有同样的质量信号。
+        diagnostics_payload = result.get("diagnostics") if not cached else None
+        if not isinstance(diagnostics_payload, dict):
+            diagnostics_payload = extraction_diag.build_diagnostics(
+                {"entities": entities, "relations": relations}, text)
+        diagnostics_summary = extraction_diag.summarize_diagnostics(diagnostics_payload)
+        _logger.info(
+            "抽取诊断 doc_id=%s 实体证据=%s 关系证据=%s direction_basis=%s 未匹配提及=%d",
+            doc_id,
+            diagnostics_summary["entities"]["evidence"],
+            diagnostics_summary["relations"]["evidence"],
+            diagnostics_summary["relations"]["direction_basis"],
+            diagnostics_summary["unmatched_mentions"]["total"],
+        )
 
         # 3. 入图（整数 course_id + 文档级 document_id；每个文档独立建图）
         # 入图前必须再确认作用域仍存在：删除与后台任务并发时，绝不能向已删除的

@@ -1,0 +1,31 @@
+{
+ "text": "eval_data\\第7章_树.txt",
+ "text_id": "Hello算法_第7章_树",
+ "chars": 12416,
+ "temperature": 0.0,
+ "domain": "computer_science",
+ "runs": {
+  "v3": {
+   "name": "v3",
+   "entities": 56,
+   "relations": 28,
+   "raw_relations": 34,
+   "dropped_counts": {
+    "invalid_evidence": 5,
+    "duplicate": 1
+   },
+   "chunk_count": 2,
+   "failed_chunk_count": 0,
+   "entity_duplicates": 5,
+   "unmatched_mentions": 3,
+   "error": null,
+   "error_types": null,
+   "wall_seconds": 24.02,
+   "calls": 4,
+   "failed_calls": 0,
+   "prompt_tokens": 30591,
+   "completion_tokens": 7472,
+   "total_tokens": 38063
+  }
+ }
+}

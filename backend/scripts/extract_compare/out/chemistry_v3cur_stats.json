@@ -1,0 +1,33 @@
+{
+ "text": "eval_data\\第2章_原子分子与离子_中文版.txt",
+ "text_id": "化学_第2章_原子分子与离子",
+ "chars": 40093,
+ "temperature": 0.0,
+ "domain": "chemistry",
+ "runs": {
+  "v3": {
+   "name": "v3",
+   "entities": 134,
+   "relations": 59,
+   "raw_relations": 70,
+   "dropped_counts": {
+    "invalid_evidence": 6,
+    "duplicate": 5
+   },
+   "chunk_count": 4,
+   "failed_chunk_count": 1,
+   "entity_duplicates": 69,
+   "unmatched_mentions": 1,
+   "error": "模型输出达到 max_tokens 上限",
+   "error_types": [
+    "truncated"
+   ],
+   "wall_seconds": 65.58,
+   "calls": 8,
+   "failed_calls": 0,
+   "prompt_tokens": 85052,
+   "completion_tokens": 27083,
+   "total_tokens": 112135
+  }
+ }
+}
