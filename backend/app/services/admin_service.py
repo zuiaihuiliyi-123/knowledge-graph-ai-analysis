@@ -15,16 +15,18 @@
   三处一致），不另写一套删除逻辑；
 - 资料字段白名单与长度校验复用 ProfileService。
 """
+import datetime
 import logging
 import secrets
 import string
 
+from ..core.codes import format_teacher_invite_code
 from ..core.config import settings
 from ..core.database import db
 from ..core.metrics import snapshot as metrics_snapshot
 from ..core.security import hash_password, verify_password
 from ..core.sql_database import (
-    ADMIN_ACTIONS, COURSE_GOVERNANCE_STATUS, COURSE_VISIBLE_SQL, USER_ROLES, sql_db,
+    ADMIN_ACTIONS, COURSE_GOVERNANCE_STATUS, COURSE_VISIBLE_SQL, USER_ROLES, _now, sql_db,
 )
 from ..core.user_state import invalidate_user_state
 from .dashboard_service import DashboardService
@@ -174,6 +176,94 @@ class AdminService:
                 for c in courses
             ],
         })
+
+    # ---------- 教师注册邀请码 ----------
+
+    INVITE_MAX_VALID_DAYS = 3650   # 10 年，等效「永久」；再长已没有实际意义
+
+    @staticmethod
+    def _invite_row(row: dict, now: str = None) -> dict:
+        """库行 -> 前端展示结构：补「已过期」这个计算态，并把码格式化成 XXXX-XXXX-XXXX。
+
+        status 只存 active/used/revoked 三种**持久**状态；「过期」是时间的函数，刻意不落库——
+        否则要么加定时任务刷状态，要么在每个查询点各判一次。放在出口统一算，只有这一处逻辑。
+        """
+        now = now or _now()
+        status = row.get("status") or "active"
+        if status == "active" and row.get("expires_at") and row["expires_at"] <= now:
+            status = "expired"
+        return {
+            "invite_id": row.get("invite_id"),
+            "code": format_teacher_invite_code(row.get("code") or ""),
+            "note": row.get("note") or "",
+            "status": status,
+            "created_by": row.get("created_by"),
+            "created_by_name": row.get("created_by_name") or row.get("created_by_username") or "",
+            "used_by": row.get("used_by"),
+            "used_by_name": row.get("used_by_name") or row.get("used_by_username") or "",
+            "used_at": row.get("used_at"),
+            "expires_at": row.get("expires_at"),
+            "created_at": row.get("created_at"),
+        }
+
+    @staticmethod
+    def list_invite_codes() -> dict:
+        """全部邀请码（新的在前）。数量级是「每学期几十个」，一次返回比做分页更省事。"""
+        now = _now()
+        items = [AdminService._invite_row(r, now)
+                 for r in sql_db.list_teacher_invite_codes()]
+        return AdminService._ok({
+            "items": items,
+            "total": len(items),
+            "active_count": sum(1 for i in items if i["status"] == "active"),
+            "used_count": sum(1 for i in items if i["status"] == "used"),
+            # 环境变量那条「全员通用码」仍然生效（兜底），把它告诉管理员，
+            # 否则会出现「界面里一个可用码都没有，但教师却能注册」的解释不通。
+            "env_code_enabled": bool((settings.TEACHER_INVITE_CODE or "").strip()),
+        })
+
+    @staticmethod
+    def create_invite_code(operator: dict, note: str = None, valid_days: int = 0,
+                           request=None) -> dict:
+        """签发一条邀请码。valid_days <= 0 表示永久有效。"""
+        try:
+            valid_days = int(valid_days or 0)
+        except (TypeError, ValueError):
+            return AdminService._fail(1001, "有效期天数必须是整数")
+        if valid_days < 0 or valid_days > AdminService.INVITE_MAX_VALID_DAYS:
+            return AdminService._fail(1001, "有效期天数需在 0-3650 之间（0 表示永久）")
+        note = (note or "").strip()[:100] or None
+        expires_at = None
+        if valid_days:
+            expires_at = (datetime.datetime.now()
+                          + datetime.timedelta(days=valid_days)).strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            invite_id, _code = sql_db.create_teacher_invite_code(
+                operator.get("user_id"), note=note, expires_at=expires_at)
+        except RuntimeError as exc:
+            _logger.error("生成教师邀请码失败: %s", exc)
+            return AdminService._fail(2002, "生成邀请码失败，请重试")
+        AdminService.write_audit(
+            operator, "invite.create", "invite", invite_id,
+            detail=f"生成教师邀请码（有效期：{valid_days} 天）"
+                   + (f"，备注：{note}" if note else ""),
+            request=request)
+        return AdminService._ok(
+            AdminService._invite_row(sql_db.get_teacher_invite_code_by_id(invite_id)))
+
+    @staticmethod
+    def revoke_invite_code(operator: dict, invite_id: int, request=None) -> dict:
+        """作废一条未使用的邀请码（已使用的保留，用于追溯「谁是谁邀请进来的」）。"""
+        row = sql_db.get_teacher_invite_code_by_id(invite_id)
+        if not row:
+            return AdminService._fail(2001, "邀请码不存在")
+        if row.get("status") != "active":
+            return AdminService._fail(2002, "只有未使用的邀请码可以作废")
+        if not sql_db.revoke_teacher_invite_code(invite_id):
+            return AdminService._fail(2002, "该邀请码刚被使用或已作废，请刷新后重试")
+        AdminService.write_audit(operator, "invite.revoke", "invite", invite_id,
+                                 detail="作废教师邀请码", request=request)
+        return AdminService._ok({"invite_id": invite_id, "status": "revoked"})
 
     @staticmethod
     def _neo4j_available() -> bool:

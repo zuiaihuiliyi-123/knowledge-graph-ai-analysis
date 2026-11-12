@@ -31,3 +31,14 @@ class GovernanceAction(BaseModel):
 
 class TransferCourse(BaseModel):
     teacher_id: int
+
+
+class InviteCodeCreate(BaseModel):
+    """签发教师注册邀请码。
+
+    valid_days：0（或缺省）表示永久有效；上限 3650 天（10 年）由 service 再校验一次。
+    码本身由服务端生成，**不接受客户端指定**——否则管理员可以把码设成 "123456"，
+    一次撞库就能批量注册教师。
+    """
+    note: str | None = Field(default=None, max_length=100, description="备注，例如「计算机学院 2026 春」")
+    valid_days: int = Field(default=0, ge=0, le=3650, description="有效期天数，0 表示永久")

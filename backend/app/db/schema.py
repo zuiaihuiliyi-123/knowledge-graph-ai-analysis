@@ -86,6 +86,8 @@ ADMIN_ACTIONS = (
     "course.delete",           # 删除课程
     "resource.delete",         # 删除文档资源
     "settings.update",         # 修改平台设置
+    "invite.create",           # 生成教师注册邀请码
+    "invite.revoke",           # 作废教师注册邀请码
     # ---- 文档级知识融合（管理员端；Dry Run 不落审计，只有真正写库的操作才记） ----
     "fusion.scan",             # 扫描候选并落库（persist=true 时才记）
     "fusion.review",           # 审核候选（通过/驳回/暂缓）
@@ -671,4 +673,29 @@ _SCHEMA_SQL = [
     )
     """,
     "CREATE INDEX IF NOT EXISTS idx_document_task_status ON t_document_task(status);",
+
+    # 教师注册邀请码（管理员端生成，单次使用）
+    # 为什么单独建表而不是继续用环境变量单码：TEACHER_INVITE_CODE 是「一个码给所有人用、
+    # 只能整体换、看不出谁用过」的静态配置，管理员既不能按需签发（每个学院一个、限时一个），
+    # 也无法追溯是谁注册进来的。改成一条记录 = 一次授权，天然带 created_by / used_by / 过期。
+    # 环境变量仍然保留为兜底（见 AuthService.register），避免升级后旧部署的教师注册突然关闭。
+    """
+    CREATE TABLE IF NOT EXISTS t_teacher_invite_code (
+        invite_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        code        TEXT NOT NULL UNIQUE,
+        note        TEXT,
+        status      TEXT NOT NULL DEFAULT 'active'
+                    CHECK (status IN ('active', 'used', 'revoked')),
+        created_by  INTEGER NOT NULL,
+        used_by     INTEGER,
+        used_at     TEXT,
+        -- NULL 表示永久有效；写死时刻而不是「有效天数」，避免服务重启/改配置后语义漂移
+        expires_at  TEXT,
+        created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+        FOREIGN KEY (created_by) REFERENCES t_user(user_id),
+        FOREIGN KEY (used_by) REFERENCES t_user(user_id)
+    )
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_ti_code ON t_teacher_invite_code(code);",
+    "CREATE INDEX IF NOT EXISTS idx_ti_status ON t_teacher_invite_code(status);",
 ]

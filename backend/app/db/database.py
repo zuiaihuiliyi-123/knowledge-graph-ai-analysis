@@ -7,6 +7,7 @@ from .repositories.courses import CoursesMixin
 from .repositories.documents import DocumentsMixin
 from .repositories.embeddings import EmbeddingsMixin
 from .repositories.fusion import FusionMixin
+from .repositories.invite_codes import InviteCodesMixin
 from .repositories.learning import LearningMixin
 from .repositories.members import MembersMixin
 from .repositories.practice import PracticeMixin
@@ -27,6 +28,7 @@ class SQLDatabase(
     QuestionsMixin,
     PracticeMixin,
     FusionMixin,
+    InviteCodesMixin,
     AdminMixin,
 ):
     """SQLite 数据库管理类（第一阶段；第二阶段由 MySQL 实现替换底层连接）"""

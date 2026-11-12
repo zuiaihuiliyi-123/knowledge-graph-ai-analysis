@@ -20,6 +20,7 @@ from ..schemas.admin import (
     ResetPassword,
     GovernanceAction,
     TransferCourse,
+    InviteCodeCreate,
 )
 
 router = APIRouter(prefix="/api/v1/admin", tags=["管理员端"])
@@ -116,6 +117,33 @@ async def reset_password(user_id: int, request: Request,
 async def delete_user(user_id: int, request: Request, admin: dict = Depends(require_admin)):
     """删除用户（仅限无任何关联业务数据的账号；其余情况引导使用禁用）"""
     return _reply(AdminService.delete_user(admin, user_id, request))
+
+
+# ---------- 教师注册邀请码 ----------
+
+
+@router.get("/invite-codes")
+async def list_invite_codes(admin: dict = Depends(require_admin)):
+    """教师注册邀请码列表（含已使用 / 已过期 / 已作废）。
+
+    已使用的码不删：它是「谁是谁邀请进来的」的唯一凭据，删了教师来源就断了。
+    """
+    return _reply(AdminService.list_invite_codes())
+
+
+@router.post("/invite-codes")
+async def create_invite_code(body: InviteCodeCreate, request: Request,
+                             admin: dict = Depends(require_admin)):
+    """签发一条教师注册邀请码（单次使用；valid_days=0 表示永久）"""
+    return _reply(AdminService.create_invite_code(
+        admin, body.note, body.valid_days, request))
+
+
+@router.delete("/invite-codes/{invite_id}")
+async def revoke_invite_code(invite_id: int, request: Request,
+                             admin: dict = Depends(require_admin)):
+    """作废未使用的邀请码（已使用的不允许作废，否则丢失使用人追溯）"""
+    return _reply(AdminService.revoke_invite_code(admin, invite_id, request))
 
 
 # ---------- 课程管理 ----------
