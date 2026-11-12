@@ -19,7 +19,7 @@
         <span class="option-row">
           <span class="option-label">{{ optionLabel(c) }}</span>
           <el-icon
-            v-if="store.role === 'teacher'"
+            v-if="store.role === 'teacher' && c.is_owner !== false"
             class="option-del"
             title="删除课程"
             @click.stop="onDelete(c)"
@@ -41,7 +41,7 @@
       v-if="!compact"
       :content="
         store.role === 'teacher'
-          ? '点击 + 新建课程，悬停课程项可删除'
+          ? '点击 + 新建课程；自己创建的课程悬停可删除，协作课程仅创建者可删除'
           : '选择课程后浏览知识图谱、问答与学习路径'
       "
       placement="top"

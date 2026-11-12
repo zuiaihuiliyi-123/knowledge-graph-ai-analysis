@@ -145,7 +145,7 @@ class MemberService:
         if member is None:
             return MemberService._fail(2004, f"成员记录不存在: user_id={user_id}")
         if member["status"] == "approved":
-            return MemberService._fail(4004, "该学生已是课程成员")
+            return MemberService._fail(4004, "该用户已是课程成员")
         sql_db.set_membership_status(course_id, user_id, "approved", reviewed_by=operator_id)
         return {"ok": True, "code": 0, "message": "success", "data": {
             "course_id": course_id, "user_id": user_id, "status": "approved"}}

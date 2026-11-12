@@ -1,0 +1,240 @@
+﻿{
+ "file": "eval_report_pred_��ѧ_��2��_ԭ�ӷ���������_v18.json",
+ "runs": 3,
+ "warnings": [],
+ "relation_primary_f1": {
+  "mean": 0.9079,
+  "std": 0.0,
+  "min": 0.9079,
+  "max": 0.9079
+ },
+ "relation_primary_precision": {
+  "mean": 0.8846,
+  "std": 0.0,
+  "min": 0.8846,
+  "max": 0.8846
+ },
+ "relation_primary_recall": {
+  "mean": 0.9324,
+  "std": 0.0,
+  "min": 0.9324,
+  "max": 0.9324
+ },
+ "entity_f1": {
+  "mean": 0.9176,
+  "std": 0.0272,
+  "min": 0.8905,
+  "max": 0.9449
+ },
+ "entity_precision": {
+  "mean": 0.8652,
+  "std": 0.0551,
+  "min": 0.8133,
+  "max": 0.9231
+ },
+ "entity_recall": {
+  "mean": 0.9785,
+  "std": 0.0094,
+  "min": 0.9677,
+  "max": 0.9839
+ },
+ "entity_category_accuracy": {
+  "mean": 0.934,
+  "std": 0.0006,
+  "min": 0.9333,
+  "max": 0.9344
+ }
+}
+------------------------------------------------------------
+{
+ "file": "eval_report_pred_���ݽṹ_��2��_���Ӷȷ���_v18.json",
+ "runs": 3,
+ "warnings": [],
+ "relation_primary_f1": {
+  "mean": 0.9153,
+  "std": 0.0154,
+  "min": 0.902,
+  "max": 0.9321
+ },
+ "relation_primary_precision": {
+  "mean": 0.941,
+  "std": 0.0325,
+  "min": 0.913,
+  "max": 0.9767
+ },
+ "relation_primary_recall": {
+  "mean": 0.8913,
+  "std": 0.0,
+  "min": 0.8913,
+  "max": 0.8913
+ },
+ "entity_f1": {
+  "mean": 0.9138,
+  "std": 0.0198,
+  "min": 0.9024,
+  "max": 0.9367
+ },
+ "entity_precision": {
+  "mean": 0.9036,
+  "std": 0.0391,
+  "min": 0.881,
+  "max": 0.9487
+ },
+ "entity_recall": {
+  "mean": 0.925,
+  "std": 0.0,
+  "min": 0.925,
+  "max": 0.925
+ },
+ "entity_category_accuracy": {
+  "mean": 0.8018,
+  "std": 0.0156,
+  "min": 0.7838,
+  "max": 0.8108
+ }
+}
+------------------------------------------------------------
+{
+ "file": "eval_report_pred_����_��2��_�˶�ѧ_v18.json",
+ "runs": 3,
+ "warnings": [],
+ "relation_primary_f1": {
+  "mean": 0.8785,
+  "std": 0.0,
+  "min": 0.8785,
+  "max": 0.8785
+ },
+ "relation_primary_precision": {
+  "mean": 1.0,
+  "std": 0.0,
+  "min": 1.0,
+  "max": 1.0
+ },
+ "relation_primary_recall": {
+  "mean": 0.7833,
+  "std": 0.0,
+  "min": 0.7833,
+  "max": 0.7833
+ },
+ "entity_f1": {
+  "mean": 0.9588,
+  "std": 0.0143,
+  "min": 0.9444,
+  "max": 0.973
+ },
+ "entity_precision": {
+  "mean": 1.0,
+  "std": 0.0,
+  "min": 1.0,
+  "max": 1.0
+ },
+ "entity_recall": {
+  "mean": 0.9211,
+  "std": 0.0264,
+  "min": 0.8947,
+  "max": 0.9474
+ },
+ "entity_category_accuracy": {
+  "mean": 1.0,
+  "std": 0.0,
+  "min": 1.0,
+  "max": 1.0
+ }
+}
+------------------------------------------------------------
+{
+ "file": "eval_report_pred_��7��_��_v18.json",
+ "runs": 3,
+ "warnings": [],
+ "relation_primary_f1": {
+  "mean": 0.8663,
+  "std": 0.0817,
+  "min": 0.7945,
+  "max": 0.9552
+ },
+ "relation_primary_precision": {
+  "mean": 0.8137,
+  "std": 0.1132,
+  "min": 0.725,
+  "max": 0.9412
+ },
+ "relation_primary_recall": {
+  "mean": 0.9293,
+  "std": 0.0463,
+  "min": 0.8788,
+  "max": 0.9697
+ },
+ "entity_f1": {
+  "mean": 0.9129,
+  "std": 0.0392,
+  "min": 0.8679,
+  "max": 0.94
+ },
+ "entity_precision": {
+  "mean": 0.8775,
+  "std": 0.0617,
+  "min": 0.807,
+  "max": 0.9216
+ },
+ "entity_recall": {
+  "mean": 0.9524,
+  "std": 0.0118,
+  "min": 0.9388,
+  "max": 0.9592
+ },
+ "entity_category_accuracy": {
+  "mean": 0.9786,
+  "std": 0.0002,
+  "min": 0.9783,
+  "max": 0.9787
+ }
+}
+------------------------------------------------------------
+{
+ "file": "eval_report_��7��_��_v15.json",
+ "runs": 3,
+ "warnings": [],
+ "relation_primary_f1": {
+  "mean": 0.8312,
+  "std": 0.0271,
+  "min": 0.8,
+  "max": 0.8485
+ },
+ "relation_primary_precision": {
+  "mean": 0.7841,
+  "std": 0.0673,
+  "min": 0.7143,
+  "max": 0.8485
+ },
+ "relation_primary_recall": {
+  "mean": 0.8889,
+  "std": 0.035,
+  "min": 0.8485,
+  "max": 0.9091
+ },
+ "entity_f1": {
+  "mean": 0.922,
+  "std": 0.0065,
+  "min": 0.9167,
+  "max": 0.9293
+ },
+ "entity_precision": {
+  "mean": 0.9194,
+  "std": 0.0171,
+  "min": 0.902,
+  "max": 0.9362
+ },
+ "entity_recall": {
+  "mean": 0.9252,
+  "std": 0.0236,
+  "min": 0.898,
+  "max": 0.9388
+ },
+ "entity_category_accuracy": {
+  "mean": 0.978,
+  "std": 0.0006,
+  "min": 0.9773,
+  "max": 0.9783
+ }
+}
+------------------------------------------------------------

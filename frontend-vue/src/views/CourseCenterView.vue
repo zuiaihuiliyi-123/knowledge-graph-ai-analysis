@@ -273,6 +273,7 @@
     <CourseSettingsDialog
       v-model="settingsVisible"
       :course="settingsCourse"
+      :is-owner="settingsCourse?.is_owner !== false"
       @saved="loadMine"
       @deleted="loadMine"
     />
@@ -445,6 +446,11 @@ function onCourseCreated() {
 }
 
 async function removeCourse(c) {
+  // 协作教师没有删除权：提前提示，避免走到后端再吃一个 403
+  if (c?.is_owner === false) {
+    ElMessage.warning('协作教师不能删除课程，如需删除请联系课程创建者')
+    return
+  }
   const ok = await ElMessageBox.confirm(
     `确定删除课程「${c.course_name}」吗？\n\n该课程的文档、知识图谱、学习记录、收藏、成员与邀请都会一并删除，且不可恢复。`,
     '删除课程',
@@ -493,6 +499,15 @@ async function doJoin() {
     joinCode.value = ''
     joinReason.value = ''
     await loadMine()
+    if (data.status === 'approved') {
+      // 教师加入其他教师的课程后，课程会出现在「课程管理」列表里：
+      // 刷新全局课程缓存并带他过去，避免加入成功却不知道去哪里找。
+      await store.fetchCourses(true).catch(() => {})
+      if (isTeacher.value) {
+        router.push({ path: '/teacher', query: { tab: 'courses' } })
+        return
+      }
+    }
     if (!isTeacher.value) {
       activeTab.value = 'mine'
       onTabChange('mine')
@@ -519,10 +534,14 @@ async function doApply() {
     if (data?.status === 'approved') {
       ElMessage.success(`已加入课程「${data.course_name}」`)
       await loadMine()
-      if (!isTeacher.value) {
-        activeTab.value = 'mine'
-        onTabChange('mine')
+      await store.fetchCourses(true).catch(() => {})
+      if (isTeacher.value) {
+        applyVisible.value = false
+        router.push({ path: '/teacher', query: { tab: 'courses' } })
+        return
       }
+      activeTab.value = 'mine'
+      onTabChange('mine')
     } else {
       ElMessage.success('已提交申请，等待教师审核')
     }

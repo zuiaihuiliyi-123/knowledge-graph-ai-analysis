@@ -9,6 +9,7 @@ import os
 
 from ..core.codes import gen_join_code
 from ..core.database import db
+from ..core.permissions import Permissions
 from ..core.sql_database import JOIN_MODES, course_is_visible, sql_db
 from ..core.storage import resolve_document_path
 from .document_service import DocumentService
@@ -118,20 +119,21 @@ class CourseService:
             course_ids=course_ids, exclude_course_ids=exclude_course_ids,
         )
 
-        # 可管理该课程 => 可以看加课码；同时记录当前用户成员关系，供前端区分主讲/协作教师
+        # 可管理该课程 => 可以看加课码。
+        # 统一走 Permissions.can_manage_course：除了「创建者 / 已通过协作教师」，
+        # 还要求账号当前角色仍是 teacher/admin。旧写法只看成员快照，账号被降级为
+        # 学生后仍能从列表里拿到加课码（加课码就是加入凭证，属于越权泄露）。
         manageable = set()
         if viewer:
-            for c in rows:
-                if c["teacher_id"] == viewer["user_id"]:
-                    manageable.add(c["course_id"])
             if membership_map is None:
                 membership_map = {
                     m["course_id"]: m
                     for m in sql_db.list_memberships_by_user(viewer["user_id"])
                 }
-            for m in membership_map.values():
-                if m["role"] == "teacher" and m["status"] == "approved":
-                    manageable.add(m["course_id"])
+            for c in rows:
+                if Permissions.can_manage_course(
+                        c, membership_map.get(c["course_id"]), viewer):
+                    manageable.add(c["course_id"])
         else:
             membership_map = membership_map or {}
 
@@ -307,15 +309,14 @@ class CourseService:
             "pending_count": counts.get("pending", 0),
         }
         # 加课码只对课程教师可见（学生拿到码也只会重复加入，没有必要暴露）。
-        # 协作教师必须仍是 **approved** 成员才可见：get_membership 不过滤状态，
-        # 待审核 / 被拒绝 / 已被移除的教师同样有一行成员记录，旧写法会让
-        # （例如刚被移除的）协作者继续拿到可用的加课码，绕开教师审核重新进课。
+        # 判定复用 Permissions.can_manage_course：
+        # - 协作教师必须是 role=teacher 且仍为 approved（待审核/被拒/已移除都不行，
+        #   否则刚被移除的协作者还能拿到可用加课码绕开审核重新进课）；
+        # - 创建者账号被降级为 student 后也不再下发。
         if viewer:
             viewer_id = viewer["user_id"]
-            is_owner = viewer_id == course["teacher_id"]
-            member = sql_db.get_membership(course_id, viewer_id) if not is_owner else None
-            if is_owner or (viewer.get("role") == "teacher"
-                            and member and member.get("status") == "approved"):
+            member = sql_db.get_membership(course_id, viewer_id)
+            if Permissions.can_manage_course(course, member, viewer):
                 data["join_code"] = course.get("join_code")
         return {"ok": True, "code": 0, "message": "success", "data": data}
 

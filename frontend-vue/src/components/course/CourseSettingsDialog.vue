@@ -45,7 +45,8 @@
 
     <el-divider />
 
-    <div class="danger-zone">
+    <!-- 删除课程是所有权操作：协作教师可以改课程信息，但不能删除课程 -->
+    <div v-if="isOwner" class="danger-zone">
       <div class="danger-text">
         <div class="danger-title">删除课程</div>
         <div class="tip">
@@ -53,6 +54,9 @@
         </div>
       </div>
       <el-button type="danger" plain @click="doDelete">删除课程</el-button>
+    </div>
+    <div v-else class="owner-only-tip">
+      你是该课程的协作教师，可以修改课程信息与加课码；删除课程需要课程创建者操作。
     </div>
 
     <template #footer>
@@ -72,6 +76,8 @@ import { useAppStore } from '../../stores/app'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   course: { type: Object, default: null },
+  // 是否课程创建者：删除课程入口只对创建者展示（后端仍会二次校验）
+  isOwner: { type: Boolean, default: true },
 })
 const emit = defineEmits(['update:modelValue', 'saved', 'deleted'])
 
@@ -260,5 +266,10 @@ async function doDelete() {
 }
 .danger-text {
   min-width: 0;
+}
+.owner-only-tip {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
 }
 </style>

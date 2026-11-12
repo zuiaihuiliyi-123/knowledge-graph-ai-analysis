@@ -11,6 +11,7 @@
           :loading="store.isLoading"
           @create="openCreateCourse"
           @invite="openInviteForCurrent"
+          @join="goJoinCourse"
           @enter="manageDocuments"
           @members="goMembers"
           @leave="leaveCourse"
@@ -141,12 +142,17 @@
     <CourseSettingsDialog
       v-model="settingsVisible"
       :course="settingsCourse"
+      :is-owner="settingsCourse?.is_owner !== false"
       @saved="reloadCoursesSilently"
       @deleted="onCourseDeleted"
     />
 
     <!-- 邀请学生 / 协作教师 -->
-    <InviteDialog v-model="inviteVisible" :course-id="inviteCourseId" />
+    <InviteDialog
+      v-model="inviteVisible"
+      :course-id="inviteCourseId"
+      :is-owner="inviteCourse?.is_owner !== false"
+    />
   </div>
 </template>
 
@@ -216,6 +222,7 @@ const settingsVisible = ref(false)
 const settingsCourse = ref(null)
 const inviteVisible = ref(false)
 const inviteCourseId = ref('')
+const inviteCourse = computed(() => store.courseById(inviteCourseId.value) || null)
 
 function openCreateCourse() {
   createCourseVisible.value = true
@@ -263,6 +270,12 @@ function openInviteForCurrent() {
 }
 
 async function deleteCourse(course) {
+  // 删除仅课程创建者可执行（后端 require_course_owner 是最终防线，
+  // 这里提前拦住协作教师，避免弹出必然失败的确认框）
+  if (course?.is_owner === false) {
+    ElMessage.warning('协作教师不能删除课程，如需删除请联系课程创建者')
+    return
+  }
   const id = String(course.course_id)
   try {
     await ElMessageBox.confirm(
@@ -316,6 +329,11 @@ async function leaveCourse(course) {
 // ===================== 导航与路由同步 =====================
 function goCourses() {
   router.push({ path: '/teacher', query: { tab: 'courses' } })
+}
+
+/** 教师加入其他教师的课程：复用课程中心「加入课程」页（加课码 / 邀请链接） */
+function goJoinCourse() {
+  router.push({ path: '/course-center', query: { tab: 'join' } })
 }
 
 function manageDocuments(course) {
@@ -480,6 +498,29 @@ watch(
       currentDocumentId.value = ''
     }
     activeTab.value = targetTab
+  },
+  { immediate: true },
+)
+
+// 深链权限校验：URL 里的 course_id 必须出现在「当前教师可访问课程」列表中。
+// 协作教师被移除 / 主动退出后，即使浏览器里还留着旧链接，也不能继续进入管理页。
+// 等课程列表真正加载完成再判断，避免刷新瞬间把合法深链误清空。
+watch(
+  () => (store.coursesLoaded
+    ? store.courses.map((c) => String(c.course_id)).join(',')
+    : ''),
+  () => {
+    const cid = String(currentCourseId.value || '')
+    if (!cid || !store.coursesLoaded) return
+    const allowed = store.courses.some((c) => String(c.course_id) === cid)
+    if (!allowed) {
+      currentCourseId.value = ''
+      currentDocumentId.value = ''
+      if (activeTab.value !== 'courses') {
+        ElMessage.warning('你已不在该课程中，或课程已被删除，已返回课程列表')
+        router.replace({ path: '/teacher', query: { tab: 'courses' } })
+      }
+    }
   },
   { immediate: true },
 )

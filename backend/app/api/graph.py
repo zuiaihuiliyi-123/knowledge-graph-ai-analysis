@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query, Depends
 from ..core.response import success, error
 from ..core.dependencies import get_current_user, require_teacher
 from ..core.permissions import Permissions
+from ..core.sql_database import sql_db
 from ..services.kg_manager import KnowledgeGraphManager
 from ..schemas.graph import (
     NodeCreate,
@@ -34,6 +35,31 @@ def _coerce_document_id(document_id: str) -> int:
         return int(document_id)
     except (TypeError, ValueError):
         raise ValueError(f"document_id 必须为整数，收到: {document_id}")
+
+
+def _guard_document(cid: int, document_id, strict: bool = True):
+    """校验 document_id 确实属于该课程，返回 (did, 错误响应)。
+
+    仅校验课程权限不够：图谱按 (course_id, document_id) 双键隔离，允许课程成员
+    拿「本课程 + 其他课程的 document_id」组合，会在本课程下写入孤立节点/关系，
+    污染课程统计。题库接口已有同类校验（question_service._check_document）。
+
+    strict=False 只用于读：历史库里可能存在「图谱节点还在、t_document 行已丢失」
+    的孤儿数据（旧版本删除路径不完整），读接口若强制要求文档行存在，会让这些
+    课程图谱直接打不开。文档行存在时仍严格校验课程归属，避免跨课程读取。
+    """
+    try:
+        did = _coerce_document_id(document_id)
+    except ValueError as e:
+        return None, error(1001, str(e))
+    doc = sql_db.get_document(did)
+    if doc is None:
+        if strict:
+            return None, error(2002, f"文档不存在: document_id={did}")
+        return did, None
+    if int(doc["course_id"]) != int(cid):
+        return None, error(4003, "无权限：该文档不属于此课程")
+    return did, None
 
 
 def _guard(course_id: str, current_user: dict, manage: bool = False):
@@ -74,10 +100,10 @@ async def get_graph(
     course_id_int, denied = _guard(course_id, current_user)
     if denied is not None:
         return denied
-    try:
-        did = _coerce_document_id(document_id)
-    except ValueError as e:
-        return error(1001, str(e))
+    # 读接口放宽「文档行必须存在」（兼容历史孤儿图谱），但仍拒绝跨课程文档 id
+    did, denied = _guard_document(course_id_int, document_id, strict=False)
+    if denied is not None:
+        return denied
     try:
         graph = KnowledgeGraphManager.get_graph_v1(course_id_int, did, limit=limit, node_type=node_type)
     except Exception:
@@ -96,8 +122,10 @@ async def create_node(course_id: str, body: NodeCreate,
     cid, denied = _guard(course_id, current_user, manage=True)
     if denied is not None:
         return denied
+    did, denied = _guard_document(cid, document_id)
+    if denied is not None:
+        return denied
     try:
-        did = _coerce_document_id(document_id)
         node = KnowledgeGraphManager.create_node(cid, did, body.name, body.category, body.description)
     except ValueError as e:
         return error(1001, str(e))
@@ -112,8 +140,10 @@ async def update_node(course_id: str, node_id: str, body: NodeUpdate,
     cid, denied = _guard(course_id, current_user, manage=True)
     if denied is not None:
         return denied
+    did, denied = _guard_document(cid, document_id)
+    if denied is not None:
+        return denied
     try:
-        did = _coerce_document_id(document_id)
         node = KnowledgeGraphManager.update_node(
             cid, did, node_id, name=body.name, category=body.category, description=body.description,
         )
@@ -130,8 +160,10 @@ async def delete_node(course_id: str, node_id: str,
     cid, denied = _guard(course_id, current_user, manage=True)
     if denied is not None:
         return denied
+    did, denied = _guard_document(cid, document_id)
+    if denied is not None:
+        return denied
     try:
-        did = _coerce_document_id(document_id)
         result = KnowledgeGraphManager.delete_node(cid, did, node_id)
     except ValueError as e:
         return error(1001, str(e))
@@ -148,8 +180,10 @@ async def create_edge(course_id: str, body: EdgeCreate,
     cid, denied = _guard(course_id, current_user, manage=True)
     if denied is not None:
         return denied
+    did, denied = _guard_document(cid, document_id)
+    if denied is not None:
+        return denied
     try:
-        did = _coerce_document_id(document_id)
         edge = KnowledgeGraphManager.create_relationship(cid, did, body.source, body.target, body.type)
     except ValueError as e:
         return error(1001, str(e))
@@ -164,8 +198,10 @@ async def delete_edge(course_id: str, edge_id: str,
     cid, denied = _guard(course_id, current_user, manage=True)
     if denied is not None:
         return denied
+    did, denied = _guard_document(cid, document_id)
+    if denied is not None:
+        return denied
     try:
-        did = _coerce_document_id(document_id)
         result = KnowledgeGraphManager.delete_relationship(cid, did, edge_id)
     except ValueError as e:
         return error(1001, str(e))

@@ -62,7 +62,7 @@
           row-key="user_id"
           @selection-change="onMemberSelectionChange"
         >
-          <el-table-column type="selection" width="46" :selectable="(row) => row.role !== 'owner'" />
+          <el-table-column type="selection" width="46" :selectable="canSelectMember" />
           <el-table-column label="成员" min-width="150">
             <template #default="{ row }">
               <div class="member-cell">
@@ -118,7 +118,17 @@
           <el-table-column label="操作" width="160" fixed="right">
             <template #default="{ row }">
               <el-button v-if="row.role !== 'teacher' && row.user_id !== ownerId" size="small" text type="primary" @click="openDetail(row)">查看学习情况</el-button>
-              <el-button v-if="row.user_id !== ownerId && row.user_id !== selfId" size="small" text type="danger" @click="remove(row)">移除</el-button>
+              <!-- 移除教师成员 = 撤销协作资格，属于治理操作，仅创建者可执行 -->
+              <el-button
+                v-if="row.user_id !== ownerId && row.user_id !== selfId && (row.role !== 'teacher' || isOwner)"
+                size="small"
+                text
+                type="danger"
+                @click="remove(row)"
+              >移除</el-button>
+              <span v-else-if="row.role === 'teacher' && row.user_id !== ownerId && row.user_id !== selfId && !isOwner" class="co-teacher-na">
+                仅创建者可管理
+              </span>
             </template>
           </el-table-column>
         </el-table>
@@ -143,7 +153,7 @@
         </template>
 
         <el-table :data="pendingRows" v-loading="loading" size="small" empty-text="暂无待审核申请">
-          <el-table-column label="学生" min-width="150">
+          <el-table-column label="申请者" min-width="150">
             <template #default="{ row }">
               <div class="member-cell">
                 <el-avatar :size="30" :src="row.avatar_url || undefined">
@@ -154,6 +164,13 @@
                   <div class="member-sub">@{{ row.username }}</div>
                 </div>
               </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="身份" width="92">
+            <template #default="{ row }">
+              <el-tag size="small" :type="row.role === 'teacher' ? 'warning' : 'success'" effect="plain">
+                {{ row.role === 'teacher' ? '教师（协作）' : '学生' }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="学号 / 工号" min-width="110">
@@ -173,10 +190,14 @@
               <el-tag size="small" effect="plain">{{ sourceText(row.join_source) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" width="170" fixed="right">
             <template #default="{ row }">
-              <el-button size="small" type="primary" @click="approve(row)">同意</el-button>
-              <el-button size="small" type="danger" plain @click="openReject(row)">拒绝</el-button>
+              <!-- 批准教师加入 = 扩充管理团队，仅课程创建者可执行 -->
+              <template v-if="row.role !== 'teacher' || isOwner">
+                <el-button size="small" type="primary" @click="approve(row)">同意</el-button>
+                <el-button size="small" type="danger" plain @click="openReject(row)">拒绝</el-button>
+              </template>
+              <span v-else class="co-teacher-na">仅创建者可审核</span>
             </template>
           </el-table-column>
         </el-table>
@@ -324,6 +345,16 @@ const ownerId = computed(() => props.teacherId ?? store.user?.user_id)
 // 当前登录用户 id：任何人（含协作教师）都不能移除自己——自己的行不显示「移除」按钮；
 // 主讲移除协作教师（撤销误邀请）的场景不受影响，因为那一行不是「自己」。
 const selfId = computed(() => store.user?.user_id)
+// 当前登录用户是否就是课程创建者：教师成员的审核/移除属于治理操作，仅创建者可做
+const isOwner = computed(
+  () => String(selfId.value ?? '') !== '' && String(ownerId.value ?? '') === String(selfId.value),
+)
+
+/** 批量选择：不能选创建者/自己；协作教师也不能选其他教师成员（无治理权） */
+function canSelectMember(row) {
+  if (row.user_id === ownerId.value || row.user_id === selfId.value) return false
+  return row.role !== 'teacher' || isOwner.value
+}
 
 const progressColor = [
   { color: '#f56c6c', percentage: 30 },

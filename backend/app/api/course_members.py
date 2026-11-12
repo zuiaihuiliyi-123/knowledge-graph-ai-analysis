@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, Query
 from ..core.dependencies import get_current_user
 from ..core.permissions import Permissions
 from ..core.response import success, error
+from ..core.sql_database import sql_db
 from ..services.member_service import MemberService
 from ..schemas.course_members import (
     RejectRequest,
@@ -26,6 +27,23 @@ def _coerce_int(value):
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _guard_member_action(course_id: int, current_user: dict, target_user_id: int):
+    """成员审核/移除的权限分级。
+
+    学生成员属于日常教学管理，创建者与协作教师都可操作；
+    但对「教师成员」的批准、拒绝、移除会改变课程的管理团队，属于治理性操作，
+    沿用最小权限原则，仅课程创建者可以执行。
+
+    目标不是自己时才升级为 owner 校验：任何教师（含协作教师）都可以退出课程，
+    该路径由 remove_member 里的 leave_course 分支处理。
+    """
+    member = sql_db.get_membership(course_id, target_user_id)
+    is_teacher_target = bool(member and member.get("role") == "teacher")
+    if is_teacher_target and target_user_id != current_user["user_id"]:
+        return Permissions.require_course_owner(course_id, current_user)
+    return Permissions.require_course_manage(course_id, current_user)
 
 
 @router.get("/{course_id}/members")
@@ -59,8 +77,8 @@ async def member_stats(course_id: int, current_user: dict = Depends(get_current_
 @router.post("/{course_id}/members/{user_id}/approve")
 async def approve_member(course_id: int, user_id: int,
                          current_user: dict = Depends(get_current_user)):
-    """同意学生加入申请"""
-    perm = Permissions.require_course_manage(course_id, current_user)
+    """同意学生加入申请（批准教师加入属于治理操作，仅创建者）"""
+    perm = _guard_member_action(course_id, current_user, user_id)
     if not perm["ok"]:
         return error(perm["code"], perm["message"])
     result = MemberService.approve(course_id, user_id, current_user["user_id"])
@@ -70,8 +88,8 @@ async def approve_member(course_id: int, user_id: int,
 @router.post("/{course_id}/members/{user_id}/reject")
 async def reject_member(course_id: int, user_id: int, body: RejectRequest | None = None,
                         current_user: dict = Depends(get_current_user)):
-    """拒绝学生加入申请（可填理由，学生会在「申请中」看到）"""
-    perm = Permissions.require_course_manage(course_id, current_user)
+    """拒绝学生加入申请（拒绝教师加入同样仅创建者）"""
+    perm = _guard_member_action(course_id, current_user, user_id)
     if not perm["ok"]:
         return error(perm["code"], perm["message"])
     comment = body.comment if body else None
@@ -92,7 +110,9 @@ async def remove_member(course_id: int, user_id: int,
         result = MemberService.leave_course(current_user["user_id"], course_id)
         return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
 
-    perm = Permissions.require_course_manage(course_id, current_user)
+    # 移除教师成员（撤销协作资格）属于治理操作，仅创建者可执行；
+    # 移除学生仍是日常教学管理，创建者与协作教师均可。
+    perm = _guard_member_action(course_id, current_user, user_id)
     if not perm["ok"]:
         return error(perm["code"], perm["message"])
     if not confirm:
@@ -106,11 +126,17 @@ async def remove_member(course_id: int, user_id: int,
 @router.post("/{course_id}/invites")
 async def create_invite(course_id: int, body: InviteCreateRequest | None = None,
                         current_user: dict = Depends(get_current_user)):
-    """生成邀请链接（随机 token，可设角色与有效期）"""
-    perm = Permissions.require_course_manage(course_id, current_user)
+    """生成邀请链接（随机 token，可设角色与有效期）。
+
+    邀请学生 = 日常教学管理，创建者与协作教师均可；
+    邀请协作教师 = 组建管理团队，属于治理操作，仅创建者可执行。
+    """
+    role = body.role if body else "student"
+    perm = (Permissions.require_course_owner(course_id, current_user)
+            if role == "teacher"
+            else Permissions.require_course_manage(course_id, current_user))
     if not perm["ok"]:
         return error(perm["code"], perm["message"])
-    role = body.role if body else "student"
     days = body.expires_in_days if body else 7
     result = MemberService.create_invite(course_id, current_user["user_id"], role, days)
     return success(result["data"]) if result["ok"] else error(result["code"], result["message"])
@@ -129,8 +155,15 @@ async def list_invites(course_id: int, current_user: dict = Depends(get_current_
 @router.delete("/{course_id}/invites/{invite_id}")
 async def revoke_invite(course_id: int, invite_id: int,
                         current_user: dict = Depends(get_current_user)):
-    """撤销邀请链接（撤销后立即失效）"""
-    perm = Permissions.require_course_manage(course_id, current_user)
+    """撤销邀请链接（撤销后立即失效）。
+
+    协作教师可以撤销学生邀请；但撤销「教师邀请」会改变管理团队，
+    与创建教师邀请一致，仅课程创建者可执行。
+    """
+    invite = sql_db.get_invite(invite_id, course_id)
+    perm = (Permissions.require_course_owner(course_id, current_user)
+            if invite and invite.get("role") == "teacher"
+            else Permissions.require_course_manage(course_id, current_user))
     if not perm["ok"]:
         return error(perm["code"], perm["message"])
     result = MemberService.revoke_invite(course_id, invite_id)

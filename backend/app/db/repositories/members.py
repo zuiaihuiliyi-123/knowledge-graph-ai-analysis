@@ -251,6 +251,14 @@ class MembersMixin:
         return self._query_one("SELECT * FROM t_course_invite WHERE token = ?", (token,))
 
 
+    def get_invite(self, invite_id: int, course_id: int) -> dict:
+        """按 id 取邀请（限定课程），用于判断邀请角色是否属于治理级操作。"""
+        return self._query_one(
+            "SELECT * FROM t_course_invite WHERE invite_id = ? AND course_id = ?",
+            (invite_id, course_id),
+        )
+
+
     def list_invites_by_course(self, course_id: int) -> list:
         return self._query(
             """

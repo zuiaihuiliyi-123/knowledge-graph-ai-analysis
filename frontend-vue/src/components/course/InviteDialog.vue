@@ -11,7 +11,8 @@
         <el-form-item label="邀请角色">
           <el-radio-group v-model="role">
             <el-radio value="student">学生</el-radio>
-            <el-radio value="teacher">协作教师</el-radio>
+            <!-- 邀请协作教师 = 组建管理团队，仅课程创建者可操作 -->
+            <el-radio v-if="isOwner" value="teacher">协作教师</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="有效期">
@@ -25,6 +26,7 @@
       <div class="tip">
         邀请链接使用随机令牌，学生打开后可直接加入（无需审核），且不受「关闭加入」影响。
         链接可设置有效期，也可随时撤销。
+        <template v-if="!isOwner">协作教师只能邀请学生；邀请协作教师需要课程创建者操作。</template>
       </div>
     </div>
 
@@ -76,7 +78,7 @@
             @click="copy(fullUrl(row.token))"
           >复制</el-button>
           <el-button
-            v-if="row.effective_status === 'active'"
+            v-if="row.effective_status === 'active' && (row.role !== 'teacher' || isOwner)"
             size="small"
             text
             type="danger"
@@ -102,6 +104,8 @@ import { formatDateTime } from '../../utils/format'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   courseId: { type: [String, Number], default: '' },
+  // 是否课程创建者：协作教师只能邀请学生，不能组建教师团队 / 撤销教师邀请
+  isOwner: { type: Boolean, default: true },
 })
 const emit = defineEmits(['update:modelValue', 'changed'])
 
@@ -128,6 +132,8 @@ const statusType = (s) => STATUS_TYPE[s] || 'info'
 
 async function reload() {
   if (!props.courseId) return
+  // 协作教师打开对话框时不能停留在「协作教师」单选项上（该选项此时不渲染）
+  if (!props.isOwner && role.value === 'teacher') role.value = 'student'
   loading.value = true
   try {
     const data = await api.listInvites(props.courseId)

@@ -56,7 +56,7 @@
           <div class="cover-veil"></div>
           <div class="cover-name">{{ c.course_name }}</div>
           <div class="cover-tags">
-            <el-tag v-if="c.my_role === 'teacher' && !c.is_owner" size="small" effect="dark" type="warning" class="cover-tag">协作</el-tag>
+            <el-tag v-if="c.my_role === 'teacher' && !c.is_owner" size="small" effect="dark" type="warning" class="cover-tag">协作教师</el-tag>
             <el-tag v-if="c.category" size="small" effect="dark" class="cover-tag">{{ c.category }}</el-tag>
             <el-tag v-if="c.is_public === 0" size="small" effect="dark" type="warning" class="cover-tag">不公开</el-tag>
           </div>
@@ -160,7 +160,7 @@
         <div class="row-main">
           <div class="row-title">
             <span class="row-name">{{ c.course_name }}</span>
-            <el-tag v-if="c.my_role === 'teacher' && !c.is_owner" size="small" type="warning" effect="dark">协作</el-tag>
+            <el-tag v-if="c.my_role === 'teacher' && !c.is_owner" size="small" type="warning" effect="dark">协作教师</el-tag>
             <el-tag v-if="c.category" size="small" effect="plain">{{ c.category }}</el-tag>
             <el-tag v-if="c.is_public === 0" size="small" type="warning" effect="plain">不公开</el-tag>
             <el-tag v-if="role === 'teacher' && c.pending_count > 0" size="small" type="danger" effect="light">

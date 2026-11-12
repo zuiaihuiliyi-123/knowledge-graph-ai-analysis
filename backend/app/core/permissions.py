@@ -73,6 +73,22 @@ class Permissions:
         return REL_NONE
 
     @staticmethod
+    def can_manage_course(course: dict, member: dict, user: dict) -> bool:
+        """课程管理权统一判定：创建者，或已通过审核的协作教师。
+
+        账号当前角色必须仍是 teacher/admin —— t_course_member.role 是加入时的
+        快照，账号被降级后旧成员行仍可能是 teacher/approved，不能凭快照继续管理。
+        member 同时兼容 get_membership 的原始行与 resolve 归一化后的 dict。
+        """
+        if user.get("role") not in ("teacher", "admin"):
+            return False
+        if course.get("teacher_id") == user.get("user_id"):
+            return True
+        return bool(member
+                    and member.get("role") == "teacher"
+                    and member.get("status") == "approved")
+
+    @staticmethod
     def resolve(course_id, user: dict) -> dict:
         """一次性取回课程、该用户的关系与三档权限位。
 
@@ -109,9 +125,7 @@ class Permissions:
         # 旧成员行仍是 teacher/approved。只看成员行会让被降级账号继续改课、
         # 传文档、审成员——这里以账号当前角色为准，拦掉这类残留授权。
         # admin 保留管理权是平台治理角色本身的语义，不代表它属于某门课。
-        account_role = user.get("role")
-        can_manage = (relation in (REL_OWNER, REL_TEACHER_MEMBER)
-                      and account_role in ("teacher", "admin"))
+        can_manage = Permissions.can_manage_course(row, member, user)
 
         data = {
             "course": row,
