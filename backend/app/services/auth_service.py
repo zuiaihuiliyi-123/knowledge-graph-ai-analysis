@@ -9,6 +9,7 @@ import secrets
 
 import jwt
 
+from ..core.codes import normalize_teacher_invite_code
 from ..core.config import settings
 from ..core.security import hash_password, verify_password
 from ..core.sql_database import ARCHIVED_USERNAME_PREFIX, sql_db
@@ -45,10 +46,36 @@ class AuthService:
         return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
     @staticmethod
+    def _resolve_teacher_invite(provided: str) -> dict:
+        """把输入的邀请码解析成可用记录；环境变量那条「全员通用码」用 `{"env": True}` 表示。
+
+        比对前统一归一化（去空白与分隔符、转大写）：管理员把码复制给同事时，对方常会
+        带上空格、或把分隔符丢掉/换成全角横线，**形态不同不等于码不同**。
+
+        优先级：管理员签发的码优先，环境变量兜底。保留环境变量是有意的——升级后
+        旧部署没来得及签发第一个码时，教师自助注册不会突然关闭。
+        """
+        normalized = normalize_teacher_invite_code(provided)
+        if not normalized:
+            return None
+        row = sql_db.get_teacher_invite_code(normalized)
+        if row:
+            if row.get("status") != "active":
+                return None
+            expires_at = row.get("expires_at")
+            if expires_at and expires_at <= datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
+                return None
+            return row
+        env_code = normalize_teacher_invite_code(settings.TEACHER_INVITE_CODE or "")
+        if env_code and secrets.compare_digest(normalized, env_code):
+            return {"env": True}
+        return None
+
+    @staticmethod
     def register(username: str, password: str, role: str = "student",
                  email: str = None, display_name: str = None,
                  teacher_invite_code: str = None) -> dict:
-        """注册；教师自助注册必须携带正确的 TEACHER_INVITE_CODE。"""
+        """注册；教师自助注册必须携带有效邀请码（管理员签发的单次码，或环境变量兜底码）。"""
         username = (username or "").strip()
         if not username:
             return AuthService._fail(1001, "用户名不能为空")
@@ -66,25 +93,42 @@ class AuthService:
         if role not in ("teacher", "student"):
             return AuthService._fail(1001, "角色不合法，仅支持 teacher/student")
 
+        invite = None
         if role == "teacher":
-            expected = (settings.TEACHER_INVITE_CODE or "").strip()
-            if not expected:
-                # 未配置邀请码 = 未开放教师自助注册。与「邀请码错误」用同一业务码，
-                # 避免把「系统是否配置了邀请码」当成探测信息暴露出去。
-                return AuthService._fail(4003, "教师注册未开放：请联系管理员开通账号")
             provided = (teacher_invite_code or "").strip()
-            if not provided or not secrets.compare_digest(provided, expected):
-                return AuthService._fail(4003, "教师邀请码不正确")
+            if not provided:
+                return AuthService._fail(
+                    4003, "教师注册需要邀请码，请联系管理员获取")
+            invite = AuthService._resolve_teacher_invite(provided)
+            if invite is None:
+                # 不区分「码不存在 / 已使用 / 已过期 / 码错误」：区分了就等于告诉外面
+                # 「这个码曾经存在」，让枚举变得有反馈。
+                return AuthService._fail(4003, "教师邀请码不正确、已被使用或已过期")
 
-        user_id = sql_db.create_user_releasing_inactive(
-            username=username,
-            password_hash=hash_password(password),
-            role=role,
-            display_name=display_name,
-            email=email,
-        )
+        # 先占用再建号：一码一人。若先建号后标记，并发下会各建出一个教师账号、
+        # 只有一条标记成功，另一个就成为「无授权却已存在」的孤儿账号。
+        claimed = bool(invite) and not invite.get("env")
+        if claimed and not sql_db.claim_teacher_invite_code(invite["invite_id"]):
+            return AuthService._fail(4003, "该邀请码刚刚被使用，请重新获取")
+
+        try:
+            user_id = sql_db.create_user_releasing_inactive(
+                username=username,
+                password_hash=hash_password(password),
+                role=role,
+                display_name=display_name,
+                email=email,
+            )
+        except Exception:
+            if claimed:                       # 建号异常：把码退回，用户可重试
+                sql_db.release_teacher_invite_code(invite["invite_id"])
+            raise
         if user_id is None:
+            if claimed:
+                sql_db.release_teacher_invite_code(invite["invite_id"])
             return AuthService._fail(2006, f"用户名已存在: {username}")
+        if claimed:
+            sql_db.attach_teacher_invite_code(invite["invite_id"], user_id)
         return AuthService._ok({"user_id": user_id, "username": username, "role": role})
 
     @staticmethod

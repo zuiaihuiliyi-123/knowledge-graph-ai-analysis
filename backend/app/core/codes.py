@@ -36,3 +36,35 @@ def normalize_join_code(raw: str) -> str:
 def gen_invite_token(length: int = 32) -> str:
     """生成邀请令牌（URL 安全随机串，不可由 course_id / user_id 推导）"""
     return secrets.token_urlsafe(48)[:max(int(length), 16)]
+
+
+# 教师注册邀请码：与加课码共用「剔除易混字符」的字母表，但单独成一个函数，
+# 因为两者的使用场景不同——加课码要学生在课堂上口头念，邀请码多由管理员复制粘贴给同事。
+TEACHER_INVITE_ALPHABET = JOIN_CODE_ALPHABET
+TEACHER_INVITE_LENGTH = 12
+
+
+def gen_teacher_invite_code(length: int = TEACHER_INVITE_LENGTH) -> str:
+    """生成教师注册邀请码，形如 `K7QX-3MPT-9CWD`（分组便于口头或手抄传递）。
+
+    唯一性由 `t_teacher_invite_code.code` 的唯一索引兜底，调用方插入冲突时重试。
+    """
+    length = max(int(length), 8)
+    raw = "".join(secrets.choice(TEACHER_INVITE_ALPHABET) for _ in range(length))
+    return "-".join(raw[i:i + 4] for i in range(0, len(raw), 4))
+
+
+def normalize_teacher_invite_code(raw: str) -> str:
+    """归一化邀请码：去掉空白与分隔符、转大写。
+
+    用户从聊天窗口复制时常带上空格，或者把分隔符 `-` 漏掉/换成全角横线；
+    比对前统一形态，否则「看起来一样的码」会被判成错的。
+    """
+    text = (raw or "").upper()
+    return "".join(ch for ch in text if ch.isalnum() and ch.isascii())
+
+
+def format_teacher_invite_code(code: str) -> str:
+    """把库里的归一化码格式化成 `XXXX-XXXX-XXXX`，仅供界面展示/复制。"""
+    raw = normalize_teacher_invite_code(code)
+    return "-".join(raw[i:i + 4] for i in range(0, len(raw), 4))

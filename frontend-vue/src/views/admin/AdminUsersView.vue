@@ -2,6 +2,7 @@
   <div class="admin-users">
     <PageHeader title="用户管理" desc="平台全部账号的检索、资料查看与账号级治理">
       <template #extra>
+        <el-button :icon="Key" @click="openInvites">教师邀请码</el-button>
         <el-button :loading="loading" @click="load">刷新</el-button>
       </template>
     </PageHeader>
@@ -268,6 +269,94 @@
       </template>
     </el-dialog>
 
+    <!-- 教师注册邀请码：一码一人，管理员在这里签发与追溯 -->
+    <el-drawer v-model="inviteVisible" title="教师注册邀请码" size="980px" destroy-on-close>
+      <div class="invite-head">
+        <p class="invite-desc">
+          教师自助注册时需要填写邀请码。每个码只能用一次，注册成功后自动标记「已使用」并记录使用者，
+          便于追溯「这位老师是谁邀请进来的」。
+        </p>
+        <el-alert
+          v-if="inviteEnvEnabled"
+          class="invite-env-tip"
+          type="warning"
+          :closable="false"
+          show-icon
+          title="后端环境变量里还配置了一条「全员通用」邀请码"
+          description="它不会出现在下面的列表里，且任何教师都能用它注册（用于旧部署兜底）。要彻底关闭，请让运维删除 backend/.env 里的 TEACHER_INVITE_CODE。"
+        />
+        <div class="invite-create">
+          <el-input
+            v-model="inviteForm.note"
+            maxlength="100"
+            placeholder="备注（可选），例如：计算机学院 2026 春"
+            style="width: 300px"
+          />
+          <el-select v-model="inviteForm.valid_days" style="width: 132px">
+            <el-option label="永久有效" :value="0" />
+            <el-option label="7 天" :value="7" />
+            <el-option label="30 天" :value="30" />
+            <el-option label="90 天" :value="90" />
+            <el-option label="180 天" :value="180" />
+          </el-select>
+          <el-button type="primary" :loading="inviteSubmitting" @click="createInvite">
+            生成邀请码
+          </el-button>
+        </div>
+      </div>
+
+      <el-table :data="invites" v-loading="inviteLoading" size="small" empty-text="还没有生成过邀请码">
+        <el-table-column label="邀请码" width="178">
+          <template #default="{ row }">
+            <span class="invite-code">{{ row.code }}</span>
+            <el-button link type="primary" size="small" @click="copyInvite(row.code)">复制</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="86">
+          <template #default="{ row }">
+            <el-tag size="small" :type="inviteStatusType(row.status)" effect="light">
+              {{ inviteStatusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" min-width="120" show-overflow-tooltip>
+          <template #default="{ row }"><span class="dim">{{ row.note || '—' }}</span></template>
+        </el-table-column>
+        <el-table-column label="有效期至" width="134">
+          <template #default="{ row }">
+            <span class="dim">{{ row.expires_at ? fmtTime(row.expires_at) : '永久' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建" min-width="132">
+          <template #default="{ row }">
+            <div class="invite-cell">
+              <span>{{ row.created_by_name || '—' }}</span>
+              <span class="invite-cell-sub">{{ fmtTime(row.created_at) }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="使用者" width="112" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="dim">{{ row.used_by_name || '—' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="76" fixed="right">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.status === 'active'"
+              link
+              type="danger"
+              size="small"
+              @click="revokeInvite(row)"
+            >
+              作废
+            </el-button>
+            <span v-else class="dim">—</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-drawer>
+
     <!-- 重置密码 -->
     <el-dialog v-model="resetVisible" title="重置密码" width="460px" align-center>
       <el-alert
@@ -310,7 +399,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { Key, Search } from '@element-plus/icons-vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { api } from '../../api'
 import { formatDateTime } from '../../utils/format'
@@ -565,9 +654,98 @@ async function copyGeneratedPassword() {
   }
 }
 
-// ---- 删除 ----
-async function tryDelete(user) {
+// ---- 教师注册邀请码 ----
+const inviteVisible = ref(false)
+const inviteLoading = ref(false)
+const inviteSubmitting = ref(false)
+const invites = ref([])
+const inviteEnvEnabled = ref(false)
+const inviteForm = reactive({ note: '', valid_days: 0 })
+
+function inviteStatusLabel(s) {
+  return ({ active: '未使用', used: '已使用', revoked: '已作废', expired: '已过期' }[s] || s)
+}
+function inviteStatusType(s) {
+  return ({ active: 'success', used: 'info', revoked: 'danger', expired: 'warning' }[s] || 'info')
+}
+
+async function openInvites() {
+  inviteVisible.value = true
+  await loadInvites()
+}
+
+async function loadInvites() {
+  inviteLoading.value = true
   try {
+    const data = await api.adminListInviteCodes()
+    invites.value = data.items || []
+    inviteEnvEnabled.value = !!data.env_code_enabled
+  } catch (e) {
+    ElMessage.error(e?.message || '加载邀请码失败')
+  } finally {
+    inviteLoading.value = false
+  }
+}
+
+async function createInvite() {
+  inviteSubmitting.value = true
+  try {
+    const data = await api.adminCreateInviteCode(
+      inviteForm.note.trim() || null,
+      Number(inviteForm.valid_days) || 0,
+    )
+    inviteForm.note = ''
+    await loadInvites()
+    ElMessage.success(`已生成邀请码 ${data.code}`)
+    // 顺手复制：管理员下一步八成是把它发给老师，省掉一次点「复制」
+    copyInvite(data.code, true)
+  } catch (e) {
+    ElMessage.error(e?.message || '生成邀请码失败')
+  } finally {
+    inviteSubmitting.value = false
+  }
+}
+
+/** 复制邀请码；silent=true 时不提示失败（用于生成后自动复制这种附带动作） */
+async function copyInvite(code, silent = false) {
+  const text = String(code || '')
+  if (!text) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    if (!silent) ElMessage.success('邀请码已复制')
+  } catch {
+    if (!silent) ElMessage.warning('复制失败，请手动选中邀请码复制')
+  }
+}
+
+async function revokeInvite(row) {
+  try {
+    await ElMessageBox.confirm(
+      `确定作废邀请码 ${row.code} 吗？作废后它不能再用于教师注册（已使用的码不受影响）。`,
+      '作废邀请码',
+      { type: 'warning', confirmButtonText: '作废', confirmButtonClass: 'el-button--danger' },
+    )
+    await api.adminRevokeInviteCode(row.invite_id)
+    ElMessage.success('邀请码已作废')
+    await loadInvites()
+  } catch (e) {
+    if (e !== 'cancel') ElMessage.error(e?.message || '作废失败')
+  }
+}
+
+// ---- 删除 ----
+async function tryDelete(user) {  try {
     await ElMessageBox.confirm(
       `确定要删除账号「${user.username}」吗？只有从未产生课程 / 文档 / 学习记录等数据的账号才能删除；`
       + `有数据的账号请改用「禁用」（可随时恢复）。`,
@@ -619,6 +797,26 @@ onMounted(load)
 }
 .uc-sub { font-size: 11.5px; color: var(--color-text-muted); }
 .dim { color: var(--color-text-muted); font-size: 12.5px; }
+
+/* 教师注册邀请码抽屉 */
+.invite-head { margin-bottom: 14px; }
+.invite-desc {
+  margin: 0 0 12px;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.invite-env-tip { margin-bottom: 12px; }
+.invite-create { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.invite-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  color: #303133;
+  margin-right: 6px;
+}
+.invite-cell { display: flex; flex-direction: column; gap: 2px; line-height: 1.35; }
+.invite-cell-sub { font-size: 12px; color: var(--color-text-muted, #9aa3af); }
 
 .pager { display: flex; justify-content: flex-end; margin-top: 14px; }
 .empty-line { padding: 22px 0; text-align: center; color: var(--color-text-muted); font-size: 13px; }

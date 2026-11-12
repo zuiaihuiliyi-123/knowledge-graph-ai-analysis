@@ -335,6 +335,15 @@ export const api = {
       { new_password: newPassword }),
   adminDeleteUser: (userId) => request.delete(`/api/v1/admin/users/${userId}`),
 
+  /** 教师注册邀请码列表（含已使用 / 已过期 / 已作废，用于追溯邀请来源） */
+  adminListInviteCodes: () => request.get('/api/v1/admin/invite-codes'),
+  /** 签发教师注册邀请码：validDays=0 表示永久有效 */
+  adminCreateInviteCode: (note = null, validDays = 0) =>
+    request.post('/api/v1/admin/invite-codes', { note, valid_days: validDays }),
+  /** 作废未使用的邀请码（已使用的不可作废，保留使用人追溯） */
+  adminRevokeInviteCode: (inviteId) =>
+    request.delete(`/api/v1/admin/invite-codes/${inviteId}`),
+
   /** 全平台课程列表 */
   adminListCourses: (params = {}) => request.get('/api/v1/admin/courses', { params }),
   /** 课程详情（只读）：概览 + 成员 + 文档 + 图谱统计 */
