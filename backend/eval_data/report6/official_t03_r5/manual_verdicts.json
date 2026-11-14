@@ -1,0 +1,606 @@
+{
+  "relations": {
+    "R1": {
+      "verdict": "正确",
+      "note": "原文明确“体现一分为二的分治逻辑”，符合项目本体口径"
+    },
+    "R2": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R3": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R4": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R5": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R6": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R7": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R8": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R9": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R10": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R11": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R12": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R13": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R14": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R15": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R16": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R17": {
+      "verdict": "正确",
+      "note": "摩尔概念是理解摩尔质量的前置"
+    },
+    "R18": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R19": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R20": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R21": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R22": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R23": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R24": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R25": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R26": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R27": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R28": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R29": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R30": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R31": {
+      "verdict": "正确",
+      "note": "原文表1.2把质量列为基础量；该条在 gold 中为 core=false，本判定按原文语义成立"
+    },
+    "R32": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R33": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R34": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R35": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R36": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R37": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R38": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R39": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R40": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R41": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R42": {
+      "verdict": "正确",
+      "note": "原文 1.5 节定义“测量不确定度”，二者直接相关"
+    },
+    "R43": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R44": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R45": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R46": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R47": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R48": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R49": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R50": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R51": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R52": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R53": {
+      "verdict": "正确",
+      "note": "原文明确阴离子/阳离子是离子的子类"
+    },
+    "R54": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R55": {
+      "verdict": "正确",
+      "note": "原文明确多原子离子属于离子"
+    },
+    "R56": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R57": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R58": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R59": {
+      "verdict": "正确",
+      "note": "原文卢瑟福原子模型与金箔实验直接对应"
+    },
+    "R60": {
+      "verdict": "正确",
+      "note": "原文金箔实验导出原子核模型"
+    },
+    "R61": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R62": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R63": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R64": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R65": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R66": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R67": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R68": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R69": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R70": {
+      "verdict": "正确",
+      "note": "道尔顿原子理论对物质守恒定律给出微观解释"
+    },
+    "R71": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R72": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R73": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R74": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R75": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R76": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R77": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R78": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R79": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R80": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R81": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R82": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R83": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R84": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R85": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R86": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R87": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R88": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R89": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R90": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R91": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R92": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R93": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R94": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R95": {
+      "verdict": "正确",
+      "note": "原文为“位移-时间图的斜率是速度”，与“位置-时间图”同义"
+    },
+    "R96": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R97": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R98": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R99": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "R100": {
+      "verdict": "正确",
+      "note": ""
+    }
+  },
+  "entities": {
+    "E1": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E2": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E3": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E4": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E5": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E6": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E7": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E8": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E9": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E10": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E11": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E12": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E13": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E14": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E15": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E16": {
+      "verdict": "正确",
+      "note": "名称与类别正确；描述中的“体积”宜改为“时刻/状态”，不影响实体成立"
+    },
+    "E17": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E18": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E19": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E20": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E21": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E22": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E23": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E24": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E25": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E26": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E27": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E28": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E29": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E30": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E31": {
+      "verdict": "正确",
+      "note": "名称与类别正确"
+    },
+    "E32": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E33": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E34": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E35": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E36": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E37": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E38": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E39": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E40": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E41": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E42": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E43": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E44": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E45": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E46": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E47": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E48": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E49": {
+      "verdict": "正确",
+      "note": ""
+    },
+    "E50": {
+      "verdict": "正确",
+      "note": "名称与类别正确；该描述对应瞬时速率，平均速率另有定义"
+    }
+  }
+}

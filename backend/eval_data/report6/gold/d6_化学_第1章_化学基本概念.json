@@ -1,0 +1,555 @@
+[
+  {
+    "text_id": "化学_化学基本概念_第1章",
+    "source": "data/sample_docs/openstax_化学/第1章_化学基本概念_中文版.txt",
+    "entities": [
+      {
+        "name": "化学",
+        "category": "概念",
+        "description": "研究物质的组成、性质与相互作用的学科。"
+      },
+      {
+        "name": "科学方法",
+        "category": "方法",
+        "description": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的必要修改。"
+      },
+      {
+        "name": "假说",
+        "category": "概念",
+        "description": "对观察结果的试探性解释，作为收集和核验信息的指南。"
+      },
+      {
+        "name": "科学定律",
+        "category": "概念",
+        "description": "概括大量实验观察、描述或预测自然界某个方面的陈述。"
+      },
+      {
+        "name": "科学理论",
+        "category": "概念",
+        "description": "对自然界特定方面的、有充分依据的、全面的、可检验的解释。"
+      },
+      {
+        "name": "宏观领域",
+        "category": "概念",
+        "description": "大到可被人的视觉或触觉直接感知的日常事物领域。"
+      },
+      {
+        "name": "微观领域",
+        "category": "概念",
+        "description": "小到无法直接感知、常需借助想象的事物领域，如原子、分子。"
+      },
+      {
+        "name": "符号领域",
+        "category": "概念",
+        "description": "用来表示宏观和微观领域组成部分的专业语言，如化学符号、化学式和化学方程式。"
+      },
+      {
+        "name": "物质",
+        "category": "概念",
+        "description": "任何占据空间并具有质量的东西。"
+      },
+      {
+        "name": "固体",
+        "category": "概念",
+        "description": "刚性的、具有确定形状的物质状态。"
+      },
+      {
+        "name": "液体",
+        "category": "概念",
+        "description": "可以流动并呈现容器形状、具有确定体积的物质状态。"
+      },
+      {
+        "name": "气体",
+        "category": "概念",
+        "description": "呈现其容器的形状和体积的物质状态。"
+      },
+      {
+        "name": "质量",
+        "category": "概念",
+        "description": "衡量物体中所含物质量的量。"
+      },
+      {
+        "name": "重量",
+        "category": "概念",
+        "description": "重力施加在物体上的力，与物体的质量成正比。"
+      },
+      {
+        "name": "物质守恒定律",
+        "category": "定理",
+        "description": "当物质发生类型转化或状态变化时，现有物质的总量没有可检测到的变化。"
+      },
+      {
+        "name": "纯物质",
+        "category": "概念",
+        "description": "具有恒定组成的物质，所有样本都具有完全相同的构成和性质。"
+      },
+      {
+        "name": "元素",
+        "category": "概念",
+        "description": "不能通过化学变化分解成更简单物质的纯物质。"
+      },
+      {
+        "name": "化合物",
+        "category": "概念",
+        "description": "可以通过化学变化分解的纯物质。"
+      },
+      {
+        "name": "混合物",
+        "category": "概念",
+        "description": "由两种或两种以上类型的物质组成、可通过蒸发等物理变化分离的物质。"
+      },
+      {
+        "name": "非均匀混合物",
+        "category": "概念",
+        "description": "组成随位置变化而变化的混合物。"
+      },
+      {
+        "name": "均匀混合物",
+        "category": "概念",
+        "description": "组成均匀、外观各处相同的混合物，也称溶液。"
+      },
+      {
+        "name": "原子",
+        "category": "概念",
+        "description": "具有该元素性质、并能参与化学结合的元素的最小粒子。"
+      },
+      {
+        "name": "分子",
+        "category": "概念",
+        "description": "由两个或两个以上通过化学键连接在一起的原子组成的单元。"
+      },
+      {
+        "name": "物理性质",
+        "category": "概念",
+        "description": "与物质化学组成变化无关的特征，如密度、颜色、熔点。"
+      },
+      {
+        "name": "化学性质",
+        "category": "概念",
+        "description": "与一种物质转变为另一种类型的物质相关的性质，如可燃性、酸性。"
+      },
+      {
+        "name": "物理变化",
+        "category": "概念",
+        "description": "不改变物质化学身份的状态或性质变化。"
+      },
+      {
+        "name": "化学变化",
+        "category": "概念",
+        "description": "产生与变化前存在的物质不同的物质的变化。"
+      },
+      {
+        "name": "广延性质",
+        "category": "概念",
+        "description": "取决于存在的物质量的性质，如质量和体积。"
+      },
+      {
+        "name": "强度性质",
+        "category": "概念",
+        "description": "不取决于存在的物质量的性质，如温度和密度。"
+      },
+      {
+        "name": "密度",
+        "category": "概念",
+        "description": "物质样品的质量与其体积之比。"
+      },
+      {
+        "name": "密度公式",
+        "category": "公式",
+        "description": "密度 = 质量 / 体积，用于计算物质的密度。"
+      },
+      {
+        "name": "测量",
+        "category": "方法",
+        "description": "提供量值、比较单位和不确定度三种信息的定量测定过程。"
+      },
+      {
+        "name": "SI基本单位",
+        "category": "概念",
+        "description": "国际单位制中七个基本性质的测量单位，如米、千克、秒、开尔文。"
+      },
+      {
+        "name": "温度",
+        "category": "概念",
+        "description": "表示物质冷热程度的强度性质，SI单位为开尔文。"
+      },
+      {
+        "name": "有效数字",
+        "category": "概念",
+        "description": "测量中所有测得的数字，包括不确定的最后一位。"
+      },
+      {
+        "name": "不确定度",
+        "category": "概念",
+        "description": "对测量与真实值差异程度的估计。"
+      },
+      {
+        "name": "准确度",
+        "category": "概念",
+        "description": "测量结果与真实值或公认值的接近程度。"
+      },
+      {
+        "name": "精密度",
+        "category": "概念",
+        "description": "重复同一测量时结果相互吻合的程度。"
+      },
+      {
+        "name": "舍入规则",
+        "category": "方法",
+        "description": "根据有效数字位数对加减、乘除计算结果进行舍入的三条规则。"
+      },
+      {
+        "name": "量纲分析",
+        "category": "方法",
+        "description": "也称因子标记法，基于量的单位必须与数字经受相同数学运算的换算与多步计算方法。"
+      },
+      {
+        "name": "单位换算因子",
+        "category": "概念",
+        "description": "用不同测量单位表示的等价量之比，用于从一种单位换算到另一种单位。"
+      },
+      {
+        "name": "摄氏温标",
+        "category": "概念",
+        "description": "水的冰点为0 °C、沸点为100 °C的温标。"
+      },
+      {
+        "name": "华氏温标",
+        "category": "概念",
+        "description": "水的冰点为32 °F、沸点为212 °F的温标。"
+      },
+      {
+        "name": "开尔文温标",
+        "category": "概念",
+        "description": "SI采用的绝对温标，0 K对应理论上可达到的最低温度。"
+      },
+      {
+        "name": "温度换算公式",
+        "category": "公式",
+        "description": "在摄氏、华氏和开尔文温标之间换算温度的公式，如 T°F = [(9/5) × T°C] + 32。"
+      }
+    ],
+    "relations": [
+      {
+        "source": "化学",
+        "target": "物质",
+        "type": "RELATED_TO",
+        "evidence": "你就是在学习化学——研究物质的组成、性质与相互作用的学科",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "科学方法",
+        "target": "假说",
+        "type": "CONTAINS",
+        "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "科学方法",
+        "target": "科学理论",
+        "type": "CONTAINS",
+        "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "假说",
+        "target": "科学理论",
+        "type": "PRECEDES",
+        "evidence": "如果这样的假说被证明能够解释大量实验数据，它就可以达到理论（theory）的地位",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "科学定律",
+        "target": "科学理论",
+        "type": "RELATED_TO",
+        "evidence": "有些假说试图解释被总结为定律的行为",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "宏观领域",
+        "target": "微观领域",
+        "type": "RELATED_TO",
+        "evidence": "化学家在三个不同领域研究和描述物质与能量的行为：宏观（macroscopic）、微观（microscopic）和符号（symbolic）领域",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "符号领域",
+        "target": "宏观领域",
+        "type": "RELATED_TO",
+        "evidence": "符号领域包含用来表示宏观和微观领域组成部分的专业语言",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "符号领域",
+        "target": "微观领域",
+        "type": "RELATED_TO",
+        "evidence": "符号领域包含用来表示宏观和微观领域组成部分的专业语言",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质",
+        "target": "固体",
+        "type": "CONTAINS",
+        "evidence": "固体、液体和气体是地球上常见的三种物质状态",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质",
+        "target": "液体",
+        "type": "CONTAINS",
+        "evidence": "固体、液体和气体是地球上常见的三种物质状态",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质",
+        "target": "气体",
+        "type": "CONTAINS",
+        "evidence": "固体、液体和气体是地球上常见的三种物质状态",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "质量",
+        "target": "重量",
+        "type": "RELATED_TO",
+        "evidence": "虽然重量与质量有关，但两者不是一回事",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质守恒定律",
+        "target": "化学变化",
+        "type": "APPLIES_TO",
+        "evidence": "当物质从一种类型转化为另一种类型（化学变化）或在固态、液态、气态之间变化（物理变化）时，现有物质的总量没有可检测到的变化",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质守恒定律",
+        "target": "物理变化",
+        "type": "APPLIES_TO",
+        "evidence": "当物质从一种类型转化为另一种类型（化学变化）或在固态、液态、气态之间变化（物理变化）时，现有物质的总量没有可检测到的变化",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质",
+        "target": "混合物",
+        "type": "CONTAINS",
+        "evidence": "两个宽泛的类别是混合物和纯物质",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质",
+        "target": "纯物质",
+        "type": "CONTAINS",
+        "evidence": "两个宽泛的类别是混合物和纯物质",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "纯物质",
+        "target": "元素",
+        "type": "CONTAINS",
+        "evidence": "纯物质可以分为两类：元素和化合物",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "纯物质",
+        "target": "化合物",
+        "type": "CONTAINS",
+        "evidence": "纯物质可以分为两类：元素和化合物",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "混合物",
+        "target": "非均匀混合物",
+        "type": "CONTAINS",
+        "evidence": "组成随位置变化而变化的混合物称为非均匀混合物",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "混合物",
+        "target": "均匀混合物",
+        "type": "CONTAINS",
+        "evidence": "均匀混合物（homogeneous mixture），也称为溶液（solution），表现出均匀的组成",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "分子",
+        "target": "原子",
+        "type": "CONTAINS",
+        "evidence": "分子由两个或两个以上通过称为化学键的强作用力连接在一起的原子组成",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物理变化",
+        "target": "化学变化",
+        "type": "RELATED_TO",
+        "evidence": "当物质从一种类型转化为另一种类型（化学变化）或在固态、液态、气态之间变化（物理变化）时",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物理性质",
+        "target": "物理变化",
+        "type": "RELATED_TO",
+        "evidence": "其他物理性质，如铁的熔化温度或水的冻结温度，只能在物质发生物理变化时观察到",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "化学性质",
+        "target": "化学变化",
+        "type": "RELATED_TO",
+        "evidence": "化学性质（如可燃性和酸性）和化学变化（如生锈）涉及产生与变化前存在的物质不同的物质",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "广延性质",
+        "target": "强度性质",
+        "type": "RELATED_TO",
+        "evidence": "如果性质取决于存在的物质量，它就是广延性质",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "密度",
+        "target": "强度性质",
+        "type": "RELATED_TO",
+        "evidence": "强度性质不取决于存在的物质量，例如金的密度",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "测量",
+        "target": "不确定度",
+        "type": "RELATED_TO",
+        "evidence": "每次测量都提供三种信息：测量的大小或量值（一个数字）；测量的比较标准（一个单位）；以及测量不确定度的指示",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "SI基本单位",
+        "target": "质量",
+        "type": "CONTAINS",
+        "evidence": "SI制中质量的标准单位是千克（kg）",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "温度",
+        "target": "开尔文温标",
+        "type": "RELATED_TO",
+        "evidence": "SI温度单位是开尔文（K）",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "密度公式",
+        "target": "密度",
+        "type": "APPLIES_TO",
+        "evidence": "密度 = 质量 / 体积",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "密度",
+        "target": "质量",
+        "type": "RELATED_TO",
+        "evidence": "物质的密度是该物质样品的质量与其体积之比",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "不确定度",
+        "target": "有效数字",
+        "type": "RELATED_TO",
+        "evidence": "测量中的所有数字，包括不确定的最后一位，都称为有效数字",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "舍入规则",
+        "target": "有效数字",
+        "type": "APPLIES_TO",
+        "evidence": "一种方法是用正确的有效数字位数报告计算结果，这由以下三条数字舍入规则确定",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "准确度",
+        "target": "精密度",
+        "type": "RELATED_TO",
+        "evidence": "### 准确度与精密度科学家通常对同一量进行重复测量，以确保其发现的质量，并评估结果的精密度和准确度。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "量纲分析",
+        "target": "单位换算因子",
+        "type": "RELATED_TO",
+        "evidence": "换算因子通过简单应用称为因子标记法或量纲分析的数学方法导出",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "摄氏温标",
+        "target": "华氏温标",
+        "type": "RELATED_TO",
+        "evidence": "摄氏和华氏温标没有共同的零点，因此这两个标度之间的关系是线性关系而非比例关系",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "温度换算公式",
+        "target": "摄氏温标",
+        "type": "APPLIES_TO",
+        "evidence": "关联摄氏和华氏温度的线性方程很容易从定义每个标度的两个温度导出",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "温度换算公式",
+        "target": "华氏温标",
+        "type": "APPLIES_TO",
+        "evidence": "T°F = [(9 °F / 5 °C) × T°C] + 32",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "温度换算公式",
+        "target": "开尔文温标",
+        "type": "APPLIES_TO",
+        "evidence": "开尔文与摄氏温标之间的换算方程导出为：TK = T°C + 273.15",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "开尔文温标",
+        "target": "摄氏温标",
+        "type": "RELATED_TO",
+        "evidence": "水在此标度上的冻结温度是273.15 K，沸腾温度是373.15 K",
+        "core": false,
+        "confidence": 0.9
+      }
+    ]
+  }
+]

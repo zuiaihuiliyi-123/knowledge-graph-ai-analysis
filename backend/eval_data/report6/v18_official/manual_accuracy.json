@@ -1,0 +1,107 @@
+{
+  "kind": "manual_sampling_accuracy",
+  "generated_at": "2026-11-14T13:15:04",
+  "definition": "准确率 = 判定为正确的条数 / 已完成判定的条数（Precision 口径，测不出漏抽）",
+  "threshold": 0.7,
+  "relation": {
+    "label": "关系",
+    "total_rows": 100,
+    "judged": 100,
+    "unjudged": 0,
+    "correct": 94,
+    "accuracy": 0.94,
+    "ci95": [
+      0.8752,
+      0.9722
+    ],
+    "pass_70": true,
+    "by_group": {
+      "APPLIES_TO": {
+        "judged": 13,
+        "correct": 12,
+        "accuracy": 0.9231,
+        "ci95": [
+          0.6669,
+          0.9863
+        ]
+      },
+      "CONTAINS": {
+        "judged": 44,
+        "correct": 40,
+        "accuracy": 0.9091,
+        "ci95": [
+          0.7884,
+          0.9641
+        ]
+      },
+      "PRECEDES": {
+        "judged": 2,
+        "correct": 2,
+        "accuracy": 1.0,
+        "ci95": [
+          0.3424,
+          1.0
+        ]
+      },
+      "RELATED_TO": {
+        "judged": 41,
+        "correct": 40,
+        "accuracy": 0.9756,
+        "ci95": [
+          0.874,
+          0.9957
+        ]
+      }
+    },
+    "error_breakdown": {
+      "错误-类型错": 4,
+      "错误-方向反": 1,
+      "错误-臆造": 1
+    }
+  },
+  "entity": {
+    "label": "实体",
+    "total_rows": 50,
+    "judged": 50,
+    "unjudged": 0,
+    "correct": 45,
+    "accuracy": 0.9,
+    "ci95": [
+      0.7864,
+      0.9565
+    ],
+    "pass_70": true,
+    "by_group": {
+      "公式": {
+        "judged": 5,
+        "correct": 4,
+        "accuracy": 0.8,
+        "ci95": [
+          0.3755,
+          0.9638
+        ]
+      },
+      "方法": {
+        "judged": 11,
+        "correct": 9,
+        "accuracy": 0.8182,
+        "ci95": [
+          0.523,
+          0.9486
+        ]
+      },
+      "概念": {
+        "judged": 34,
+        "correct": 32,
+        "accuracy": 0.9412,
+        "ci95": [
+          0.8091,
+          0.9837
+        ]
+      }
+    },
+    "error_breakdown": {
+      "错误-粒度不当": 5
+    }
+  }
+}

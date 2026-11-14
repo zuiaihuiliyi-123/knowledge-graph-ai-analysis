@@ -1,0 +1,2361 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "化学_化学基本概念_第1章": "831b439b8d4dac95290d7876a7370fc1dcb42c01ea00fc0c1f8dc59cf61a7662"
+  },
+  "runs": 1,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.6471,
+      "std": 0.0,
+      "min": 0.6471,
+      "max": 0.6471,
+      "values": [
+        0.6471
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.9778,
+      "std": 0.0,
+      "min": 0.9778,
+      "max": 0.9778,
+      "values": [
+        0.9778
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.7788,
+      "std": 0.0,
+      "min": 0.7788,
+      "max": 0.7788,
+      "values": [
+        0.7788
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.9545,
+      "std": 0.0,
+      "min": 0.9545,
+      "max": 0.9545,
+      "values": [
+        0.9545
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.2623,
+      "std": 0.0,
+      "min": 0.2623,
+      "max": 0.2623,
+      "values": [
+        0.2623
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.5,
+      "std": 0.0,
+      "min": 0.5,
+      "max": 0.5,
+      "values": [
+        0.5
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.3441,
+      "std": 0.0,
+      "min": 0.3441,
+      "max": 0.3441,
+      "values": [
+        0.3441
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.2131,
+      "std": 0.0,
+      "min": 0.2131,
+      "max": 0.2131,
+      "values": [
+        0.2131
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.5,
+      "std": 0.0,
+      "min": 0.5,
+      "max": 0.5,
+      "values": [
+        0.5
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.2989,
+      "std": 0.0,
+      "min": 0.2989,
+      "max": 0.2989,
+      "values": [
+        0.2989
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.2623,
+      "std": 0.0,
+      "min": 0.2623,
+      "max": 0.2623,
+      "values": [
+        0.2623
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.4,
+      "std": 0.0,
+      "min": 0.4,
+      "max": 0.4,
+      "values": [
+        0.4
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.3168,
+      "std": 0.0,
+      "min": 0.3168,
+      "max": 0.3168,
+      "values": [
+        0.3168
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.3607,
+      "std": 0.0,
+      "min": 0.3607,
+      "max": 0.3607,
+      "values": [
+        0.3607
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.55,
+      "std": 0.0,
+      "min": 0.55,
+      "max": 0.55,
+      "values": [
+        0.55
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.4356,
+      "std": 0.0,
+      "min": 0.4356,
+      "max": 0.4356,
+      "values": [
+        0.4356
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.2494,
+      "std": 0.0,
+      "min": 0.2494,
+      "max": 0.2494,
+      "values": [
+        0.2494
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0164,
+      "std": 0.0,
+      "min": 0.0164,
+      "max": 0.0164,
+      "values": [
+        0.0164
+      ]
+    }
+  },
+  "entity_frequency": {
+    "SI单位": 1,
+    "不确定度": 1,
+    "体积": 1,
+    "假说": 1,
+    "元素": 1,
+    "元素周期表": 1,
+    "准确度": 1,
+    "准金属": 1,
+    "分子": 1,
+    "化合物": 1,
+    "化学": 1,
+    "化学变化": 1,
+    "化学性质": 1,
+    "化学键": 1,
+    "华氏温标": 1,
+    "单位": 1,
+    "单位换算": 1,
+    "单位换算因子": 1,
+    "原子": 1,
+    "固体": 1,
+    "固态": 1,
+    "国际单位制": 1,
+    "均匀混合物": 1,
+    "宏观领域": 1,
+    "定律": 1,
+    "密度": 1,
+    "密度公式": 1,
+    "广延性质": 1,
+    "开尔文温标": 1,
+    "强度性质": 1,
+    "微观领域": 1,
+    "摄氏温标": 1,
+    "时间": 1,
+    "有效数字": 1,
+    "气体": 1,
+    "气态": 1,
+    "水排法": 1,
+    "测量": 1,
+    "液体": 1,
+    "液态": 1,
+    "混合物": 1,
+    "温度": 1,
+    "温度换算公式": 1,
+    "物理变化": 1,
+    "物理性质": 1,
+    "物质": 1,
+    "物质守恒定律": 1,
+    "物质状态": 1,
+    "理论": 1,
+    "科学定律": 1,
+    "科学方法": 1,
+    "科学理论": 1,
+    "科学记数法": 1,
+    "符号领域": 1,
+    "等离子体": 1,
+    "精密度": 1,
+    "精确数": 1,
+    "纯物质": 1,
+    "舍入": 1,
+    "舍入规则": 1,
+    "质量": 1,
+    "道尔顿原子理论": 1,
+    "重量": 1,
+    "量纲分析": 1,
+    "金属": 1,
+    "长度": 1,
+    "非均匀混合物": 1,
+    "非金属": 1
+  },
+  "relation_frequency": {
+    "SI单位 -[CONTAINS]-> 单位": 1,
+    "元素 -[CONTAINS]-> 准金属": 1,
+    "元素 -[CONTAINS]-> 金属": 1,
+    "元素 -[CONTAINS]-> 非金属": 1,
+    "准确度 -[RELATED_TO]-> 不确定度": 1,
+    "分子 -[RELATED_TO]-> 化学键": 1,
+    "化学 -[RELATED_TO]-> 宏观领域": 1,
+    "化学 -[RELATED_TO]-> 微观领域": 1,
+    "化学 -[RELATED_TO]-> 物质": 1,
+    "化学 -[RELATED_TO]-> 符号领域": 1,
+    "化学性质 -[RELATED_TO]-> 化学变化": 1,
+    "单位换算 -[APPLIES_TO]-> 单位": 1,
+    "国际单位制 -[CONTAINS]-> 时间": 1,
+    "国际单位制 -[CONTAINS]-> 温度": 1,
+    "国际单位制 -[CONTAINS]-> 质量": 1,
+    "国际单位制 -[CONTAINS]-> 长度": 1,
+    "密度 -[RELATED_TO]-> 体积": 1,
+    "密度 -[RELATED_TO]-> 质量": 1,
+    "密度公式 -[APPLIES_TO]-> 密度": 1,
+    "有效数字 -[RELATED_TO]-> 不确定度": 1,
+    "水排法 -[APPLIES_TO]-> 密度": 1,
+    "测量 -[RELATED_TO]-> 不确定度": 1,
+    "测量 -[RELATED_TO]-> 准确度": 1,
+    "测量 -[RELATED_TO]-> 单位": 1,
+    "测量 -[RELATED_TO]-> 有效数字": 1,
+    "测量 -[RELATED_TO]-> 精密度": 1,
+    "混合物 -[CONTAINS]-> 均匀混合物": 1,
+    "混合物 -[CONTAINS]-> 非均匀混合物": 1,
+    "温度 -[RELATED_TO]-> 华氏温标": 1,
+    "温度 -[RELATED_TO]-> 开尔文温标": 1,
+    "温度 -[RELATED_TO]-> 摄氏温标": 1,
+    "温度换算公式 -[RELATED_TO]-> 华氏温标": 1,
+    "温度换算公式 -[RELATED_TO]-> 开尔文温标": 1,
+    "温度换算公式 -[RELATED_TO]-> 摄氏温标": 1,
+    "物理性质 -[CONTAINS]-> 广延性质": 1,
+    "物理性质 -[CONTAINS]-> 强度性质": 1,
+    "物理性质 -[RELATED_TO]-> 物理变化": 1,
+    "物质 -[CONTAINS]-> 固体": 1,
+    "物质 -[CONTAINS]-> 气体": 1,
+    "物质 -[CONTAINS]-> 液体": 1,
+    "物质 -[CONTAINS]-> 等离子体": 1,
+    "物质 -[RELATED_TO]-> 分子": 1,
+    "物质 -[RELATED_TO]-> 原子": 1,
+    "物质状态 -[CONTAINS]-> 固态": 1,
+    "物质状态 -[CONTAINS]-> 气态": 1,
+    "物质状态 -[CONTAINS]-> 液态": 1,
+    "物质状态 -[CONTAINS]-> 等离子体": 1,
+    "科学方法 -[RELATED_TO]-> 假说": 1,
+    "科学方法 -[RELATED_TO]-> 定律": 1,
+    "科学方法 -[RELATED_TO]-> 理论": 1,
+    "科学方法 -[RELATED_TO]-> 科学定律": 1,
+    "科学方法 -[RELATED_TO]-> 科学理论": 1,
+    "科学记数法 -[RELATED_TO]-> 有效数字": 1,
+    "精密度 -[RELATED_TO]-> 不确定度": 1,
+    "纯物质 -[CONTAINS]-> 元素": 1,
+    "纯物质 -[CONTAINS]-> 化合物": 1,
+    "舍入 -[RELATED_TO]-> 有效数字": 1,
+    "舍入规则 -[APPLIES_TO]-> 有效数字": 1,
+    "道尔顿原子理论 -[RELATED_TO]-> 原子": 1,
+    "量纲分析 -[APPLIES_TO]-> 单位换算": 1,
+    "量纲分析 -[RELATED_TO]-> 单位换算因子": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 39.0,
+      "values": [
+        39
+      ]
+    },
+    "direction_reversed": {
+      "mean": 1.0,
+      "values": [
+        1
+      ]
+    },
+    "type_confused": {
+      "mean": 5.0,
+      "values": [
+        5
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 13.0,
+      "values": [
+        13
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0
+      ]
+    },
+    "duplicate": {
+      "mean": 5.0,
+      "values": [
+        5
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 5.0,
+      "values": [
+        5
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 66.0,
+      "values": [
+        66
+      ]
+    },
+    "pred_total": {
+      "mean": 61.0,
+      "values": [
+        61
+      ]
+    },
+    "core_total": {
+      "mean": 26.0,
+      "values": [
+        26
+      ]
+    },
+    "full_total": {
+      "mean": 40.0,
+      "values": [
+        40
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 66,
+        "scored": 61,
+        "dropped": 5,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 44,
+      "fp": 24,
+      "fn": 1,
+      "precision": 0.6471,
+      "recall": 0.9778,
+      "f1": 0.7788
+    },
+    "entity_macro": {
+      "precision": 0.6471,
+      "recall": 0.9778,
+      "f1": 0.7788
+    },
+    "entity_category_accuracy": 0.9545,
+    "relation_primary_micro": {
+      "pred_total": 61,
+      "core_total": 26,
+      "full_total": 40,
+      "hit_core": 13,
+      "hit_full": 16,
+      "precision": 0.2623,
+      "recall": 0.5,
+      "f1": 0.3441
+    },
+    "relation_core_micro": {
+      "tp": 13,
+      "fp": 48,
+      "fn": 13,
+      "precision": 0.2131,
+      "recall": 0.5,
+      "f1": 0.2989
+    },
+    "relation_full_micro": {
+      "tp": 16,
+      "fp": 45,
+      "fn": 24,
+      "precision": 0.2623,
+      "recall": 0.4,
+      "f1": 0.3168
+    },
+    "relation_strict_micro": {
+      "tp": 16,
+      "fp": 45,
+      "fn": 24,
+      "precision": 0.2623,
+      "recall": 0.4,
+      "f1": 0.3168
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.2623,
+      "recall": 0.4,
+      "f1": 0.3168
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 22,
+      "fp": 39,
+      "fn": 18,
+      "precision": 0.3607,
+      "recall": 0.55,
+      "f1": 0.4356
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 1,
+        "pred_total": 0,
+        "micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "mean_document_f1": 0.0,
+        "active_document_f1": 0.0
+      },
+      "CONTAINS": {
+        "gold_total": 13,
+        "pred_total": 22,
+        "micro": {
+          "tp": 7,
+          "fp": 15,
+          "fn": 6,
+          "precision": 0.3182,
+          "recall": 0.5385,
+          "f1": 0.4
+        },
+        "mean_document_f1": 0.4,
+        "active_document_f1": 0.4
+      },
+      "RELATED_TO": {
+        "gold_total": 19,
+        "pred_total": 34,
+        "micro": {
+          "tp": 7,
+          "fp": 27,
+          "fn": 12,
+          "precision": 0.2059,
+          "recall": 0.3684,
+          "f1": 0.2642
+        },
+        "mean_document_f1": 0.2642,
+        "active_document_f1": 0.2642
+      },
+      "APPLIES_TO": {
+        "gold_total": 7,
+        "pred_total": 5,
+        "micro": {
+          "tp": 2,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.4,
+          "recall": 0.2857,
+          "f1": 0.3333
+        },
+        "mean_document_f1": 0.3333,
+        "active_document_f1": 0.3333
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.2494,
+      "active_types": 0.2494,
+      "active_type_names": [
+        "PRECEDES",
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.0164,
+    "error_taxonomy_totals": {
+      "fabricated": 39,
+      "direction_reversed": 1,
+      "type_confused": 5,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 0,
+      "duplicate": 5,
+      "low_confidence": 0,
+      "missed_core": 13,
+      "pred_raw_total": 66,
+      "pred_total": 61,
+      "dropped_total": 5,
+      "core_total": 26,
+      "full_total": 40
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 66,
+      "scored": 61,
+      "dropped": 5,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 44,
+        "fp": 24,
+        "fn": 1,
+        "precision": 0.6471,
+        "recall": 0.9778,
+        "f1": 0.7788
+      },
+      "entity_macro": {
+        "precision": 0.6471,
+        "recall": 0.9778,
+        "f1": 0.7788
+      },
+      "entity_category_accuracy": 0.9545,
+      "relation_primary_micro": {
+        "pred_total": 61,
+        "core_total": 26,
+        "full_total": 40,
+        "hit_core": 13,
+        "hit_full": 16,
+        "precision": 0.2623,
+        "recall": 0.5,
+        "f1": 0.3441
+      },
+      "relation_core_micro": {
+        "tp": 13,
+        "fp": 48,
+        "fn": 13,
+        "precision": 0.2131,
+        "recall": 0.5,
+        "f1": 0.2989
+      },
+      "relation_full_micro": {
+        "tp": 16,
+        "fp": 45,
+        "fn": 24,
+        "precision": 0.2623,
+        "recall": 0.4,
+        "f1": 0.3168
+      },
+      "relation_strict_micro": {
+        "tp": 16,
+        "fp": 45,
+        "fn": 24,
+        "precision": 0.2623,
+        "recall": 0.4,
+        "f1": 0.3168
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.2623,
+        "recall": 0.4,
+        "f1": 0.3168
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 22,
+        "fp": 39,
+        "fn": 18,
+        "precision": 0.3607,
+        "recall": 0.55,
+        "f1": 0.4356
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 1,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 13,
+          "pred_total": 22,
+          "micro": {
+            "tp": 7,
+            "fp": 15,
+            "fn": 6,
+            "precision": 0.3182,
+            "recall": 0.5385,
+            "f1": 0.4
+          },
+          "mean_document_f1": 0.4,
+          "active_document_f1": 0.4
+        },
+        "RELATED_TO": {
+          "gold_total": 19,
+          "pred_total": 34,
+          "micro": {
+            "tp": 7,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.2059,
+            "recall": 0.3684,
+            "f1": 0.2642
+          },
+          "mean_document_f1": 0.2642,
+          "active_document_f1": 0.2642
+        },
+        "APPLIES_TO": {
+          "gold_total": 7,
+          "pred_total": 5,
+          "micro": {
+            "tp": 2,
+            "fp": 3,
+            "fn": 5,
+            "precision": 0.4,
+            "recall": 0.2857,
+            "f1": 0.3333
+          },
+          "mean_document_f1": 0.3333,
+          "active_document_f1": 0.3333
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.2494,
+        "active_types": 0.2494,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0164,
+      "error_taxonomy_totals": {
+        "fabricated": 39,
+        "direction_reversed": 1,
+        "type_confused": 5,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 5,
+        "low_confidence": 0,
+        "missed_core": 13,
+        "pred_raw_total": 66,
+        "pred_total": 61,
+        "dropped_total": 5,
+        "core_total": 26,
+        "full_total": 40
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 66,
+        "scored": 61,
+        "dropped": 5,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "化学_化学基本概念_第1章",
+      "gold": {
+        "entity_count": 45,
+        "relation_core_count": 26,
+        "relation_full_count": 40
+      },
+      "entity": {
+        "tp": 44,
+        "fp": 24,
+        "fn": 1,
+        "precision": 0.6471,
+        "recall": 0.9778,
+        "f1": 0.7788
+      },
+      "entity_category": {
+        "gold_entity_count": 45,
+        "pred_entity_count": 68,
+        "evaluated_entity_count": 44,
+        "correct": 42,
+        "accuracy": 0.9545
+      },
+      "relation_primary": {
+        "pred_total": 61,
+        "core_total": 26,
+        "full_total": 40,
+        "hit_core": 13,
+        "hit_full": 16,
+        "precision": 0.2623,
+        "recall": 0.5,
+        "f1": 0.3441
+      },
+      "relation_core": {
+        "tp": 13,
+        "fp": 48,
+        "fn": 13,
+        "precision": 0.2131,
+        "recall": 0.5,
+        "f1": 0.2989
+      },
+      "relation_full": {
+        "tp": 16,
+        "fp": 45,
+        "fn": 24,
+        "precision": 0.2623,
+        "recall": 0.4,
+        "f1": 0.3168
+      },
+      "relation_pair_auxiliary": {
+        "tp": 22,
+        "fp": 39,
+        "fn": 18,
+        "precision": 0.3607,
+        "recall": 0.55,
+        "f1": 0.4356
+      },
+      "relation_direction_error_rate": 0.0164,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 1,
+          "pred": 0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "CONTAINS": {
+          "gold": 13,
+          "pred": 22,
+          "tp": 7,
+          "fp": 15,
+          "fn": 6,
+          "precision": 0.3182,
+          "recall": 0.5385,
+          "f1": 0.4
+        },
+        "RELATED_TO": {
+          "gold": 19,
+          "pred": 34,
+          "tp": 7,
+          "fp": 27,
+          "fn": 12,
+          "precision": 0.2059,
+          "recall": 0.3684,
+          "f1": 0.2642
+        },
+        "APPLIES_TO": {
+          "gold": 7,
+          "pred": 5,
+          "tp": 2,
+          "fp": 3,
+          "fn": 5,
+          "precision": 0.4,
+          "recall": 0.2857,
+          "f1": 0.3333
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 39,
+          "direction_reversed": 1,
+          "type_confused": 5,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 0,
+          "duplicate": 5,
+          "low_confidence": 0,
+          "missed_core": 13,
+          "pred_raw_total": 66,
+          "pred_total": 61,
+          "dropped_total": 5,
+          "core_total": 26,
+          "full_total": 40
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [
+          {
+            "source": "有效数字",
+            "type": "RELATED_TO",
+            "target": "不确定度",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "type_confused": [
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "华氏温标",
+            "gold_type": "APPLIES_TO"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "开尔文温标",
+            "gold_type": "APPLIES_TO"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "摄氏温标",
+            "gold_type": "APPLIES_TO"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "假说",
+            "gold_type": "CONTAINS"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "科学理论",
+            "gold_type": "CONTAINS"
+          }
+        ],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "纯物质",
+            "type": "CONTAINS",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "纯物质",
+            "type": "CONTAINS",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "混合物",
+            "type": "CONTAINS",
+            "target": "非均匀混合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "混合物",
+            "type": "CONTAINS",
+            "target": "均匀混合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "假说",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "不确定度",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "假说",
+            "type": "PRECEDES",
+            "target": "科学理论"
+          },
+          {
+            "source": "准确度",
+            "type": "RELATED_TO",
+            "target": "精密度"
+          },
+          {
+            "source": "分子",
+            "type": "CONTAINS",
+            "target": "原子"
+          },
+          {
+            "source": "宏观领域",
+            "type": "RELATED_TO",
+            "target": "微观领域"
+          },
+          {
+            "source": "广延性质",
+            "type": "RELATED_TO",
+            "target": "强度性质"
+          },
+          {
+            "source": "摄氏温标",
+            "type": "RELATED_TO",
+            "target": "华氏温标"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "APPLIES_TO",
+            "target": "摄氏温标"
+          },
+          {
+            "source": "物理变化",
+            "type": "RELATED_TO",
+            "target": "化学变化"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "混合物"
+          },
+          {
+            "source": "物质守恒定律",
+            "type": "APPLIES_TO",
+            "target": "化学变化"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "假说"
+          },
+          {
+            "source": "质量",
+            "type": "RELATED_TO",
+            "target": "重量"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "SI单位",
+            "type": "CONTAINS",
+            "target": "单位"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "准金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "准确度",
+            "type": "RELATED_TO",
+            "target": "不确定度"
+          },
+          {
+            "source": "分子",
+            "type": "RELATED_TO",
+            "target": "化学键"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "宏观领域"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "微观领域"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "符号领域"
+          },
+          {
+            "source": "单位换算",
+            "type": "APPLIES_TO",
+            "target": "单位"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "时间"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "温度"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "质量"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "长度"
+          },
+          {
+            "source": "密度",
+            "type": "RELATED_TO",
+            "target": "体积"
+          },
+          {
+            "source": "水排法",
+            "type": "APPLIES_TO",
+            "target": "密度"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "准确度"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "单位"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "精密度"
+          },
+          {
+            "source": "温度",
+            "type": "RELATED_TO",
+            "target": "华氏温标"
+          },
+          {
+            "source": "温度",
+            "type": "RELATED_TO",
+            "target": "摄氏温标"
+          },
+          {
+            "source": "物理性质",
+            "type": "CONTAINS",
+            "target": "广延性质"
+          },
+          {
+            "source": "物理性质",
+            "type": "CONTAINS",
+            "target": "强度性质"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "等离子体"
+          },
+          {
+            "source": "物质",
+            "type": "RELATED_TO",
+            "target": "分子"
+          },
+          {
+            "source": "物质",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "固态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "气态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "液态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "等离子体"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "定律"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "理论"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "科学定律"
+          },
+          {
+            "source": "科学记数法",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "精密度",
+            "type": "RELATED_TO",
+            "target": "不确定度"
+          },
+          {
+            "source": "舍入",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "量纲分析",
+            "type": "APPLIES_TO",
+            "target": "单位换算"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "SI单位",
+          "type": "CONTAINS",
+          "target": "单位"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "准金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "金属"
+        },
+        {
+          "source": "元素",
+          "type": "CONTAINS",
+          "target": "非金属"
+        },
+        {
+          "source": "准确度",
+          "type": "RELATED_TO",
+          "target": "不确定度"
+        },
+        {
+          "source": "分子",
+          "type": "RELATED_TO",
+          "target": "化学键"
+        },
+        {
+          "source": "化学",
+          "type": "RELATED_TO",
+          "target": "宏观领域"
+        },
+        {
+          "source": "化学",
+          "type": "RELATED_TO",
+          "target": "微观领域"
+        },
+        {
+          "source": "化学",
+          "type": "RELATED_TO",
+          "target": "符号领域"
+        },
+        {
+          "source": "单位换算",
+          "type": "APPLIES_TO",
+          "target": "单位"
+        },
+        {
+          "source": "国际单位制",
+          "type": "CONTAINS",
+          "target": "时间"
+        },
+        {
+          "source": "国际单位制",
+          "type": "CONTAINS",
+          "target": "温度"
+        },
+        {
+          "source": "国际单位制",
+          "type": "CONTAINS",
+          "target": "质量"
+        },
+        {
+          "source": "国际单位制",
+          "type": "CONTAINS",
+          "target": "长度"
+        },
+        {
+          "source": "密度",
+          "type": "RELATED_TO",
+          "target": "体积"
+        },
+        {
+          "source": "有效数字",
+          "type": "RELATED_TO",
+          "target": "不确定度"
+        },
+        {
+          "source": "水排法",
+          "type": "APPLIES_TO",
+          "target": "密度"
+        },
+        {
+          "source": "测量",
+          "type": "RELATED_TO",
+          "target": "准确度"
+        },
+        {
+          "source": "测量",
+          "type": "RELATED_TO",
+          "target": "单位"
+        },
+        {
+          "source": "测量",
+          "type": "RELATED_TO",
+          "target": "有效数字"
+        },
+        {
+          "source": "测量",
+          "type": "RELATED_TO",
+          "target": "精密度"
+        },
+        {
+          "source": "温度",
+          "type": "RELATED_TO",
+          "target": "华氏温标"
+        },
+        {
+          "source": "温度",
+          "type": "RELATED_TO",
+          "target": "摄氏温标"
+        },
+        {
+          "source": "温度换算公式",
+          "type": "RELATED_TO",
+          "target": "华氏温标"
+        },
+        {
+          "source": "温度换算公式",
+          "type": "RELATED_TO",
+          "target": "开尔文温标"
+        },
+        {
+          "source": "温度换算公式",
+          "type": "RELATED_TO",
+          "target": "摄氏温标"
+        },
+        {
+          "source": "物理性质",
+          "type": "CONTAINS",
+          "target": "广延性质"
+        },
+        {
+          "source": "物理性质",
+          "type": "CONTAINS",
+          "target": "强度性质"
+        },
+        {
+          "source": "物质",
+          "type": "CONTAINS",
+          "target": "等离子体"
+        },
+        {
+          "source": "物质",
+          "type": "RELATED_TO",
+          "target": "分子"
+        },
+        {
+          "source": "物质",
+          "type": "RELATED_TO",
+          "target": "原子"
+        },
+        {
+          "source": "物质状态",
+          "type": "CONTAINS",
+          "target": "固态"
+        },
+        {
+          "source": "物质状态",
+          "type": "CONTAINS",
+          "target": "气态"
+        },
+        {
+          "source": "物质状态",
+          "type": "CONTAINS",
+          "target": "液态"
+        },
+        {
+          "source": "物质状态",
+          "type": "CONTAINS",
+          "target": "等离子体"
+        },
+        {
+          "source": "科学方法",
+          "type": "RELATED_TO",
+          "target": "假说"
+        },
+        {
+          "source": "科学方法",
+          "type": "RELATED_TO",
+          "target": "定律"
+        },
+        {
+          "source": "科学方法",
+          "type": "RELATED_TO",
+          "target": "理论"
+        },
+        {
+          "source": "科学方法",
+          "type": "RELATED_TO",
+          "target": "科学定律"
+        },
+        {
+          "source": "科学方法",
+          "type": "RELATED_TO",
+          "target": "科学理论"
+        },
+        {
+          "source": "科学记数法",
+          "type": "RELATED_TO",
+          "target": "有效数字"
+        },
+        {
+          "source": "精密度",
+          "type": "RELATED_TO",
+          "target": "不确定度"
+        },
+        {
+          "source": "舍入",
+          "type": "RELATED_TO",
+          "target": "有效数字"
+        },
+        {
+          "source": "道尔顿原子理论",
+          "type": "RELATED_TO",
+          "target": "原子"
+        },
+        {
+          "source": "量纲分析",
+          "type": "APPLIES_TO",
+          "target": "单位换算"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "不确定度",
+          "type": "RELATED_TO",
+          "target": "有效数字"
+        },
+        {
+          "source": "假说",
+          "type": "PRECEDES",
+          "target": "科学理论"
+        },
+        {
+          "source": "准确度",
+          "type": "RELATED_TO",
+          "target": "精密度"
+        },
+        {
+          "source": "分子",
+          "type": "CONTAINS",
+          "target": "原子"
+        },
+        {
+          "source": "宏观领域",
+          "type": "RELATED_TO",
+          "target": "微观领域"
+        },
+        {
+          "source": "广延性质",
+          "type": "RELATED_TO",
+          "target": "强度性质"
+        },
+        {
+          "source": "摄氏温标",
+          "type": "RELATED_TO",
+          "target": "华氏温标"
+        },
+        {
+          "source": "温度换算公式",
+          "type": "APPLIES_TO",
+          "target": "摄氏温标"
+        },
+        {
+          "source": "物理变化",
+          "type": "RELATED_TO",
+          "target": "化学变化"
+        },
+        {
+          "source": "物质",
+          "type": "CONTAINS",
+          "target": "混合物"
+        },
+        {
+          "source": "物质守恒定律",
+          "type": "APPLIES_TO",
+          "target": "化学变化"
+        },
+        {
+          "source": "科学方法",
+          "type": "CONTAINS",
+          "target": "假说"
+        },
+        {
+          "source": "质量",
+          "type": "RELATED_TO",
+          "target": "重量"
+        }
+      ],
+      "type_confusions": [
+        {
+          "source": "温度换算公式",
+          "target": "华氏温标",
+          "gold_type": "APPLIES_TO",
+          "pred_type": "RELATED_TO"
+        },
+        {
+          "source": "温度换算公式",
+          "target": "开尔文温标",
+          "gold_type": "APPLIES_TO",
+          "pred_type": "RELATED_TO"
+        },
+        {
+          "source": "温度换算公式",
+          "target": "摄氏温标",
+          "gold_type": "APPLIES_TO",
+          "pred_type": "RELATED_TO"
+        },
+        {
+          "source": "科学方法",
+          "target": "假说",
+          "gold_type": "CONTAINS",
+          "pred_type": "RELATED_TO"
+        },
+        {
+          "source": "科学方法",
+          "target": "科学理论",
+          "gold_type": "CONTAINS",
+          "pred_type": "RELATED_TO"
+        }
+      ]
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "化学_化学基本概念_第1章",
+        "gold": {
+          "entity_count": 45,
+          "relation_core_count": 26,
+          "relation_full_count": 40
+        },
+        "entity": {
+          "tp": 44,
+          "fp": 24,
+          "fn": 1,
+          "precision": 0.6471,
+          "recall": 0.9778,
+          "f1": 0.7788
+        },
+        "entity_category": {
+          "gold_entity_count": 45,
+          "pred_entity_count": 68,
+          "evaluated_entity_count": 44,
+          "correct": 42,
+          "accuracy": 0.9545
+        },
+        "relation_primary": {
+          "pred_total": 61,
+          "core_total": 26,
+          "full_total": 40,
+          "hit_core": 13,
+          "hit_full": 16,
+          "precision": 0.2623,
+          "recall": 0.5,
+          "f1": 0.3441
+        },
+        "relation_core": {
+          "tp": 13,
+          "fp": 48,
+          "fn": 13,
+          "precision": 0.2131,
+          "recall": 0.5,
+          "f1": 0.2989
+        },
+        "relation_full": {
+          "tp": 16,
+          "fp": 45,
+          "fn": 24,
+          "precision": 0.2623,
+          "recall": 0.4,
+          "f1": 0.3168
+        },
+        "relation_pair_auxiliary": {
+          "tp": 22,
+          "fp": 39,
+          "fn": 18,
+          "precision": 0.3607,
+          "recall": 0.55,
+          "f1": 0.4356
+        },
+        "relation_direction_error_rate": 0.0164,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 1,
+            "pred": 0,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "CONTAINS": {
+            "gold": 13,
+            "pred": 22,
+            "tp": 7,
+            "fp": 15,
+            "fn": 6,
+            "precision": 0.3182,
+            "recall": 0.5385,
+            "f1": 0.4
+          },
+          "RELATED_TO": {
+            "gold": 19,
+            "pred": 34,
+            "tp": 7,
+            "fp": 27,
+            "fn": 12,
+            "precision": 0.2059,
+            "recall": 0.3684,
+            "f1": 0.2642
+          },
+          "APPLIES_TO": {
+            "gold": 7,
+            "pred": 5,
+            "tp": 2,
+            "fp": 3,
+            "fn": 5,
+            "precision": 0.4,
+            "recall": 0.2857,
+            "f1": 0.3333
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 39,
+            "direction_reversed": 1,
+            "type_confused": 5,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 0,
+            "duplicate": 5,
+            "low_confidence": 0,
+            "missed_core": 13,
+            "pred_raw_total": 66,
+            "pred_total": 61,
+            "dropped_total": 5,
+            "core_total": 26,
+            "full_total": 40
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "有效数字",
+              "type": "RELATED_TO",
+              "target": "不确定度",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [
+            {
+              "source": "温度换算公式",
+              "type": "RELATED_TO",
+              "target": "华氏温标",
+              "gold_type": "APPLIES_TO"
+            },
+            {
+              "source": "温度换算公式",
+              "type": "RELATED_TO",
+              "target": "开尔文温标",
+              "gold_type": "APPLIES_TO"
+            },
+            {
+              "source": "温度换算公式",
+              "type": "RELATED_TO",
+              "target": "摄氏温标",
+              "gold_type": "APPLIES_TO"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "假说",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "科学理论",
+              "gold_type": "CONTAINS"
+            }
+          ],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "纯物质",
+              "type": "CONTAINS",
+              "target": "元素",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "纯物质",
+              "type": "CONTAINS",
+              "target": "化合物",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "混合物",
+              "type": "CONTAINS",
+              "target": "非均匀混合物",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "混合物",
+              "type": "CONTAINS",
+              "target": "均匀混合物",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "假说",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "不确定度",
+              "type": "RELATED_TO",
+              "target": "有效数字"
+            },
+            {
+              "source": "假说",
+              "type": "PRECEDES",
+              "target": "科学理论"
+            },
+            {
+              "source": "准确度",
+              "type": "RELATED_TO",
+              "target": "精密度"
+            },
+            {
+              "source": "分子",
+              "type": "CONTAINS",
+              "target": "原子"
+            },
+            {
+              "source": "宏观领域",
+              "type": "RELATED_TO",
+              "target": "微观领域"
+            },
+            {
+              "source": "广延性质",
+              "type": "RELATED_TO",
+              "target": "强度性质"
+            },
+            {
+              "source": "摄氏温标",
+              "type": "RELATED_TO",
+              "target": "华氏温标"
+            },
+            {
+              "source": "温度换算公式",
+              "type": "APPLIES_TO",
+              "target": "摄氏温标"
+            },
+            {
+              "source": "物理变化",
+              "type": "RELATED_TO",
+              "target": "化学变化"
+            },
+            {
+              "source": "物质",
+              "type": "CONTAINS",
+              "target": "混合物"
+            },
+            {
+              "source": "物质守恒定律",
+              "type": "APPLIES_TO",
+              "target": "化学变化"
+            },
+            {
+              "source": "科学方法",
+              "type": "CONTAINS",
+              "target": "假说"
+            },
+            {
+              "source": "质量",
+              "type": "RELATED_TO",
+              "target": "重量"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "SI单位",
+              "type": "CONTAINS",
+              "target": "单位"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "准金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "金属"
+            },
+            {
+              "source": "元素",
+              "type": "CONTAINS",
+              "target": "非金属"
+            },
+            {
+              "source": "准确度",
+              "type": "RELATED_TO",
+              "target": "不确定度"
+            },
+            {
+              "source": "分子",
+              "type": "RELATED_TO",
+              "target": "化学键"
+            },
+            {
+              "source": "化学",
+              "type": "RELATED_TO",
+              "target": "宏观领域"
+            },
+            {
+              "source": "化学",
+              "type": "RELATED_TO",
+              "target": "微观领域"
+            },
+            {
+              "source": "化学",
+              "type": "RELATED_TO",
+              "target": "符号领域"
+            },
+            {
+              "source": "单位换算",
+              "type": "APPLIES_TO",
+              "target": "单位"
+            },
+            {
+              "source": "国际单位制",
+              "type": "CONTAINS",
+              "target": "时间"
+            },
+            {
+              "source": "国际单位制",
+              "type": "CONTAINS",
+              "target": "温度"
+            },
+            {
+              "source": "国际单位制",
+              "type": "CONTAINS",
+              "target": "质量"
+            },
+            {
+              "source": "国际单位制",
+              "type": "CONTAINS",
+              "target": "长度"
+            },
+            {
+              "source": "密度",
+              "type": "RELATED_TO",
+              "target": "体积"
+            },
+            {
+              "source": "水排法",
+              "type": "APPLIES_TO",
+              "target": "密度"
+            },
+            {
+              "source": "测量",
+              "type": "RELATED_TO",
+              "target": "准确度"
+            },
+            {
+              "source": "测量",
+              "type": "RELATED_TO",
+              "target": "单位"
+            },
+            {
+              "source": "测量",
+              "type": "RELATED_TO",
+              "target": "有效数字"
+            },
+            {
+              "source": "测量",
+              "type": "RELATED_TO",
+              "target": "精密度"
+            },
+            {
+              "source": "温度",
+              "type": "RELATED_TO",
+              "target": "华氏温标"
+            },
+            {
+              "source": "温度",
+              "type": "RELATED_TO",
+              "target": "摄氏温标"
+            },
+            {
+              "source": "物理性质",
+              "type": "CONTAINS",
+              "target": "广延性质"
+            },
+            {
+              "source": "物理性质",
+              "type": "CONTAINS",
+              "target": "强度性质"
+            },
+            {
+              "source": "物质",
+              "type": "CONTAINS",
+              "target": "等离子体"
+            },
+            {
+              "source": "物质",
+              "type": "RELATED_TO",
+              "target": "分子"
+            },
+            {
+              "source": "物质",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "物质状态",
+              "type": "CONTAINS",
+              "target": "固态"
+            },
+            {
+              "source": "物质状态",
+              "type": "CONTAINS",
+              "target": "气态"
+            },
+            {
+              "source": "物质状态",
+              "type": "CONTAINS",
+              "target": "液态"
+            },
+            {
+              "source": "物质状态",
+              "type": "CONTAINS",
+              "target": "等离子体"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "定律"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "理论"
+            },
+            {
+              "source": "科学方法",
+              "type": "RELATED_TO",
+              "target": "科学定律"
+            },
+            {
+              "source": "科学记数法",
+              "type": "RELATED_TO",
+              "target": "有效数字"
+            },
+            {
+              "source": "精密度",
+              "type": "RELATED_TO",
+              "target": "不确定度"
+            },
+            {
+              "source": "舍入",
+              "type": "RELATED_TO",
+              "target": "有效数字"
+            },
+            {
+              "source": "道尔顿原子理论",
+              "type": "RELATED_TO",
+              "target": "原子"
+            },
+            {
+              "source": "量纲分析",
+              "type": "APPLIES_TO",
+              "target": "单位换算"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "SI单位",
+            "type": "CONTAINS",
+            "target": "单位"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "准金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "金属"
+          },
+          {
+            "source": "元素",
+            "type": "CONTAINS",
+            "target": "非金属"
+          },
+          {
+            "source": "准确度",
+            "type": "RELATED_TO",
+            "target": "不确定度"
+          },
+          {
+            "source": "分子",
+            "type": "RELATED_TO",
+            "target": "化学键"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "宏观领域"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "微观领域"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "符号领域"
+          },
+          {
+            "source": "单位换算",
+            "type": "APPLIES_TO",
+            "target": "单位"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "时间"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "温度"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "质量"
+          },
+          {
+            "source": "国际单位制",
+            "type": "CONTAINS",
+            "target": "长度"
+          },
+          {
+            "source": "密度",
+            "type": "RELATED_TO",
+            "target": "体积"
+          },
+          {
+            "source": "有效数字",
+            "type": "RELATED_TO",
+            "target": "不确定度"
+          },
+          {
+            "source": "水排法",
+            "type": "APPLIES_TO",
+            "target": "密度"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "准确度"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "单位"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "测量",
+            "type": "RELATED_TO",
+            "target": "精密度"
+          },
+          {
+            "source": "温度",
+            "type": "RELATED_TO",
+            "target": "华氏温标"
+          },
+          {
+            "source": "温度",
+            "type": "RELATED_TO",
+            "target": "摄氏温标"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "华氏温标"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "开尔文温标"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "RELATED_TO",
+            "target": "摄氏温标"
+          },
+          {
+            "source": "物理性质",
+            "type": "CONTAINS",
+            "target": "广延性质"
+          },
+          {
+            "source": "物理性质",
+            "type": "CONTAINS",
+            "target": "强度性质"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "等离子体"
+          },
+          {
+            "source": "物质",
+            "type": "RELATED_TO",
+            "target": "分子"
+          },
+          {
+            "source": "物质",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "固态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "气态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "液态"
+          },
+          {
+            "source": "物质状态",
+            "type": "CONTAINS",
+            "target": "等离子体"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "假说"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "定律"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "理论"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "科学定律"
+          },
+          {
+            "source": "科学方法",
+            "type": "RELATED_TO",
+            "target": "科学理论"
+          },
+          {
+            "source": "科学记数法",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "精密度",
+            "type": "RELATED_TO",
+            "target": "不确定度"
+          },
+          {
+            "source": "舍入",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "道尔顿原子理论",
+            "type": "RELATED_TO",
+            "target": "原子"
+          },
+          {
+            "source": "量纲分析",
+            "type": "APPLIES_TO",
+            "target": "单位换算"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "不确定度",
+            "type": "RELATED_TO",
+            "target": "有效数字"
+          },
+          {
+            "source": "假说",
+            "type": "PRECEDES",
+            "target": "科学理论"
+          },
+          {
+            "source": "准确度",
+            "type": "RELATED_TO",
+            "target": "精密度"
+          },
+          {
+            "source": "分子",
+            "type": "CONTAINS",
+            "target": "原子"
+          },
+          {
+            "source": "宏观领域",
+            "type": "RELATED_TO",
+            "target": "微观领域"
+          },
+          {
+            "source": "广延性质",
+            "type": "RELATED_TO",
+            "target": "强度性质"
+          },
+          {
+            "source": "摄氏温标",
+            "type": "RELATED_TO",
+            "target": "华氏温标"
+          },
+          {
+            "source": "温度换算公式",
+            "type": "APPLIES_TO",
+            "target": "摄氏温标"
+          },
+          {
+            "source": "物理变化",
+            "type": "RELATED_TO",
+            "target": "化学变化"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "混合物"
+          },
+          {
+            "source": "物质守恒定律",
+            "type": "APPLIES_TO",
+            "target": "化学变化"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "假说"
+          },
+          {
+            "source": "质量",
+            "type": "RELATED_TO",
+            "target": "重量"
+          }
+        ],
+        "type_confusions": [
+          {
+            "source": "温度换算公式",
+            "target": "华氏温标",
+            "gold_type": "APPLIES_TO",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "温度换算公式",
+            "target": "开尔文温标",
+            "gold_type": "APPLIES_TO",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "温度换算公式",
+            "target": "摄氏温标",
+            "gold_type": "APPLIES_TO",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "科学方法",
+            "target": "假说",
+            "gold_type": "CONTAINS",
+            "pred_type": "RELATED_TO"
+          },
+          {
+            "source": "科学方法",
+            "target": "科学理论",
+            "gold_type": "CONTAINS",
+            "pred_type": "RELATED_TO"
+          }
+        ]
+      }
+    ]
+  ]
+}

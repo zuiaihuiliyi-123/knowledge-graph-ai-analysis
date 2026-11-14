@@ -1,0 +1,12 @@
+{
+  "d5_化学_第4章_化学反应计量": {
+    "relation_primary_f1": 0.2947,
+    "entity_f1": 0.8431,
+    "runs": 1
+  },
+  "d6_化学_第1章_化学基本概念": {
+    "relation_primary_f1": 0.3441,
+    "entity_f1": 0.7788,
+    "runs": 1
+  }
+}

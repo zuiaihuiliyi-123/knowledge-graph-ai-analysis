@@ -1,0 +1,1293 @@
+[
+  {
+    "text_id": "化学_化学基本概念_第1章",
+    "runs": [
+      {
+        "entities": [
+          {
+            "name": "化学",
+            "category": "概念",
+            "description": "研究物质的组成、性质与相互作用的学科。",
+            "descriptions": [
+              "研究物质的组成、性质与相互作用的学科。",
+              "研究物质的组成、性质和相互作用的学科。"
+            ],
+            "evidence": "化学——研究物质的组成、性质与相互作用的学科。",
+            "alt_descriptions": [
+              "研究物质的组成、性质和相互作用的学科。"
+            ],
+            "alt_evidences": [
+              "化学 chemistry"
+            ]
+          },
+          {
+            "name": "物质",
+            "category": "概念",
+            "description": "任何占据空间并具有质量的东西。",
+            "descriptions": [
+              "任何占据空间并具有质量的东西。"
+            ],
+            "evidence": "物质被定义为任何占据空间并具有质量的东西。",
+            "alt_evidences": [
+              "物质 matter"
+            ]
+          },
+          {
+            "name": "固体",
+            "category": "概念",
+            "description": "物质的一种状态，具有刚性、确定的形状。",
+            "descriptions": [
+              "物质的一种状态，具有刚性、确定的形状。",
+              "刚性的、有确定形状、体积相当恒定的物质状态。"
+            ],
+            "evidence": "固体是刚性的，具有确定的形状。",
+            "alt_descriptions": [
+              "刚性的、有确定形状、体积相当恒定的物质状态。"
+            ],
+            "alt_evidences": [
+              "固体 solid"
+            ]
+          },
+          {
+            "name": "液体",
+            "category": "概念",
+            "description": "物质的一种状态，可以流动并呈现容器的形状。",
+            "descriptions": [
+              "物质的一种状态，可以流动并呈现容器的形状。",
+              "有确定体积但形状不确定的物质状态。"
+            ],
+            "evidence": "液体可以流动并呈现容器的形状。",
+            "alt_descriptions": [
+              "有确定体积但形状不确定的物质状态。"
+            ],
+            "alt_evidences": [
+              "液体 liquid"
+            ]
+          },
+          {
+            "name": "气体",
+            "category": "概念",
+            "description": "物质的一种状态，呈现其容器的形状和体积。",
+            "descriptions": [
+              "物质的一种状态，呈现其容器的形状和体积。",
+              "既没有确定体积也没有确定形状的物质状态。"
+            ],
+            "evidence": "气体则呈现其容器的形状和体积。",
+            "alt_descriptions": [
+              "既没有确定体积也没有确定形状的物质状态。"
+            ],
+            "alt_evidences": [
+              "气体 gas"
+            ]
+          },
+          {
+            "name": "等离子体",
+            "category": "概念",
+            "description": "第四种物质状态，含有大量带电粒子。",
+            "descriptions": [
+              "第四种物质状态，含有大量带电粒子。",
+              "含有大量带电原子和/或分子的气态物质状态。"
+            ],
+            "evidence": "等离子体是一种气态物质状态，含有大量带电粒子。",
+            "alt_descriptions": [
+              "含有大量带电原子和/或分子的气态物质状态。"
+            ],
+            "alt_evidences": [
+              "等离子体 plasma"
+            ]
+          },
+          {
+            "name": "质量",
+            "category": "概念",
+            "description": "衡量物体中所含物质量的量。",
+            "descriptions": [
+              "衡量物体中所含物质量的量。",
+              "SI基本单位之一，标准单位是千克（kg）。",
+              "表示物质量的基本性质。"
+            ],
+            "evidence": "物体的质量是衡量其中所含物质量的量。",
+            "alt_descriptions": [
+              "SI基本单位之一，标准单位是千克（kg）。",
+              "表示物质量的基本性质。"
+            ],
+            "alt_evidences": [
+              "SI制中质量的标准单位是千克（kg）。",
+              "质量 mass"
+            ]
+          },
+          {
+            "name": "重量",
+            "category": "概念",
+            "description": "重力施加在物体上的力，与质量成正比。",
+            "descriptions": [
+              "重力施加在物体上的力，与质量成正比。",
+              "重力施加在物体上的力。"
+            ],
+            "evidence": "重量是指重力施加在物体上的力。",
+            "alt_descriptions": [
+              "重力施加在物体上的力。"
+            ],
+            "alt_evidences": [
+              "重量 weight"
+            ]
+          },
+          {
+            "name": "物质守恒定律",
+            "category": "概念",
+            "description": "物质转化时现有物质总量没有可检测的变化。",
+            "descriptions": [
+              "物质转化时现有物质总量没有可检测的变化。"
+            ],
+            "evidence": "物质守恒定律总结了关于物质的大量科学观察：它指出，当物质从一种类型转化为另一种类型时，现有物质的总量没有可检测到的变化。"
+          },
+          {
+            "name": "纯物质",
+            "category": "概念",
+            "description": "具有恒定组成的物质。",
+            "descriptions": [
+              "具有恒定组成的物质。",
+              "组成恒定的均匀物质。"
+            ],
+            "evidence": "纯物质具有恒定的组成。",
+            "alt_descriptions": [
+              "组成恒定的均匀物质。"
+            ],
+            "alt_evidences": [
+              "纯物质 pure substance"
+            ]
+          },
+          {
+            "name": "混合物",
+            "category": "概念",
+            "description": "由两种或两种以上类型的物质组成，可以以不同数量存在。",
+            "descriptions": [
+              "由两种或两种以上类型的物质组成，可以以不同数量存在。",
+              "可以通过物理方法分离成各组成部分的物质。"
+            ],
+            "evidence": "混合物由两种或两种以上类型的物质组成。",
+            "alt_descriptions": [
+              "可以通过物理方法分离成各组成部分的物质。"
+            ],
+            "alt_evidences": [
+              "混合物 mixture"
+            ]
+          },
+          {
+            "name": "元素",
+            "category": "概念",
+            "description": "不能通过化学变化分解成更简单物质的纯物质。",
+            "descriptions": [
+              "不能通过化学变化分解成更简单物质的纯物质。",
+              "由单一类型原子组成的物质；不能通过化学变化分解的物质。"
+            ],
+            "evidence": "不能通过化学变化分解成更简单物质的纯物质称为元素。",
+            "alt_descriptions": [
+              "由单一类型原子组成的物质；不能通过化学变化分解的物质。"
+            ],
+            "alt_evidences": [
+              "元素 element"
+            ]
+          },
+          {
+            "name": "化合物",
+            "category": "概念",
+            "description": "可以通过化学变化分解的纯物质。",
+            "descriptions": [
+              "可以通过化学变化分解的纯物质。",
+              "可以分解成两种或更多元素的纯物质。"
+            ],
+            "evidence": "可以通过化学变化分解的纯物质称为化合物。",
+            "alt_descriptions": [
+              "可以分解成两种或更多元素的纯物质。"
+            ],
+            "alt_evidences": [
+              "化合物 compound"
+            ]
+          },
+          {
+            "name": "非均匀混合物",
+            "category": "概念",
+            "description": "组成随位置变化而变化的混合物。",
+            "descriptions": [
+              "组成随位置变化而变化的混合物。",
+              "组成随位置变化的物质组合。"
+            ],
+            "evidence": "组成随位置变化而变化的混合物称为非均匀混合物。",
+            "alt_descriptions": [
+              "组成随位置变化的物质组合。"
+            ],
+            "alt_evidences": [
+              "非均匀混合物 heterogeneous mixture"
+            ]
+          },
+          {
+            "name": "均匀混合物",
+            "category": "概念",
+            "description": "表现出均匀组成且外观各处相同的混合物。",
+            "descriptions": [
+              "表现出均匀组成且外观各处相同的混合物。",
+              "组成各处均匀的物质组合。"
+            ],
+            "evidence": "均匀混合物，也称为溶液，表现出均匀的组成，并且外观上各处相同。",
+            "alt_descriptions": [
+              "组成各处均匀的物质组合。"
+            ],
+            "alt_evidences": [
+              "均匀混合物 homogeneous mixture"
+            ]
+          },
+          {
+            "name": "原子",
+            "category": "概念",
+            "description": "具有该元素性质并能参与化学结合的元素的最小粒子。",
+            "descriptions": [
+              "具有该元素性质并能参与化学结合的元素的最小粒子。",
+              "能够参与化学结合的元素的最小粒子。"
+            ],
+            "evidence": "原子是具有该元素性质、并能参与化学结合的元素的最小粒子。",
+            "alt_descriptions": [
+              "能够参与化学结合的元素的最小粒子。"
+            ],
+            "alt_evidences": [
+              "原子 atom"
+            ]
+          },
+          {
+            "name": "分子",
+            "category": "概念",
+            "description": "由两个或两个以上通过化学键连接的原子组成的单元。",
+            "descriptions": [
+              "由两个或两个以上通过化学键连接的原子组成的单元。",
+              "两个或更多相同或不同元素原子键合在一起的集合。"
+            ],
+            "evidence": "分子由两个或两个以上通过称为化学键的强作用力连接在一起的原子组成。",
+            "alt_descriptions": [
+              "两个或更多相同或不同元素原子键合在一起的集合。"
+            ],
+            "alt_evidences": [
+              "分子 molecule"
+            ]
+          },
+          {
+            "name": "化学键",
+            "category": "概念",
+            "description": "连接原子形成分子的强作用力。",
+            "descriptions": [
+              "连接原子形成分子的强作用力。"
+            ],
+            "evidence": "通过称为化学键的强作用力连接在一起的原子。"
+          },
+          {
+            "name": "科学方法",
+            "category": "方法",
+            "description": "从问题和观察到定律或假说再到理论的发现路径，包括实验验证和理论修改。",
+            "descriptions": [
+              "从问题和观察到定律或假说再到理论的发现路径，包括实验验证和理论修改。",
+              "包括假说、理论和定律的科学探究方法（文中提及假说、理论和定律支撑测量信息）。",
+              "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改。"
+            ],
+            "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法。",
+            "category_variants": [
+              "概念"
+            ],
+            "alt_descriptions": [
+              "包括假说、理论和定律的科学探究方法（文中提及假说、理论和定律支撑测量信息）。",
+              "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改。"
+            ],
+            "alt_evidences": [
+              "测量提供了大量信息，这些信息支撑着描述化学宏观和微观领域中物质和能量行为的假说、理论和定律。",
+              "科学方法 scientific method"
+            ]
+          },
+          {
+            "name": "假说",
+            "category": "概念",
+            "description": "对观察结果的试探性解释，作为收集和核验信息的指南。",
+            "descriptions": [
+              "对观察结果的试探性解释，作为收集和核验信息的指南。"
+            ],
+            "evidence": "假说，即对观察结果的试探性解释，作为收集和核验信息的指南。",
+            "alt_evidences": [
+              "假说 hypothesis"
+            ]
+          },
+          {
+            "name": "科学理论",
+            "category": "概念",
+            "description": "对自然界特定方面的、有充分依据的、全面的、可检验的解释。",
+            "descriptions": [
+              "对自然界特定方面的、有充分依据的、全面的、可检验的解释。"
+            ],
+            "evidence": "科学理论是对自然界特定方面的、有充分依据的、全面的、可检验的解释。",
+            "alt_evidences": [
+              "理论 theory"
+            ]
+          },
+          {
+            "name": "科学定律",
+            "category": "概念",
+            "description": "概括了大量实验观察，描述或预测自然界某个方面。",
+            "descriptions": [
+              "概括了大量实验观察，描述或预测自然界某个方面。",
+              "概括大量实验观察、描述或预测自然界某个方面的陈述。"
+            ],
+            "evidence": "科学定律概括了大量实验观察，描述或预测自然界的某个方面。",
+            "alt_descriptions": [
+              "概括大量实验观察、描述或预测自然界某个方面的陈述。"
+            ],
+            "alt_evidences": [
+              "定律 law"
+            ]
+          },
+          {
+            "name": "宏观领域",
+            "category": "概念",
+            "description": "日常事物的领域，大到足以被人的视觉或触觉直接感知。",
+            "descriptions": [
+              "日常事物的领域，大到足以被人的视觉或触觉直接感知。",
+              "足够大、可直接被人的视觉和触觉感知的日常事物领域。"
+            ],
+            "evidence": "宏观领域为我们所熟悉：它是日常事物的领域，这些事物大到足以被人的视觉或触觉直接感知。",
+            "alt_descriptions": [
+              "足够大、可直接被人的视觉和触觉感知的日常事物领域。"
+            ],
+            "alt_evidences": [
+              "宏观领域 macroscopic domain"
+            ]
+          },
+          {
+            "name": "微观领域",
+            "category": "概念",
+            "description": "化学中涉及分子、原子等微小实体的领域。",
+            "descriptions": [
+              "化学中涉及分子、原子等微小实体的领域。",
+              "小到无法直接感知的事物领域。"
+            ],
+            "evidence": "微观领域的其他组成部分包括离子和电子、质子和中子，以及化学键，每一个都太小而无法看见。",
+            "alt_descriptions": [
+              "小到无法直接感知的事物领域。"
+            ],
+            "alt_evidences": [
+              "微观领域 microscopic domain"
+            ]
+          },
+          {
+            "name": "符号领域",
+            "category": "概念",
+            "description": "包含用来表示宏观和微观领域组成部分的专业语言的领域。",
+            "descriptions": [
+              "包含用来表示宏观和微观领域组成部分的专业语言的领域。",
+              "用来表示宏观和微观领域组成部分的专业语言，如化学符号、化学式、化学方程式、图表、绘图和计算。"
+            ],
+            "evidence": "符号领域包含用来表示宏观和微观领域组成部分的专业语言。",
+            "alt_descriptions": [
+              "用来表示宏观和微观领域组成部分的专业语言，如化学符号、化学式、化学方程式、图表、绘图和计算。"
+            ],
+            "alt_evidences": [
+              "符号领域 symbolic domain"
+            ]
+          },
+          {
+            "name": "物理性质",
+            "category": "概念",
+            "description": "与物质化学组成变化无关的特征，如密度、颜色、硬度、熔点和沸点、电导率等。",
+            "descriptions": [
+              "与物质化学组成变化无关的特征，如密度、颜色、硬度、熔点和沸点、电导率等。",
+              "与物质化学组成变化无关的特征。"
+            ],
+            "evidence": "物理性质（physical property）是与物质化学组成变化无关的特征。",
+            "alt_descriptions": [
+              "与物质化学组成变化无关的特征。"
+            ],
+            "alt_evidences": [
+              "物理性质 physical property"
+            ]
+          },
+          {
+            "name": "化学性质",
+            "category": "概念",
+            "description": "一种物质转变为另一种类型的物质（或无法转变）的性质，如可燃性、毒性、酸性等。",
+            "descriptions": [
+              "一种物质转变为另一种类型的物质（或无法转变）的性质，如可燃性、毒性、酸性等。",
+              "与一种物质转变为另一种物质相关的行为。"
+            ],
+            "evidence": "一种物质转变为另一种类型的物质（或无法转变）是化学性质（chemical property）。",
+            "alt_descriptions": [
+              "与一种物质转变为另一种物质相关的行为。"
+            ],
+            "alt_evidences": [
+              "化学性质 chemical property"
+            ]
+          },
+          {
+            "name": "物理变化",
+            "category": "概念",
+            "description": "物质状态或性质的变化，但化学身份不发生任何伴随变化。",
+            "descriptions": [
+              "物质状态或性质的变化，但化学身份不发生任何伴随变化。",
+              "物质状态或性质的变化，不涉及化学组成的变化。"
+            ],
+            "evidence": "物理变化（physical change）是物质状态或性质的变化，物质中所含物质的化学身份不发生任何伴随变化。",
+            "alt_descriptions": [
+              "物质状态或性质的变化，不涉及化学组成的变化。"
+            ],
+            "alt_evidences": [
+              "物理变化 physical change"
+            ]
+          },
+          {
+            "name": "化学变化",
+            "category": "概念",
+            "description": "总是产生一种或多种与变化前存在的物质不同的物质的变化。",
+            "descriptions": [
+              "总是产生一种或多种与变化前存在的物质不同的物质的变化。",
+              "产生与原始物质不同的物质的变化。"
+            ],
+            "evidence": "化学变化总是产生一种或多种与变化前存在的物质不同的物质。",
+            "alt_descriptions": [
+              "产生与原始物质不同的物质的变化。"
+            ],
+            "alt_evidences": [
+              "化学变化 chemical change"
+            ]
+          },
+          {
+            "name": "广延性质",
+            "category": "概念",
+            "description": "取决于存在的物质量的性质，如质量和体积。",
+            "descriptions": [
+              "取决于存在的物质量的性质，如质量和体积。",
+              "取决于物质量的物质性质。"
+            ],
+            "evidence": "如果性质取决于存在的物质量，它就是广延性质（extensive property）。",
+            "alt_descriptions": [
+              "取决于物质量的物质性质。"
+            ],
+            "alt_evidences": [
+              "广延性质 extensive property"
+            ]
+          },
+          {
+            "name": "强度性质",
+            "category": "概念",
+            "description": "不取决于存在的物质量的性质，如温度。",
+            "descriptions": [
+              "不取决于存在的物质量的性质，如温度。",
+              "与物质量无关的物质性质。"
+            ],
+            "evidence": "如果物质样品的性质不取决于存在的物质量，它就是强度性质（intensive property）。",
+            "alt_descriptions": [
+              "与物质量无关的物质性质。"
+            ],
+            "alt_evidences": [
+              "强度性质 intensive property"
+            ]
+          },
+          {
+            "name": "金属",
+            "category": "概念",
+            "description": "导电性好的元素。",
+            "descriptions": [
+              "导电性好的元素。"
+            ],
+            "evidence": "金属（导电性好的元素）"
+          },
+          {
+            "name": "非金属",
+            "category": "概念",
+            "description": "导电性差的元素。",
+            "descriptions": [
+              "导电性差的元素。"
+            ],
+            "evidence": "非金属（导电性差的元素）"
+          },
+          {
+            "name": "类金属",
+            "category": "概念",
+            "description": "导电性居中的元素。",
+            "descriptions": [
+              "导电性居中的元素。"
+            ],
+            "evidence": "准金属/类金属（导电性居中的元素）"
+          },
+          {
+            "name": "元素周期表",
+            "category": "概念",
+            "description": "一张把具有相似性质的元素放在一起的元素表。",
+            "descriptions": [
+              "一张把具有相似性质的元素放在一起的元素表。"
+            ],
+            "evidence": "元素周期表是一张把具有相似性质的元素放在一起的元素表"
+          },
+          {
+            "name": "测量",
+            "category": "概念",
+            "description": "提供关于物质和能量行为信息的过程，每次测量提供量值、单位和不确定度。",
+            "descriptions": [
+              "提供关于物质和能量行为信息的过程，每次测量提供量值、单位和不确定度。"
+            ],
+            "evidence": "测量提供了大量信息，这些信息支撑着描述化学宏观和微观领域中物质和能量行为的假说、理论和定律。"
+          },
+          {
+            "name": "科学记数法",
+            "category": "方法",
+            "description": "用指数形式表示数字的方法，也称为指数记数法。",
+            "descriptions": [
+              "用指数形式表示数字的方法，也称为指数记数法。"
+            ],
+            "evidence": "测量中的数字可以用不同方式表示，包括十进制形式与科学记数法。"
+          },
+          {
+            "name": "单位",
+            "category": "概念",
+            "description": "测量的比较标准，如升、磅和厘米。",
+            "descriptions": [
+              "测量的比较标准，如升、磅和厘米。"
+            ],
+            "evidence": "单位（unit），如升、磅和厘米，是测量的比较标准。"
+          },
+          {
+            "name": "SI基本单位",
+            "category": "概念",
+            "description": "七个基本性质的测量单位，由国际协议确定。",
+            "descriptions": [
+              "七个基本性质的测量单位，由国际协议确定。"
+            ],
+            "evidence": "七个基本性质（“基本单位”）的测量单位列于表1.2中。这些单位的标准由国际协议确定，被称为国际单位制或SI单位"
+          },
+          {
+            "name": "长度",
+            "category": "概念",
+            "description": "SI基本单位之一，标准单位是米（m）。",
+            "descriptions": [
+              "SI基本单位之一，标准单位是米（m）。",
+              "对物体一个维度的度量。"
+            ],
+            "evidence": "SI制和原始公制中长度的标准单位都是米（m）。",
+            "alt_descriptions": [
+              "对物体一个维度的度量。"
+            ],
+            "alt_evidences": [
+              "长度 length"
+            ]
+          },
+          {
+            "name": "温度",
+            "category": "概念",
+            "description": "一种强度性质，SI单位是开尔文（K）。",
+            "descriptions": [
+              "一种强度性质，SI单位是开尔文（K）。",
+              "表示物质冷热程度的强度性质。"
+            ],
+            "evidence": "温度是一种强度性质。SI温度单位是开尔文（K）。",
+            "alt_descriptions": [
+              "表示物质冷热程度的强度性质。"
+            ],
+            "alt_evidences": [
+              "温度 temperature"
+            ]
+          },
+          {
+            "name": "时间",
+            "category": "概念",
+            "description": "SI基本单位之一，标准单位是秒（s）。",
+            "descriptions": [
+              "SI基本单位之一，标准单位是秒（s）。"
+            ],
+            "evidence": "SI时间基本单位是秒（s）。"
+          },
+          {
+            "name": "体积",
+            "category": "概念",
+            "description": "衡量物体所占据空间大小的量，SI标准单位是立方米（m3）。",
+            "descriptions": [
+              "衡量物体所占据空间大小的量，SI标准单位是立方米（m3）。",
+              "物体所占据的空间大小。"
+            ],
+            "evidence": "体积是衡量物体所占据空间大小的量。SI体积标准单位由长度基本单位定义",
+            "alt_descriptions": [
+              "物体所占据的空间大小。"
+            ],
+            "alt_evidences": [
+              "体积 volume"
+            ]
+          },
+          {
+            "name": "密度",
+            "category": "概念",
+            "description": "物质样品的质量与其体积之比。",
+            "descriptions": [
+              "物质样品的质量与其体积之比。",
+              "物质或物体的质量与体积之比。"
+            ],
+            "evidence": "物质的密度是该物质样品的质量与其体积之比。",
+            "alt_descriptions": [
+              "物质或物体的质量与体积之比。"
+            ],
+            "alt_evidences": [
+              "密度 density"
+            ]
+          },
+          {
+            "name": "密度公式",
+            "category": "公式",
+            "description": "密度等于质量除以体积的计算公式。",
+            "descriptions": [
+              "密度等于质量除以体积的计算公式。",
+              "密度等于质量除以体积。"
+            ],
+            "evidence": "密度 = 质量 / 体积",
+            "alt_descriptions": [
+              "密度等于质量除以体积。"
+            ]
+          },
+          {
+            "name": "准确度",
+            "category": "概念",
+            "description": "测量值与真实值的接近程度（文中未直接定义，但作为知识点出现）。",
+            "descriptions": [
+              "测量值与真实值的接近程度（文中未直接定义，但作为知识点出现）。",
+              "测量与正确值吻合的程度。"
+            ],
+            "evidence": "定义准确度和精密度",
+            "alt_descriptions": [
+              "测量与正确值吻合的程度。"
+            ],
+            "alt_evidences": [
+              "准确度 accuracy"
+            ]
+          },
+          {
+            "name": "精密度",
+            "category": "概念",
+            "description": "多次测量结果之间的一致程度（文中未直接定义，但作为知识点出现）。",
+            "descriptions": [
+              "多次测量结果之间的一致程度（文中未直接定义，但作为知识点出现）。",
+              "重复同一测量时结果相互吻合的程度。"
+            ],
+            "evidence": "定义准确度和精密度",
+            "alt_descriptions": [
+              "重复同一测量时结果相互吻合的程度。"
+            ],
+            "alt_evidences": [
+              "精密度 precision"
+            ]
+          },
+          {
+            "name": "精确数",
+            "category": "概念",
+            "description": "没有不确定度的测量结果，如计数或定义量。",
+            "descriptions": [
+              "没有不确定度的测量结果，如计数或定义量。"
+            ],
+            "evidence": "这种计数测量的结果是精确数（exact number）的一个例子。"
+          },
+          {
+            "name": "有效数字",
+            "category": "概念",
+            "description": "测量中所有确定的数字加上最后一位不确定的数字。",
+            "descriptions": [
+              "测量中所有确定的数字加上最后一位不确定的数字。",
+              "一次测定中的所有测得数字，包括不确定的最后一位。"
+            ],
+            "evidence": "测量中的所有数字，包括不确定的最后一位，都称为有效数字（significant figures）或有意义数字。",
+            "alt_descriptions": [
+              "一次测定中的所有测得数字，包括不确定的最后一位。"
+            ],
+            "alt_evidences": [
+              "有效数字 significant figures"
+            ]
+          },
+          {
+            "name": "舍入规则",
+            "category": "方法",
+            "description": "对计算量进行舍入以正确表示不确定度的规则。",
+            "descriptions": [
+              "对计算量进行舍入以正确表示不确定度的规则。"
+            ],
+            "evidence": "一种方法是用正确的有效数字位数报告计算结果，这由以下三条数字舍入规则确定"
+          },
+          {
+            "name": "舍入",
+            "category": "方法",
+            "description": "用于确保计算结果正确反映计算中所用测量不确定度的程序。",
+            "descriptions": [
+              "用于确保计算结果正确反映计算中所用测量不确定度的程序。"
+            ],
+            "evidence": "舍入 rounding"
+          },
+          {
+            "name": "量纲分析",
+            "category": "方法",
+            "description": "可应用于从简单单位换算到涉及几个不同量的更复杂多步计算的多功能数学方法。",
+            "descriptions": [
+              "可应用于从简单单位换算到涉及几个不同量的更复杂多步计算的多功能数学方法。"
+            ],
+            "evidence": "量纲分析 dimensional analysis"
+          },
+          {
+            "name": "单位换算因子",
+            "category": "概念",
+            "description": "用不同单位表示的等价量之比；用于从一种单位换算到另一种单位。",
+            "descriptions": [
+              "用不同单位表示的等价量之比；用于从一种单位换算到另一种单位。"
+            ],
+            "evidence": "单位换算因子 unit conversion factor"
+          },
+          {
+            "name": "摄氏温标",
+            "category": "概念",
+            "description": "温度单位；在此标度上水在0 °C结冰、100 °C沸腾。",
+            "descriptions": [
+              "温度单位；在此标度上水在0 °C结冰、100 °C沸腾。"
+            ],
+            "evidence": "摄氏度 Celsius (°C)"
+          },
+          {
+            "name": "华氏温标",
+            "category": "概念",
+            "description": "温度单位；在此标度上水在32 °F结冰、212 °F沸腾。",
+            "descriptions": [
+              "温度单位；在此标度上水在32 °F结冰、212 °F沸腾。"
+            ],
+            "evidence": "华氏度 Fahrenheit"
+          },
+          {
+            "name": "开尔文温标",
+            "category": "概念",
+            "description": "SI温度单位；273.15 K = 0 °C。",
+            "descriptions": [
+              "SI温度单位；273.15 K = 0 °C。"
+            ],
+            "evidence": "开尔文 kelvin (K)"
+          },
+          {
+            "name": "温度换算公式",
+            "category": "公式",
+            "description": "用于摄氏、华氏和开尔文温标之间换算的公式。",
+            "descriptions": [
+              "用于摄氏、华氏和开尔文温标之间换算的公式。"
+            ],
+            "evidence": "T°C = (5/9) × (T°F − 32)"
+          },
+          {
+            "name": "不确定度",
+            "category": "概念",
+            "description": "对测量与真实值差异程度的估计。",
+            "descriptions": [
+              "对测量与真实值差异程度的估计。"
+            ],
+            "evidence": "不确定度 uncertainty"
+          }
+        ],
+        "relations": [
+          {
+            "source": "物质",
+            "target": "固体",
+            "type": "CONTAINS",
+            "evidence": "固体、液体和气体是地球上常见的三种物质状态。",
+            "confidence": 0.95,
+            "direction_basis": "物质包含固体作为其状态之一"
+          },
+          {
+            "source": "物质",
+            "target": "液体",
+            "type": "CONTAINS",
+            "evidence": "固体、液体和气体是地球上常见的三种物质状态。",
+            "confidence": 0.95,
+            "direction_basis": "物质包含液体作为其状态之一"
+          },
+          {
+            "source": "物质",
+            "target": "气体",
+            "type": "CONTAINS",
+            "evidence": "固体、液体和气体是地球上常见的三种物质状态。",
+            "confidence": 0.95,
+            "direction_basis": "物质包含气体作为其状态之一"
+          },
+          {
+            "source": "物质",
+            "target": "等离子体",
+            "type": "CONTAINS",
+            "evidence": "第四种物质状态——等离子体——天然存在于恒星内部。",
+            "confidence": 0.9,
+            "direction_basis": "物质包含等离子体作为其状态之一"
+          },
+          {
+            "source": "物质",
+            "target": "混合物",
+            "type": "CONTAINS",
+            "evidence": "物质可以分为几个类别。两个宽泛的类别是混合物和纯物质。",
+            "confidence": 0.95,
+            "direction_basis": "物质包含混合物作为其类别之一"
+          },
+          {
+            "source": "物质",
+            "target": "纯物质",
+            "type": "CONTAINS",
+            "evidence": "物质可以分为几个类别。两个宽泛的类别是混合物和纯物质。",
+            "confidence": 0.95,
+            "direction_basis": "物质包含纯物质作为其类别之一"
+          },
+          {
+            "source": "纯物质",
+            "target": "元素",
+            "type": "CONTAINS",
+            "evidence": "纯物质可以分为两类：元素和化合物。",
+            "confidence": 0.95,
+            "direction_basis": "纯物质包含元素作为其子类"
+          },
+          {
+            "source": "纯物质",
+            "target": "化合物",
+            "type": "CONTAINS",
+            "evidence": "纯物质可以分为两类：元素和化合物。",
+            "confidence": 0.95,
+            "direction_basis": "纯物质包含化合物作为其子类"
+          },
+          {
+            "source": "混合物",
+            "target": "非均匀混合物",
+            "type": "CONTAINS",
+            "evidence": "组成随位置变化而变化的混合物称为非均匀混合物。",
+            "confidence": 0.95,
+            "direction_basis": "混合物包含非均匀混合物作为其子类"
+          },
+          {
+            "source": "混合物",
+            "target": "均匀混合物",
+            "type": "CONTAINS",
+            "evidence": "均匀混合物，也称为溶液，表现出均匀的组成。",
+            "confidence": 0.95,
+            "direction_basis": "混合物包含均匀混合物作为其子类"
+          },
+          {
+            "source": "科学方法",
+            "target": "假说",
+            "type": "CONTAINS",
+            "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法。",
+            "confidence": 0.9,
+            "direction_basis": "科学方法包含假说作为其组成部分"
+          },
+          {
+            "source": "科学方法",
+            "target": "科学理论",
+            "type": "CONTAINS",
+            "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法。",
+            "confidence": 0.9,
+            "direction_basis": "科学方法包含科学理论作为其组成部分"
+          },
+          {
+            "source": "科学方法",
+            "target": "科学定律",
+            "type": "CONTAINS",
+            "evidence": "从问题和观察到定律或假说再到理论的发现路径，加上对假说的实验验证以及对理论的任何必要修改，被称为科学方法。",
+            "confidence": 0.9,
+            "direction_basis": "科学方法包含科学定律作为其组成部分"
+          },
+          {
+            "source": "假说",
+            "target": "科学理论",
+            "type": "PRECEDES",
+            "evidence": "如果这样的假说被证明能够解释大量实验数据，它就可以达到理论（theory）的地位。",
+            "confidence": 0.9,
+            "direction_basis": "假说发展为理论，学习理论前需先理解假说"
+          },
+          {
+            "source": "化学",
+            "target": "物质",
+            "type": "RELATED_TO",
+            "evidence": "化学——研究物质的组成、性质与相互作用的学科。",
+            "confidence": 0.9,
+            "direction_basis": "化学研究物质，二者密切相关"
+          },
+          {
+            "source": "宏观领域",
+            "target": "微观领域",
+            "type": "RELATED_TO",
+            "evidence": "化学家在三个不同领域研究和描述物质与能量的行为：宏观、微观和符号领域。",
+            "confidence": 0.85,
+            "direction_basis": "三个领域并列相关"
+          },
+          {
+            "source": "符号领域",
+            "target": "宏观领域",
+            "type": "RELATED_TO",
+            "evidence": "符号领域包含用来表示宏观和微观领域组成部分的专业语言。",
+            "confidence": 0.85,
+            "direction_basis": "符号领域表示宏观领域"
+          },
+          {
+            "source": "符号领域",
+            "target": "微观领域",
+            "type": "RELATED_TO",
+            "evidence": "符号领域包含用来表示宏观和微观领域组成部分的专业语言。",
+            "confidence": 0.85,
+            "direction_basis": "符号领域表示微观领域"
+          },
+          {
+            "source": "质量",
+            "target": "重量",
+            "type": "RELATED_TO",
+            "evidence": "虽然重量与质量有关，但两者不是一回事。",
+            "confidence": 0.9,
+            "direction_basis": "质量与重量密切相关但不同"
+          },
+          {
+            "source": "原子",
+            "target": "分子",
+            "type": "RELATED_TO",
+            "evidence": "分子由两个或两个以上通过称为化学键的强作用力连接在一起的原子组成。",
+            "confidence": 0.9,
+            "direction_basis": "原子构成分子，二者密切相关"
+          },
+          {
+            "source": "物理性质",
+            "target": "物理变化",
+            "type": "RELATED_TO",
+            "evidence": "其他物理性质，如铁的熔化温度或水的冻结温度，只能在物质发生物理变化时观察到。",
+            "confidence": 0.8,
+            "direction_basis": "物理性质与物理变化密切相关，方向按正文先出现方为source。"
+          },
+          {
+            "source": "化学性质",
+            "target": "化学变化",
+            "type": "RELATED_TO",
+            "evidence": "化学变化总是产生一种或多种与变化前存在的物质不同的物质。",
+            "confidence": 0.8,
+            "direction_basis": "化学性质与化学变化密切相关，方向按正文先出现方为source。"
+          },
+          {
+            "source": "广延性质",
+            "target": "强度性质",
+            "type": "RELATED_TO",
+            "evidence": "物质的性质分为两类之一。如果性质取决于存在的物质量，它就是广延性质（extensive property）。如果物质样品的性质不取决于存在的物质量，它就是强度性质（intensive property）。",
+            "confidence": 0.9,
+            "direction_basis": "并列类似关系，source取正文先出现方。"
+          },
+          {
+            "source": "元素",
+            "target": "金属",
+            "type": "CONTAINS",
+            "evidence": "这些性质可以用来把元素分为三类：金属（导电性好的元素）、非金属（导电性差的元素）和准金属/类金属（导电性居中的元素）。",
+            "confidence": 0.95,
+            "direction_basis": "元素是上位概念，金属是下位概念。"
+          },
+          {
+            "source": "元素",
+            "target": "非金属",
+            "type": "CONTAINS",
+            "evidence": "这些性质可以用来把元素分为三类：金属（导电性好的元素）、非金属（导电性差的元素）和准金属/类金属（导电性居中的元素）。",
+            "confidence": 0.95,
+            "direction_basis": "元素是上位概念，非金属是下位概念。"
+          },
+          {
+            "source": "元素",
+            "target": "类金属",
+            "type": "CONTAINS",
+            "evidence": "这些性质可以用来把元素分为三类：金属（导电性好的元素）、非金属（导电性差的元素）和准金属/类金属（导电性居中的元素）。",
+            "confidence": 0.95,
+            "direction_basis": "元素是上位概念，类金属是下位概念。"
+          },
+          {
+            "source": "SI基本单位",
+            "target": "长度",
+            "type": "CONTAINS",
+            "evidence": "七个基本性质（“基本单位”）的测量单位列于表1.2中。",
+            "confidence": 0.9,
+            "direction_basis": "SI基本单位包含长度单位。"
+          },
+          {
+            "source": "SI基本单位",
+            "target": "质量",
+            "type": "CONTAINS",
+            "evidence": "七个基本性质（“基本单位”）的测量单位列于表1.2中。",
+            "confidence": 0.9,
+            "direction_basis": "SI基本单位包含质量单位。"
+          },
+          {
+            "source": "SI基本单位",
+            "target": "温度",
+            "type": "CONTAINS",
+            "evidence": "七个基本性质（“基本单位”）的测量单位列于表1.2中。",
+            "confidence": 0.9,
+            "direction_basis": "SI基本单位包含温度单位。"
+          },
+          {
+            "source": "SI基本单位",
+            "target": "时间",
+            "type": "CONTAINS",
+            "evidence": "七个基本性质（“基本单位”）的测量单位列于表1.2中。",
+            "confidence": 0.9,
+            "direction_basis": "SI基本单位包含时间单位。"
+          },
+          {
+            "source": "密度公式",
+            "target": "密度",
+            "type": "APPLIES_TO",
+            "evidence": "密度 = 质量 / 体积",
+            "confidence": 0.95,
+            "direction_basis": "密度公式是计算密度的方法，应用于密度。"
+          },
+          {
+            "source": "舍入规则",
+            "target": "有效数字",
+            "type": "APPLIES_TO",
+            "evidence": "一种方法是用正确的有效数字位数报告计算结果，这由以下三条数字舍入规则确定",
+            "confidence": 0.9,
+            "direction_basis": "舍入规则用于确定有效数字的表示。"
+          },
+          {
+            "source": "准确度",
+            "target": "精密度",
+            "type": "RELATED_TO",
+            "evidence": "定义准确度和精密度",
+            "confidence": 0.7,
+            "direction_basis": "准确度与精密度并列相关，source取正文先出现方。"
+          },
+          {
+            "source": "舍入",
+            "target": "有效数字",
+            "type": "APPLIES_TO",
+            "evidence": "舍入规则的原因——正确表示所报告值的确定度",
+            "confidence": 0.9,
+            "direction_basis": "舍入是方法，用于处理有效数字"
+          },
+          {
+            "source": "量纲分析",
+            "target": "单位换算因子",
+            "type": "APPLIES_TO",
+            "evidence": "这些换算使用单位换算因子完成，换算因子通过简单应用称为因子标记法或量纲分析的数学方法导出",
+            "confidence": 0.9,
+            "direction_basis": "量纲分析是方法，用于导出单位换算因子"
+          },
+          {
+            "source": "温度换算公式",
+            "target": "摄氏温标",
+            "type": "APPLIES_TO",
+            "evidence": "T°C = (5/9) × (T°F − 32)",
+            "confidence": 0.9,
+            "direction_basis": "温度换算公式用于摄氏温标换算"
+          },
+          {
+            "source": "温度换算公式",
+            "target": "华氏温标",
+            "type": "APPLIES_TO",
+            "evidence": "T°F = [(9/5) × T°C] + 32",
+            "confidence": 0.9,
+            "direction_basis": "温度换算公式用于华氏温标换算"
+          },
+          {
+            "source": "温度换算公式",
+            "target": "开尔文温标",
+            "type": "APPLIES_TO",
+            "evidence": "TK = T°C + 273.15",
+            "confidence": 0.9,
+            "direction_basis": "温度换算公式用于开尔文温标换算"
+          },
+          {
+            "source": "物理变化",
+            "target": "化学变化",
+            "type": "RELATED_TO",
+            "evidence": "物理变化和化学变化",
+            "confidence": 0.8,
+            "direction_basis": "并列变化类型"
+          },
+          {
+            "source": "不确定度",
+            "target": "有效数字",
+            "type": "RELATED_TO",
+            "evidence": "测量量具有相关的不确定度，由该量数字中的有效数字位数表示",
+            "confidence": 0.9,
+            "direction_basis": "不确定度由有效数字表示"
+          },
+          {
+            "source": "量纲分析",
+            "target": "单位换算因子",
+            "type": "RELATED_TO",
+            "evidence": "量纲分析基于这样的前提：量的单位必须与其相关的数字经受相同的数学运算。这种方法可以应用于从简单单位换算到涉及几个不同量的更复杂的多步计算。",
+            "confidence": 0.8,
+            "direction_basis": "量纲分析与单位换算因子密切相关"
+          },
+          {
+            "source": "摄氏温标",
+            "target": "华氏温标",
+            "type": "RELATED_TO",
+            "evidence": "摄氏和华氏温标没有共同的零点，因此这两个标度之间的关系是线性关系而非比例关系",
+            "confidence": 0.8,
+            "direction_basis": "两个温标相关"
+          },
+          {
+            "source": "摄氏温标",
+            "target": "开尔文温标",
+            "type": "RELATED_TO",
+            "evidence": "开尔文与摄氏温标之间的换算方程导出为：TK = T°C + 273.15",
+            "confidence": 0.8,
+            "direction_basis": "两个温标相关"
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 65,
+        "dropped_counts": {
+          "duplicate": 22
+        },
+        "dropped_relations": [
+          {
+            "source": "密度公式",
+            "type": "APPLIES_TO",
+            "target": "密度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "混合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "纯物质",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "固体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "液体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "气体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "物质",
+            "type": "CONTAINS",
+            "target": "等离子体",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "混合物",
+            "type": "CONTAINS",
+            "target": "均匀混合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "混合物",
+            "type": "CONTAINS",
+            "target": "非均匀混合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "纯物质",
+            "type": "CONTAINS",
+            "target": "元素",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "纯物质",
+            "type": "CONTAINS",
+            "target": "化合物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "假说",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "科学理论",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "科学定律",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "假说",
+            "type": "PRECEDES",
+            "target": "科学理论",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学",
+            "type": "RELATED_TO",
+            "target": "物质",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "宏观领域",
+            "type": "RELATED_TO",
+            "target": "微观领域",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "符号领域",
+            "type": "RELATED_TO",
+            "target": "宏观领域",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "符号领域",
+            "type": "RELATED_TO",
+            "target": "微观领域",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "质量",
+            "type": "RELATED_TO",
+            "target": "重量",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "广延性质",
+            "type": "RELATED_TO",
+            "target": "强度性质",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "准确度",
+            "type": "RELATED_TO",
+            "target": "精密度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      }
+    ]
+  }
+]

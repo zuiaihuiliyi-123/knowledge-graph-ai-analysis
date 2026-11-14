@@ -1,0 +1,808 @@
+{
+  "generated_at": "2026-11-14T13:39:22",
+  "source_pdf": "data\\uploads\\5\\4_第6章 面向对象程序设计.pdf",
+  "characters": 17380,
+  "entities": 45,
+  "relations": 23,
+  "raw_relation_count": 23,
+  "dropped_counts": {},
+  "error": null,
+  "sample_entities": [
+    {
+      "name": "面向对象程序设计",
+      "category": "概念",
+      "description": "一种以对象为核心的软件设计方法，支持封装、继承、多态等特性。",
+      "descriptions": [
+        "一种以对象为核心的软件设计方法，支持封装、继承、多态等特性。"
+      ]
+    },
+    {
+      "name": "对象",
+      "category": "概念",
+      "description": "将数据和对数据的操作封装在一起形成的整体，是类的实例。",
+      "descriptions": [
+        "将数据和对数据的操作封装在一起形成的整体，是类的实例。"
+      ]
+    },
+    {
+      "name": "类",
+      "category": "概念",
+      "description": "对相同类型对象进行分类、抽象后得出的共同特征和行为的定义。",
+      "descriptions": [
+        "对相同类型对象进行分类、抽象后得出的共同特征和行为的定义。"
+      ]
+    },
+    {
+      "name": "封装",
+      "category": "概念",
+      "description": "将数据和对数据的操作封装在一起，组成不可分割的整体。",
+      "descriptions": [
+        "将数据和对数据的操作封装在一起，组成不可分割的整体。"
+      ]
+    },
+    {
+      "name": "继承",
+      "category": "概念",
+      "description": "实现代码复用和设计复用的机制，子类可以继承父类的公有成员。",
+      "descriptions": [
+        "实现代码复用和设计复用的机制，子类可以继承父类的公有成员。",
+        "面向对象编程中派生类获取基类属性和方法的机制。"
+      ],
+      "evidence": "派生类继承了基类行为和属性之后",
+      "alt_descriptions": [
+        "面向对象编程中派生类获取基类属性和方法的机制。"
+      ]
+    },
+    {
+      "name": "多态",
+      "category": "概念",
+      "description": "基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+      "descriptions": [
+        "基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+        "基类的同一个方法在不同派生类对象中具有不同表现和行为的特性。"
+      ],
+      "evidence": "所谓多态（polymorphism），是指基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+      "alt_descriptions": [
+        "基类的同一个方法在不同派生类对象中具有不同表现和行为的特性。"
+      ]
+    },
+    {
+      "name": "数据成员",
+      "category": "概念",
+      "description": "创建类时用变量形式表示的对象属性。",
+      "descriptions": [
+        "创建类时用变量形式表示的对象属性。"
+      ]
+    },
+    {
+      "name": "成员方法",
+      "category": "概念",
+      "description": "创建类时用函数形式表示的对象行为。",
+      "descriptions": [
+        "创建类时用函数形式表示的对象行为。"
+      ]
+    },
+    {
+      "name": "类的成员",
+      "category": "概念",
+      "description": "成员属性和成员方法的统称。",
+      "descriptions": [
+        "成员属性和成员方法的统称。"
+      ]
+    },
+    {
+      "name": "class关键字",
+      "category": "概念",
+      "description": "Python中用于定义类的关键字。",
+      "descriptions": [
+        "Python中用于定义类的关键字。"
+      ]
+    }
+  ],
+  "sample_relations": [
+    {
+      "source": "面向对象程序设计",
+      "target": "封装",
+      "type": "CONTAINS",
+      "evidence": "面向对象程序设计的一个关键性观念是将数据以及对数据的操作封装在一起",
+      "confidence": 0.9,
+      "direction_basis": "封装是面向对象程序设计的关键特性之一，属于其组成部分。"
+    },
+    {
+      "source": "面向对象程序设计",
+      "target": "继承",
+      "type": "CONTAINS",
+      "evidence": "Python完全支持了面向对象程序设计的思想，是真正面向对象的高级动态编程语言，完全支持面向对象的基本功能，如封装、继承、多态",
+      "confidence": 0.9,
+      "direction_basis": "继承是面向对象程序设计的基本功能之一。"
+    },
+    {
+      "source": "面向对象程序设计",
+      "target": "多态",
+      "type": "CONTAINS",
+      "evidence": "Python完全支持了面向对象程序设计的思想，是真正面向对象的高级动态编程语言，完全支持面向对象的基本功能，如封装、继承、多态",
+      "confidence": 0.9,
+      "direction_basis": "多态是面向对象程序设计的基本功能之一。"
+    },
+    {
+      "source": "类的成员",
+      "target": "数据成员",
+      "type": "CONTAINS",
+      "evidence": "成员属性和成员方法统称为类的成员",
+      "confidence": 0.95,
+      "direction_basis": "数据成员（成员属性）是类的成员的一种。"
+    },
+    {
+      "source": "类的成员",
+      "target": "成员方法",
+      "type": "CONTAINS",
+      "evidence": "成员属性和成员方法统称为类的成员",
+      "confidence": 0.95,
+      "direction_basis": "成员方法是类的成员的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "公有方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "公有方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "私有方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "私有方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "静态方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "静态方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "类方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "类方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "抽象方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "抽象方法是方法的一种。"
+    },
+    {
+      "source": "继承",
+      "target": "多继承",
+      "type": "CONTAINS",
+      "evidence": "Python支持多继承",
+      "confidence": 0.9,
+      "direction_basis": "多继承是继承的一种形式。"
+    },
+    {
+      "source": "继承",
+      "target": "覆盖",
+      "type": "CONTAINS",
+      "evidence": "派生类继承了基类行为和属性之后，还会增加某些特定的行为和属性，同时还可能会对继承来的某些行为进行一定的改变",
+      "confidence": 0.8,
+      "direction_basis": "覆盖是继承中派生类改变继承行为的一种操作。"
+    },
+    {
+      "source": "单链表",
+      "target": "节点",
+      "type": "CONTAINS",
+      "evidence": "单链表由节点组成",
+      "confidence": 0.9,
+      "direction_basis": "节点是单链表的组成单元，但此处作为类型包含关系处理。"
+    },
+    {
+      "source": "单链表",
+      "target": "插入节点",
+      "type": "CONTAINS",
+      "evidence": "在值为3的节点后面插入值为3.5的新节点",
+      "confidence": 0.8,
+      "direction_basis": "插入节点是单链表的典型操作。"
+    },
+    {
+      "source": "单链表",
+      "target": "删除节点",
+      "type": "CONTAINS",
+      "evidence": "删除节点7后面的节点",
+      "confidence": 0.8,
+      "direction_basis": "删除节点是单链表的典型操作。"
+    }
+  ],
+  "all_entities": [
+    {
+      "name": "面向对象程序设计",
+      "category": "概念",
+      "description": "一种以对象为核心的软件设计方法，支持封装、继承、多态等特性。",
+      "descriptions": [
+        "一种以对象为核心的软件设计方法，支持封装、继承、多态等特性。"
+      ]
+    },
+    {
+      "name": "对象",
+      "category": "概念",
+      "description": "将数据和对数据的操作封装在一起形成的整体，是类的实例。",
+      "descriptions": [
+        "将数据和对数据的操作封装在一起形成的整体，是类的实例。"
+      ]
+    },
+    {
+      "name": "类",
+      "category": "概念",
+      "description": "对相同类型对象进行分类、抽象后得出的共同特征和行为的定义。",
+      "descriptions": [
+        "对相同类型对象进行分类、抽象后得出的共同特征和行为的定义。"
+      ]
+    },
+    {
+      "name": "封装",
+      "category": "概念",
+      "description": "将数据和对数据的操作封装在一起，组成不可分割的整体。",
+      "descriptions": [
+        "将数据和对数据的操作封装在一起，组成不可分割的整体。"
+      ]
+    },
+    {
+      "name": "继承",
+      "category": "概念",
+      "description": "实现代码复用和设计复用的机制，子类可以继承父类的公有成员。",
+      "descriptions": [
+        "实现代码复用和设计复用的机制，子类可以继承父类的公有成员。",
+        "面向对象编程中派生类获取基类属性和方法的机制。"
+      ],
+      "evidence": "派生类继承了基类行为和属性之后",
+      "alt_descriptions": [
+        "面向对象编程中派生类获取基类属性和方法的机制。"
+      ]
+    },
+    {
+      "name": "多态",
+      "category": "概念",
+      "description": "基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+      "descriptions": [
+        "基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+        "基类的同一个方法在不同派生类对象中具有不同表现和行为的特性。"
+      ],
+      "evidence": "所谓多态（polymorphism），是指基类的同一个方法在不同派生类对象中具有不同的表现和行为。",
+      "alt_descriptions": [
+        "基类的同一个方法在不同派生类对象中具有不同表现和行为的特性。"
+      ]
+    },
+    {
+      "name": "数据成员",
+      "category": "概念",
+      "description": "创建类时用变量形式表示的对象属性。",
+      "descriptions": [
+        "创建类时用变量形式表示的对象属性。"
+      ]
+    },
+    {
+      "name": "成员方法",
+      "category": "概念",
+      "description": "创建类时用函数形式表示的对象行为。",
+      "descriptions": [
+        "创建类时用函数形式表示的对象行为。"
+      ]
+    },
+    {
+      "name": "类的成员",
+      "category": "概念",
+      "description": "成员属性和成员方法的统称。",
+      "descriptions": [
+        "成员属性和成员方法的统称。"
+      ]
+    },
+    {
+      "name": "class关键字",
+      "category": "概念",
+      "description": "Python中用于定义类的关键字。",
+      "descriptions": [
+        "Python中用于定义类的关键字。"
+      ]
+    },
+    {
+      "name": "实例化对象",
+      "category": "方法",
+      "description": "使用类创建对象的过程。",
+      "descriptions": [
+        "使用类创建对象的过程。"
+      ]
+    },
+    {
+      "name": "pass关键字",
+      "category": "概念",
+      "description": "Python关键字，表示空语句，用于占位。",
+      "descriptions": [
+        "Python关键字，表示空语句，用于占位。"
+      ]
+    },
+    {
+      "name": "self参数",
+      "category": "概念",
+      "description": "类的实例方法的第一个参数，代表将来要创建的对象本身。",
+      "descriptions": [
+        "类的实例方法的第一个参数，代表将来要创建的对象本身。"
+      ]
+    },
+    {
+      "name": "实例属性",
+      "category": "概念",
+      "description": "属于实例的数据成员，一般在构造方法中定义，以self为前缀。",
+      "descriptions": [
+        "属于实例的数据成员，一般在构造方法中定义，以self为前缀。"
+      ]
+    },
+    {
+      "name": "类属性",
+      "category": "概念",
+      "description": "属于类的数据成员，在类中所有方法之外定义。",
+      "descriptions": [
+        "属于类的数据成员，在类中所有方法之外定义。"
+      ]
+    },
+    {
+      "name": "动态增加成员",
+      "category": "方法",
+      "description": "在运行时为自定义类和对象增加新的属性和方法。",
+      "descriptions": [
+        "在运行时为自定义类和对象增加新的属性和方法。"
+      ]
+    },
+    {
+      "name": "动态删除成员",
+      "category": "方法",
+      "description": "在运行时删除自定义类和对象的成员。",
+      "descriptions": [
+        "在运行时删除自定义类和对象的成员。"
+      ]
+    },
+    {
+      "name": "混入机制",
+      "category": "概念",
+      "description": "Python动态类型特点的一种体现，允许动态为类或对象增加行为。",
+      "descriptions": [
+        "Python动态类型特点的一种体现，允许动态为类或对象增加行为。"
+      ]
+    },
+    {
+      "name": "方法",
+      "category": "概念",
+      "description": "与特定实例绑定的函数，通过对象调用时对象本身作为第一个参数隐式传递。",
+      "descriptions": [
+        "与特定实例绑定的函数，通过对象调用时对象本身作为第一个参数隐式传递。"
+      ]
+    },
+    {
+      "name": "函数",
+      "category": "概念",
+      "description": "普通函数，不具备与实例绑定的特点。",
+      "descriptions": [
+        "普通函数，不具备与实例绑定的特点。"
+      ]
+    },
+    {
+      "name": "公有方法",
+      "category": "概念",
+      "description": "可以通过对象名直接调用的方法。",
+      "descriptions": [
+        "可以通过对象名直接调用的方法。"
+      ]
+    },
+    {
+      "name": "私有方法",
+      "category": "概念",
+      "description": "名字以两个下画线开始，不能通过对象名直接调用的方法。",
+      "descriptions": [
+        "名字以两个下画线开始，不能通过对象名直接调用的方法。",
+        "以双下划线开头、在派生类中不能直接访问的方法。"
+      ],
+      "category_variants": [
+        "方法"
+      ],
+      "evidence": "私有方法在派生类中不能直接访问",
+      "alt_descriptions": [
+        "以双下划线开头、在派生类中不能直接访问的方法。"
+      ]
+    },
+    {
+      "name": "静态方法",
+      "category": "概念",
+      "description": "可以通过类名和对象名调用，但不能直接访问属于对象的成员的方法。",
+      "descriptions": [
+        "可以通过类名和对象名调用，但不能直接访问属于对象的成员的方法。"
+      ]
+    },
+    {
+      "name": "类方法",
+      "category": "概念",
+      "description": "可以通过类名和对象名调用，第一个参数为cls的方法。",
+      "descriptions": [
+        "可以通过类名和对象名调用，第一个参数为cls的方法。"
+      ]
+    },
+    {
+      "name": "抽象方法",
+      "category": "概念",
+      "description": "只能在抽象类中定义，必须在派生类中实现的方法。",
+      "descriptions": [
+        "只能在抽象类中定义，必须在派生类中实现的方法。"
+      ]
+    },
+    {
+      "name": "抽象类",
+      "category": "概念",
+      "description": "包含抽象方法的类，不能直接实例化。",
+      "descriptions": [
+        "包含抽象方法的类，不能直接实例化。"
+      ]
+    },
+    {
+      "name": "只读属性",
+      "category": "概念",
+      "description": "使用@property装饰器定义的属性，只能读取不能修改和删除。",
+      "descriptions": [
+        "使用@property装饰器定义的属性，只能读取不能修改和删除。"
+      ]
+    },
+    {
+      "name": "可读可修改可删除属性",
+      "category": "概念",
+      "description": "使用property()函数定义的属性，支持读取、修改和删除。",
+      "descriptions": [
+        "使用property()函数定义的属性，支持读取、修改和删除。"
+      ]
+    },
+    {
+      "name": "构造方法",
+      "category": "概念",
+      "description": "特殊方法__init__()，在创建对象时自动调用，用于初始化。",
+      "descriptions": [
+        "特殊方法__init__()，在创建对象时自动调用，用于初始化。",
+        "创建对象时自动调用的特殊方法，用于初始化对象。"
+      ],
+      "category_variants": [
+        "方法"
+      ],
+      "evidence": "构造方法可能会被派生类继承",
+      "alt_descriptions": [
+        "创建对象时自动调用的特殊方法，用于初始化对象。"
+      ]
+    },
+    {
+      "name": "析构方法",
+      "category": "概念",
+      "description": "特殊方法__del__()，在删除对象时自动调用，用于释放资源。",
+      "descriptions": [
+        "特殊方法__del__()，在删除对象时自动调用，用于释放资源。"
+      ]
+    },
+    {
+      "name": "运算符重载",
+      "category": "概念",
+      "description": "通过重写特殊方法实现运算符的自定义行为。",
+      "descriptions": [
+        "通过重写特殊方法实现运算符的自定义行为。",
+        "通过特殊方法使运算符作用于不同类型操作数时具有不同表现。"
+      ],
+      "category_variants": [
+        "方法"
+      ],
+      "evidence": "是通过特殊方法与运算符重载实现的",
+      "alt_descriptions": [
+        "通过特殊方法使运算符作用于不同类型操作数时具有不同表现。"
+      ]
+    },
+    {
+      "name": "特殊方法",
+      "category": "概念",
+      "description": "Python预定义的大量以双下划线开头和结尾的方法。",
+      "descriptions": [
+        "Python预定义的大量以双下划线开头和结尾的方法。"
+      ]
+    },
+    {
+      "name": "父类",
+      "category": "概念",
+      "description": "在继承关系中已有的、设计好的类，也称为基类。",
+      "descriptions": [
+        "在继承关系中已有的、设计好的类，也称为基类。"
+      ]
+    },
+    {
+      "name": "子类",
+      "category": "概念",
+      "description": "在继承关系中新设计的类，也称为派生类。",
+      "descriptions": [
+        "在继承关系中新设计的类，也称为派生类。"
+      ]
+    },
+    {
+      "name": "多继承",
+      "category": "概念",
+      "description": "Python支持一个子类继承多个父类。",
+      "descriptions": [
+        "Python支持一个子类继承多个父类。"
+      ]
+    },
+    {
+      "name": "覆盖",
+      "category": "方法",
+      "description": "在派生类中重新定义继承自基类的方法。",
+      "descriptions": [
+        "在派生类中重新定义继承自基类的方法。"
+      ]
+    },
+    {
+      "name": "单链表",
+      "category": "概念",
+      "description": "由节点组成的链式数据结构，每个节点包含数据和指向下一个节点的指针。",
+      "descriptions": [
+        "由节点组成的链式数据结构，每个节点包含数据和指向下一个节点的指针。"
+      ]
+    },
+    {
+      "name": "节点",
+      "category": "概念",
+      "description": "单链表的基本组成单元，包含数据域和指针域。",
+      "descriptions": [
+        "单链表的基本组成单元，包含数据域和指针域。"
+      ]
+    },
+    {
+      "name": "插入节点",
+      "category": "方法",
+      "description": "在链表中插入新节点的操作。",
+      "descriptions": [
+        "在链表中插入新节点的操作。"
+      ]
+    },
+    {
+      "name": "删除节点",
+      "category": "方法",
+      "description": "在链表中删除节点的操作。",
+      "descriptions": [
+        "在链表中删除节点的操作。"
+      ]
+    },
+    {
+      "name": "遍历链表",
+      "category": "方法",
+      "description": "依次访问链表中每个节点的操作。",
+      "descriptions": [
+        "依次访问链表中每个节点的操作。"
+      ]
+    },
+    {
+      "name": "稀疏矩阵",
+      "category": "概念",
+      "description": "使用字典表示和处理的二维矩阵，只存储非零元素。",
+      "descriptions": [
+        "使用字典表示和处理的二维矩阵，只存储非零元素。"
+      ]
+    },
+    {
+      "name": "字典",
+      "category": "概念",
+      "description": "Python内置数据结构，用于存储键值对。",
+      "descriptions": [
+        "Python内置数据结构，用于存储键值对。"
+      ]
+    },
+    {
+      "name": "公开方法",
+      "category": "方法",
+      "description": "在派生类中可以直接访问、也可以被覆盖的方法。",
+      "descriptions": [
+        "在派生类中可以直接访问、也可以被覆盖的方法。"
+      ],
+      "evidence": "公开方法在派生类中可以直接访问，也可以被覆盖"
+    },
+    {
+      "name": "方法覆盖",
+      "category": "方法",
+      "description": "派生类定义与基类同名的方法以改变继承来的行为。",
+      "descriptions": [
+        "派生类定义与基类同名的方法以改变继承来的行为。"
+      ],
+      "evidence": "覆盖了继承自A类的公开方法public"
+    }
+  ],
+  "all_relations": [
+    {
+      "source": "面向对象程序设计",
+      "target": "封装",
+      "type": "CONTAINS",
+      "evidence": "面向对象程序设计的一个关键性观念是将数据以及对数据的操作封装在一起",
+      "confidence": 0.9,
+      "direction_basis": "封装是面向对象程序设计的关键特性之一，属于其组成部分。"
+    },
+    {
+      "source": "面向对象程序设计",
+      "target": "继承",
+      "type": "CONTAINS",
+      "evidence": "Python完全支持了面向对象程序设计的思想，是真正面向对象的高级动态编程语言，完全支持面向对象的基本功能，如封装、继承、多态",
+      "confidence": 0.9,
+      "direction_basis": "继承是面向对象程序设计的基本功能之一。"
+    },
+    {
+      "source": "面向对象程序设计",
+      "target": "多态",
+      "type": "CONTAINS",
+      "evidence": "Python完全支持了面向对象程序设计的思想，是真正面向对象的高级动态编程语言，完全支持面向对象的基本功能，如封装、继承、多态",
+      "confidence": 0.9,
+      "direction_basis": "多态是面向对象程序设计的基本功能之一。"
+    },
+    {
+      "source": "类的成员",
+      "target": "数据成员",
+      "type": "CONTAINS",
+      "evidence": "成员属性和成员方法统称为类的成员",
+      "confidence": 0.95,
+      "direction_basis": "数据成员（成员属性）是类的成员的一种。"
+    },
+    {
+      "source": "类的成员",
+      "target": "成员方法",
+      "type": "CONTAINS",
+      "evidence": "成员属性和成员方法统称为类的成员",
+      "confidence": 0.95,
+      "direction_basis": "成员方法是类的成员的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "公有方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "公有方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "私有方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "私有方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "静态方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "静态方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "类方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "类方法是方法的一种。"
+    },
+    {
+      "source": "方法",
+      "target": "抽象方法",
+      "type": "CONTAINS",
+      "evidence": "在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类方法和抽象方法",
+      "confidence": 0.9,
+      "direction_basis": "抽象方法是方法的一种。"
+    },
+    {
+      "source": "继承",
+      "target": "多继承",
+      "type": "CONTAINS",
+      "evidence": "Python支持多继承",
+      "confidence": 0.9,
+      "direction_basis": "多继承是继承的一种形式。"
+    },
+    {
+      "source": "继承",
+      "target": "覆盖",
+      "type": "CONTAINS",
+      "evidence": "派生类继承了基类行为和属性之后，还会增加某些特定的行为和属性，同时还可能会对继承来的某些行为进行一定的改变",
+      "confidence": 0.8,
+      "direction_basis": "覆盖是继承中派生类改变继承行为的一种操作。"
+    },
+    {
+      "source": "单链表",
+      "target": "节点",
+      "type": "CONTAINS",
+      "evidence": "单链表由节点组成",
+      "confidence": 0.9,
+      "direction_basis": "节点是单链表的组成单元，但此处作为类型包含关系处理。"
+    },
+    {
+      "source": "单链表",
+      "target": "插入节点",
+      "type": "CONTAINS",
+      "evidence": "在值为3的节点后面插入值为3.5的新节点",
+      "confidence": 0.8,
+      "direction_basis": "插入节点是单链表的典型操作。"
+    },
+    {
+      "source": "单链表",
+      "target": "删除节点",
+      "type": "CONTAINS",
+      "evidence": "删除节点7后面的节点",
+      "confidence": 0.8,
+      "direction_basis": "删除节点是单链表的典型操作。"
+    },
+    {
+      "source": "单链表",
+      "target": "遍历链表",
+      "type": "CONTAINS",
+      "evidence": "遍历链表并输出每个节点的值",
+      "confidence": 0.8,
+      "direction_basis": "遍历链表是单链表的典型操作。"
+    },
+    {
+      "source": "稀疏矩阵",
+      "target": "字典",
+      "type": "RELATED_TO",
+      "evidence": "使用字典表示和处理稀疏矩阵",
+      "confidence": 0.9,
+      "direction_basis": "字典是表示稀疏矩阵的工具，工具作为source。"
+    },
+    {
+      "source": "继承",
+      "target": "多态",
+      "type": "PRECEDES",
+      "evidence": "派生类继承了基类行为和属性之后，还会增加某些特定的行为和属性，同时还可能会对继承来的某些行为进行一定的改变，这都是多态的表现形式。",
+      "confidence": 0.9,
+      "direction_basis": "文本表明多态建立在继承基础上，学习多态前需掌握继承。"
+    },
+    {
+      "source": "继承",
+      "target": "构造方法",
+      "type": "CONTAINS",
+      "evidence": "构造方法可能会被派生类继承",
+      "confidence": 0.85,
+      "direction_basis": "构造方法是继承机制中的典型操作，继承包含构造方法的继承。"
+    },
+    {
+      "source": "继承",
+      "target": "私有方法",
+      "type": "CONTAINS",
+      "evidence": "私有方法在派生类中不能直接访问",
+      "confidence": 0.85,
+      "direction_basis": "私有方法是继承中讨论的方法类型，继承包含私有方法的继承规则。"
+    },
+    {
+      "source": "继承",
+      "target": "公开方法",
+      "type": "CONTAINS",
+      "evidence": "公开方法在派生类中可以直接访问，也可以被覆盖",
+      "confidence": 0.85,
+      "direction_basis": "公开方法是继承中讨论的方法类型，继承包含公开方法的继承规则。"
+    },
+    {
+      "source": "方法覆盖",
+      "target": "多态",
+      "type": "APPLIES_TO",
+      "evidence": "派生类，覆盖了基类的show()方法",
+      "confidence": 0.8,
+      "direction_basis": "方法覆盖是实现多态的一种手段，方法覆盖应用于多态。"
+    },
+    {
+      "source": "运算符重载",
+      "target": "多态",
+      "type": "APPLIES_TO",
+      "evidence": "是通过特殊方法与运算符重载实现的",
+      "confidence": 0.8,
+      "direction_basis": "运算符重载用于实现多态，运算符重载应用于多态。"
+    }
+  ]
+}

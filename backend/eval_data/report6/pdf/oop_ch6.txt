@@ -1,0 +1,701 @@
+第 章 面向对象程序设计
+6
+《 程序设计，董付国》
+Python
+面向对象程序设计
+§ 面向对象程序设计（Object Oriented Programming，OOP）主要针对大型软件设计而
+提出，使得软件设计更加灵活，能够更好地支持代码复用和设计复用，并且使得代码具
+有更好的可读性和可扩展性。
+§ 面向对象程序设计的一条基本原则是计算机程序由多个能够起到子程序作用的单元或对
+象组合而成，大大地降低了软件开发的难度。
+§ 面向对象程序设计的一个关键性观念是将数据以及对数据的操作封装在一起，组成一个
+相互依存、不可分割的整体，即对象（或称实例）。对于相同类型的对象进行分类、抽
+象后，得出共同的特征和行为而形成类，面向对象程序设计的关键就是如何合理地定义
+和组织这些类以及类之间的关系。
+2
+面向对象程序设计
+§ Python完全支持了面向对象程序设计的思想，是真正面向对象的高级动态编程语言，完
+全支持面向对象的基本功能，如封装、继承、多态以及对基类方法的覆盖或重写。
+§ Python中对象的概念很广泛，Python中的一切内容都可以称为对象，除了数字、字符串、
+列表、元组、字典、集合、range对象、zip对象等等，函数也是对象，类也是对象。
+§ 创建类时用变量形式表示的对象属性称为数据成员，用函数形式表示的对象行为称为成
+员方法，成员属性和成员方法统称为类的成员。
+3
+§ Python使用 class关键字来定义类， class关键字之后是一个空格，然后是类的
+名字，再然后是一个冒号，最后换行并定义类的内部实现。
+§ 类名的首字母一般要大写，当然也可以按照自己的习惯定义类名，但一般推荐
+参考惯例来命名，并在整个系统的设计和实现中保持风格一致，这一点对于团
+队合作尤其重要。
+§ 定义类时如果不指定基类，则默认为 object。
+class Car:
+def infor(self):
+print(" This is a car ")
+4
+n 定义了类之后，可以用来实例化对象，并通过“对象名 .成员”的方式来访问
+其中的数据成员或成员方法。
+car = Car()
+car.infor()
+n 可以使用内置函数 isinstance()来测试一个对象是否为某个类的实例。
+isinstance(car, Car) # True
+isinstance(car, str) # False
+5
+n Python关键字“ pass”表示空语句，可以用在类和函数的定义中或者选择结构
+中。当暂时没有确定如何实现功能，或者为以后的软件升级预留空间，或者其
+他类型功能时，可以使用该关键字来“占位”。
+class A:
+pass
+def demo():
+pass
+if 5>3:
+pass
+6
+§ 类的所有实例方法都必须至少有一个名为 self的参数，并且必须是方法的第一
+个形参（如果有多个形参的话）， 参数代表将来要创建的对象本身。
+self
+§ 在类的实例方法中访问实例属性时需要以 self为前缀。
+§ 在外部通过对象调用对象方法时并不需要传递这个参数，如果在外部通过类调
+用对象方法则需要显式为 参数传递一个该类的对象。
+self
+7
+n 在 Python中，在类中定义实例方法时将第一个参数定义为 self只是一个习惯，
+而实际上不必须使用 这个名字，尽管如此，建议编写代码时仍以 作为
+self self
+方法的第一个参数名字。
+>>> class A:
+def __init__(hahaha, v):
+hahaha.value = v
+def show(hahaha):
+print(hahaha.value)
+>>> a = A(3)
+>>> a.show()
+3
+8
+§ 属于实例的数据成员一般是指在构造方法 __init__()中定义的，定义和使用时
+必须以 作为前缀；属于类的数据成员是在类中所有方法之外定义的。
+self
+§ 在主程序中（或类的外部），实例属性属于实例 (对象 )，只能通过对象名访问；
+类属性属于类，可以通过类名或对象名都可以访问。
+§ 在实例方法中可以调用该实例的其他方法，也可以访问类属性以及实例属性。
+9
+§ 在 Python中，可以动态地为自定义类和对象增加或删除成员，这一点是和很
+多面向对象程序设计语言不同的，也是 动态类型特点的一种重要体现。
+Python
+10
+class Car:
+price = 100000 # 定义类属性
+def __init__(self, c):
+self.color = c # 定义实例属性
+car1 = Car('Red') # 实例化对象
+car2 = Car('Blue')
+print(car1.color, Car.price) # 查看实例属性和类属性的值
+Car.price = 110000 # 修改类属性
+Car.name = 'QQ' # 动态增加类属性
+car1.color = 'Yellow' # 修改实例属性
+print(car2.color, Car.price, Car.name)
+print(car1.color, Car.price, Car.name)
+11
+import types
+def setSpeed(self, s):
+self.speed = s
+car1.setSpeed = types.MethodType(setSpeed, car1) # 动态增加成员方法
+car1.setSpeed(50) # 调用成员方法
+print(car1.speed)
+12
+类型的动态性使得我们可以动态为自定义类及其对象增加新的属性和
+• Python
+行为，俗称混入（ ）机制，这在大型项目开发中会非常方便和实用。
+mixin
+例如系统中的所有用户分类非常复杂，不同用户组具有不同的行为和权限，并
+•
+且可能会经常改变。这时候我们可以独立地定义一些行为，然后根据需要来为
+不同的用户设置相应的行为能力。
+13
+>>> import types
+>>> class Person(object):
+def __init__(self, name):
+assert isinstance(name, str), 'name must be string'
+self.name = name
+>>> def sing(self):
+print(self.name+' can sing.')
+>>> def walk(self):
+print(self.name+' can walk.')
+>>> def eat(self):
+print(self.name+' can eat.')
+14
+>>> zhang = Person('zhang')
+>>> zhang.sing() # 用户不具有该行为
+AttributeError: 'Person' object has no attribute 'sing'
+>>> zhang.sing = types.MethodType(sing, zhang) # 动态增加一个新行为
+>>> zhang.sing()
+zhang can sing.
+>>> zhang.walk()
+AttributeError: 'Person' object has no attribute 'walk'
+>>> zhang.walk = types.MethodType(walk, zhang)
+>>> zhang.walk()
+zhang can walk.
+>>> del zhang.walk # 删除用户行为
+>>> zhang.walk()
+AttributeError: 'Person' object has no attribute 'walk'
+15
+n 在 Python中，函数和方法是有区别的。方法一般指与特定实例绑定的函数，通
+过对象调用方法时，对象本身将被作为第一个参数隐式传递过去，普通函数并
+不具备这个特点。
+16
+>>> class Demo:
+pass
+>>> t = Demo()
+>>> def test(self, v):
+self.value = v
+>>> t.test = test
+>>> t.test # 普通函数
+<function test at 0x00000000034B7EA0>
+>>> t.test(t, 3) # 必须为self参数传值
+>>> t.test = types.MethodType(test, t)
+>>> t.test # 绑定的方法
+<bound method test of <__main__.Demo object at 0x000000000074F9E8>>
+>>> t.test(5) # 不需要为self参数传值
+17
+补充：在 中，变量并不直接存储值，而是存储值的引用。列表、元组、
+• Python
+字典、集合以及其他容器类对象中的元素也是存储值的引用。对象中的成员也
+是存储的引用。
+自定义类的数据成员是该类所有对象共有的，既可以通过类访问，也可以通过
+•
+该类任意对象进行访问。
+18
+如果通过类把成员的值进行了修改，该类对象都能得到体现。然而，如果通过
+•
+其中某个对象修改了 的值，不会影响类和该类其他对象。
+value
+ü 修改 t1.value的值之后， t1.value不再共享类的数据成员。
+ü 修改 T.value之后，不影响已改变的 t1.value，并且 t2.value仍然共享类的数据
+成员。
+19
+当类成员 为列表 时，相应的一系列修改之后，内存布局如图，不
+• value [1,2,3]
+管是通过类还是通过该类的对象，只要使用列表自身的原地修改方法或者下标
+的形式，修改的都是同一个列表。
+20
+自定义类中的方法也遵守同样的规则。
+•
+21
+§ 在 IDLE、 Spyder、 PyCharm等 Python开发环境中，在对象或类名后面加上一
+个圆点“ ”，稍等一秒钟则会自动列出其所有公开成员，模块也具有同样的
+.
+用法。
+§ 如果在圆点“ .”后面再加一个下划线，则会列出该对象、类或模块的所有成
+员，包括私有成员。
+22
+n 在 Python中，以下划线开头的变量名和方法名有特殊的含义，尤其是在类
+的定义中。
+ _xxx：以单下画线开头受保护成员，默认情况下模块中这类成员无法使用from module
+import *导入；
+ __xxx__：前后各两个下画线，表示系统预定义的特殊成员，不能随意增加，只能按需
+进行覆盖；
+ __xxx：私有成员，只有类对象自己能访问，子类对象不能直接访问这个成员，但在对象
+外部可以通过“对象名._类名__xxx”这样的特殊方式来访问。
+v 注意： Python中不存在严格意义上的私有成员。
+23
+• 在程序中，下画线可以作为匿名变量来使用，往往用于语法上需要一个变量但
+实际上并不需要关心该变量的值的场合。
+div, _ = divmod(2024, 20) # 只关心整商，不关心余数
+for _ in range(3): # for循环中不使用循环变量
+print('only a test')
+data = [(1,2,3), (1,2,3,4,5,6), (1,2,3,4,5,6,7)]
+for a, b, *_ in data: # 收集第3个以及后面的值但不使用
+print(a, b)
+24
+§ 在类中定义的方法可以粗略分为无大类：公有方法、私有方法、静态方法、类
+方法和抽象方法。
+ü 私有方法的名字以两个下画线“__”开始，每个对象都有自己的公有方法和私有方法，
+在这两类方法中可以访问属于类和对象的成员；
+ü 公有方法通过对象名直接调用，私有方法不能通过对象名直接调用，只能在属于对象的
+方法中通过self调用或在外部通过Python支持的特殊方式来调用。
+ü 如果通过类名来调用属于对象的公有方法，需要显式为该方法的self参数传递一个对象
+名，用来明确指定访问哪个对象的数据成员。
+25
+ü 静态方法和类方法都可以通过类名和对象名调用，但不能直接访问属于对象的成员，只
+能访问属于类的成员。
+ü 静态方法可以没有参数。
+ü 一般将cls作为类方法的第一个参数名称，但也可以使用其他的名字作为参数，并且在
+调用类方法时不需要为该参数传递值。
+26
+>>> class Root:
+__total = 0
+def __init__(self, v): # 构造方法
+self.__value = v
+Root.__total += 1
+def show(self): # 普通实例方法
+print('self.__value:', self.__value)
+print('Root.__total:', Root.__total)
+@classmethod # 修饰器，声明类方法
+def classShowTotal(cls): # 类方法
+print(cls.__total)
+@staticmethod # 修饰器，声明静态方法
+def staticShowTotal(): # 静态方法
+print(Root.__total)
+27
+>>> r = Root(3)
+>>> r.classShowTotal() # 通过对象来调用类方法
+1
+>>> r.staticShowTotal() # 通过对象来调用静态方法
+1
+>>> r.show()
+self.__value: 3
+Root.__total: 1
+>>> rr = Root(5)
+>>> Root.classShowTotal() # 通过类名调用类方法
+2
+>>> Root.staticShowTotal() # 通过类名调用静态方法
+2
+28
+>>> Root.show() # 试图通过类名直接调用实例方法，失败
+TypeError: unbound method show() must be called with Root instance as
+first argument (got nothing instead)
+>>> Root.show(r) # 但是可以通过这种方法来调用方法并访问实例成员
+self.__value: 3
+Root.__total: 2
+>>> Root.show(rr) # 通过类名调用实例方法时为self参数显式传递对象名
+self.__value: 5
+Root.__total: 2
+29
+抽象方法只能在抽象类中定义，抽象类不能实例化，这样做时会报错并提示
+•
+“
+TypeError: Can't instantiate abstract class AbstractBase with abstract
+”，必须创建抽象类的派生类并实现全部抽象方法之后才能对派生类
+method...
+进行实例化。
+30
+import abc
+class AbstractBase(abc.ABC): # 创建抽象类
+def __init__(self, v):
+self.value = v
+def modify(self, v):
+self.value = v
+@abc.abstractmethod
+def show(self): # 定义抽象方法，可以没有具体实现
+pass
+class Child(AbstractBase): # 继承抽象类，创建派生类
+def show(self): # 实现抽象方法
+print(self.value)
+c = Child(3) # 实例化，创建派生类的对象
+c.modify(5)
+31
+c.show()
+属性
+6.3
+n 只读属性
+>>> class Test:
+def __init__(self, value):
+self.__value = value
+@property
+def value(self): # 只读，无法修改和删除
+return self.__value
+32
+属性
+6.3
+>>> t = Test(3)
+>>> t.value
+3
+>>> t.value = 5 # 只读属性不允许修改值
+AttributeError: can't set attribute
+>>> t.v=5 # 动态增加新成员
+>>> t.v
+5
+>>> del t.v # 动态删除成员
+>>> del t.value # 试图删除对象属性，失败
+AttributeError: can't delete attribute
+>>> t.value
+3
+33
+属性
+6.3
+n 可读、可修改、可删除的属性。
+>>> class Test:
+def __init__(self, value):
+self.__value = value
+def __get(self):
+return self.__value
+def __set(self, v):
+self.__value = v
+def __del(self):
+del self.__value
+value = property(__get, __set, __del)
+def show(self):
+print(self.__value)
+34
+属性
+6.3
+>>> t = Test(3)
+>>> t.show()
+3
+>>> t.value
+3
+>>> t.value = 5
+>>> t.show()
+5
+>>> t.value
+5
+35
+属性
+6.3
+>>> del t.value # 删除属性
+>>> t.value # 对应的私有数据成员已删除
+AttributeError: 'Test' object has no attribute '_Test__value'
+>>> t.show()
+AttributeError: 'Test' object has no attribute '_Test__value'
+>>> t.value = 1 # 为对象动态增加属性和对应的私有数据成员
+>>> t.show()
+1
+>>> t.value
+1
+36
+§ Python类有大量的特殊方法，其中比较常用的是构造方法和析构方法，除此
+之外， 还预定义了大量的特殊方法，运算符重载就是通过重写特殊方
+Python
+法实现的。
+ü Python中类的构造方法是__init__()，一般用来为数据成员设置初值或进行其他必要的初始化工作，在创
+建对象时被自动调用和执行。如果用户没有设计构造方法，Python将提供一个默认的构造方法用来进行
+必要的初始化工作。
+ü Python中类的析构方法是__del__()，一般用来释放对象占用的资源，在Python删除对象和收回对象空
+间时被自动调用和执行。如果用户没有编写析构方法，Python将提供一个默认的析构方法进行必要的清
+理工作。
+37
+特殊成员 功能说明
+__new__() 类的静态方法，可用于确定是否要创建对象
+__init__() 构造方法，创建对象时自动调用
+__del__() 析构方法，删除对象时自动调用
+__add__() +
+__sub__() -
+__mul__() *
+__truediv__() /
+__floordiv__() //
+__mod__() %
+__pow__() **
+__eq__()、 __ne__()、__lt__()、 __le__()、 ==、 !=、<、 <=、>、 >=
+__gt__()、 __ge__()
+__lshift__()、__rshift__() <<、>>
+__and__()、__or__()、__invert__()、__xor__() &、|、~、^
+38
+特殊成员 功能说明
+__iadd__()、__isub__() +=、-=，很多其他运算符也有与之对应的复合赋值分隔符
+__pos__() 一元运算符+，正号
+__neg__() 一元运算符-，负号
+__contains__ () 与成员测试运算符in对应
+__radd__()、__rsub__ 反射加法、反射减法，一般与普通加法和减法具有相同的功能，但操作数的位置或顺序
+相反，很多其他运算符也有与之对应的反射运算符
+__abs__() 与内置函数abs()对应
+__bool__() 与内置函数bool()对应，要求该方法必须返回True或False
+__bytes__() 与内置函数bytes()对应，要求必须返回字节串
+__complex__() 与内置函数complex()对应，要求该方法必须返回复数
+__dir__() 与内置函数dir()对应
+__divmod__() 与内置函数divmod()对应
+__float__() 与内置函数float()对应，要求该该方法必须返回实数
+__hash__() 与内置函数hash()对应，要求必须返回整数，同时实现了特殊方法__hash__()和
+__eq__()的类的对象为可哈希对象，这两个方法设置为None时为不可哈希对象
+__int__() 与内置函数int()对应，要求该方法必须返回整数
+39
+特殊成员 功能说明
+__iter__() 与内置函数iter()对应，实现了该方法的类的对象为可迭代对象
+__len__() 与内置函数len()对应，要求必须返回整数
+__next__() 与内置函数next()对应，同时实现了该方法和__iter__()方法的类的对象为迭代器
+__reduce__() 提供对reduce()函数的支持
+__reversed__() 与内置函数reversed()对应
+__round__() 对内置函数round()对应
+__str__() 与内置函数str()对应，要求该方法必须返回str类型的数据
+__repr__() 与内置函数repr()对应，要求该方法必须返回str类型的数据
+__getitem__() 按照索引获取值
+__setitem__() 按照索引赋值
+__delattr__() 删除对象的指定属性
+__getattr__() 获取对象指定属性的值，对应成员访问运算符“.”
+特殊成员 功能说明
+__getattribute__() 获取对象指定属性的值，如果同时定义了该方法与__getattr__()，那么__getattr__()将不
+会被调用，除非在__getattribute__()中显式调用__getattr__()或者抛出AttributeError
+异常
+__setattr__() 设置对象指定属性的值
+__base__ 该类的基类
+__class__ 返回对象所属的类
+__dict__ 对象所包含的属性与值的字典
+__subclasses__() 返回该类的所有子类
+__call__() 包含该特殊方法的类的对象为可调用对象
+__get__() 定义了这三个特殊方法中任何一个的类称作描述符（descriptor），描述符对象一般作为其
+__set__() 他类的属性来使用，这三个方法分别在获取属性、修改属性值或删除属性时被调用
+__delete__()
+析构方法调用的时机
+•
+class Language:
+def __init__(self, name):
+self.name = name
+print(f'对象{self.name}被创建。')
+def __del__(self):
+print(f'对象{self.name}被释放。')
+python = Language('Python')
+go = Language('go')
+42
+class Language:
+def __init__(self, name):
+self.name = name
+print(f'对象{self.name}被创建。')
+def __del__(self):
+print(f'对象{self.name}被释放。')
+python = Language('Python')
+go = Language('go')
+del python
+del go 43
+class Language:
+def __init__(self, name):
+self.name = name
+print(f'对象{self.name}被创建。')
+def __del__(self):
+print(f'对象{self.name}被释放。')
+python = Language('Python')
+python_2 = python
+del python
+44
+class Language:
+def __init__(self, name):
+self.name = name
+print(f'对象{self.name}被创建。')
+def __del__(self):
+print(f'对象{self.name}被释放。')
+def func():
+python = Language('Python')
+go = Language('go')
+func()
+45
+>>> from MyArray import MyArray
+>>> x = MyArray(1, 2, 3, 4, 5, 6)
+>>> y = MyArray(6, 5, 4, 3, 2, 1)
+>>> len(x)
+6
+>>> x + 5
+[6, 7, 8, 9, 10, 11]
+>>> x * 3
+[3, 6, 9, 12, 15, 18]
+>>> x.dot(y)
+56
+>>> x.append(7)
+>>> x
+[1, 2, 3, 4, 5, 6, 7]
+>>> x.dot(y)
+The size must be equal.
+>>> x[9] = 8
+46
+Index type error or out of range
+>>> x / 2
+[0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5]
+>>> x // 2
+[0, 1, 1, 2, 2, 3, 3]
+>>> x % 3
+[1, 2, 0, 1, 2, 0, 1]
+>>> x[2]
+3
+>>> 'a' in x
+False
+>>> 3 in x
+True
+>>> x < y
+True
+>>> x = MyArray(1, 2, 3, 4, 5, 6)
+>>> x + y
+[7, 7, 7, 7, 7, 7]
+47
+案例精选
+6.4.2
+§ 补充例题 4 自定义常量类。
+ü 每个类和对象都有一个叫作__dict__的字典成员，用来记录该类或对象所拥有的属
+性。当访问对象属性时，首先会尝试在对象属性中查找，如果找不到就到类属性中
+查找。Python内置类型不支持属性的增加，用户自定义类及其对象一般支持属性和
+方法的增加与删除。
+ü 在下面定义的常量类中，要求对象的成员必须大写，所有成员的值不能相同，并且
+不允许修改已有成员的值。
+48
+案例精选
+6.4.2
+>>> class Constants:
+def __setattr__(self, name, value):
+assert name not in self.__dict__, 'You can not modify '+name
+assert name.isupper(), 'Constant should be uppercase.'
+assert value not in self.__dict__.values(), 'Value already exists.'
+self.__dict__[name] = value
+>>> t = Constants()
+>>> t.R = 3 # 成员不存在，允许添加
+>>> t.R = 4 # 成员已存在，不允许修改
+AssertionError: You can not modify R
+>>> t.G = 4
+>>> t.g = 4 # 成员必须大写
+AssertionError: Constant should be uppercase.
+>>> t.B = 4 # 成员的值不允许相同
+AssertionError: Value already exists.
+49
+案例精选
+6.4.2
+• 补充例题5 使用字典模拟稀疏矩阵。 def __add_sub__(self, anotherSparseMatrix, op): def __mul_matrix(self, anotherMatrix):
+code\使用字典表示和处理稀疏矩阵.py '''两个矩阵的加法与减法运算通用代码''' '''两个矩阵相乘''' def __pow__(self, n):
+class SparseMatrix: if self.__size != anotherSparseMatrix.__size: result = SparseMatrix()
+'''矩阵与数字的幂运算'''
+'''使用字典表示和处理二维稀疏矩阵 raise Exception('尺寸不一致') result.__size = (self.__size[0], anotherMatrix.__size[1]) return self.__mul_div_truediv_pow(n, '**')
+字典的键表示位置，值表示系数矩阵中该位置的值''' result = SparseMatrix() for r in range(self.__size[0]): def __str__(self):
+result.__size = self.__size # 获取self矩阵中第r行，列表 return 'SparseMatrix size:'+str(self.__size)+\
+def __init__(self, lstMatrix=None): positions = tuple(self.__data.keys())+\ row = [0] * self.__size[1] ' NonZero elements:'+str(len(self.__data))
+'''把二维列表转换为稀疏矩阵，或创建空矩阵''' tuple(anotherSparseMatrix.__data.keys()) for pos, value in self.__data.items():
+self.__data = {} for pos in positions: if pos[0] == r: __repr__ = __str__
+if lstMatrix is None: result.__data[pos] = eval(str(self.__data.get(pos, 0))+op+ row[pos[1]] = value
+self.__size = (0, 0) str(anotherSparseMatrix.__data.get(pos, 0))) for c in range(anotherMatrix.__size[1]):
+return return result # 获取anotherMatrix矩阵中第c列，列表
+if len(set((len(row) for row in lstMatrix))) != 1: col = [0] * anotherMatrix.__size[0]
+raise Exception('所有行必须长度一样') def __add__(self, anotherSparseMatrix): for pos, value in anotherMatrix.__data.items():
+# 使用字典保存原始矩阵中非0元素的位置和值 '''两个矩阵相加''' if pos[1] == c:
+for rIndex, row in enumerate(lstMatrix): return self.__add_sub__(anotherSparseMatrix, '+') col[pos[0]] = value
+for cIndex, value in enumerate(row): # 计算两个列表的内积，作为矩阵相乘结果中的一个元素
+value = float(value) def __sub__(self, anotherSparseMatrix): dot = sum(map(lambda x,y: x*y, row, col))
+if value != 0: '''两个矩阵相减''' result.__data[(r,c)] = dot
+self.__data[(rIndex,cIndex)] = value return self.__add_sub__(anotherSparseMatrix, '-') return result
+# 矩阵尺寸
+self.__size = (len(lstMatrix), len(lstMatrix[0])) def __mul_div_truediv_pow(self, n, op): def __mul__(self, n):
+'''矩阵与标量乘法、整除、真除运算通用代码''' '''乘法，根据参数的不同，调用不同的运算'''
+def toMatrix(self): result = SparseMatrix() if isinstance(n, (int, float)):
+'''转换为矩阵''' result.__size = self.__size return self.__mul_div_truediv_pow(n, '*')
+# 创建全0矩阵 for position, value in self.__data.items(): elif isinstance(n, SparseMatrix) and self.__size[1]==n.__size[0]:
+matrix = [] result.__data[position] = eval(str(value)+op+str(n)) return self.__mul_matrix(n)
+for _ in range(self.__size[0]): return result else:
+matrix.append([0]*self.__size[1]) raise Exception('数据类型不正确，或尺寸不合适')
+# 修改非0元素
+for position, value in self.__data.items(): def __floordiv__(self, n):
+r, c = position '''矩阵与数字整除'''
+matrix[r][c] = value assert isinstance(n, int), '除数必须为整数'
+return '['+'\n '.join(map(str, matrix))+']' return self.__mul_div_truediv_pow(n, '//')
+50
+def __truediv__(self, n):
+'''真除'''
+return self.__mul_div_truediv_pow(n, '/')
+# 头节点
+案例精选
+6.4.2 head = Node(0)
+p = head
+for i in range(1, 10):
+# 依次生成10个数字，并创建相应的节点
+# 把节点连接到链表的尾部
+n = Node(i)
+p.insertAfter(n)
+• 补充例题7 单链表。 p = n
+code\单链表.py
+p = head
+# 遍历链表节点，在值为3的节点后面插入值为3.5的新节点
+class Node:
+while True:
+'''节点结构'''
+if p.data == 3:
+def __init__(self, data, nextNode=None):
+p.insertAfter(Node(3.5))
+# 设置当前节点的值和指向下一个节点的指针 break
+self.data = data else:
+self.next = nextNode p = p.next
+p = head
+def insertAfter(self, node):
+# 删除节点7后面的节点
+# 在当前节点后面插入新节点
+while True:
+node.next = self.next
+if p.data == 7:
+self.next = node p.deleteAfter()
+break
+def deleteAfter(self): p = p.next
+# 删除当前节点后面的节点 if p.next == None:
+break
+if self.next == None:
+return
+p = head
+p = self.next # 遍历链表并输出每个节点的值
+self.next = p.next while True:
+p.next = None print(p.data)
+del p if p.next == None: 51
+break
+p = p.next
+n 继承是用来实现代码复用和设计复用的机制，是面向对象程序设计的重要特性之一。设
+计一个新类时，如果可以继承一个已有的设计良好的类然后进行二次开发，无疑会大幅
+度减少开发工作量。
+n 在继承关系中，已有的、设计好的类称为父类或基类，新设计的类称为子类或派生类。
+派生类可以继承父类的公有成员，但是不能继承其私有成员。如果需要在派生类中调用
+基类的方法，可以使用内置函数super()或者通过“基类名.方法名()”的方式来实现这一
+目的。
+n Python支持多继承，如果父类中有相同的方法名，而在子类中使用时没有指定父类名，
+则Python解释器将从左向右按顺序进行搜索。
+52
+n 构造方法、私有方法以及普通公开方法的继承原理。
+>>> class A(object):
+def __init__(self): # 构造方法可能会被派生类继承
+self.__private()
+self.public()
+def __private(self): # 私有方法在派生类中不能直接访问
+print('__private() method in A')
+def public(self): # 公开方法在派生类中可以直接访问，也可以被覆盖
+print('public() method in A')
+53
+>>> class B(A): # 类B没有构造方法，会继承基类的构造方法
+def __private(self): # 这不会覆盖基类的私有方法
+print('__private() method in B')
+def public(self): # 覆盖了继承自A类的公开方法public
+print('public() method in B')
+>>> b = B() # 自动调用基类构造方法
+__private() method in A
+public() method in B
+>>> dir(b) # 基类和派生类的私有方法访问方式不一样
+['_A__private', '_B__private', '__class__', ...]
+54
+>>> class C(A):
+def __init__(self): # 显式定义构造方法
+self.__private() # 这里调用的是类C的私有方法
+self.public()
+def __private(self):
+print('__private() method in C')
+def public(self):
+print('public() method in C')
+>>> c = C() # 调用类C的构造方法
+__private() method in C
+public() method in C
+>>> dir(c)
+['_A__private', '_C__private', '__class__', ...]
+55
+56
+多态原理与实现
+6.6
+所谓多态（ ），是指基类的同一个方法在不同派生类对象中具
+• polymorphism
+有不同的表现和行为。派生类继承了基类行为和属性之后，还会增加某些特定
+的行为和属性，同时还可能会对继承来的某些行为进行一定的改变，这都是多
+态的表现形式。
+大多数运算符可以作用于多种不同类型的操作数，并且对于不同类型
+• Python
+的操作数往往有不同的表现，这本身就是多态，是通过特殊方法与运算符重载
+实现的。
+57
+多态原理与实现
+6.6
+>>> class Animal(object): # 定义基类
+def show(self):
+print('I am an animal.')
+>>> class Cat(Animal): # 派生类，覆盖了基类的show()方法
+def show(self):
+print('I am a cat.')
+>>> class Dog(Animal): # 派生类
+def show(self):
+print('I am a dog.')
+>>> class Tiger(Animal): # 派生类
+def show(self):
+print('I am a tiger.')
+>>> class Test(Animal): # 派生类，没有覆盖基类的show()方法
+pass
+58
+多态原理与实现
+6.6
+>>> x = [item() for item in (Animal, Cat, Dog, Tiger, Test)]
+>>> for item in x: # 遍历基类和派生类对象并调用show()方法
+item.show()
+I am an animal.
+I am a cat.
+I am a dog.
+I am a tiger.
+I am an animal.
+59

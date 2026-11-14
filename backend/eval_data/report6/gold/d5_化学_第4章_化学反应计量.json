@@ -1,0 +1,547 @@
+[
+  {
+    "text_id": "化学_化学反应计量_第4章",
+    "source": "data/sample_docs/openstax_化学/第4章_化学反应计量_中文版.txt",
+    "entities": [
+      {
+        "name": "化学方程式",
+        "category": "概念",
+        "description": "化学变化和物理变化的符号表示，用化学式、系数和箭头表示反应物与生成物及其相对数量。"
+      },
+      {
+        "name": "配平化学方程式",
+        "category": "方法",
+        "description": "调整系数使反应物和生成物中每种元素的原子数相等，从而使方程式符合物质守恒定律的过程。"
+      },
+      {
+        "name": "物质守恒定律",
+        "category": "定理",
+        "description": "化学反应前后各元素原子数守恒的基本定律，是化学方程式必须配平的原因。"
+      },
+      {
+        "name": "观察法配平",
+        "category": "方法",
+        "description": "通过比较方程式两侧各元素原子数目并逐步调整系数来配平化学方程式的简单方法。"
+      },
+      {
+        "name": "分子方程式",
+        "category": "概念",
+        "description": "所有反应物和产物均以中性物质（完整化学式）表示、不明确显示离子的化学方程式。"
+      },
+      {
+        "name": "完全离子方程式",
+        "category": "概念",
+        "description": "所有溶解的离子反应物和产物（包括旁观离子）均以其解离离子的化学式明确表示的化学方程式。"
+      },
+      {
+        "name": "净离子方程式",
+        "category": "概念",
+        "description": "消去旁观离子后，仅表示实际发生化学或物理变化的溶解离子反应物和产物的化学方程式。"
+      },
+      {
+        "name": "旁观离子",
+        "category": "概念",
+        "description": "在反应过程中不发生化学或物理变化，但其存在是维持电荷中性所必需的离子。"
+      },
+      {
+        "name": "化学反应分类",
+        "category": "方法",
+        "description": "通过识别常见的反应活性模式，将化学反应归入沉淀、酸碱和氧化还原三大常见类型的方法。"
+      },
+      {
+        "name": "沉淀反应",
+        "category": "概念",
+        "description": "溶解的物质发生反应生成一种或多种不溶性固体产物（沉淀）的反应。"
+      },
+      {
+        "name": "溶解性规则",
+        "category": "概念",
+        "description": "总结离子化合物在水中溶解性的经验规律（表4.1），用于预测沉淀反应所生成的固体。"
+      },
+      {
+        "name": "酸碱反应",
+        "category": "概念",
+        "description": "氢离子H+从一种化学物种转移到另一种化学物种的反应。"
+      },
+      {
+        "name": "中和反应",
+        "category": "概念",
+        "description": "反应物为酸和碱、产物通常为盐和水的特定类型的酸碱反应。"
+      },
+      {
+        "name": "酸",
+        "category": "概念",
+        "description": "溶于水后产生水合氢离子H3O+的物质。"
+      },
+      {
+        "name": "碱",
+        "category": "概念",
+        "description": "溶于水后产生氢氧根离子OH−的物质。"
+      },
+      {
+        "name": "强酸",
+        "category": "概念",
+        "description": "溶于水时几乎完全与水反应产生水合氢离子的酸，如HCl、HNO3、H2SO4。"
+      },
+      {
+        "name": "弱酸",
+        "category": "概念",
+        "description": "溶于水时仅与水部分反应、产生相对少量水合氢离子的酸，如乙酸。"
+      },
+      {
+        "name": "强碱",
+        "category": "概念",
+        "description": "溶于水时完全解离（或完全反应）产生氢氧根离子的碱，如NaOH、Ba(OH)2。"
+      },
+      {
+        "name": "弱碱",
+        "category": "概念",
+        "description": "溶于水时仅部分与水反应产生氢氧根离子的碱，如氨。"
+      },
+      {
+        "name": "氧化还原反应",
+        "category": "概念",
+        "description": "参与反应的一种或多种元素氧化数发生变化的反应，涉及电子的转移或偏移。"
+      },
+      {
+        "name": "氧化",
+        "category": "概念",
+        "description": "元素因失去电子（或氧化数升高）而发生的过程。"
+      },
+      {
+        "name": "还原",
+        "category": "概念",
+        "description": "元素因获得电子（或氧化数降低）而发生的过程。"
+      },
+      {
+        "name": "氧化数",
+        "category": "概念",
+        "description": "（也称氧化态）若化合物为离子化合物，元素每个原子在化合物中所会具有的电荷。"
+      },
+      {
+        "name": "氧化剂",
+        "category": "概念",
+        "description": "使另一种物质被氧化、同时自身被还原的物质。"
+      },
+      {
+        "name": "还原剂",
+        "category": "概念",
+        "description": "使另一物质被还原、而自身在此过程中被氧化的物质。"
+      },
+      {
+        "name": "半反应",
+        "category": "概念",
+        "description": "表示氧化还原反应中每种反应物去向（失去还是获得电子）的方程式。"
+      },
+      {
+        "name": "半反应法",
+        "category": "方法",
+        "description": "通过写出并逐步配平氧化、还原两个半反应再相加，来配平氧化还原反应方程式的系统方法。"
+      },
+      {
+        "name": "燃烧反应",
+        "category": "概念",
+        "description": "还原剂（燃料）和氧化剂剧烈反应、以火焰形式产生大量热（通常还有光）的氧化还原反应子类。"
+      },
+      {
+        "name": "化学计量学",
+        "category": "概念",
+        "description": "化学反应中反应物与生成物量之间的定量关系，可由配平的化学方程式描述。"
+      },
+      {
+        "name": "化学计量因子",
+        "category": "概念",
+        "description": "由配平化学方程式中系数的比值导出的因子，用于计算反应物和生成物的量之间的关系。"
+      },
+      {
+        "name": "限量反应物",
+        "category": "概念",
+        "description": "以低于反应化学计量所需量存在的反应物，其完全消耗限制了产物的生成量。"
+      },
+      {
+        "name": "过量反应物",
+        "category": "概念",
+        "description": "以高于反应化学计量所需量存在的反应物，反应完成后会有剩余。"
+      },
+      {
+        "name": "实际产率",
+        "category": "概念",
+        "description": "反应实践中实际获得的产物量，通常低于理论产率。"
+      },
+      {
+        "name": "理论产率",
+        "category": "概念",
+        "description": "按照配平化学方程式的化学计量关系计算，反应可能产生的最大产物量。"
+      },
+      {
+        "name": "百分产率",
+        "category": "公式",
+        "description": "反应实现理论产率程度的度量：百分产率 = 实际产率 / 理论产率 × 100%。"
+      },
+      {
+        "name": "绿色化学",
+        "category": "概念",
+        "description": "有目的地设计化学产品和工艺，以最大限度地减少有害物质使用和废物产生的哲学方法。"
+      },
+      {
+        "name": "原子经济性",
+        "category": "公式",
+        "description": "衡量合成工艺理论效率的指标：原子经济性 = 产物的质量 / 反应物的质量 × 100%。"
+      },
+      {
+        "name": "定量分析",
+        "category": "概念",
+        "description": "测定样品中某物质的量或浓度的化学分析方法。"
+      },
+      {
+        "name": "滴定分析",
+        "category": "方法",
+        "description": "通过测量完全与样品中分析物反应所需的滴定剂溶液体积，来计算分析物浓度的定量化学分析方法。"
+      },
+      {
+        "name": "滴定剂",
+        "category": "概念",
+        "description": "滴定分析中含有已知浓度、可与分析物反应的物质的溶液。"
+      },
+      {
+        "name": "分析物",
+        "category": "概念",
+        "description": "滴定分析中样品溶液里待测浓度或量的化学物种。"
+      },
+      {
+        "name": "等当点",
+        "category": "概念",
+        "description": "滴定中滴定剂恰好为分析物提供化学计量量、与分析物完全反应的点。"
+      },
+      {
+        "name": "终点",
+        "category": "概念",
+        "description": "滴定中实际测得的滴定剂体积，此时样品溶液的外观或其他性质产生符合等当量预期的变化。"
+      },
+      {
+        "name": "重量分析",
+        "category": "方法",
+        "description": "通过物理或化学过程将待测物从样品中分离，并对待测物、反应产物或样品进行质量测定的定量化学分析方法。"
+      },
+      {
+        "name": "燃烧分析",
+        "category": "方法",
+        "description": "通过收集并称量燃烧产生的气态产物（CO2和H2O）来测定化合物元素组成的重量分析技术。"
+      }
+    ],
+    "relations": [
+      {
+        "source": "化学方程式",
+        "target": "配平化学方程式",
+        "type": "RELATED_TO",
+        "evidence": "配平方程式是指其系数使反应物和生成物中每种元素的原子数相等的方程式。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "物质守恒定律",
+        "target": "配平化学方程式",
+        "type": "PRECEDES",
+        "evidence": "这是方程式必须满足的要求，以符合物质守恒定律。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "观察法配平",
+        "target": "配平化学方程式",
+        "type": "APPLIES_TO",
+        "evidence": "配平的化学方程式通常可以通过一种相当简单的方法从某些化学反应的定性描述中推导出来，这种方法称为观察法配平。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "分子方程式",
+        "target": "完全离子方程式",
+        "type": "PRECEDES",
+        "evidence": "因此，溶于水的离子化合物更真实地表示为解离的离子，在本例中为",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "完全离子方程式",
+        "target": "净离子方程式",
+        "type": "PRECEDES",
+        "evidence": "它们可以从方程式中消去，得到更简洁的表示，称为净离子方程式",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "旁观离子",
+        "target": "净离子方程式",
+        "type": "RELATED_TO",
+        "evidence": "这些旁观离子——即维持电荷中性所必需的离子——在此过程中既没有发生化学变化也没有发生物理变化",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "化学反应分类",
+        "target": "沉淀反应",
+        "type": "CONTAINS",
+        "evidence": "本模块将介绍三种最常见的化学反应类型：沉淀反应、酸碱反应和氧化还原反应。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "化学反应分类",
+        "target": "酸碱反应",
+        "type": "CONTAINS",
+        "evidence": "本模块将介绍三种最常见的化学反应类型：沉淀反应、酸碱反应和氧化还原反应。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "化学反应分类",
+        "target": "氧化还原反应",
+        "type": "CONTAINS",
+        "evidence": "本模块将介绍三种最常见的化学反应类型：沉淀反应、酸碱反应和氧化还原反应。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "溶解性规则",
+        "target": "沉淀反应",
+        "type": "APPLIES_TO",
+        "evidence": "为了预测沉淀反应所生成固体的种类，只需参考已观察到的许多离子化合物的溶解性规律（表4.1）。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "酸碱反应",
+        "target": "中和反应",
+        "type": "CONTAINS",
+        "evidence": "中和反应是一种特定类型的酸碱反应，其中反应物是酸和碱（但不是水），产物通常是盐和水",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "酸",
+        "target": "碱",
+        "type": "RELATED_TO",
+        "evidence": "酸碱反应是指氢离子H+从一种化学物种转移到另一种化学物种的反应。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "酸",
+        "target": "强酸",
+        "type": "CONTAINS",
+        "evidence": "以这种方式完全反应的酸称为强酸",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "酸",
+        "target": "弱酸",
+        "type": "CONTAINS",
+        "evidence": "数量多得多的化合物表现为弱酸，仅与水部分反应",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "碱",
+        "target": "强碱",
+        "type": "CONTAINS",
+        "evidence": "这些碱以及在水中的完全解离的其他氢氧化物被认为是强碱。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "碱",
+        "target": "弱碱",
+        "type": "CONTAINS",
+        "evidence": "这些化合物仅部分反应，因此被归类为弱碱。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "氧化还原反应",
+        "target": "燃烧反应",
+        "type": "CONTAINS",
+        "evidence": "氧化还原反应可分为几个子类，包括燃烧反应",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "氧化数",
+        "target": "氧化还原反应",
+        "type": "PRECEDES",
+        "evidence": "利用氧化数的概念，人们建立了氧化还原反应的全面定义。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "氧化",
+        "target": "还原",
+        "type": "RELATED_TO",
+        "evidence": "这类反应中，电子的得失定义了发生的互补过程",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "氧化剂",
+        "target": "还原剂",
+        "type": "RELATED_TO",
+        "evidence": "钠充当还原剂（reductant），因为它向氯提供电子（或还原氯）。同样，氯充当氧化剂（oxidant）",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "半反应法",
+        "target": "氧化还原反应",
+        "type": "APPLIES_TO",
+        "evidence": "通过半反应法配平氧化还原反应",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "半反应",
+        "target": "半反应法",
+        "type": "RELATED_TO",
+        "evidence": "以称为半反应的方式表示每种反应物的去向",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "配平化学方程式",
+        "target": "化学计量学",
+        "type": "PRECEDES",
+        "evidence": "配平的化学方程式可用于描述反应的化学计量关系（反应物与生成物量之间的关系）。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "化学计量学",
+        "target": "化学计量因子",
+        "type": "RELATED_TO",
+        "evidence": "配平方程式中的系数用于推导化学计量因子，从而可以计算所需的数量。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "限量反应物",
+        "target": "过量反应物",
+        "type": "RELATED_TO",
+        "evidence": "这种物质就是限量反应物，而另一种物质则是过量反应物。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "限量反应物",
+        "target": "理论产率",
+        "type": "PRECEDES",
+        "evidence": "当使用低于化学计量量的反应物进行反应时，生成产物的量将由限量反应物决定。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "实际产率",
+        "target": "理论产率",
+        "type": "RELATED_TO",
+        "evidence": "获得的产物量称为实际产率，由于多种原因，它通常低于理论产率。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "百分产率",
+        "target": "实际产率",
+        "type": "RELATED_TO",
+        "evidence": "百分产率 = 实际产率 / 理论产率 × 100%",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "百分产率",
+        "target": "理论产率",
+        "type": "RELATED_TO",
+        "evidence": "反应实现其理论产率的程度通常表示为其百分产率",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "原子经济性",
+        "target": "百分产率",
+        "type": "RELATED_TO",
+        "evidence": "尽管原子经济性的定义乍看之下与百分产率的定义非常相似",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "绿色化学",
+        "target": "原子经济性",
+        "type": "RELATED_TO",
+        "evidence": "十二原则中有一条专门旨在最大化合成化学产品工艺的效率。一个工艺的原子经济性是衡量这种效率的指标",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "定量分析",
+        "target": "滴定分析",
+        "type": "CONTAINS",
+        "evidence": "一种定量化学分析方法，涉及测量完全与样品中分析物反应所需的反应物溶液的体积",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "定量分析",
+        "target": "重量分析",
+        "type": "CONTAINS",
+        "evidence": "重量法是用于定量化学分析的最早技术，至今仍是现代化学实验室中的重要工具。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "重量分析",
+        "target": "燃烧分析",
+        "type": "CONTAINS",
+        "evidence": "烃类及相关化合物的元素组成可以通过一种称为燃烧分析的重量法来确定。",
+        "core": false,
+        "confidence": 0.9
+      },
+      {
+        "source": "滴定分析",
+        "target": "滴定剂",
+        "type": "RELATED_TO",
+        "evidence": "将含有已知浓度某物质的溶液（滴定剂）逐次增量加入到含有待测浓度物质的样品溶液（分析物）中",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "滴定分析",
+        "target": "分析物",
+        "type": "RELATED_TO",
+        "evidence": "将含有已知浓度某物质的溶液（滴定剂）逐次增量加入到含有待测浓度物质的样品溶液（分析物）中",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "滴定分析",
+        "target": "等当点",
+        "type": "RELATED_TO",
+        "evidence": "测量与分析物完全反应所需的滴定剂溶液体积（滴定的等当点）即可计算分析物浓度。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "等当点",
+        "target": "终点",
+        "type": "RELATED_TO",
+        "evidence": "实际测得的滴定剂体积称为终点。正确设计良好的滴定方法通常能确保等当点与终点之间的差异可以忽略不计。",
+        "core": true,
+        "confidence": 0.9
+      },
+      {
+        "source": "沉淀反应",
+        "target": "重量分析",
+        "type": "RELATED_TO",
+        "evidence": "同样常见的是重量分析技术，其中待测物经历本章前面所述类型的沉淀反应。",
+        "core": false,
+        "confidence": 0.9
+      }
+    ]
+  }
+]

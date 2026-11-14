@@ -1,0 +1,101 @@
+{
+  "kind": "manual_sampling_accuracy",
+  "generated_at": "2026-11-14T11:53:46",
+  "definition": "准确率 = 判定为正确的条数 / 已完成判定的条数（Precision 口径，测不出漏抽）",
+  "threshold": 0.7,
+  "relation": {
+    "label": "关系",
+    "total_rows": 100,
+    "judged": 100,
+    "unjudged": 0,
+    "correct": 100,
+    "accuracy": 1.0,
+    "ci95": [
+      0.963,
+      1.0
+    ],
+    "pass_70": true,
+    "by_group": {
+      "APPLIES_TO": {
+        "judged": 13,
+        "correct": 13,
+        "accuracy": 1.0,
+        "ci95": [
+          0.7719,
+          1.0
+        ]
+      },
+      "CONTAINS": {
+        "judged": 39,
+        "correct": 39,
+        "accuracy": 1.0,
+        "ci95": [
+          0.9103,
+          1.0
+        ]
+      },
+      "PRECEDES": {
+        "judged": 8,
+        "correct": 8,
+        "accuracy": 1.0,
+        "ci95": [
+          0.6756,
+          1.0
+        ]
+      },
+      "RELATED_TO": {
+        "judged": 40,
+        "correct": 40,
+        "accuracy": 1.0,
+        "ci95": [
+          0.9124,
+          1.0
+        ]
+      }
+    },
+    "error_breakdown": {}
+  },
+  "entity": {
+    "label": "实体",
+    "total_rows": 50,
+    "judged": 50,
+    "unjudged": 0,
+    "correct": 50,
+    "accuracy": 1.0,
+    "ci95": [
+      0.9286,
+      1.0
+    ],
+    "pass_70": true,
+    "by_group": {
+      "公式": {
+        "judged": 5,
+        "correct": 5,
+        "accuracy": 1.0,
+        "ci95": [
+          0.5655,
+          1.0
+        ]
+      },
+      "方法": {
+        "judged": 9,
+        "correct": 9,
+        "accuracy": 1.0,
+        "ci95": [
+          0.7008,
+          1.0
+        ]
+      },
+      "概念": {
+        "judged": 36,
+        "correct": 36,
+        "accuracy": 1.0,
+        "ci95": [
+          0.9036,
+          1.0
+        ]
+      }
+    },
+    "error_breakdown": {}
+  }
+}

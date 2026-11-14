@@ -1,0 +1,3348 @@
+{
+  "evaluation_version": "2.0",
+  "relation_types": [
+    "PRECEDES",
+    "CONTAINS",
+    "RELATED_TO",
+    "APPLIES_TO"
+  ],
+  "entity_categories": [
+    "概念",
+    "定理",
+    "公式",
+    "方法"
+  ],
+  "metric_policy": {
+    "relation_primary": "precision_on_Full_set__recall_on_Core_set",
+    "relation_core": "conservative_lower_bound",
+    "relation_full": "strict_match_against_full_gold",
+    "entity_primary": "name_exact_after_frozen_normalization",
+    "relation_pair": "auxiliary_only_ignore_type_and_direction",
+    "confidence_is_not_accuracy": true,
+    "accuracy_source": "manual_gold_annotation"
+  },
+  "normalization": {
+    "version": "n1",
+    "aliases": {
+      "满二叉树": "完美二叉树",
+      "广度优先搜索": "广度优先遍历",
+      "深度优先搜索": "深度优先遍历",
+      "BFS": "广度优先遍历",
+      "DFS": "深度优先遍历",
+      "节点的高度": "高度",
+      "节点高度": "高度",
+      "二叉树的高度": "高度",
+      "节点的深度": "深度",
+      "AVL树": "AVL 树",
+      "旋转操作": "旋转",
+      "先右旋再左旋": "先右旋后左旋",
+      "先左旋再右旋": "先左旋后右旋",
+      "插入操作": "插入节点",
+      "删除操作": "删除节点",
+      "查找操作": "查找节点",
+      "索引映射公式": "映射公式",
+      "数组表示法": "数组表示",
+      "顺序存储结构": "顺序表",
+      "链式存储结构": "链表"
+    },
+    "aliases_sha256": "960bb3117d7fe9ef6f22280d318bf6ede3f746f58df3a8ed8e147f5f6c9dfad5"
+  },
+  "gold_sha256": {
+    "化学_化学反应计量_第4章": "1ab4fa9850aa06e61c421fc58aaa6f0709df1dea19e83f33cf27ae65322f287f"
+  },
+  "runs": 3,
+  "warnings": [],
+  "stability": {
+    "entity_precision": {
+      "mean": 0.7348,
+      "std": 0.0544,
+      "min": 0.6774,
+      "max": 0.7857,
+      "values": [
+        0.6774,
+        0.7414,
+        0.7857
+      ]
+    },
+    "entity_recall": {
+      "mean": 0.9556,
+      "std": 0.0223,
+      "min": 0.9333,
+      "max": 0.9778,
+      "values": [
+        0.9333,
+        0.9556,
+        0.9778
+      ]
+    },
+    "entity_f1": {
+      "mean": 0.8304,
+      "std": 0.0433,
+      "min": 0.785,
+      "max": 0.8713,
+      "values": [
+        0.785,
+        0.835,
+        0.8713
+      ]
+    },
+    "entity_category_accuracy": {
+      "mean": 0.8915,
+      "std": 0.0137,
+      "min": 0.881,
+      "max": 0.907,
+      "values": [
+        0.881,
+        0.907,
+        0.8864
+      ]
+    },
+    "relation_primary_precision": {
+      "mean": 0.7741,
+      "std": 0.0473,
+      "min": 0.7436,
+      "max": 0.8286,
+      "values": [
+        0.7436,
+        0.75,
+        0.8286
+      ]
+    },
+    "relation_primary_recall": {
+      "mean": 0.8267,
+      "std": 0.0833,
+      "min": 0.76,
+      "max": 0.92,
+      "values": [
+        0.8,
+        0.92,
+        0.76
+      ]
+    },
+    "relation_primary_f1": {
+      "mean": 0.7966,
+      "std": 0.0279,
+      "min": 0.7708,
+      "max": 0.8263,
+      "values": [
+        0.7708,
+        0.8263,
+        0.7928
+      ]
+    },
+    "relation_core_precision": {
+      "mean": 0.5261,
+      "std": 0.0153,
+      "min": 0.5128,
+      "max": 0.5429,
+      "values": [
+        0.5128,
+        0.5227,
+        0.5429
+      ]
+    },
+    "relation_core_recall": {
+      "mean": 0.8267,
+      "std": 0.0833,
+      "min": 0.76,
+      "max": 0.92,
+      "values": [
+        0.8,
+        0.92,
+        0.76
+      ]
+    },
+    "relation_core_f1": {
+      "mean": 0.6417,
+      "std": 0.0221,
+      "min": 0.625,
+      "max": 0.6667,
+      "values": [
+        0.625,
+        0.6667,
+        0.6333
+      ]
+    },
+    "relation_full_precision": {
+      "mean": 0.7741,
+      "std": 0.0473,
+      "min": 0.7436,
+      "max": 0.8286,
+      "values": [
+        0.7436,
+        0.75,
+        0.8286
+      ]
+    },
+    "relation_full_recall": {
+      "mean": 0.7778,
+      "std": 0.0592,
+      "min": 0.7436,
+      "max": 0.8462,
+      "values": [
+        0.7436,
+        0.8462,
+        0.7436
+      ]
+    },
+    "relation_full_f1": {
+      "mean": 0.7742,
+      "std": 0.0271,
+      "min": 0.7436,
+      "max": 0.7952,
+      "values": [
+        0.7436,
+        0.7952,
+        0.7838
+      ]
+    },
+    "relation_pair_precision": {
+      "mean": 0.8251,
+      "std": 0.0482,
+      "min": 0.7857,
+      "max": 0.8788,
+      "values": [
+        0.8108,
+        0.7857,
+        0.8788
+      ]
+    },
+    "relation_pair_recall": {
+      "mean": 0.7863,
+      "std": 0.0534,
+      "min": 0.7436,
+      "max": 0.8462,
+      "values": [
+        0.7692,
+        0.8462,
+        0.7436
+      ]
+    },
+    "relation_pair_f1": {
+      "mean": 0.8033,
+      "std": 0.0128,
+      "min": 0.7895,
+      "max": 0.8148,
+      "values": [
+        0.7895,
+        0.8148,
+        0.8056
+      ]
+    },
+    "relation_macro_f1_active": {
+      "mean": 0.7819,
+      "std": 0.0387,
+      "min": 0.7443,
+      "max": 0.8216,
+      "values": [
+        0.7443,
+        0.7797,
+        0.8216
+      ]
+    },
+    "direction_error_rate": {
+      "mean": 0.0598,
+      "std": 0.0159,
+      "min": 0.0455,
+      "max": 0.0769,
+      "values": [
+        0.0769,
+        0.0455,
+        0.0571
+      ]
+    }
+  },
+  "entity_frequency": {
+    "中和反应": 3,
+    "净离子方程式": 3,
+    "分子方程式": 3,
+    "分析物": 3,
+    "化学反应计量学": 3,
+    "化学方程式": 3,
+    "化学计量因子": 3,
+    "化学计量学": 3,
+    "半反应": 3,
+    "半反应法": 3,
+    "单置换反应": 3,
+    "原子经济性": 3,
+    "反应物": 3,
+    "完全离子方程式": 3,
+    "定量分析": 3,
+    "实际产率": 3,
+    "弱碱": 3,
+    "弱酸": 3,
+    "强碱": 3,
+    "强酸": 3,
+    "指示剂": 3,
+    "旁观离子": 3,
+    "歧化反应": 3,
+    "氧化": 3,
+    "氧化剂": 3,
+    "氧化数": 3,
+    "氧化还原反应": 3,
+    "沉淀反应": 3,
+    "溶解性规则": 3,
+    "滴定分析": 3,
+    "滴定剂": 3,
+    "燃烧分析": 3,
+    "燃烧反应": 3,
+    "物质守恒定律": 3,
+    "理论产率": 3,
+    "生成物": 3,
+    "百分产率": 3,
+    "盐": 3,
+    "等当点": 3,
+    "系数": 3,
+    "终点": 3,
+    "绿色化学": 3,
+    "观察法配平": 3,
+    "过量反应物": 3,
+    "还原": 3,
+    "还原剂": 3,
+    "配平化学方程式": 3,
+    "酸碱反应": 3,
+    "重量分析": 3,
+    "限量反应物": 3,
+    "反应计量学": 2,
+    "实验式": 2,
+    "溶解度": 2,
+    "不溶性物质": 1,
+    "假说": 1,
+    "化学反应分类": 1,
+    "双置换反应": 1,
+    "发酵": 1,
+    "可溶性物质": 1,
+    "复分解反应": 1,
+    "抗酸剂": 1,
+    "摩尔浓度": 1,
+    "氢氧根离子": 1,
+    "水": 1,
+    "水合氢离子": 1,
+    "沉淀": 1,
+    "碱": 1,
+    "科学定律": 1,
+    "科学方法": 1,
+    "科学理论": 1,
+    "腌制": 1,
+    "观察法": 1,
+    "酸": 1
+  },
+  "relation_frequency": {
+    "分子方程式 -[PRECEDES]-> 完全离子方程式": 3,
+    "化学计量学 -[RELATED_TO]-> 化学计量因子": 3,
+    "半反应 -[RELATED_TO]-> 半反应法": 3,
+    "半反应法 -[APPLIES_TO]-> 氧化还原反应": 3,
+    "原子经济性 -[RELATED_TO]-> 百分产率": 3,
+    "完全离子方程式 -[PRECEDES]-> 净离子方程式": 3,
+    "定量分析 -[CONTAINS]-> 滴定分析": 3,
+    "定量分析 -[CONTAINS]-> 重量分析": 3,
+    "实际产率 -[RELATED_TO]-> 理论产率": 3,
+    "旁观离子 -[RELATED_TO]-> 净离子方程式": 3,
+    "氧化 -[RELATED_TO]-> 还原": 3,
+    "氧化剂 -[RELATED_TO]-> 还原剂": 3,
+    "氧化数 -[PRECEDES]-> 氧化还原反应": 3,
+    "氧化还原反应 -[CONTAINS]-> 单置换反应": 3,
+    "氧化还原反应 -[CONTAINS]-> 歧化反应": 3,
+    "氧化还原反应 -[CONTAINS]-> 燃烧反应": 3,
+    "沉淀反应 -[RELATED_TO]-> 重量分析": 3,
+    "溶解性规则 -[APPLIES_TO]-> 沉淀反应": 3,
+    "滴定分析 -[RELATED_TO]-> 分析物": 3,
+    "滴定分析 -[RELATED_TO]-> 指示剂": 3,
+    "滴定分析 -[RELATED_TO]-> 滴定剂": 3,
+    "滴定分析 -[RELATED_TO]-> 等当点": 3,
+    "物质守恒定律 -[PRECEDES]-> 配平化学方程式": 3,
+    "百分产率 -[RELATED_TO]-> 实际产率": 3,
+    "百分产率 -[RELATED_TO]-> 理论产率": 3,
+    "等当点 -[RELATED_TO]-> 终点": 3,
+    "绿色化学 -[RELATED_TO]-> 原子经济性": 3,
+    "观察法配平 -[APPLIES_TO]-> 配平化学方程式": 3,
+    "配平化学方程式 -[PRECEDES]-> 化学计量学": 3,
+    "限量反应物 -[PRECEDES]-> 理论产率": 3,
+    "限量反应物 -[RELATED_TO]-> 过量反应物": 3,
+    "滴定分析 -[RELATED_TO]-> 终点": 2,
+    "酸碱反应 -[CONTAINS]-> 中和反应": 2,
+    "重量分析 -[CONTAINS]-> 燃烧分析": 2,
+    "中和反应 -[RELATED_TO]-> 盐": 1,
+    "假说 -[PRECEDES]-> 科学理论": 1,
+    "化学反应分类 -[CONTAINS]-> 氧化还原反应": 1,
+    "化学反应分类 -[CONTAINS]-> 沉淀反应": 1,
+    "化学反应分类 -[CONTAINS]-> 酸碱反应": 1,
+    "双置换反应 -[RELATED_TO]-> 复分解反应": 1,
+    "实际产率 -[PRECEDES]-> 百分产率": 1,
+    "实际产率 -[RELATED_TO]-> 百分产率": 1,
+    "滴定分析 -[APPLIES_TO]-> 定量分析": 1,
+    "燃烧分析 -[APPLIES_TO]-> 实验式": 1,
+    "燃烧分析 -[CONTAINS]-> 重量分析": 1,
+    "理论产率 -[PRECEDES]-> 百分产率": 1,
+    "理论产率 -[RELATED_TO]-> 百分产率": 1,
+    "科学方法 -[CONTAINS]-> 假说": 1,
+    "科学方法 -[CONTAINS]-> 科学定律": 1,
+    "科学方法 -[CONTAINS]-> 科学理论": 1,
+    "腌制 -[RELATED_TO]-> 发酵": 1,
+    "观察法 -[APPLIES_TO]-> 配平化学方程式": 1,
+    "重量分析 -[APPLIES_TO]-> 定量分析": 1
+  },
+  "error_taxonomy_across_runs": {
+    "fabricated": {
+      "mean": 6.6667,
+      "values": [
+        7,
+        9,
+        4
+      ]
+    },
+    "direction_reversed": {
+      "mean": 2.3333,
+      "values": [
+        3,
+        2,
+        2
+      ]
+    },
+    "type_confused": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "synonym_split": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "missed_core": {
+      "mean": 4.3333,
+      "values": [
+        5,
+        2,
+        6
+      ]
+    },
+    "invalid_endpoint": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "invalid_relation_type": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dangling_endpoint": {
+      "mean": 6.6667,
+      "values": [
+        11,
+        8,
+        1
+      ]
+    },
+    "duplicate": {
+      "mean": 28.6667,
+      "values": [
+        35,
+        25,
+        26
+      ]
+    },
+    "low_confidence": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "dropped_total": {
+      "mean": 35.3333,
+      "values": [
+        46,
+        33,
+        27
+      ]
+    },
+    "pred_raw_total": {
+      "mean": 74.6667,
+      "values": [
+        85,
+        77,
+        62
+      ]
+    },
+    "pred_total": {
+      "mean": 39.3333,
+      "values": [
+        39,
+        44,
+        35
+      ]
+    },
+    "core_total": {
+      "mean": 25.0,
+      "values": [
+        25,
+        25,
+        25
+      ]
+    },
+    "full_total": {
+      "mean": 39.0,
+      "values": [
+        39,
+        39,
+        39
+      ]
+    }
+  },
+  "reconciliation": {
+    "identity": "pred_raw_total == pred_total + dropped_total",
+    "raw_source": "extractor",
+    "balanced_all_runs": true,
+    "per_run": [
+      {
+        "raw": 85,
+        "scored": 39,
+        "dropped": 46,
+        "reconciles": true
+      },
+      {
+        "raw": 77,
+        "scored": 44,
+        "dropped": 33,
+        "reconciles": true
+      },
+      {
+        "raw": 62,
+        "scored": 35,
+        "dropped": 27,
+        "reconciles": true
+      }
+    ]
+  },
+  "summary": {
+    "entity_micro": {
+      "tp": 42,
+      "fp": 20,
+      "fn": 3,
+      "precision": 0.6774,
+      "recall": 0.9333,
+      "f1": 0.785
+    },
+    "entity_macro": {
+      "precision": 0.6774,
+      "recall": 0.9333,
+      "f1": 0.785
+    },
+    "entity_category_accuracy": 0.881,
+    "relation_primary_micro": {
+      "pred_total": 39,
+      "core_total": 25,
+      "full_total": 39,
+      "hit_core": 20,
+      "hit_full": 29,
+      "precision": 0.7436,
+      "recall": 0.8,
+      "f1": 0.7708
+    },
+    "relation_core_micro": {
+      "tp": 20,
+      "fp": 19,
+      "fn": 5,
+      "precision": 0.5128,
+      "recall": 0.8,
+      "f1": 0.625
+    },
+    "relation_full_micro": {
+      "tp": 29,
+      "fp": 10,
+      "fn": 10,
+      "precision": 0.7436,
+      "recall": 0.7436,
+      "f1": 0.7436
+    },
+    "relation_strict_micro": {
+      "tp": 29,
+      "fp": 10,
+      "fn": 10,
+      "precision": 0.7436,
+      "recall": 0.7436,
+      "f1": 0.7436
+    },
+    "relation_strict_macro_by_document": {
+      "precision": 0.7436,
+      "recall": 0.7436,
+      "f1": 0.7436
+    },
+    "relation_pair_auxiliary_micro": {
+      "tp": 30,
+      "fp": 7,
+      "fn": 9,
+      "precision": 0.8108,
+      "recall": 0.7692,
+      "f1": 0.7895
+    },
+    "relation_by_type": {
+      "PRECEDES": {
+        "gold_total": 6,
+        "pred_total": 8,
+        "micro": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        },
+        "mean_document_f1": 0.8571,
+        "active_document_f1": 0.8571
+      },
+      "CONTAINS": {
+        "gold_total": 12,
+        "pred_total": 7,
+        "micro": {
+          "tp": 4,
+          "fp": 3,
+          "fn": 8,
+          "precision": 0.5714,
+          "recall": 0.3333,
+          "f1": 0.4211
+        },
+        "mean_document_f1": 0.4211,
+        "active_document_f1": 0.4211
+      },
+      "RELATED_TO": {
+        "gold_total": 18,
+        "pred_total": 20,
+        "micro": {
+          "tp": 16,
+          "fp": 4,
+          "fn": 2,
+          "precision": 0.8,
+          "recall": 0.8889,
+          "f1": 0.8421
+        },
+        "mean_document_f1": 0.8421,
+        "active_document_f1": 0.8421
+      },
+      "APPLIES_TO": {
+        "gold_total": 3,
+        "pred_total": 4,
+        "micro": {
+          "tp": 3,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        },
+        "mean_document_f1": 0.8571,
+        "active_document_f1": 0.8571
+      }
+    },
+    "relation_macro_f1": {
+      "all_types": 0.7443,
+      "active_types": 0.7443,
+      "active_type_names": [
+        "PRECEDES",
+        "CONTAINS",
+        "RELATED_TO",
+        "APPLIES_TO"
+      ]
+    },
+    "direction_error_rate": 0.0769,
+    "error_taxonomy_totals": {
+      "fabricated": 7,
+      "direction_reversed": 3,
+      "type_confused": 0,
+      "synonym_split": 0,
+      "invalid_endpoint": 0,
+      "invalid_relation_type": 0,
+      "dangling_endpoint": 11,
+      "duplicate": 35,
+      "low_confidence": 0,
+      "missed_core": 5,
+      "pred_raw_total": 85,
+      "pred_total": 39,
+      "dropped_total": 46,
+      "core_total": 25,
+      "full_total": 39
+    },
+    "accounting": {
+      "raw_source": "extractor",
+      "raw": 85,
+      "scored": 39,
+      "dropped": 46,
+      "balanced": true
+    }
+  },
+  "per_run_summaries": [
+    {
+      "entity_micro": {
+        "tp": 42,
+        "fp": 20,
+        "fn": 3,
+        "precision": 0.6774,
+        "recall": 0.9333,
+        "f1": 0.785
+      },
+      "entity_macro": {
+        "precision": 0.6774,
+        "recall": 0.9333,
+        "f1": 0.785
+      },
+      "entity_category_accuracy": 0.881,
+      "relation_primary_micro": {
+        "pred_total": 39,
+        "core_total": 25,
+        "full_total": 39,
+        "hit_core": 20,
+        "hit_full": 29,
+        "precision": 0.7436,
+        "recall": 0.8,
+        "f1": 0.7708
+      },
+      "relation_core_micro": {
+        "tp": 20,
+        "fp": 19,
+        "fn": 5,
+        "precision": 0.5128,
+        "recall": 0.8,
+        "f1": 0.625
+      },
+      "relation_full_micro": {
+        "tp": 29,
+        "fp": 10,
+        "fn": 10,
+        "precision": 0.7436,
+        "recall": 0.7436,
+        "f1": 0.7436
+      },
+      "relation_strict_micro": {
+        "tp": 29,
+        "fp": 10,
+        "fn": 10,
+        "precision": 0.7436,
+        "recall": 0.7436,
+        "f1": 0.7436
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.7436,
+        "recall": 0.7436,
+        "f1": 0.7436
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 30,
+        "fp": 7,
+        "fn": 9,
+        "precision": 0.8108,
+        "recall": 0.7692,
+        "f1": 0.7895
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 6,
+          "pred_total": 8,
+          "micro": {
+            "tp": 6,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          },
+          "mean_document_f1": 0.8571,
+          "active_document_f1": 0.8571
+        },
+        "CONTAINS": {
+          "gold_total": 12,
+          "pred_total": 7,
+          "micro": {
+            "tp": 4,
+            "fp": 3,
+            "fn": 8,
+            "precision": 0.5714,
+            "recall": 0.3333,
+            "f1": 0.4211
+          },
+          "mean_document_f1": 0.4211,
+          "active_document_f1": 0.4211
+        },
+        "RELATED_TO": {
+          "gold_total": 18,
+          "pred_total": 20,
+          "micro": {
+            "tp": 16,
+            "fp": 4,
+            "fn": 2,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421
+          },
+          "mean_document_f1": 0.8421,
+          "active_document_f1": 0.8421
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 4,
+          "micro": {
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          },
+          "mean_document_f1": 0.8571,
+          "active_document_f1": 0.8571
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.7443,
+        "active_types": 0.7443,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0769,
+      "error_taxonomy_totals": {
+        "fabricated": 7,
+        "direction_reversed": 3,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 11,
+        "duplicate": 35,
+        "low_confidence": 0,
+        "missed_core": 5,
+        "pred_raw_total": 85,
+        "pred_total": 39,
+        "dropped_total": 46,
+        "core_total": 25,
+        "full_total": 39
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 85,
+        "scored": 39,
+        "dropped": 46,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 43,
+        "fp": 15,
+        "fn": 2,
+        "precision": 0.7414,
+        "recall": 0.9556,
+        "f1": 0.835
+      },
+      "entity_macro": {
+        "precision": 0.7414,
+        "recall": 0.9556,
+        "f1": 0.835
+      },
+      "entity_category_accuracy": 0.907,
+      "relation_primary_micro": {
+        "pred_total": 44,
+        "core_total": 25,
+        "full_total": 39,
+        "hit_core": 23,
+        "hit_full": 33,
+        "precision": 0.75,
+        "recall": 0.92,
+        "f1": 0.8263
+      },
+      "relation_core_micro": {
+        "tp": 23,
+        "fp": 21,
+        "fn": 2,
+        "precision": 0.5227,
+        "recall": 0.92,
+        "f1": 0.6667
+      },
+      "relation_full_micro": {
+        "tp": 33,
+        "fp": 11,
+        "fn": 6,
+        "precision": 0.75,
+        "recall": 0.8462,
+        "f1": 0.7952
+      },
+      "relation_strict_micro": {
+        "tp": 33,
+        "fp": 11,
+        "fn": 6,
+        "precision": 0.75,
+        "recall": 0.8462,
+        "f1": 0.7952
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.75,
+        "recall": 0.8462,
+        "f1": 0.7952
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 33,
+        "fp": 9,
+        "fn": 6,
+        "precision": 0.7857,
+        "recall": 0.8462,
+        "f1": 0.8148
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 6,
+          "pred_total": 7,
+          "micro": {
+            "tp": 6,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.8571,
+            "recall": 1.0,
+            "f1": 0.9231
+          },
+          "mean_document_f1": 0.9231,
+          "active_document_f1": 0.9231
+        },
+        "CONTAINS": {
+          "gold_total": 12,
+          "pred_total": 13,
+          "micro": {
+            "tp": 8,
+            "fp": 5,
+            "fn": 4,
+            "precision": 0.6154,
+            "recall": 0.6667,
+            "f1": 0.64
+          },
+          "mean_document_f1": 0.64,
+          "active_document_f1": 0.64
+        },
+        "RELATED_TO": {
+          "gold_total": 18,
+          "pred_total": 18,
+          "micro": {
+            "tp": 16,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.8889,
+            "recall": 0.8889,
+            "f1": 0.8889
+          },
+          "mean_document_f1": 0.8889,
+          "active_document_f1": 0.8889
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 6,
+          "micro": {
+            "tp": 3,
+            "fp": 3,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667
+          },
+          "mean_document_f1": 0.6667,
+          "active_document_f1": 0.6667
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.7797,
+        "active_types": 0.7797,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0455,
+      "error_taxonomy_totals": {
+        "fabricated": 9,
+        "direction_reversed": 2,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 8,
+        "duplicate": 25,
+        "low_confidence": 0,
+        "missed_core": 2,
+        "pred_raw_total": 77,
+        "pred_total": 44,
+        "dropped_total": 33,
+        "core_total": 25,
+        "full_total": 39
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 77,
+        "scored": 44,
+        "dropped": 33,
+        "balanced": true
+      }
+    },
+    {
+      "entity_micro": {
+        "tp": 44,
+        "fp": 12,
+        "fn": 1,
+        "precision": 0.7857,
+        "recall": 0.9778,
+        "f1": 0.8713
+      },
+      "entity_macro": {
+        "precision": 0.7857,
+        "recall": 0.9778,
+        "f1": 0.8713
+      },
+      "entity_category_accuracy": 0.8864,
+      "relation_primary_micro": {
+        "pred_total": 35,
+        "core_total": 25,
+        "full_total": 39,
+        "hit_core": 19,
+        "hit_full": 29,
+        "precision": 0.8286,
+        "recall": 0.76,
+        "f1": 0.7928
+      },
+      "relation_core_micro": {
+        "tp": 19,
+        "fp": 16,
+        "fn": 6,
+        "precision": 0.5429,
+        "recall": 0.76,
+        "f1": 0.6333
+      },
+      "relation_full_micro": {
+        "tp": 29,
+        "fp": 6,
+        "fn": 10,
+        "precision": 0.8286,
+        "recall": 0.7436,
+        "f1": 0.7838
+      },
+      "relation_strict_micro": {
+        "tp": 29,
+        "fp": 6,
+        "fn": 10,
+        "precision": 0.8286,
+        "recall": 0.7436,
+        "f1": 0.7838
+      },
+      "relation_strict_macro_by_document": {
+        "precision": 0.8286,
+        "recall": 0.7436,
+        "f1": 0.7838
+      },
+      "relation_pair_auxiliary_micro": {
+        "tp": 29,
+        "fp": 4,
+        "fn": 10,
+        "precision": 0.8788,
+        "recall": 0.7436,
+        "f1": 0.8056
+      },
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 6,
+          "pred_total": 6,
+          "micro": {
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        },
+        "CONTAINS": {
+          "gold_total": 12,
+          "pred_total": 6,
+          "micro": {
+            "tp": 4,
+            "fp": 2,
+            "fn": 8,
+            "precision": 0.6667,
+            "recall": 0.3333,
+            "f1": 0.4444
+          },
+          "mean_document_f1": 0.4444,
+          "active_document_f1": 0.4444
+        },
+        "RELATED_TO": {
+          "gold_total": 18,
+          "pred_total": 20,
+          "micro": {
+            "tp": 16,
+            "fp": 4,
+            "fn": 2,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421
+          },
+          "mean_document_f1": 0.8421,
+          "active_document_f1": 0.8421
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 3,
+          "micro": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        }
+      },
+      "relation_macro_f1": {
+        "all_types": 0.8216,
+        "active_types": 0.8216,
+        "active_type_names": [
+          "PRECEDES",
+          "CONTAINS",
+          "RELATED_TO",
+          "APPLIES_TO"
+        ]
+      },
+      "direction_error_rate": 0.0571,
+      "error_taxonomy_totals": {
+        "fabricated": 4,
+        "direction_reversed": 2,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 1,
+        "duplicate": 26,
+        "low_confidence": 0,
+        "missed_core": 6,
+        "pred_raw_total": 62,
+        "pred_total": 35,
+        "dropped_total": 27,
+        "core_total": 25,
+        "full_total": 39
+      },
+      "accounting": {
+        "raw_source": "extractor",
+        "raw": 62,
+        "scored": 35,
+        "dropped": 27,
+        "balanced": true
+      }
+    }
+  ],
+  "documents": [
+    {
+      "text_id": "化学_化学反应计量_第4章",
+      "gold": {
+        "entity_count": 45,
+        "relation_core_count": 25,
+        "relation_full_count": 39
+      },
+      "entity": {
+        "tp": 42,
+        "fp": 20,
+        "fn": 3,
+        "precision": 0.6774,
+        "recall": 0.9333,
+        "f1": 0.785
+      },
+      "entity_category": {
+        "gold_entity_count": 45,
+        "pred_entity_count": 62,
+        "evaluated_entity_count": 42,
+        "correct": 37,
+        "accuracy": 0.881
+      },
+      "relation_primary": {
+        "pred_total": 39,
+        "core_total": 25,
+        "full_total": 39,
+        "hit_core": 20,
+        "hit_full": 29,
+        "precision": 0.7436,
+        "recall": 0.8,
+        "f1": 0.7708
+      },
+      "relation_core": {
+        "tp": 20,
+        "fp": 19,
+        "fn": 5,
+        "precision": 0.5128,
+        "recall": 0.8,
+        "f1": 0.625
+      },
+      "relation_full": {
+        "tp": 29,
+        "fp": 10,
+        "fn": 10,
+        "precision": 0.7436,
+        "recall": 0.7436,
+        "f1": 0.7436
+      },
+      "relation_pair_auxiliary": {
+        "tp": 30,
+        "fp": 7,
+        "fn": 9,
+        "precision": 0.8108,
+        "recall": 0.7692,
+        "f1": 0.7895
+      },
+      "relation_direction_error_rate": 0.0769,
+      "relations_by_type": {
+        "PRECEDES": {
+          "gold": 6,
+          "pred": 8,
+          "tp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        },
+        "CONTAINS": {
+          "gold": 12,
+          "pred": 7,
+          "tp": 4,
+          "fp": 3,
+          "fn": 8,
+          "precision": 0.5714,
+          "recall": 0.3333,
+          "f1": 0.4211
+        },
+        "RELATED_TO": {
+          "gold": 18,
+          "pred": 20,
+          "tp": 16,
+          "fp": 4,
+          "fn": 2,
+          "precision": 0.8,
+          "recall": 0.8889,
+          "f1": 0.8421
+        },
+        "APPLIES_TO": {
+          "gold": 3,
+          "pred": 4,
+          "tp": 3,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571
+        }
+      },
+      "error_taxonomy": {
+        "counts": {
+          "fabricated": 7,
+          "direction_reversed": 3,
+          "type_confused": 0,
+          "synonym_split": 0,
+          "invalid_endpoint": 0,
+          "invalid_relation_type": 0,
+          "dangling_endpoint": 11,
+          "duplicate": 35,
+          "low_confidence": 0,
+          "missed_core": 5,
+          "pred_raw_total": 85,
+          "pred_total": 39,
+          "dropped_total": 46,
+          "core_total": 25,
+          "full_total": 39
+        },
+        "accounting": {
+          "identity": "pred_raw_total == pred_total + dropped_total",
+          "raw_source": "extractor",
+          "balanced": true
+        },
+        "direction_reversed": [
+          {
+            "source": "实际产率",
+            "type": "PRECEDES",
+            "target": "百分产率",
+            "gold_type": "RELATED_TO"
+          },
+          {
+            "source": "燃烧分析",
+            "type": "CONTAINS",
+            "target": "重量分析",
+            "gold_type": "CONTAINS"
+          },
+          {
+            "source": "理论产率",
+            "type": "PRECEDES",
+            "target": "百分产率",
+            "gold_type": "RELATED_TO"
+          }
+        ],
+        "type_confused": [],
+        "synonym_split": [],
+        "dropped_relations": [
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "沉淀反应",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "酸碱反应",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "氧化还原反应",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "弱酸",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "碱",
+            "type": "CONTAINS",
+            "target": "强碱",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "碱",
+            "type": "CONTAINS",
+            "target": "弱碱",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "氧化数",
+            "type": "PRECEDES",
+            "target": "氧化还原反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "半反应法",
+            "type": "APPLIES_TO",
+            "target": "氧化还原反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "半反应",
+            "type": "RELATED_TO",
+            "target": "半反应法",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化",
+            "type": "RELATED_TO",
+            "target": "还原",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化剂",
+            "type": "RELATED_TO",
+            "target": "还原剂",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学计量学",
+            "type": "RELATED_TO",
+            "target": "化学计量因子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "限量反应物",
+            "type": "PRECEDES",
+            "target": "理论产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实际产率",
+            "type": "RELATED_TO",
+            "target": "理论产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "百分产率",
+            "type": "RELATED_TO",
+            "target": "实际产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "百分产率",
+            "type": "RELATED_TO",
+            "target": "理论产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "绿色化学",
+            "type": "RELATED_TO",
+            "target": "原子经济性",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子经济性",
+            "type": "RELATED_TO",
+            "target": "百分产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "限量反应物",
+            "type": "PRECEDES",
+            "target": "理论产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "百分产率",
+            "type": "RELATED_TO",
+            "target": "实际产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "百分产率",
+            "type": "RELATED_TO",
+            "target": "理论产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "原子经济性",
+            "type": "RELATED_TO",
+            "target": "百分产率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "绿色化学",
+            "type": "RELATED_TO",
+            "target": "原子经济性",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定量分析",
+            "type": "CONTAINS",
+            "target": "滴定分析",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "定量分析",
+            "type": "CONTAINS",
+            "target": "重量分析",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "滴定剂",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "分析物",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "等当点",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "等当点",
+            "type": "RELATED_TO",
+            "target": "终点",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "沉淀反应",
+            "type": "RELATED_TO",
+            "target": "重量分析",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "化学计量学",
+            "type": "RELATED_TO",
+            "target": "化学计量因子",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "配平化学方程式",
+            "type": "PRECEDES",
+            "target": "化学计量学",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "分子方程式",
+            "type": "PRECEDES",
+            "target": "完全离子方程式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "完全离子方程式",
+            "type": "PRECEDES",
+            "target": "净离子方程式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "半反应法",
+            "type": "APPLIES_TO",
+            "target": "氧化还原反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化数",
+            "type": "PRECEDES",
+            "target": "氧化还原反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化",
+            "type": "RELATED_TO",
+            "target": "还原",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化剂",
+            "type": "RELATED_TO",
+            "target": "还原剂",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "旁观离子",
+            "type": "RELATED_TO",
+            "target": "净离子方程式",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸碱反应",
+            "type": "CONTAINS",
+            "target": "中和反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "单置换反应",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "弱酸",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "碱",
+            "type": "CONTAINS",
+            "target": "强碱",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          },
+          {
+            "source": "碱",
+            "type": "CONTAINS",
+            "target": "弱碱",
+            "reason_code": "dangling_endpoint",
+            "detail": "端点不在 entities 中"
+          }
+        ],
+        "missed_core": [
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "氧化还原反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "沉淀反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "酸碱反应"
+          },
+          {
+            "source": "化学方程式",
+            "type": "RELATED_TO",
+            "target": "配平化学方程式"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸"
+          }
+        ],
+        "fabricated": [
+          {
+            "source": "双置换反应",
+            "type": "RELATED_TO",
+            "target": "复分解反应"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "单置换反应"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "歧化反应"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "指示剂"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "终点"
+          },
+          {
+            "source": "燃烧分析",
+            "type": "APPLIES_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "腌制",
+            "type": "RELATED_TO",
+            "target": "发酵"
+          }
+        ]
+      },
+      "false_positive_relations": [
+        {
+          "source": "双置换反应",
+          "type": "RELATED_TO",
+          "target": "复分解反应"
+        },
+        {
+          "source": "实际产率",
+          "type": "PRECEDES",
+          "target": "百分产率"
+        },
+        {
+          "source": "氧化还原反应",
+          "type": "CONTAINS",
+          "target": "单置换反应"
+        },
+        {
+          "source": "氧化还原反应",
+          "type": "CONTAINS",
+          "target": "歧化反应"
+        },
+        {
+          "source": "滴定分析",
+          "type": "RELATED_TO",
+          "target": "指示剂"
+        },
+        {
+          "source": "滴定分析",
+          "type": "RELATED_TO",
+          "target": "终点"
+        },
+        {
+          "source": "燃烧分析",
+          "type": "APPLIES_TO",
+          "target": "实验式"
+        },
+        {
+          "source": "燃烧分析",
+          "type": "CONTAINS",
+          "target": "重量分析"
+        },
+        {
+          "source": "理论产率",
+          "type": "PRECEDES",
+          "target": "百分产率"
+        },
+        {
+          "source": "腌制",
+          "type": "RELATED_TO",
+          "target": "发酵"
+        }
+      ],
+      "false_negative_relations": [
+        {
+          "source": "化学反应分类",
+          "type": "CONTAINS",
+          "target": "氧化还原反应"
+        },
+        {
+          "source": "化学反应分类",
+          "type": "CONTAINS",
+          "target": "沉淀反应"
+        },
+        {
+          "source": "化学反应分类",
+          "type": "CONTAINS",
+          "target": "酸碱反应"
+        },
+        {
+          "source": "化学方程式",
+          "type": "RELATED_TO",
+          "target": "配平化学方程式"
+        },
+        {
+          "source": "酸",
+          "type": "CONTAINS",
+          "target": "强酸"
+        }
+      ],
+      "type_confusions": []
+    }
+  ],
+  "documents_per_run": [
+    [
+      {
+        "text_id": "化学_化学反应计量_第4章",
+        "gold": {
+          "entity_count": 45,
+          "relation_core_count": 25,
+          "relation_full_count": 39
+        },
+        "entity": {
+          "tp": 42,
+          "fp": 20,
+          "fn": 3,
+          "precision": 0.6774,
+          "recall": 0.9333,
+          "f1": 0.785
+        },
+        "entity_category": {
+          "gold_entity_count": 45,
+          "pred_entity_count": 62,
+          "evaluated_entity_count": 42,
+          "correct": 37,
+          "accuracy": 0.881
+        },
+        "relation_primary": {
+          "pred_total": 39,
+          "core_total": 25,
+          "full_total": 39,
+          "hit_core": 20,
+          "hit_full": 29,
+          "precision": 0.7436,
+          "recall": 0.8,
+          "f1": 0.7708
+        },
+        "relation_core": {
+          "tp": 20,
+          "fp": 19,
+          "fn": 5,
+          "precision": 0.5128,
+          "recall": 0.8,
+          "f1": 0.625
+        },
+        "relation_full": {
+          "tp": 29,
+          "fp": 10,
+          "fn": 10,
+          "precision": 0.7436,
+          "recall": 0.7436,
+          "f1": 0.7436
+        },
+        "relation_pair_auxiliary": {
+          "tp": 30,
+          "fp": 7,
+          "fn": 9,
+          "precision": 0.8108,
+          "recall": 0.7692,
+          "f1": 0.7895
+        },
+        "relation_direction_error_rate": 0.0769,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 6,
+            "pred": 8,
+            "tp": 6,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          },
+          "CONTAINS": {
+            "gold": 12,
+            "pred": 7,
+            "tp": 4,
+            "fp": 3,
+            "fn": 8,
+            "precision": 0.5714,
+            "recall": 0.3333,
+            "f1": 0.4211
+          },
+          "RELATED_TO": {
+            "gold": 18,
+            "pred": 20,
+            "tp": 16,
+            "fp": 4,
+            "fn": 2,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 4,
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 7,
+            "direction_reversed": 3,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 11,
+            "duplicate": 35,
+            "low_confidence": 0,
+            "missed_core": 5,
+            "pred_raw_total": 85,
+            "pred_total": 39,
+            "dropped_total": 46,
+            "core_total": 25,
+            "full_total": 39
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "实际产率",
+              "type": "PRECEDES",
+              "target": "百分产率",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "燃烧分析",
+              "type": "CONTAINS",
+              "target": "重量分析",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "理论产率",
+              "type": "PRECEDES",
+              "target": "百分产率",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "沉淀反应",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "酸碱反应",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "氧化还原反应",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "弱酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "强碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "弱碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应法",
+              "type": "APPLIES_TO",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应",
+              "type": "RELATED_TO",
+              "target": "半反应法",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化",
+              "type": "RELATED_TO",
+              "target": "还原",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化剂",
+              "type": "RELATED_TO",
+              "target": "还原剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学计量学",
+              "type": "RELATED_TO",
+              "target": "化学计量因子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "实际产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "实际产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "绿色化学",
+              "type": "RELATED_TO",
+              "target": "原子经济性",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子经济性",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "实际产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子经济性",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "绿色化学",
+              "type": "RELATED_TO",
+              "target": "原子经济性",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "定量分析",
+              "type": "CONTAINS",
+              "target": "滴定分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "定量分析",
+              "type": "CONTAINS",
+              "target": "重量分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "滴定剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "分析物",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "等当点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "等当点",
+              "type": "RELATED_TO",
+              "target": "终点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "沉淀反应",
+              "type": "RELATED_TO",
+              "target": "重量分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学计量学",
+              "type": "RELATED_TO",
+              "target": "化学计量因子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "配平化学方程式",
+              "type": "PRECEDES",
+              "target": "化学计量学",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "分子方程式",
+              "type": "PRECEDES",
+              "target": "完全离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "完全离子方程式",
+              "type": "PRECEDES",
+              "target": "净离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应法",
+              "type": "APPLIES_TO",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化",
+              "type": "RELATED_TO",
+              "target": "还原",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化剂",
+              "type": "RELATED_TO",
+              "target": "还原剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "旁观离子",
+              "type": "RELATED_TO",
+              "target": "净离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸碱反应",
+              "type": "CONTAINS",
+              "target": "中和反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "单置换反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "弱酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "强碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "弱碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "氧化还原反应"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "沉淀反应"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "酸碱反应"
+            },
+            {
+              "source": "化学方程式",
+              "type": "RELATED_TO",
+              "target": "配平化学方程式"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "双置换反应",
+              "type": "RELATED_TO",
+              "target": "复分解反应"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "单置换反应"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "歧化反应"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "指示剂"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "终点"
+            },
+            {
+              "source": "燃烧分析",
+              "type": "APPLIES_TO",
+              "target": "实验式"
+            },
+            {
+              "source": "腌制",
+              "type": "RELATED_TO",
+              "target": "发酵"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "双置换反应",
+            "type": "RELATED_TO",
+            "target": "复分解反应"
+          },
+          {
+            "source": "实际产率",
+            "type": "PRECEDES",
+            "target": "百分产率"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "单置换反应"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "歧化反应"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "指示剂"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "终点"
+          },
+          {
+            "source": "燃烧分析",
+            "type": "APPLIES_TO",
+            "target": "实验式"
+          },
+          {
+            "source": "燃烧分析",
+            "type": "CONTAINS",
+            "target": "重量分析"
+          },
+          {
+            "source": "理论产率",
+            "type": "PRECEDES",
+            "target": "百分产率"
+          },
+          {
+            "source": "腌制",
+            "type": "RELATED_TO",
+            "target": "发酵"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "氧化还原反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "沉淀反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "酸碱反应"
+          },
+          {
+            "source": "化学方程式",
+            "type": "RELATED_TO",
+            "target": "配平化学方程式"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸"
+          }
+        ],
+        "type_confusions": []
+      }
+    ],
+    [
+      {
+        "text_id": "化学_化学反应计量_第4章",
+        "gold": {
+          "entity_count": 45,
+          "relation_core_count": 25,
+          "relation_full_count": 39
+        },
+        "entity": {
+          "tp": 43,
+          "fp": 15,
+          "fn": 2,
+          "precision": 0.7414,
+          "recall": 0.9556,
+          "f1": 0.835
+        },
+        "entity_category": {
+          "gold_entity_count": 45,
+          "pred_entity_count": 58,
+          "evaluated_entity_count": 43,
+          "correct": 39,
+          "accuracy": 0.907
+        },
+        "relation_primary": {
+          "pred_total": 44,
+          "core_total": 25,
+          "full_total": 39,
+          "hit_core": 23,
+          "hit_full": 33,
+          "precision": 0.75,
+          "recall": 0.92,
+          "f1": 0.8263
+        },
+        "relation_core": {
+          "tp": 23,
+          "fp": 21,
+          "fn": 2,
+          "precision": 0.5227,
+          "recall": 0.92,
+          "f1": 0.6667
+        },
+        "relation_full": {
+          "tp": 33,
+          "fp": 11,
+          "fn": 6,
+          "precision": 0.75,
+          "recall": 0.8462,
+          "f1": 0.7952
+        },
+        "relation_pair_auxiliary": {
+          "tp": 33,
+          "fp": 9,
+          "fn": 6,
+          "precision": 0.7857,
+          "recall": 0.8462,
+          "f1": 0.8148
+        },
+        "relation_direction_error_rate": 0.0455,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 6,
+            "pred": 7,
+            "tp": 6,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.8571,
+            "recall": 1.0,
+            "f1": 0.9231
+          },
+          "CONTAINS": {
+            "gold": 12,
+            "pred": 13,
+            "tp": 8,
+            "fp": 5,
+            "fn": 4,
+            "precision": 0.6154,
+            "recall": 0.6667,
+            "f1": 0.64
+          },
+          "RELATED_TO": {
+            "gold": 18,
+            "pred": 18,
+            "tp": 16,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.8889,
+            "recall": 0.8889,
+            "f1": 0.8889
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 6,
+            "tp": 3,
+            "fp": 3,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 9,
+            "direction_reversed": 2,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 8,
+            "duplicate": 25,
+            "low_confidence": 0,
+            "missed_core": 2,
+            "pred_raw_total": 77,
+            "pred_total": 44,
+            "dropped_total": 33,
+            "core_total": 25,
+            "full_total": 39
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "滴定分析",
+              "type": "APPLIES_TO",
+              "target": "定量分析",
+              "gold_type": "CONTAINS"
+            },
+            {
+              "source": "重量分析",
+              "type": "APPLIES_TO",
+              "target": "定量分析",
+              "gold_type": "CONTAINS"
+            }
+          ],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "弱酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "强碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "弱碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "实际产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "实际产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "实际产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "实际产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子经济性",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "绿色化学",
+              "type": "RELATED_TO",
+              "target": "原子经济性",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "定量分析",
+              "type": "CONTAINS",
+              "target": "滴定分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "定量分析",
+              "type": "CONTAINS",
+              "target": "重量分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "沉淀反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "酸碱反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应法",
+              "type": "APPLIES_TO",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学计量学",
+              "type": "RELATED_TO",
+              "target": "化学计量因子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "物质守恒定律",
+              "type": "PRECEDES",
+              "target": "配平化学方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "分子方程式",
+              "type": "PRECEDES",
+              "target": "完全离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "完全离子方程式",
+              "type": "PRECEDES",
+              "target": "净离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "旁观离子",
+              "type": "RELATED_TO",
+              "target": "净离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化剂",
+              "type": "RELATED_TO",
+              "target": "还原剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化",
+              "type": "RELATED_TO",
+              "target": "还原",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "弱酸",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "强碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            },
+            {
+              "source": "碱",
+              "type": "CONTAINS",
+              "target": "弱碱",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "化学方程式",
+              "type": "RELATED_TO",
+              "target": "配平化学方程式"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "中和反应",
+              "type": "RELATED_TO",
+              "target": "盐"
+            },
+            {
+              "source": "假说",
+              "type": "PRECEDES",
+              "target": "科学理论"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "单置换反应"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "歧化反应"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "指示剂"
+            },
+            {
+              "source": "科学方法",
+              "type": "CONTAINS",
+              "target": "假说"
+            },
+            {
+              "source": "科学方法",
+              "type": "CONTAINS",
+              "target": "科学定律"
+            },
+            {
+              "source": "科学方法",
+              "type": "CONTAINS",
+              "target": "科学理论"
+            },
+            {
+              "source": "观察法",
+              "type": "APPLIES_TO",
+              "target": "配平化学方程式"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "中和反应",
+            "type": "RELATED_TO",
+            "target": "盐"
+          },
+          {
+            "source": "假说",
+            "type": "PRECEDES",
+            "target": "科学理论"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "单置换反应"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "歧化反应"
+          },
+          {
+            "source": "滴定分析",
+            "type": "APPLIES_TO",
+            "target": "定量分析"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "指示剂"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "假说"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "科学定律"
+          },
+          {
+            "source": "科学方法",
+            "type": "CONTAINS",
+            "target": "科学理论"
+          },
+          {
+            "source": "观察法",
+            "type": "APPLIES_TO",
+            "target": "配平化学方程式"
+          },
+          {
+            "source": "重量分析",
+            "type": "APPLIES_TO",
+            "target": "定量分析"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "化学方程式",
+            "type": "RELATED_TO",
+            "target": "配平化学方程式"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸"
+          }
+        ],
+        "type_confusions": []
+      }
+    ],
+    [
+      {
+        "text_id": "化学_化学反应计量_第4章",
+        "gold": {
+          "entity_count": 45,
+          "relation_core_count": 25,
+          "relation_full_count": 39
+        },
+        "entity": {
+          "tp": 44,
+          "fp": 12,
+          "fn": 1,
+          "precision": 0.7857,
+          "recall": 0.9778,
+          "f1": 0.8713
+        },
+        "entity_category": {
+          "gold_entity_count": 45,
+          "pred_entity_count": 56,
+          "evaluated_entity_count": 44,
+          "correct": 39,
+          "accuracy": 0.8864
+        },
+        "relation_primary": {
+          "pred_total": 35,
+          "core_total": 25,
+          "full_total": 39,
+          "hit_core": 19,
+          "hit_full": 29,
+          "precision": 0.8286,
+          "recall": 0.76,
+          "f1": 0.7928
+        },
+        "relation_core": {
+          "tp": 19,
+          "fp": 16,
+          "fn": 6,
+          "precision": 0.5429,
+          "recall": 0.76,
+          "f1": 0.6333
+        },
+        "relation_full": {
+          "tp": 29,
+          "fp": 6,
+          "fn": 10,
+          "precision": 0.8286,
+          "recall": 0.7436,
+          "f1": 0.7838
+        },
+        "relation_pair_auxiliary": {
+          "tp": 29,
+          "fp": 4,
+          "fn": 10,
+          "precision": 0.8788,
+          "recall": 0.7436,
+          "f1": 0.8056
+        },
+        "relation_direction_error_rate": 0.0571,
+        "relations_by_type": {
+          "PRECEDES": {
+            "gold": 6,
+            "pred": 6,
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "CONTAINS": {
+            "gold": 12,
+            "pred": 6,
+            "tp": 4,
+            "fp": 2,
+            "fn": 8,
+            "precision": 0.6667,
+            "recall": 0.3333,
+            "f1": 0.4444
+          },
+          "RELATED_TO": {
+            "gold": 18,
+            "pred": 20,
+            "tp": 16,
+            "fp": 4,
+            "fn": 2,
+            "precision": 0.8,
+            "recall": 0.8889,
+            "f1": 0.8421
+          },
+          "APPLIES_TO": {
+            "gold": 3,
+            "pred": 3,
+            "tp": 3,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          }
+        },
+        "error_taxonomy": {
+          "counts": {
+            "fabricated": 4,
+            "direction_reversed": 2,
+            "type_confused": 0,
+            "synonym_split": 0,
+            "invalid_endpoint": 0,
+            "invalid_relation_type": 0,
+            "dangling_endpoint": 1,
+            "duplicate": 26,
+            "low_confidence": 0,
+            "missed_core": 6,
+            "pred_raw_total": 62,
+            "pred_total": 35,
+            "dropped_total": 27,
+            "core_total": 25,
+            "full_total": 39
+          },
+          "accounting": {
+            "identity": "pred_raw_total == pred_total + dropped_total",
+            "raw_source": "extractor",
+            "balanced": true
+          },
+          "direction_reversed": [
+            {
+              "source": "实际产率",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "gold_type": "RELATED_TO"
+            },
+            {
+              "source": "理论产率",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "gold_type": "RELATED_TO"
+            }
+          ],
+          "type_confused": [],
+          "synonym_split": [],
+          "dropped_relations": [
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应法",
+              "type": "APPLIES_TO",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应",
+              "type": "RELATED_TO",
+              "target": "半反应法",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化",
+              "type": "RELATED_TO",
+              "target": "还原",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化剂",
+              "type": "RELATED_TO",
+              "target": "还原剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "实际产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "实际产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "百分产率",
+              "type": "RELATED_TO",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子经济性",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "绿色化学",
+              "type": "RELATED_TO",
+              "target": "原子经济性",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学计量学",
+              "type": "RELATED_TO",
+              "target": "化学计量因子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "限量反应物",
+              "type": "PRECEDES",
+              "target": "理论产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "绿色化学",
+              "type": "RELATED_TO",
+              "target": "原子经济性",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "原子经济性",
+              "type": "RELATED_TO",
+              "target": "百分产率",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "滴定剂",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "分析物",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "等当点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "等当点",
+              "type": "RELATED_TO",
+              "target": "终点",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "沉淀反应",
+              "type": "RELATED_TO",
+              "target": "重量分析",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "化学计量学",
+              "type": "RELATED_TO",
+              "target": "化学计量因子",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "分子方程式",
+              "type": "PRECEDES",
+              "target": "完全离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "完全离子方程式",
+              "type": "PRECEDES",
+              "target": "净离子方程式",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "半反应法",
+              "type": "APPLIES_TO",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "氧化数",
+              "type": "PRECEDES",
+              "target": "氧化还原反应",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "配平化学方程式",
+              "type": "PRECEDES",
+              "target": "化学计量学",
+              "reason_code": "duplicate",
+              "detail": "重复三元组（多因分块重叠）"
+            },
+            {
+              "source": "实验式",
+              "type": "PRECEDES",
+              "target": "分子式",
+              "reason_code": "dangling_endpoint",
+              "detail": "端点不在 entities 中"
+            }
+          ],
+          "missed_core": [
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "氧化还原反应"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "沉淀反应"
+            },
+            {
+              "source": "化学反应分类",
+              "type": "CONTAINS",
+              "target": "酸碱反应"
+            },
+            {
+              "source": "化学方程式",
+              "type": "RELATED_TO",
+              "target": "配平化学方程式"
+            },
+            {
+              "source": "酸",
+              "type": "CONTAINS",
+              "target": "强酸"
+            },
+            {
+              "source": "酸碱反应",
+              "type": "CONTAINS",
+              "target": "中和反应"
+            }
+          ],
+          "fabricated": [
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "单置换反应"
+            },
+            {
+              "source": "氧化还原反应",
+              "type": "CONTAINS",
+              "target": "歧化反应"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "指示剂"
+            },
+            {
+              "source": "滴定分析",
+              "type": "RELATED_TO",
+              "target": "终点"
+            }
+          ]
+        },
+        "false_positive_relations": [
+          {
+            "source": "实际产率",
+            "type": "RELATED_TO",
+            "target": "百分产率"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "单置换反应"
+          },
+          {
+            "source": "氧化还原反应",
+            "type": "CONTAINS",
+            "target": "歧化反应"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "指示剂"
+          },
+          {
+            "source": "滴定分析",
+            "type": "RELATED_TO",
+            "target": "终点"
+          },
+          {
+            "source": "理论产率",
+            "type": "RELATED_TO",
+            "target": "百分产率"
+          }
+        ],
+        "false_negative_relations": [
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "氧化还原反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "沉淀反应"
+          },
+          {
+            "source": "化学反应分类",
+            "type": "CONTAINS",
+            "target": "酸碱反应"
+          },
+          {
+            "source": "化学方程式",
+            "type": "RELATED_TO",
+            "target": "配平化学方程式"
+          },
+          {
+            "source": "酸",
+            "type": "CONTAINS",
+            "target": "强酸"
+          },
+          {
+            "source": "酸碱反应",
+            "type": "CONTAINS",
+            "target": "中和反应"
+          }
+        ],
+        "type_confusions": []
+      }
+    ]
+  ]
+}

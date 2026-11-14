@@ -1,0 +1,73 @@
+diff --git a/backend/app/services/knowledge_extractor.py b/backend/app/services/knowledge_extractor.py
+index 606ff5a..b15b20b 100644
+--- a/backend/app/services/knowledge_extractor.py
++++ b/backend/app/services/knowledge_extractor.py
+@@ -124,6 +124,55 @@ PRECEDES / CONTAINS / RELATED_TO / APPLIES_TO
+   是固定、有名称、本身独立可学的知识点，故用 CONTAINS 表示组成。
+   但质子、中子挂在「原子核」下，不要挂在「原子」下（不输出 原子 CONTAINS 质子/中子）。
+ 
++### 5.1.1 化学通用规则（第 1 章基本概念 / 第 3 章计量 / 第 4 章反应）
++
++以下是在第 2 章之外、化学各章反复出现的挂载与关系口径。只在原文明确支持时输出，
++不要为了覆盖清单而强行造关系。
++
++**物质与概念的分类挂载（CONTAINS，方向为上位 → 下位）**
++- 「物质」CONTAINS 混合物、纯物质、固体、液体、气体
++- 「纯物质」CONTAINS 元素、化合物
++- 「混合物」CONTAINS 均匀混合物、非均匀混合物
++- 「化学反应分类」CONTAINS 沉淀反应、酸碱反应、氧化还原反应
++- 「定量分析」CONTAINS 滴定分析、重量分析（定量分析是上位，方向勿反）
++- 「科学方法」CONTAINS 假说、科学理论、科学定律（原文把它们作为科学方法的环节时）
++- 「酸」CONTAINS 强酸、弱酸；「碱」CONTAINS 强碱、弱碱（原文明确区分强弱时才输出）
++
++**学习前置（PRECEDES，先学 source，后学 target）**
++- 「物质守恒定律」PRECEDES「配平化学方程式」
++- 同一反应的不同表达按「分子方程式 → 完全离子方程式 → 净离子方程式」的先后：
++  分子方程式 PRECEDES 完全离子方程式；完全离子方程式 PRECEDES 净离子方程式。
++  **严禁**把化学方程式 CONTAINS 分子方程式/完全离子方程式/净离子方程式——它们是表达方式，
++  不是化学方程式的子类。
++- 「氧化数」PRECEDES「氧化还原反应」；「限量反应物」PRECEDES「理论产率」
++- 「配平化学方程式」PRECEDES「化学计量学」
++- 「假说」PRECEDES「科学理论」
++- 计量链：平均原子质量 PRECEDES 式量；摩尔 PRECEDES 摩尔质量；实验式 PRECEDES 分子式
++
++**公式/规则/方法 APPLIES_TO 其处理对象（不是 RELATED_TO）**
++- 密度公式 APPLIES_TO 密度；温度换算公式 APPLIES_TO 摄氏温标、华氏温标、开尔文温标
++- 舍入规则 APPLIES_TO 有效数字；量纲分析 APPLIES_TO 单位换算；量纲分析 RELATED_TO 单位换算因子
++- 观察法配平 APPLIES_TO 配平化学方程式；半反应法 APPLIES_TO 氧化还原反应
++- 溶解性规则 APPLIES_TO 沉淀反应；命名法 APPLIES_TO 化合物
++- 注意：滴定分析与其对象（滴定剂、分析物、等当点）是 RELATED_TO，**不是** APPLIES_TO
++
++**化学 RELATED_TO 正例（按原文、按方向；只输出原文明确关联的对）**
++- 化学 RELATED_TO 物质；宏观领域 RELATED_TO 微观领域；符号领域 RELATED_TO 宏观领域、微观领域
++- 质量 RELATED_TO 重量；物理变化 RELATED_TO 化学变化；广延性质 RELATED_TO 强度性质
++- 准确度 RELATED_TO 精密度；不确定度 RELATED_TO 有效数字
++- 量纲分析 RELATED_TO 单位换算因子；摄氏温标 RELATED_TO 华氏温标、开尔文温标
++- 氧化 RELATED_TO 还原；氧化剂 RELATED_TO 还原剂；旁观离子 RELATED_TO 净离子方程式
++- 滴定分析 RELATED_TO 滴定剂、分析物、等当点；等当点 RELATED_TO 终点
++- 限量反应物 RELATED_TO 过量反应物；实际产率 RELATED_TO 理论产率；
++  百分产率 RELATED_TO 实际产率、理论产率
++- 原子经济性 RELATED_TO 百分产率；绿色化学 RELATED_TO 原子经济性；半反应 RELATED_TO 半反应法
++- 化学计量学 RELATED_TO 化学计量因子；沉淀反应 RELATED_TO 重量分析
++
++**实体规范名**
++- 用「SI基本单位」，不抽「国际单位制」「SI单位」作为替代名
++- 用「配平化学方程式」，不抽「配平」「配平方程式」；用「滴定分析」「重量分析」
++- 温度用「摄氏温标」「华氏温标」「开尔文温标」；只有原文明确出现「等离子体」时才抽该实体
++
+ ### 5.1 物理运动学分类挂载（严格按此，避免把对象挂到矢量/标量或运动学上）
+ - 「矢量」CONTAINS 仅 位移、速度
+ - 「标量」CONTAINS 仅 距离、速率
+diff --git a/backend/eval_config.py b/backend/eval_config.py
+index fa0cd4b..5091d01 100644
+--- a/backend/eval_config.py
++++ b/backend/eval_config.py
+@@ -23,7 +23,7 @@ from app.services.knowledge_extractor import (
+ 
+ # Prompt 版本号：每次修改 EXTRACTION_PROMPT 时递增，便于把评测结果对应到 Prompt 版本
+ 
+-PROMPT_VERSION = "v1.8"
++PROMPT_VERSION = "v1.9.1"
+ 
+ 
+ def make_config(temperature: float = 0, overlap_tokens: int = _OVERLAP_TOKENS) -> dict:

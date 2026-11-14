@@ -1,0 +1,137 @@
+[
+  {
+    "name": "d1_数据结构_第7章_树",
+    "course": "数据结构",
+    "note": "《Hello 算法》第 7 章；原始 gold 已完整通过 validate_gold",
+    "source_gold": "eval_data\\gold_第7章_树.json",
+    "source_text": "eval_data\\第7章_树.txt",
+    "characters": 12416,
+    "entities": 49,
+    "relations": 33,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 0,
+    "patched_evidence": 0,
+    "evidence_changes": [],
+    "gold_sha256": "b951325e289fbde6219c6704e043b4f835f347d4d0d3202bd8452c858b3dfa1b",
+    "text_sha256": "895163c6e4e2a7211be9e821511bd2102a2ac8778afe843f9e4e4666aacf0fbc"
+  },
+  {
+    "name": "d2_数据结构_第2章_复杂度分析",
+    "course": "数据结构",
+    "note": "《Hello 算法》第 2 章；原始 gold 已完整通过 validate_gold",
+    "source_gold": "eval_data\\gold_数据结构_第2章_复杂度分析_人工版.json",
+    "source_text": "eval_data\\第2章_复杂度分析.txt",
+    "characters": 16410,
+    "entities": 40,
+    "relations": 47,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 0,
+    "patched_evidence": 0,
+    "evidence_changes": [],
+    "gold_sha256": "7f6aa37145d3a604a2c7623b9984cc88d3d8b2b759189aa756bba80141c89252",
+    "text_sha256": "f66903737c296a4e05c40b7483934a666fc2fff7fca03e39d718fc1dd050351b"
+  },
+  {
+    "name": "d3_物理_第2章_运动学",
+    "course": "物理",
+    "note": "OpenStax College Physics 2e 中译；原始 gold 已完整通过 validate_gold",
+    "source_gold": "eval_data\\gold_物理_第2章_运动学_人工版.json",
+    "source_text": "eval_data\\第2章_运动学_Kinematics_中文版.txt",
+    "characters": 36659,
+    "entities": 38,
+    "relations": 60,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 0,
+    "patched_evidence": 0,
+    "evidence_changes": [],
+    "gold_sha256": "517134bc942f99d19d13a2772728d5f4a71d5fabcaf09121f9736bf738770477",
+    "text_sha256": "d4ff3d56bc5cb01458916ad5e96d0a48acf438582e1071c27500705e1ad5f282"
+  },
+  {
+    "name": "d4_化学_第2章_原子分子与离子",
+    "course": "化学",
+    "note": "OpenStax Chemistry 2e 中译；原始 gold 已完整通过 validate_gold",
+    "source_gold": "eval_data\\gold_化学_第2章_原子分子与离子_人工版.json",
+    "source_text": "eval_data\\第2章_原子分子与离子_中文版.txt",
+    "characters": 40093,
+    "entities": 62,
+    "relations": 74,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 0,
+    "patched_evidence": 0,
+    "evidence_changes": [],
+    "gold_sha256": "9ada0280fc10dff2f2ed3884b0e2eefc6caf4f60d268055540c1a7969be0b63a",
+    "text_sha256": "9370040af04774b368d07cbc23da0109b29e20995112f4f95b65e12d07d0ac14"
+  },
+  {
+    "name": "d5_化学_第4章_化学反应计量",
+    "course": "化学",
+    "note": "OpenStax Chemistry 2e 中译；原 gold 缺 confidence，实体/关系/core 未改动",
+    "source_gold": "eval_data\\gold_第4章_化学反应计量_中文版_人工版.json",
+    "source_text": "data\\sample_docs\\openstax_化学\\第4章_化学反应计量_中文版.txt",
+    "characters": 30732,
+    "entities": 45,
+    "relations": 39,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "PRECEDES",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 39,
+    "patched_evidence": 0,
+    "evidence_changes": [],
+    "gold_sha256": "2db78cfed12bed6288561497dca8288021a11f612803fe13649188e02f0980da",
+    "text_sha256": "ee80bd76bf6096f35c3c8f35b2aaf8ab8b193a2159f28b1e35f0f6e4963735a4"
+  },
+  {
+    "name": "d6_化学_第1章_化学基本概念",
+    "course": "化学",
+    "note": "OpenStax Chemistry 2e 中译；原 gold 缺 confidence 且 2 条 evidence 无法逐字命中",
+    "source_gold": "eval_data\\gold_第1章_化学基本概念_中文版_人工版.json",
+    "source_text": "data\\sample_docs\\openstax_化学\\第1章_化学基本概念_中文版.txt",
+    "characters": 33128,
+    "entities": 45,
+    "relations": 40,
+    "relation_types": [
+      "APPLIES_TO",
+      "CONTAINS",
+      "PRECEDES",
+      "RELATED_TO"
+    ],
+    "patched_confidence": 40,
+    "patched_evidence": 2,
+    "evidence_changes": [
+      {
+        "triple": "广延性质 -[RELATED_TO]-> 强度性质",
+        "old": "如果性质取决于存在的物质量，它就是广延性质……如果物质样品的性质不取决于存在的物质量，它就是强度性质",
+        "new": "如果性质取决于存在的物质量，它就是广延性质",
+        "how": "截断省略号"
+      },
+      {
+        "triple": "准确度 -[RELATED_TO]-> 精密度",
+        "old": "如果以相同方式重复测量得到非常相似的结果，就称测量是精密的。如果测量得到的结果非常接近真实值或公认值，就认为该测量是准确的",
+        "new": "### 准确度与精密度科学家通常对同一量进行重复测量，以确保其发现的质量，并评估结果的精密度和准确度。",
+        "how": "替换为含「准确度」的原文句"
+      }
+    ],
+    "gold_sha256": "79725b6bcc0b6d1a9d36889ca4f18865d1db6604a8e3a84142dca959c06e1e2e",
+    "text_sha256": "0381f7686a8e3d972f9b7647adf43687082c8d30758aef65ff750816a13b9758"
+  }
+]

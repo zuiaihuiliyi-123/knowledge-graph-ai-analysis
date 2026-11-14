@@ -1,0 +1,2880 @@
+[
+  {
+    "text_id": "数据结构_第2章_复杂度分析",
+    "runs": [
+      {
+        "entities": [
+          {
+            "name": "算法效率",
+            "category": "概念",
+            "description": "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+            "descriptions": [
+              "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+              "衡量算法优劣的指标，包括时间效率和空间效率。"
+            ],
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "alt_descriptions": [
+              "衡量算法优劣的指标，包括时间效率和空间效率。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标。"
+            ]
+          },
+          {
+            "name": "时间效率",
+            "category": "概念",
+            "description": "算法运行时间的长短。",
+            "descriptions": [
+              "算法运行时间的长短。",
+              "算法运行时间方面的效率。"
+            ],
+            "evidence": "时间效率：算法运行时间的长短。",
+            "alt_descriptions": [
+              "算法运行时间方面的效率。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标。"
+            ]
+          },
+          {
+            "name": "空间效率",
+            "category": "概念",
+            "description": "算法占用内存空间的大小。",
+            "descriptions": [
+              "算法占用内存空间的大小。",
+              "算法占用内存空间方面的效率。"
+            ],
+            "evidence": "空间效率：算法占用内存空间的大小。",
+            "alt_descriptions": [
+              "算法占用内存空间方面的效率。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标。"
+            ]
+          },
+          {
+            "name": "实际测试",
+            "category": "方法",
+            "description": "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+            "descriptions": [
+              "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+              "通过运行程序来评估算法效率的方法。"
+            ],
+            "evidence": "最直接的方法是找一台计算机，运行这两个算法，并监控记录它们的运行时间和内存占用情况。",
+            "alt_descriptions": [
+              "通过运行程序来评估算法效率的方法。"
+            ],
+            "alt_evidences": [
+              "我们可以通过实际测试来评估算法效率。"
+            ]
+          },
+          {
+            "name": "复杂度分析",
+            "category": "方法",
+            "description": "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+            "descriptions": [
+              "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+              "通过分析算法操作数量或空间占用随数据规模增长趋势来评估效率的方法。"
+            ],
+            "evidence": "这种估算方法被称为渐近复杂度分析（asymptotic complexity analysis），简称复杂度分析。",
+            "alt_descriptions": [
+              "通过分析算法操作数量或空间占用随数据规模增长趋势来评估效率的方法。"
+            ],
+            "alt_evidences": [
+              "复杂度分析可以消除实际测试的弊端。"
+            ]
+          },
+          {
+            "name": "时间复杂度",
+            "category": "概念",
+            "description": "算法运行时间随着数据量变大时的增长趋势。",
+            "descriptions": [
+              "算法运行时间随着数据量变大时的增长趋势。",
+              "衡量算法运行时间随数据量增长的趋势。"
+            ],
+            "evidence": "时间复杂度分析统计的不是算法运行时间，而是算法运行时间随着数据量变大时的增长趋势。",
+            "alt_descriptions": [
+              "衡量算法运行时间随数据量增长的趋势。"
+            ],
+            "alt_evidences": [
+              "时间复杂度用于衡量算法运行时间随数据量增长的趋势。"
+            ]
+          },
+          {
+            "name": "空间复杂度",
+            "category": "概念",
+            "description": "算法占用内存空间随着数据量变大时的增长趋势。",
+            "descriptions": [
+              "算法占用内存空间随着数据量变大时的增长趋势。",
+              "衡量算法占用内存空间随数据量增长的趋势。"
+            ],
+            "evidence": "空间复杂度（space complexity）用于衡量算法占用内存空间随着数据量变大时的增长趋势。",
+            "alt_descriptions": [
+              "衡量算法占用内存空间随数据量增长的趋势。"
+            ]
+          },
+          {
+            "name": "迭代",
+            "category": "概念",
+            "description": "一种重复执行某个任务的控制结构。",
+            "descriptions": [
+              "一种重复执行某个任务的控制结构。"
+            ],
+            "evidence": "迭代（iteration）是一种重复执行某个任务的控制结构。"
+          },
+          {
+            "name": "递归",
+            "category": "概念",
+            "description": "一种算法策略，通过函数调用自身来解决问题。",
+            "descriptions": [
+              "一种算法策略，通过函数调用自身来解决问题。",
+              "函数直接或间接调用自身的方法。"
+            ],
+            "evidence": "递归（recursion）是一种算法策略，通过函数调用自身来解决问题。",
+            "category_variants": [
+              "方法"
+            ],
+            "alt_descriptions": [
+              "函数直接或间接调用自身的方法。"
+            ],
+            "alt_evidences": [
+              "递归函数 recur() 在运行过程中会同时存在 n 个未返回的 recur()。"
+            ]
+          },
+          {
+            "name": "for 循环",
+            "category": "方法",
+            "description": "最常见的迭代形式之一，适合在预先知道迭代次数时使用。",
+            "descriptions": [
+              "最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+            ],
+            "evidence": "for 循环是最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+          },
+          {
+            "name": "while 循环",
+            "category": "方法",
+            "description": "一种实现迭代的方法，每轮先检查条件。",
+            "descriptions": [
+              "一种实现迭代的方法，每轮先检查条件。"
+            ],
+            "evidence": "while 循环也是一种实现迭代的方法。"
+          },
+          {
+            "name": "嵌套循环",
+            "category": "方法",
+            "description": "在一个循环结构内嵌套另一个循环结构。",
+            "descriptions": [
+              "在一个循环结构内嵌套另一个循环结构。"
+            ],
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构。"
+          },
+          {
+            "name": "尾递归",
+            "category": "概念",
+            "description": "函数在返回前的最后一步才进行递归调用，可被优化。",
+            "descriptions": [
+              "函数在返回前的最后一步才进行递归调用，可被优化。",
+              "递归调用是函数最后一步操作的递归形式。"
+            ],
+            "evidence": "如果函数在返回前的最后一步才进行递归调用，则该函数可以被编译器或解释器优化，使其在空间效率上与迭代相当。这种情况被称为尾递归（tail recursion）。",
+            "category_variants": [
+              "方法"
+            ],
+            "alt_descriptions": [
+              "递归调用是函数最后一步操作的递归形式。"
+            ],
+            "alt_evidences": [
+              "尾递归函数的空间复杂度可以优化至 O(1)。"
+            ]
+          },
+          {
+            "name": "调用栈",
+            "category": "概念",
+            "description": "系统为递归函数调用分配栈帧的内存区域。",
+            "descriptions": [
+              "系统为递归函数调用分配栈帧的内存区域。",
+              "系统用于管理函数调用的栈结构。"
+            ],
+            "evidence": "系统会在“调用栈”上为该函数分配新的栈帧。",
+            "alt_descriptions": [
+              "系统用于管理函数调用的栈结构。"
+            ],
+            "alt_evidences": [
+              "系统在每次调用函数时都会在栈顶部创建一个栈帧。"
+            ]
+          },
+          {
+            "name": "栈帧空间",
+            "category": "概念",
+            "description": "存储函数上下文数据的内存区域。",
+            "descriptions": [
+              "存储函数上下文数据的内存区域。",
+              "暂存空间中用于保存调用函数上下文数据的部分。"
+            ],
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中。",
+            "alt_descriptions": [
+              "暂存空间中用于保存调用函数上下文数据的部分。"
+            ],
+            "alt_evidences": [
+              "栈帧空间：用于保存调用函数的上下文数据。"
+            ]
+          },
+          {
+            "name": "递归树",
+            "category": "概念",
+            "description": "递归调用产生的树形结构，用于分析递归过程。",
+            "descriptions": [
+              "递归调用产生的树形结构，用于分析递归过程。",
+              "描述递归调用过程的树形结构，用于分析复杂度。"
+            ],
+            "evidence": "这样不断递归调用下去，最终将产生一棵层数为 n 的递归树（recursion tree）。",
+            "alt_descriptions": [
+              "描述递归调用过程的树形结构，用于分析复杂度。"
+            ],
+            "alt_evidences": [
+              "形成高度为 log n 的递归树。"
+            ]
+          },
+          {
+            "name": "分治",
+            "category": "方法",
+            "description": "将问题分解为更小子问题的算法策略。",
+            "descriptions": [
+              "将问题分解为更小子问题的算法策略。",
+              "将问题分解为子问题分别解决的方法思想。"
+            ],
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "alt_descriptions": [
+              "将问题分解为子问题分别解决的方法思想。"
+            ],
+            "alt_evidences": [
+              "对数阶常见于分治算法。"
+            ]
+          },
+          {
+            "name": "常数阶",
+            "category": "概念",
+            "description": "操作数量与输入数据大小无关的时间复杂度。",
+            "descriptions": [
+              "操作数量与输入数据大小无关的时间复杂度。",
+              "空间复杂度的一种，表示占用空间与输入规模无关。"
+            ],
+            "evidence": "算法 A 只有 1 个打印操作，算法运行时间不随着 n 增大而增长。我们称此算法的时间复杂度为“常数阶”。",
+            "alt_descriptions": [
+              "空间复杂度的一种，表示占用空间与输入规模无关。"
+            ],
+            "alt_evidences": [
+              "常数阶 O(1) 常见于数量与输入数据大小 n 无关的常量、变量、对象。"
+            ]
+          },
+          {
+            "name": "线性阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以线性级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以线性级别增长的时间复杂度。",
+              "空间复杂度的一种，表示占用空间与输入规模成正比。"
+            ],
+            "evidence": "算法 B 中的打印操作需要循环 n 次，算法运行时间随着 n 增大呈线性增长。此算法的时间复杂度被称为“线性阶”。",
+            "alt_descriptions": [
+              "空间复杂度的一种，表示占用空间与输入规模成正比。"
+            ],
+            "alt_evidences": [
+              "线性阶 O(n) 常见于元素数量与 n 成正比的数组、链表、栈、队列等。"
+            ]
+          },
+          {
+            "name": "平方阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以平方级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以平方级别增长的时间复杂度。",
+              "空间复杂度的一种，表示占用空间与输入规模的平方成正比。"
+            ],
+            "evidence": "平方阶的操作数量相对于输入数据大小 n 以平方级别增长。",
+            "alt_descriptions": [
+              "空间复杂度的一种，表示占用空间与输入规模的平方成正比。"
+            ],
+            "alt_evidences": [
+              "平方阶 O(n^2) 常见于矩阵和图，元素数量与 n 成平方关系。"
+            ]
+          },
+          {
+            "name": "指数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以指数级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以指数级别增长的时间复杂度。",
+              "空间复杂度的一种，表示占用空间随输入规模指数增长。"
+            ],
+            "evidence": "指数阶增长非常迅速，在穷举法（暴力搜索、回溯等）中比较常见。",
+            "alt_descriptions": [
+              "空间复杂度的一种，表示占用空间随输入规模指数增长。"
+            ],
+            "alt_evidences": [
+              "指数阶 O(2^n) 常见于二叉树。"
+            ]
+          },
+          {
+            "name": "对数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以对数级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以对数级别增长的时间复杂度。",
+              "空间复杂度的一种，表示占用空间随输入规模对数增长。"
+            ],
+            "evidence": "对数阶反映了“每轮缩减到一半”的情况。",
+            "alt_descriptions": [
+              "空间复杂度的一种，表示占用空间随输入规模对数增长。"
+            ],
+            "alt_evidences": [
+              "对数阶 O(log n) 常见于分治算法。"
+            ]
+          },
+          {
+            "name": "线性对数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以线性对数级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以线性对数级别增长的时间复杂度。"
+            ],
+            "evidence": "线性对数阶常出现于嵌套循环中，两层循环的时间复杂度分别为 O(log n) 和 O(n)。"
+          },
+          {
+            "name": "阶乘阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小以阶乘级别增长的时间复杂度。",
+            "descriptions": [
+              "操作数量相对于输入数据大小以阶乘级别增长的时间复杂度。"
+            ],
+            "evidence": "阶乘阶对应数学上的“全排列”问题。"
+          },
+          {
+            "name": "最佳时间复杂度",
+            "category": "概念",
+            "description": "算法在最佳输入情况下的时间复杂度，对应渐近下界。",
+            "descriptions": [
+              "算法在最佳输入情况下的时间复杂度，对应渐近下界。",
+              "算法在最佳输入情况下的时间复杂度，通常出现概率小，不具代表性。"
+            ],
+            "evidence": "“最佳时间复杂度”对应函数渐近下界，用 Ω 记号表示。",
+            "alt_descriptions": [
+              "算法在最佳输入情况下的时间复杂度，通常出现概率小，不具代表性。"
+            ],
+            "alt_evidences": [
+              "最佳时间复杂度几乎不用，因为输入数据一般需要满足严格条件才能达到最佳情况。"
+            ]
+          },
+          {
+            "name": "最差时间复杂度",
+            "category": "概念",
+            "description": "算法在最差输入情况下的时间复杂度，对应渐近上界。",
+            "descriptions": [
+              "算法在最差输入情况下的时间复杂度，对应渐近上界。",
+              "算法在最差输入情况下的时间复杂度，给出效率安全值。"
+            ],
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "alt_descriptions": [
+              "算法在最差输入情况下的时间复杂度，给出效率安全值。"
+            ],
+            "alt_evidences": [
+              "最差时间复杂度更为实用，因为它给出了一个效率安全值。"
+            ]
+          },
+          {
+            "name": "平均时间复杂度",
+            "category": "概念",
+            "description": "算法在随机输入数据下的平均运行效率，用 Θ 记号表示。",
+            "descriptions": [
+              "算法在随机输入数据下的平均运行效率，用 Θ 记号表示。",
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示。"
+            ],
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "alt_descriptions": [
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示。"
+            ]
+          },
+          {
+            "name": "大 O 记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学符号。",
+            "descriptions": [
+              "表示函数渐近上界的数学符号。"
+            ],
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界。"
+          },
+          {
+            "name": "渐近上界",
+            "category": "概念",
+            "description": "描述函数增长趋势的上界。",
+            "descriptions": [
+              "描述函数增长趋势的上界。",
+              "描述函数在自变量趋于无穷时的增长上界。"
+            ],
+            "evidence": "计算渐近上界就是寻找一个函数 f(n)，使得当 n 趋向于无穷大时，T(n) 和 f(n) 处于相同的增长级别。",
+            "alt_descriptions": [
+              "描述函数在自变量趋于无穷时的增长上界。"
+            ],
+            "alt_evidences": [
+              "最差时间复杂度使用大 O 符号表示，对应函数渐近上界。"
+            ]
+          },
+          {
+            "name": "操作数量",
+            "category": "概念",
+            "description": "算法中基本操作的执行次数，用于时间复杂度分析。",
+            "descriptions": [
+              "算法中基本操作的执行次数，用于时间复杂度分析。",
+              "算法执行的基本操作次数，用于推算时间复杂度。"
+            ],
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "alt_descriptions": [
+              "算法执行的基本操作次数，用于推算时间复杂度。"
+            ],
+            "alt_evidences": [
+              "推算时间复杂度分为两步，首先统计操作数量，然后判断渐近上界。"
+            ]
+          },
+          {
+            "name": "输入空间",
+            "category": "概念",
+            "description": "用于存储算法的输入数据的内存空间。",
+            "descriptions": [
+              "用于存储算法的输入数据的内存空间。"
+            ],
+            "evidence": "输入空间：用于存储算法的输入数据。"
+          },
+          {
+            "name": "暂存空间",
+            "category": "概念",
+            "description": "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间。",
+            "descriptions": [
+              "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间。"
+            ],
+            "evidence": "暂存空间：用于存储算法运行过程中的变量、对象、函数上下文等数据。"
+          },
+          {
+            "name": "输出空间",
+            "category": "概念",
+            "description": "用于存储算法的输出数据的内存空间。",
+            "descriptions": [
+              "用于存储算法的输出数据的内存空间。"
+            ],
+            "evidence": "输出空间：用于存储算法的输出数据。"
+          },
+          {
+            "name": "暂存数据",
+            "category": "概念",
+            "description": "暂存空间中用于保存常量、变量、对象等的部分。",
+            "descriptions": [
+              "暂存空间中用于保存常量、变量、对象等的部分。"
+            ],
+            "evidence": "暂存数据：用于保存算法运行过程中的各种常量、变量、对象等。"
+          },
+          {
+            "name": "指令空间",
+            "category": "概念",
+            "description": "暂存空间中用于保存编译后程序指令的部分，通常忽略不计。",
+            "descriptions": [
+              "暂存空间中用于保存编译后程序指令的部分，通常忽略不计。"
+            ],
+            "evidence": "指令空间：用于保存编译后的程序指令，在实际统计中通常忽略不计。"
+          },
+          {
+            "name": "以空间换时间",
+            "category": "概念",
+            "description": "牺牲内存空间来提升算法运行速度的策略。",
+            "descriptions": [
+              "牺牲内存空间来提升算法运行速度的策略。"
+            ],
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”。"
+          },
+          {
+            "name": "以时间换空间",
+            "category": "概念",
+            "description": "牺牲运行速度来节省内存空间的策略。",
+            "descriptions": [
+              "牺牲运行速度来节省内存空间的策略。"
+            ],
+            "evidence": "反之，则称为“以时间换空间”。"
+          },
+          {
+            "name": "归并排序",
+            "category": "方法",
+            "description": "一种分治排序算法，递归地将数组分成两半排序后合并。",
+            "descriptions": [
+              "一种分治排序算法，递归地将数组分成两半排序后合并。"
+            ],
+            "evidence": "例如归并排序，输入长度为 n 的数组，每轮递归将数组从中点处划分为两半。"
+          },
+          {
+            "name": "大O记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学记号，常用于描述最差时间复杂度。",
+            "descriptions": [
+              "表示函数渐近上界的数学记号，常用于描述最差时间复杂度。"
+            ],
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界。"
+          }
+        ],
+        "relations": [
+          {
+            "source": "算法效率",
+            "target": "时间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。时间效率：算法运行时间的长短。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含时间效率，是整体与部分的关系。"
+          },
+          {
+            "source": "算法效率",
+            "target": "空间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。空间效率：算法占用内存空间的大小。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含空间效率。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "时间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "复杂度分析能够体现算法运行所需的时间和空间资源与输入数据规模之间的关系。",
+            "confidence": 0.9,
+            "direction_basis": "复杂度分析是方法，时间复杂度是其分析对象之一，密切相关。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "空间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "复杂度分析能够体现算法运行所需的时间和空间资源与输入数据规模之间的关系。",
+            "confidence": 0.9,
+            "direction_basis": "复杂度分析是方法，空间复杂度是其分析对象之一，密切相关。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "算法 A 只有 1 个打印操作，算法运行时间不随着 n 增大而增长。我们称此算法的时间复杂度为“常数阶”。",
+            "confidence": 0.95,
+            "direction_basis": "常数阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "算法 B 中的打印操作需要循环 n 次，算法运行时间随着 n 增大呈线性增长。此算法的时间复杂度被称为“线性阶”。",
+            "confidence": 0.95,
+            "direction_basis": "线性阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "平方阶的操作数量相对于输入数据大小 n 以平方级别增长。",
+            "confidence": 0.95,
+            "direction_basis": "平方阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "指数阶增长非常迅速，在穷举法（暴力搜索、回溯等）中比较常见。",
+            "confidence": 0.95,
+            "direction_basis": "指数阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "对数阶反映了“每轮缩减到一半”的情况。",
+            "confidence": 0.95,
+            "direction_basis": "对数阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性对数阶",
+            "type": "CONTAINS",
+            "evidence": "线性对数阶常出现于嵌套循环中，两层循环的时间复杂度分别为 O(log n) 和 O(n)。",
+            "confidence": 0.95,
+            "direction_basis": "线性对数阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "阶乘阶",
+            "type": "CONTAINS",
+            "evidence": "阶乘阶对应数学上的“全排列”问题。",
+            "confidence": 0.95,
+            "direction_basis": "阶乘阶是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最佳时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“最佳时间复杂度”对应函数渐近下界，用 Ω 记号表示。",
+            "confidence": 0.95,
+            "direction_basis": "最佳时间复杂度是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最差时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.95,
+            "direction_basis": "最差时间复杂度是时间复杂度的一种类型。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平均时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "confidence": 0.95,
+            "direction_basis": "平均时间复杂度是时间复杂度的一种类型。"
+          },
+          {
+            "source": "迭代",
+            "target": "for 循环",
+            "type": "CONTAINS",
+            "evidence": "for 循环是最常见的迭代形式之一。",
+            "confidence": 0.95,
+            "direction_basis": "for 循环是迭代的一种形式。"
+          },
+          {
+            "source": "迭代",
+            "target": "while 循环",
+            "type": "CONTAINS",
+            "evidence": "while 循环也是一种实现迭代的方法。",
+            "confidence": 0.95,
+            "direction_basis": "while 循环是迭代的一种实现方法。"
+          },
+          {
+            "source": "迭代",
+            "target": "嵌套循环",
+            "type": "CONTAINS",
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构。",
+            "confidence": 0.9,
+            "direction_basis": "嵌套循环是迭代的一种结构。"
+          },
+          {
+            "source": "递归",
+            "target": "尾递归",
+            "type": "CONTAINS",
+            "evidence": "这种情况被称为尾递归（tail recursion）。",
+            "confidence": 0.95,
+            "direction_basis": "尾递归是递归的一种特殊形式。"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "type": "RELATED_TO",
+            "evidence": "这样不断递归调用下去，最终将产生一棵层数为 n 的递归树。",
+            "confidence": 0.9,
+            "direction_basis": "递归调用产生递归树，二者密切相关。"
+          },
+          {
+            "source": "递归",
+            "target": "调用栈",
+            "type": "RELATED_TO",
+            "evidence": "系统会在“调用栈”上为该函数分配新的栈帧。",
+            "confidence": 0.9,
+            "direction_basis": "递归调用使用调用栈，二者密切相关。"
+          },
+          {
+            "source": "调用栈",
+            "target": "栈帧空间",
+            "type": "RELATED_TO",
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中。",
+            "confidence": 0.9,
+            "direction_basis": "调用栈由栈帧空间组成，密切相关。"
+          },
+          {
+            "source": "递归",
+            "target": "分治",
+            "type": "APPLIES_TO",
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "confidence": 0.9,
+            "direction_basis": "递归用于实现分治策略。"
+          },
+          {
+            "source": "大 O 记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界。",
+            "confidence": 0.95,
+            "direction_basis": "大 O 记号用于表示渐近上界，密切相关。"
+          },
+          {
+            "source": "最差时间复杂度",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.95,
+            "direction_basis": "最差时间复杂度对应渐近上界。"
+          },
+          {
+            "source": "操作数量",
+            "target": "时间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "confidence": 0.9,
+            "direction_basis": "操作数量用于分析时间复杂度，密切相关。"
+          },
+          {
+            "source": "实际测试",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "最直接的方法是找一台计算机，运行这两个算法，并监控记录它们的运行时间和内存占用情况。",
+            "confidence": 0.9,
+            "direction_basis": "实际测试用于评估算法效率。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "复杂度分析为我们提供了一把评估算法效率的“标尺”。",
+            "confidence": 0.95,
+            "direction_basis": "复杂度分析用于评估算法效率。"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "type": "RELATED_TO",
+            "evidence": "一般情况下，空间复杂度的统计范围是“暂存空间”加上“输出空间”。",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度统计暂存空间，工具/支撑方为source"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "type": "RELATED_TO",
+            "evidence": "一般情况下，空间复杂度的统计范围是“暂存空间”加上“输出空间”。",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度统计输出空间，工具/支撑方为source"
+          },
+          {
+            "source": "暂存空间",
+            "target": "暂存数据",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分。",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含暂存数据，上位概念在前"
+          },
+          {
+            "source": "暂存空间",
+            "target": "栈帧空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分。",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含栈帧空间，上位概念在前"
+          },
+          {
+            "source": "暂存空间",
+            "target": "指令空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分。",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含指令空间，上位概念在前"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含常数阶，上位概念在前"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含对数阶，上位概念在前"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含线性阶，上位概念在前"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含平方阶，上位概念在前"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含指数阶，上位概念在前"
+          },
+          {
+            "source": "以空间换时间",
+            "target": "以时间换空间",
+            "type": "RELATED_TO",
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”；反之，则称为“以时间换空间”。",
+            "confidence": 0.9,
+            "direction_basis": "并列类似关系，source先出现"
+          },
+          {
+            "source": "实际测试",
+            "target": "复杂度分析",
+            "type": "RELATED_TO",
+            "evidence": "复杂度分析可以消除实际测试的弊端",
+            "confidence": 0.9,
+            "direction_basis": "实际测试与复杂度分析相关，实际测试为工具方"
+          },
+          {
+            "source": "大O记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界",
+            "confidence": 0.9,
+            "direction_basis": "大O记号表示渐近上界，大O为工具方"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "空间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的作用类似于时间复杂度",
+            "confidence": 0.9,
+            "direction_basis": "并列类似关系，时间复杂度先出现"
+          },
+          {
+            "source": "尾递归",
+            "target": "递归",
+            "type": "CONTAINS",
+            "evidence": "尾递归函数的空间复杂度可以优化至 O(1)",
+            "confidence": 0.8,
+            "direction_basis": "递归包含尾递归，上位概念在前"
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 55,
+        "dropped_counts": {
+          "duplicate": 13
+        },
+        "dropped_relations": [
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "调用栈",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "调用栈",
+            "type": "RELATED_TO",
+            "target": "栈帧空间",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最佳时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最差时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "平均时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "算法效率",
+            "category": "概念",
+            "description": "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+            "descriptions": [
+              "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+              "衡量算法优劣的指标，包括时间效率和空间效率。"
+            ],
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "alt_descriptions": [
+              "衡量算法优劣的指标，包括时间效率和空间效率。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "时间效率",
+            "category": "概念",
+            "description": "算法运行时间的长短。",
+            "descriptions": [
+              "算法运行时间的长短。",
+              "算法效率的一个方面，反映运行时间。"
+            ],
+            "evidence": "时间效率：算法运行时间的长短。",
+            "alt_descriptions": [
+              "算法效率的一个方面，反映运行时间。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "空间效率",
+            "category": "概念",
+            "description": "算法占用内存空间的大小。",
+            "descriptions": [
+              "算法占用内存空间的大小。",
+              "算法效率的一个方面，反映内存占用。"
+            ],
+            "evidence": "空间效率：算法占用内存空间的大小。",
+            "alt_descriptions": [
+              "算法效率的一个方面，反映内存占用。"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "实际测试",
+            "category": "方法",
+            "description": "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+            "descriptions": [
+              "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+              "通过运行程序来评估算法效率的方法，但受环境因素影响。"
+            ],
+            "evidence": "最直接的方法是找一台计算机，运行这两个算法，并监控记录它们的运行时间和内存占用情况。",
+            "alt_descriptions": [
+              "通过运行程序来评估算法效率的方法，但受环境因素影响。"
+            ],
+            "alt_evidences": [
+              "我们可以通过实际测试来评估算法效率"
+            ]
+          },
+          {
+            "name": "复杂度分析",
+            "category": "方法",
+            "description": "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+            "descriptions": [
+              "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+              "分析算法时间复杂度和空间复杂度的方法，能消除实际测试的弊端。"
+            ],
+            "evidence": "这种估算方法被称为渐近复杂度分析（asymptotic complexity analysis），简称复杂度分析。",
+            "alt_descriptions": [
+              "分析算法时间复杂度和空间复杂度的方法，能消除实际测试的弊端。"
+            ],
+            "alt_evidences": [
+              "复杂度分析可以消除实际测试的弊端"
+            ]
+          },
+          {
+            "name": "时间复杂度",
+            "category": "概念",
+            "description": "描述算法运行时间随输入数据规模增长的趋势。",
+            "descriptions": [
+              "描述算法运行时间随输入数据规模增长的趋势。",
+              "衡量算法运行时间随数据量增长的趋势。"
+            ],
+            "evidence": "时间复杂度（time complexity）",
+            "alt_descriptions": [
+              "衡量算法运行时间随数据量增长的趋势。"
+            ],
+            "alt_evidences": [
+              "时间复杂度用于衡量算法运行时间随数据量增长的趋势"
+            ]
+          },
+          {
+            "name": "空间复杂度",
+            "category": "概念",
+            "description": "衡量算法占用内存空间随着数据量变大时的增长趋势。",
+            "descriptions": [
+              "衡量算法占用内存空间随着数据量变大时的增长趋势。",
+              "衡量算法占用内存空间随数据量增长的趋势。"
+            ],
+            "evidence": "空间复杂度（space complexity）用于衡量算法占用内存空间随着数据量变大时的增长趋势。",
+            "alt_descriptions": [
+              "衡量算法占用内存空间随数据量增长的趋势。"
+            ],
+            "alt_evidences": [
+              "空间复杂度（space complexity）用于衡量算法占用内存空间随着数据量变大时的增长趋势"
+            ]
+          },
+          {
+            "name": "迭代",
+            "category": "概念",
+            "description": "一种重复执行某个任务的控制结构。",
+            "descriptions": [
+              "一种重复执行某个任务的控制结构。"
+            ],
+            "evidence": "迭代（iteration）是一种重复执行某个任务的控制结构。"
+          },
+          {
+            "name": "递归",
+            "category": "概念",
+            "description": "一种算法策略，通过函数调用自身来解决问题。",
+            "descriptions": [
+              "一种算法策略，通过函数调用自身来解决问题。",
+              "函数调用自身的编程技巧，在空间复杂度分析中需注意栈帧空间。"
+            ],
+            "evidence": "递归（recursion）是一种算法策略，通过函数调用自身来解决问题。",
+            "category_variants": [
+              "方法"
+            ],
+            "alt_descriptions": [
+              "函数调用自身的编程技巧，在空间复杂度分析中需注意栈帧空间。"
+            ],
+            "alt_evidences": [
+              "递归函数 recur() 在运行过程中会同时存在 n 个未返回的 recur()"
+            ]
+          },
+          {
+            "name": "for 循环",
+            "category": "方法",
+            "description": "最常见的迭代形式之一，适合在预先知道迭代次数时使用。",
+            "descriptions": [
+              "最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+            ],
+            "evidence": "for 循环是最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+          },
+          {
+            "name": "while 循环",
+            "category": "方法",
+            "description": "一种实现迭代的方法，每轮先检查条件。",
+            "descriptions": [
+              "一种实现迭代的方法，每轮先检查条件。"
+            ],
+            "evidence": "while 循环也是一种实现迭代的方法。"
+          },
+          {
+            "name": "嵌套循环",
+            "category": "方法",
+            "description": "在一个循环结构内嵌套另一个循环结构。",
+            "descriptions": [
+              "在一个循环结构内嵌套另一个循环结构。"
+            ],
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构"
+          },
+          {
+            "name": "尾递归",
+            "category": "方法",
+            "description": "函数在返回前的最后一步才进行递归调用，可被优化。",
+            "descriptions": [
+              "函数在返回前的最后一步才进行递归调用，可被优化。",
+              "一种递归形式，理论上可优化至常数阶空间复杂度。"
+            ],
+            "evidence": "如果函数在返回前的最后一步才进行递归调用，则该函数可以被编译器或解释器优化，使其在空间效率上与迭代相当。这种情况被称为尾递归（tail recursion）。",
+            "alt_descriptions": [
+              "一种递归形式，理论上可优化至常数阶空间复杂度。"
+            ],
+            "alt_evidences": [
+              "尾递归的空间复杂度是 O(1) 吗？"
+            ]
+          },
+          {
+            "name": "调用栈",
+            "category": "概念",
+            "description": "系统为递归函数调用分配栈帧的内存区域。",
+            "descriptions": [
+              "系统为递归函数调用分配栈帧的内存区域。"
+            ],
+            "evidence": "系统会在“调用栈”上为该函数分配新的栈帧"
+          },
+          {
+            "name": "栈帧空间",
+            "category": "概念",
+            "description": "存储函数上下文数据的内存区域。",
+            "descriptions": [
+              "存储函数上下文数据的内存区域。",
+              "暂存空间中用于保存调用函数上下文数据的部分。"
+            ],
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中",
+            "alt_descriptions": [
+              "暂存空间中用于保存调用函数上下文数据的部分。"
+            ],
+            "alt_evidences": [
+              "栈帧空间：用于保存调用函数的上下文数据"
+            ]
+          },
+          {
+            "name": "递归树",
+            "category": "概念",
+            "description": "递归调用产生的树形结构。",
+            "descriptions": [
+              "递归调用产生的树形结构。",
+              "描述递归调用过程的树形结构，用于分析空间复杂度。"
+            ],
+            "evidence": "最终将产生一棵层数为 n 的递归树（recursion tree）。",
+            "alt_descriptions": [
+              "描述递归调用过程的树形结构，用于分析空间复杂度。"
+            ],
+            "alt_evidences": [
+              "形成高度为 log n 的递归树"
+            ]
+          },
+          {
+            "name": "分治",
+            "category": "方法",
+            "description": "将问题分解为更小子问题的算法策略。",
+            "descriptions": [
+              "将问题分解为更小子问题的算法策略。",
+              "将问题分解为子问题求解的算法思想，常见于对数阶空间复杂度。"
+            ],
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "alt_descriptions": [
+              "将问题分解为子问题求解的算法思想，常见于对数阶空间复杂度。"
+            ],
+            "alt_evidences": [
+              "对数阶常见于分治算法"
+            ]
+          },
+          {
+            "name": "大 O 记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学符号。",
+            "descriptions": [
+              "表示函数渐近上界的数学符号。"
+            ],
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界（asymptotic upper bound）。"
+          },
+          {
+            "name": "渐近上界",
+            "category": "概念",
+            "description": "描述函数增长上限的数学概念。",
+            "descriptions": [
+              "描述函数增长上限的数学概念。",
+              "描述函数在自变量趋于无穷时的增长上界。"
+            ],
+            "evidence": "表示函数 T(n) 的渐近上界（asymptotic upper bound）。",
+            "alt_descriptions": [
+              "描述函数在自变量趋于无穷时的增长上界。"
+            ],
+            "alt_evidences": [
+              "对应函数渐近上界"
+            ]
+          },
+          {
+            "name": "常数阶",
+            "category": "概念",
+            "description": "操作数量与输入数据大小无关的时间复杂度。",
+            "descriptions": [
+              "操作数量与输入数据大小无关的时间复杂度。",
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模无关。"
+            ],
+            "evidence": "算法 A 只有 1 个打印操作，算法运行时间不随着 n 增大而增长。我们称此算法的时间复杂度为“常数阶”。",
+            "alt_descriptions": [
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模无关。"
+            ],
+            "alt_evidences": [
+              "常数阶 O(1)"
+            ]
+          },
+          {
+            "name": "线性阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小线性增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小线性增长的时间复杂度。",
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模成正比。"
+            ],
+            "evidence": "算法 B 中的打印操作需要循环 n 次，算法运行时间随着 n 增大呈线性增长。此算法的时间复杂度被称为“线性阶”。",
+            "alt_descriptions": [
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模成正比。"
+            ],
+            "alt_evidences": [
+              "线性阶 O(n)"
+            ]
+          },
+          {
+            "name": "平方阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小平方增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小平方增长的时间复杂度。",
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的平方成正比。"
+            ],
+            "evidence": "平方阶的操作数量相对于输入数据大小 n 以平方级别增长。",
+            "alt_descriptions": [
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的平方成正比。"
+            ],
+            "alt_evidences": [
+              "平方阶 O(n^2)"
+            ]
+          },
+          {
+            "name": "指数阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小指数增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小指数增长的时间复杂度。",
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的指数成正比。"
+            ],
+            "evidence": "指数阶增长非常迅速，在穷举法（暴力搜索、回溯等）中比较常见。",
+            "alt_descriptions": [
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的指数成正比。"
+            ],
+            "alt_evidences": [
+              "指数阶 O(2^n)"
+            ]
+          },
+          {
+            "name": "对数阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小对数增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小对数增长的时间复杂度。",
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的对数成正比。"
+            ],
+            "evidence": "对数阶反映了“每轮缩减到一半”的情况。",
+            "alt_descriptions": [
+              "空间复杂度或时间复杂度的一种，表示增长与输入规模的对数成正比。"
+            ],
+            "alt_evidences": [
+              "对数阶 O(log n)"
+            ]
+          },
+          {
+            "name": "线性对数阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小线性对数增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小线性对数增长的时间复杂度。"
+            ],
+            "evidence": "线性对数阶常出现于嵌套循环中，两层循环的时间复杂度分别为 O(log n) 和 O(n)。"
+          },
+          {
+            "name": "阶乘阶",
+            "category": "概念",
+            "description": "操作数量随输入数据大小阶乘增长的时间复杂度。",
+            "descriptions": [
+              "操作数量随输入数据大小阶乘增长的时间复杂度。"
+            ],
+            "evidence": "阶乘阶对应数学上的“全排列”问题。"
+          },
+          {
+            "name": "最差时间复杂度",
+            "category": "概念",
+            "description": "算法在最坏情况下的时间复杂度，对应渐近上界。",
+            "descriptions": [
+              "算法在最坏情况下的时间复杂度，对应渐近上界。",
+              "算法在最差输入情况下的时间复杂度，给出效率安全值。"
+            ],
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "alt_descriptions": [
+              "算法在最差输入情况下的时间复杂度，给出效率安全值。"
+            ],
+            "alt_evidences": [
+              "最差时间复杂度更为实用，因为它给出了一个效率安全值"
+            ]
+          },
+          {
+            "name": "最佳时间复杂度",
+            "category": "概念",
+            "description": "算法在最好情况下的时间复杂度，对应渐近下界。",
+            "descriptions": [
+              "算法在最好情况下的时间复杂度，对应渐近下界。",
+              "算法在最佳输入情况下的时间复杂度，通常出现概率小，具有误导性。"
+            ],
+            "evidence": "“最佳时间复杂度”对应函数渐近下界，用 Ω 记号表示。",
+            "alt_descriptions": [
+              "算法在最佳输入情况下的时间复杂度，通常出现概率小，具有误导性。"
+            ],
+            "alt_evidences": [
+              "我们在实际中很少使用最佳时间复杂度"
+            ]
+          },
+          {
+            "name": "平均时间复杂度",
+            "category": "概念",
+            "description": "算法在随机输入数据下的平均运行效率。",
+            "descriptions": [
+              "算法在随机输入数据下的平均运行效率。",
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示。"
+            ],
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "alt_descriptions": [
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示。"
+            ],
+            "alt_evidences": [
+              "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示"
+            ]
+          },
+          {
+            "name": "操作数量",
+            "category": "概念",
+            "description": "算法中计算操作的执行次数，用于时间复杂度分析。",
+            "descriptions": [
+              "算法中计算操作的执行次数，用于时间复杂度分析。",
+              "算法执行的基本操作次数，用于推算时间复杂度。"
+            ],
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "alt_descriptions": [
+              "算法执行的基本操作次数，用于推算时间复杂度。"
+            ],
+            "alt_evidences": [
+              "首先统计操作数量，然后判断渐近上界"
+            ]
+          },
+          {
+            "name": "输入空间",
+            "category": "概念",
+            "description": "用于存储算法的输入数据的内存空间。",
+            "descriptions": [
+              "用于存储算法的输入数据的内存空间。"
+            ],
+            "evidence": "输入空间：用于存储算法的输入数据"
+          },
+          {
+            "name": "暂存空间",
+            "category": "概念",
+            "description": "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间。",
+            "descriptions": [
+              "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间。"
+            ],
+            "evidence": "暂存空间：用于存储算法在运行过程中的变量、对象、函数上下文等数据"
+          },
+          {
+            "name": "输出空间",
+            "category": "概念",
+            "description": "用于存储算法的输出数据的内存空间。",
+            "descriptions": [
+              "用于存储算法的输出数据的内存空间。"
+            ],
+            "evidence": "输出空间：用于存储算法的输出数据"
+          },
+          {
+            "name": "暂存数据",
+            "category": "概念",
+            "description": "暂存空间中用于保存常量、变量、对象等的部分。",
+            "descriptions": [
+              "暂存空间中用于保存常量、变量、对象等的部分。"
+            ],
+            "evidence": "暂存数据：用于保存算法运行过程中的各种常量、变量、对象等"
+          },
+          {
+            "name": "指令空间",
+            "category": "概念",
+            "description": "暂存空间中用于保存编译后程序指令的部分，通常忽略不计。",
+            "descriptions": [
+              "暂存空间中用于保存编译后程序指令的部分，通常忽略不计。"
+            ],
+            "evidence": "指令空间：用于保存编译后的程序指令，在实际统计中通常忽略不计"
+          },
+          {
+            "name": "以空间换时间",
+            "category": "方法",
+            "description": "牺牲内存空间来提升算法运行速度的策略。",
+            "descriptions": [
+              "牺牲内存空间来提升算法运行速度的策略。"
+            ],
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”"
+          },
+          {
+            "name": "以时间换空间",
+            "category": "方法",
+            "description": "牺牲运行速度来节省内存空间的策略。",
+            "descriptions": [
+              "牺牲运行速度来节省内存空间的策略。"
+            ],
+            "evidence": "反之，则称为“以时间换空间”"
+          },
+          {
+            "name": "归并排序",
+            "category": "方法",
+            "description": "一种分治排序算法，空间复杂度为对数阶。",
+            "descriptions": [
+              "一种分治排序算法，空间复杂度为对数阶。"
+            ],
+            "evidence": "例如归并排序，输入长度为 n 的数组，每轮递归将数组从中点处划分为两半"
+          },
+          {
+            "name": "满二叉树",
+            "category": "概念",
+            "description": "每层节点数都达到最大值的二叉树，节点数量为2^n-1。",
+            "descriptions": [
+              "每层节点数都达到最大值的二叉树，节点数量为2^n-1。"
+            ],
+            "evidence": "层数为 n 的“满二叉树”的节点数量为 2^n - 1"
+          },
+          {
+            "name": "大O记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学记号，常用于最差时间复杂度。",
+            "descriptions": [
+              "表示函数渐近上界的数学记号，常用于最差时间复杂度。"
+            ],
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界"
+          },
+          {
+            "name": "Θ记号",
+            "category": "概念",
+            "description": "表示函数渐近紧确界的数学记号，常用于平均时间复杂度。",
+            "descriptions": [
+              "表示函数渐近紧确界的数学记号，常用于平均时间复杂度。"
+            ],
+            "evidence": "用 Θ 记号来表示"
+          }
+        ],
+        "relations": [
+          {
+            "source": "算法效率",
+            "target": "时间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含时间效率，是上位概念。"
+          },
+          {
+            "source": "算法效率",
+            "target": "空间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含空间效率，是上位概念。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“时间和空间资源”分别对应时间复杂度（time complexity）和空间复杂度（space complexity）。",
+            "confidence": 0.95,
+            "direction_basis": "复杂度分析包含时间复杂度。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "空间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“时间和空间资源”分别对应时间复杂度（time complexity）和空间复杂度（space complexity）。",
+            "confidence": 0.95,
+            "direction_basis": "复杂度分析包含空间复杂度。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含常数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含线性阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含平方阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含指数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含对数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性对数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含线性对数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "阶乘阶",
+            "type": "CONTAINS",
+            "evidence": "常见的时间复杂度类型如下图所示（按照从低到高的顺序排列）。",
+            "confidence": 0.95,
+            "direction_basis": "时间复杂度包含阶乘阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最差时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "最差时间复杂度对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "时间复杂度包含最差时间复杂度。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最佳时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "最佳时间复杂度对应函数渐近下界，用 Ω 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "时间复杂度包含最佳时间复杂度。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平均时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "confidence": 0.9,
+            "direction_basis": "时间复杂度包含平均时间复杂度。"
+          },
+          {
+            "source": "迭代",
+            "target": "for 循环",
+            "type": "CONTAINS",
+            "evidence": "for 循环是最常见的迭代形式之一。",
+            "confidence": 0.95,
+            "direction_basis": "迭代包含 for 循环。"
+          },
+          {
+            "source": "迭代",
+            "target": "while 循环",
+            "type": "CONTAINS",
+            "evidence": "while 循环也是一种实现迭代的方法。",
+            "confidence": 0.95,
+            "direction_basis": "迭代包含 while 循环。"
+          },
+          {
+            "source": "迭代",
+            "target": "嵌套循环",
+            "type": "CONTAINS",
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构。",
+            "confidence": 0.9,
+            "direction_basis": "迭代包含嵌套循环。"
+          },
+          {
+            "source": "递归",
+            "target": "尾递归",
+            "type": "CONTAINS",
+            "evidence": "这种情况被称为尾递归（tail recursion）。",
+            "confidence": 0.95,
+            "direction_basis": "递归包含尾递归。"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "type": "RELATED_TO",
+            "evidence": "最终将产生一棵层数为 n 的递归树（recursion tree）。",
+            "confidence": 0.9,
+            "direction_basis": "递归与递归树密切相关，递归树是递归调用的产物。"
+          },
+          {
+            "source": "递归",
+            "target": "调用栈",
+            "type": "RELATED_TO",
+            "evidence": "调用栈和栈帧空间这类递归术语已经暗示了递归与栈之间的密切关系。",
+            "confidence": 0.9,
+            "direction_basis": "递归与调用栈密切相关。"
+          },
+          {
+            "source": "调用栈",
+            "target": "栈帧空间",
+            "type": "RELATED_TO",
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中。",
+            "confidence": 0.9,
+            "direction_basis": "调用栈与栈帧空间密切相关。"
+          },
+          {
+            "source": "递归",
+            "target": "分治",
+            "type": "APPLIES_TO",
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "confidence": 0.9,
+            "direction_basis": "递归用于实现分治策略。"
+          },
+          {
+            "source": "大 O 记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界（asymptotic upper bound）。",
+            "confidence": 0.95,
+            "direction_basis": "大 O 记号用于表示渐近上界。"
+          },
+          {
+            "source": "最差时间复杂度",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "最差时间复杂度对应渐近上界。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "复杂度分析为我们提供了一把评估算法效率的“标尺”。",
+            "confidence": 0.95,
+            "direction_basis": "复杂度分析用于评估算法效率。"
+          },
+          {
+            "source": "实际测试",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "效率评估方法主要分为两种：实际测试、理论估算。",
+            "confidence": 0.9,
+            "direction_basis": "实际测试用于评估算法效率。"
+          },
+          {
+            "source": "操作数量",
+            "target": "时间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "confidence": 0.9,
+            "direction_basis": "操作数量与时间复杂度密切相关。"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型：常数阶 O(1)",
+            "confidence": 0.95,
+            "direction_basis": "空间复杂度包含常数阶类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型：对数阶 O(log n)",
+            "confidence": 0.95,
+            "direction_basis": "空间复杂度包含对数阶类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型：线性阶 O(n)",
+            "confidence": 0.95,
+            "direction_basis": "空间复杂度包含线性阶类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型：平方阶 O(n^2)",
+            "confidence": 0.95,
+            "direction_basis": "空间复杂度包含平方阶类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型：指数阶 O(2^n)",
+            "confidence": 0.95,
+            "direction_basis": "空间复杂度包含指数阶类型"
+          },
+          {
+            "source": "暂存空间",
+            "target": "暂存数据",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分：暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含暂存数据"
+          },
+          {
+            "source": "暂存空间",
+            "target": "栈帧空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分：暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含栈帧空间"
+          },
+          {
+            "source": "暂存空间",
+            "target": "指令空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分：暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间包含指令空间"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的统计范围是“暂存空间”加上“输出空间”",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度与暂存空间密切相关，暂存空间是其统计对象"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的统计范围是“暂存空间”加上“输出空间”",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度与输出空间密切相关，输出空间是其统计对象"
+          },
+          {
+            "source": "以空间换时间",
+            "target": "以时间换空间",
+            "type": "RELATED_TO",
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”；反之，则称为“以时间换空间”",
+            "confidence": 0.9,
+            "direction_basis": "两者是相反策略，并列相关"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "空间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的作用类似于时间复杂度",
+            "confidence": 0.9,
+            "direction_basis": "两者类似且密切相关"
+          },
+          {
+            "source": "大O记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界",
+            "confidence": 0.9,
+            "direction_basis": "大O记号用于表示渐近上界"
+          },
+          {
+            "source": "实际测试",
+            "target": "复杂度分析",
+            "type": "RELATED_TO",
+            "evidence": "复杂度分析可以消除实际测试的弊端",
+            "confidence": 0.9,
+            "direction_basis": "实际测试与复杂度分析是评估算法效率的两种方法，密切相关"
+          },
+          {
+            "source": "分治",
+            "target": "归并排序",
+            "type": "APPLIES_TO",
+            "evidence": "例如归并排序，输入长度为 n 的数组，每轮递归将数组从中点处划分为两半",
+            "confidence": 0.9,
+            "direction_basis": "分治思想应用于归并排序"
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 54,
+        "dropped_counts": {
+          "duplicate": 12
+        },
+        "dropped_relations": [
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最佳时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最差时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "平均时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "尾递归",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      },
+      {
+        "entities": [
+          {
+            "name": "算法效率",
+            "category": "概念",
+            "description": "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+            "descriptions": [
+              "衡量算法优劣的主要评价指标，包括时间效率和空间效率两个维度。",
+              "衡量算法优劣的指标，包括时间效率和空间效率"
+            ],
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "alt_descriptions": [
+              "衡量算法优劣的指标，包括时间效率和空间效率"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "时间效率",
+            "category": "概念",
+            "description": "算法运行时间的长短。",
+            "descriptions": [
+              "算法运行时间的长短。",
+              "算法运行速度的效率指标"
+            ],
+            "evidence": "时间效率：算法运行时间的长短。",
+            "alt_descriptions": [
+              "算法运行速度的效率指标"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "空间效率",
+            "category": "概念",
+            "description": "算法占用内存空间的大小。",
+            "descriptions": [
+              "算法占用内存空间的大小。",
+              "算法内存使用效率的指标"
+            ],
+            "evidence": "空间效率：算法占用内存空间的大小。",
+            "alt_descriptions": [
+              "算法内存使用效率的指标"
+            ],
+            "alt_evidences": [
+              "时间效率和空间效率是衡量算法优劣的两个主要评价指标"
+            ]
+          },
+          {
+            "name": "实际测试",
+            "category": "方法",
+            "description": "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+            "descriptions": [
+              "通过运行算法并监控记录运行时间和内存占用情况来评估效率的方法。",
+              "通过运行程序来评估算法效率的方法"
+            ],
+            "evidence": "最直接的方法是找一台计算机，运行这两个算法，并监控记录它们的运行时间和内存占用情况。",
+            "alt_descriptions": [
+              "通过运行程序来评估算法效率的方法"
+            ],
+            "alt_evidences": [
+              "我们可以通过实际测试来评估算法效率"
+            ]
+          },
+          {
+            "name": "复杂度分析",
+            "category": "方法",
+            "description": "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+            "descriptions": [
+              "通过计算来评估算法效率的理论估算方法，又称渐近复杂度分析。",
+              "通过理论分析评估算法效率的方法"
+            ],
+            "evidence": "这种估算方法被称为渐近复杂度分析（asymptotic complexity analysis），简称复杂度分析。",
+            "alt_descriptions": [
+              "通过理论分析评估算法效率的方法"
+            ],
+            "alt_evidences": [
+              "复杂度分析可以消除实际测试的弊端，分析结果适用于所有运行平台"
+            ]
+          },
+          {
+            "name": "时间复杂度",
+            "category": "概念",
+            "description": "体现算法运行时间与输入数据规模之间关系的概念。",
+            "descriptions": [
+              "体现算法运行时间与输入数据规模之间关系的概念。",
+              "衡量算法运行时间随数据量增长趋势的指标"
+            ],
+            "evidence": "“时间和空间资源”分别对应时间复杂度（time complexity）和空间复杂度（space complexity）。",
+            "alt_descriptions": [
+              "衡量算法运行时间随数据量增长趋势的指标"
+            ],
+            "alt_evidences": [
+              "时间复杂度用于衡量算法运行时间随数据量增长的趋势"
+            ]
+          },
+          {
+            "name": "空间复杂度",
+            "category": "概念",
+            "description": "衡量算法占用内存空间随着数据量变大时的增长趋势。",
+            "descriptions": [
+              "衡量算法占用内存空间随着数据量变大时的增长趋势。",
+              "衡量算法占用内存空间随数据量增长趋势的指标"
+            ],
+            "evidence": "空间复杂度（space complexity）用于衡量算法占用内存空间随着数据量变大时的增长趋势。",
+            "alt_descriptions": [
+              "衡量算法占用内存空间随数据量增长趋势的指标"
+            ],
+            "alt_evidences": [
+              "空间复杂度（space complexity）用于衡量算法占用内存空间随着数据量变大时的增长趋势"
+            ]
+          },
+          {
+            "name": "迭代",
+            "category": "概念",
+            "description": "一种重复执行某个任务的控制结构。",
+            "descriptions": [
+              "一种重复执行某个任务的控制结构。"
+            ],
+            "evidence": "迭代（iteration）是一种重复执行某个任务的控制结构。"
+          },
+          {
+            "name": "递归",
+            "category": "概念",
+            "description": "一种算法策略，通过函数调用自身来解决问题。",
+            "descriptions": [
+              "一种算法策略，通过函数调用自身来解决问题。",
+              "函数直接或间接调用自身的编程技巧"
+            ],
+            "evidence": "递归（recursion）是一种算法策略，通过函数调用自身来解决问题。",
+            "alt_descriptions": [
+              "函数直接或间接调用自身的编程技巧"
+            ],
+            "alt_evidences": [
+              "递归函数 recur() 在运行过程中会同时存在 n 个未返回的 recur()"
+            ]
+          },
+          {
+            "name": "for 循环",
+            "category": "方法",
+            "description": "最常见的迭代形式之一，适合在预先知道迭代次数时使用。",
+            "descriptions": [
+              "最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+            ],
+            "evidence": "for 循环是最常见的迭代形式之一，适合在预先知道迭代次数时使用。"
+          },
+          {
+            "name": "while 循环",
+            "category": "方法",
+            "description": "一种实现迭代的方法，每轮先检查条件。",
+            "descriptions": [
+              "一种实现迭代的方法，每轮先检查条件。"
+            ],
+            "evidence": "while 循环也是一种实现迭代的方法。"
+          },
+          {
+            "name": "嵌套循环",
+            "category": "方法",
+            "description": "在一个循环结构内嵌套另一个循环结构。",
+            "descriptions": [
+              "在一个循环结构内嵌套另一个循环结构。"
+            ],
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构。"
+          },
+          {
+            "name": "尾递归",
+            "category": "概念",
+            "description": "函数在返回前的最后一步才进行递归调用的情况。",
+            "descriptions": [
+              "函数在返回前的最后一步才进行递归调用的情况。",
+              "递归调用是函数最后一步操作的递归形式"
+            ],
+            "evidence": "如果函数在返回前的最后一步才进行递归调用，则该函数可以被编译器或解释器优化，使其在空间效率上与迭代相当。这种情况被称为尾递归（tail recursion）。",
+            "alt_descriptions": [
+              "递归调用是函数最后一步操作的递归形式"
+            ],
+            "alt_evidences": [
+              "尾递归函数的空间复杂度可以优化至 O(1)"
+            ]
+          },
+          {
+            "name": "调用栈",
+            "category": "概念",
+            "description": "系统为递归函数调用分配栈帧的内存区域。",
+            "descriptions": [
+              "系统为递归函数调用分配栈帧的内存区域。"
+            ],
+            "evidence": "系统会在“调用栈”上为该函数分配新的栈帧。"
+          },
+          {
+            "name": "栈帧空间",
+            "category": "概念",
+            "description": "存储函数上下文数据的内存区域。",
+            "descriptions": [
+              "存储函数上下文数据的内存区域。",
+              "暂存空间中用于保存函数调用上下文数据的部分"
+            ],
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中。",
+            "alt_descriptions": [
+              "暂存空间中用于保存函数调用上下文数据的部分"
+            ],
+            "alt_evidences": [
+              "栈帧空间：用于保存调用函数的上下文数据"
+            ]
+          },
+          {
+            "name": "递归树",
+            "category": "概念",
+            "description": "递归调用产生的树状结构，用于分析递归过程。",
+            "descriptions": [
+              "递归调用产生的树状结构，用于分析递归过程。",
+              "描述递归调用过程的树形结构，用于分析复杂度"
+            ],
+            "evidence": "这样不断递归调用下去，最终将产生一棵层数为 n 的递归树（recursion tree）。",
+            "alt_descriptions": [
+              "描述递归调用过程的树形结构，用于分析复杂度"
+            ],
+            "alt_evidences": [
+              "形成高度为 log n 的递归树"
+            ]
+          },
+          {
+            "name": "分治",
+            "category": "方法",
+            "description": "将问题分解为更小子问题的算法策略。",
+            "descriptions": [
+              "将问题分解为更小子问题的算法策略。",
+              "将问题分解为子问题分别求解的方法"
+            ],
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "alt_descriptions": [
+              "将问题分解为子问题分别求解的方法"
+            ],
+            "alt_evidences": [
+              "对数阶常见于分治算法"
+            ]
+          },
+          {
+            "name": "常数阶",
+            "category": "概念",
+            "description": "操作数量与输入数据大小 n 无关的时间复杂度类型。",
+            "descriptions": [
+              "操作数量与输入数据大小 n 无关的时间复杂度类型。",
+              "空间或时间复杂度与输入规模无关，记作O(1)"
+            ],
+            "evidence": "算法 A 只有 1 个打印操作，算法运行时间不随着 n 增大而增长。我们称此算法的时间复杂度为“常数阶”。",
+            "alt_descriptions": [
+              "空间或时间复杂度与输入规模无关，记作O(1)"
+            ],
+            "alt_evidences": [
+              "常数阶 O(1)"
+            ]
+          },
+          {
+            "name": "线性阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以线性级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以线性级别增长的时间复杂度类型。",
+              "空间或时间复杂度随输入规模线性增长，记作O(n)"
+            ],
+            "evidence": "算法 B 中的打印操作需要循环 n 次，算法运行时间随着 n 增大呈线性增长。此算法的时间复杂度被称为“线性阶”。",
+            "alt_descriptions": [
+              "空间或时间复杂度随输入规模线性增长，记作O(n)"
+            ],
+            "alt_evidences": [
+              "线性阶 O(n)"
+            ]
+          },
+          {
+            "name": "平方阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以平方级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以平方级别增长的时间复杂度类型。",
+              "空间或时间复杂度随输入规模平方增长，记作O(n^2)"
+            ],
+            "evidence": "平方阶的操作数量相对于输入数据大小 n 以平方级别增长。",
+            "alt_descriptions": [
+              "空间或时间复杂度随输入规模平方增长，记作O(n^2)"
+            ],
+            "alt_evidences": [
+              "平方阶 O(n^2)"
+            ]
+          },
+          {
+            "name": "指数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以指数级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以指数级别增长的时间复杂度类型。",
+              "空间或时间复杂度随输入规模指数增长，记作O(2^n)"
+            ],
+            "evidence": "指数阶增长非常迅速，在穷举法（暴力搜索、回溯等）中比较常见。",
+            "alt_descriptions": [
+              "空间或时间复杂度随输入规模指数增长，记作O(2^n)"
+            ],
+            "alt_evidences": [
+              "指数阶 O(2^n)"
+            ]
+          },
+          {
+            "name": "对数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以对数级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以对数级别增长的时间复杂度类型。",
+              "空间或时间复杂度随输入规模对数增长，记作O(log n)"
+            ],
+            "evidence": "对数阶反映了“每轮缩减到一半”的情况。",
+            "alt_descriptions": [
+              "空间或时间复杂度随输入规模对数增长，记作O(log n)"
+            ],
+            "alt_evidences": [
+              "对数阶 O(log n)"
+            ]
+          },
+          {
+            "name": "线性对数阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以线性对数级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以线性对数级别增长的时间复杂度类型。"
+            ],
+            "evidence": "线性对数阶常出现于嵌套循环中，两层循环的时间复杂度分别为 O(log n) 和 O(n)。"
+          },
+          {
+            "name": "阶乘阶",
+            "category": "概念",
+            "description": "操作数量相对于输入数据大小 n 以阶乘级别增长的时间复杂度类型。",
+            "descriptions": [
+              "操作数量相对于输入数据大小 n 以阶乘级别增长的时间复杂度类型。"
+            ],
+            "evidence": "阶乘阶对应数学上的“全排列”问题。"
+          },
+          {
+            "name": "最佳时间复杂度",
+            "category": "概念",
+            "description": "算法在最佳输入情况下的时间复杂度，对应函数渐近下界。",
+            "descriptions": [
+              "算法在最佳输入情况下的时间复杂度，对应函数渐近下界。",
+              "算法在最佳输入情况下的时间复杂度，出现概率小"
+            ],
+            "evidence": "“最佳时间复杂度”对应函数渐近下界，用 Ω 记号表示。",
+            "alt_descriptions": [
+              "算法在最佳输入情况下的时间复杂度，出现概率小"
+            ],
+            "alt_evidences": [
+              "最佳时间复杂度几乎不用，因为输入数据一般需要满足严格条件才能达到最佳情况"
+            ]
+          },
+          {
+            "name": "最差时间复杂度",
+            "category": "概念",
+            "description": "算法在最差输入情况下的时间复杂度，对应函数渐近上界。",
+            "descriptions": [
+              "算法在最差输入情况下的时间复杂度，对应函数渐近上界。",
+              "算法在最差输入情况下的时间复杂度，给出效率安全值"
+            ],
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "alt_descriptions": [
+              "算法在最差输入情况下的时间复杂度，给出效率安全值"
+            ],
+            "alt_evidences": [
+              "最差时间复杂度更为实用，因为它给出了一个效率安全值"
+            ]
+          },
+          {
+            "name": "平均时间复杂度",
+            "category": "概念",
+            "description": "算法在随机输入数据下的平均时间复杂度，用 Θ 记号表示。",
+            "descriptions": [
+              "算法在随机输入数据下的平均时间复杂度，用 Θ 记号表示。",
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示"
+            ],
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "alt_descriptions": [
+              "算法在随机输入数据下的期望运行时间，用Θ记号表示"
+            ],
+            "alt_evidences": [
+              "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示"
+            ]
+          },
+          {
+            "name": "大 O 记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学符号。",
+            "descriptions": [
+              "表示函数渐近上界的数学符号。"
+            ],
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界（asymptotic upper bound）。"
+          },
+          {
+            "name": "渐近上界",
+            "category": "概念",
+            "description": "描述函数增长趋势的上界。",
+            "descriptions": [
+              "描述函数增长趋势的上界。",
+              "当n趋向无穷大时函数增长的上界"
+            ],
+            "evidence": "表示函数 T(n) 的渐近上界（asymptotic upper bound）。",
+            "alt_descriptions": [
+              "当n趋向无穷大时函数增长的上界"
+            ],
+            "alt_evidences": [
+              "对应函数渐近上界，反映当 n 趋向正无穷时，操作数量 T(n) 的增长级别"
+            ]
+          },
+          {
+            "name": "操作数量",
+            "category": "概念",
+            "description": "算法中计算操作的执行次数，用于时间复杂度分析。",
+            "descriptions": [
+              "算法中计算操作的执行次数，用于时间复杂度分析。",
+              "算法执行的基本操作次数，用于推算时间复杂度"
+            ],
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "alt_descriptions": [
+              "算法执行的基本操作次数，用于推算时间复杂度"
+            ],
+            "alt_evidences": [
+              "首先统计操作数量，然后判断渐近上界"
+            ]
+          },
+          {
+            "name": "大O记号",
+            "category": "概念",
+            "description": "表示函数渐近上界的数学记号，常用于描述最差时间复杂度",
+            "descriptions": [
+              "表示函数渐近上界的数学记号，常用于描述最差时间复杂度"
+            ],
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界"
+          },
+          {
+            "name": "输入空间",
+            "category": "概念",
+            "description": "用于存储算法输入数据的内存空间",
+            "descriptions": [
+              "用于存储算法输入数据的内存空间"
+            ],
+            "evidence": "输入空间：用于存储算法的输入数据"
+          },
+          {
+            "name": "暂存空间",
+            "category": "概念",
+            "description": "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间",
+            "descriptions": [
+              "用于存储算法运行过程中的变量、对象、函数上下文等数据的内存空间"
+            ],
+            "evidence": "暂存空间：用于存储算法运行过程中的变量、对象、函数上下文等数据"
+          },
+          {
+            "name": "输出空间",
+            "category": "概念",
+            "description": "用于存储算法输出数据的内存空间",
+            "descriptions": [
+              "用于存储算法输出数据的内存空间"
+            ],
+            "evidence": "输出空间：用于存储算法的输出数据"
+          },
+          {
+            "name": "暂存数据",
+            "category": "概念",
+            "description": "暂存空间中用于保存常量、变量、对象等的部分",
+            "descriptions": [
+              "暂存空间中用于保存常量、变量、对象等的部分"
+            ],
+            "evidence": "暂存数据：用于保存算法运行过程中的各种常量、变量、对象等"
+          },
+          {
+            "name": "指令空间",
+            "category": "概念",
+            "description": "暂存空间中用于保存编译后程序指令的部分，通常忽略不计",
+            "descriptions": [
+              "暂存空间中用于保存编译后程序指令的部分，通常忽略不计"
+            ],
+            "evidence": "指令空间：用于保存编译后的程序指令，在实际统计中通常忽略不计"
+          },
+          {
+            "name": "以空间换时间",
+            "category": "概念",
+            "description": "牺牲内存空间来提升算法运行速度的策略",
+            "descriptions": [
+              "牺牲内存空间来提升算法运行速度的策略"
+            ],
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”"
+          },
+          {
+            "name": "以时间换空间",
+            "category": "概念",
+            "description": "牺牲运行速度来节省内存空间的策略",
+            "descriptions": [
+              "牺牲运行速度来节省内存空间的策略"
+            ],
+            "evidence": "反之，则称为“以时间换空间”"
+          },
+          {
+            "name": "归并排序",
+            "category": "方法",
+            "description": "基于分治的排序算法，空间复杂度为O(log n)",
+            "descriptions": [
+              "基于分治的排序算法，空间复杂度为O(log n)"
+            ],
+            "evidence": "例如归并排序，输入长度为 n 的数组，每轮递归将数组从中点处划分为两半"
+          },
+          {
+            "name": "满二叉树",
+            "category": "概念",
+            "description": "每一层节点数都达到最大的二叉树",
+            "descriptions": [
+              "每一层节点数都达到最大的二叉树"
+            ],
+            "evidence": "层数为 n 的“满二叉树”的节点数量为 2^n - 1"
+          }
+        ],
+        "relations": [
+          {
+            "source": "算法效率",
+            "target": "时间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含时间效率，是上位与下位关系。"
+          },
+          {
+            "source": "算法效率",
+            "target": "空间效率",
+            "type": "CONTAINS",
+            "evidence": "算法效率已成为衡量算法优劣的主要评价指标，它包括以下两个维度。",
+            "confidence": 0.95,
+            "direction_basis": "算法效率包含空间效率，是上位与下位关系。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“时间和空间资源”分别对应时间复杂度（time complexity）和空间复杂度（space complexity）。",
+            "confidence": 0.9,
+            "direction_basis": "复杂度分析包含时间复杂度，是上位与下位关系。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "空间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“时间和空间资源”分别对应时间复杂度（time complexity）和空间复杂度（space complexity）。",
+            "confidence": 0.9,
+            "direction_basis": "复杂度分析包含空间复杂度，是上位与下位关系。"
+          },
+          {
+            "source": "迭代",
+            "target": "for 循环",
+            "type": "CONTAINS",
+            "evidence": "for 循环是最常见的迭代形式之一。",
+            "confidence": 0.95,
+            "direction_basis": "for 循环是迭代的一种形式，迭代包含 for 循环。"
+          },
+          {
+            "source": "迭代",
+            "target": "while 循环",
+            "type": "CONTAINS",
+            "evidence": "while 循环也是一种实现迭代的方法。",
+            "confidence": 0.95,
+            "direction_basis": "while 循环是迭代的一种实现，迭代包含 while 循环。"
+          },
+          {
+            "source": "迭代",
+            "target": "嵌套循环",
+            "type": "CONTAINS",
+            "evidence": "我们可以在一个循环结构内嵌套另一个循环结构。",
+            "confidence": 0.9,
+            "direction_basis": "嵌套循环是迭代的一种形式，迭代包含嵌套循环。"
+          },
+          {
+            "source": "递归",
+            "target": "尾递归",
+            "type": "CONTAINS",
+            "evidence": "这种情况被称为尾递归（tail recursion）。",
+            "confidence": 0.9,
+            "direction_basis": "尾递归是递归的一种特殊形式，递归包含尾递归。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "我们称此算法的时间复杂度为“常数阶”。",
+            "confidence": 0.95,
+            "direction_basis": "常数阶是时间复杂度的一种类型，时间复杂度包含常数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "此算法的时间复杂度被称为“线性阶”。",
+            "confidence": 0.95,
+            "direction_basis": "线性阶是时间复杂度的一种类型，时间复杂度包含线性阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "平方阶的操作数量相对于输入数据大小 n 以平方级别增长。",
+            "confidence": 0.95,
+            "direction_basis": "平方阶是时间复杂度的一种类型，时间复杂度包含平方阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "指数阶增长非常迅速，在穷举法（暴力搜索、回溯等）中比较常见。",
+            "confidence": 0.95,
+            "direction_basis": "指数阶是时间复杂度的一种类型，时间复杂度包含指数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "对数阶反映了“每轮缩减到一半”的情况。",
+            "confidence": 0.95,
+            "direction_basis": "对数阶是时间复杂度的一种类型，时间复杂度包含对数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "线性对数阶",
+            "type": "CONTAINS",
+            "evidence": "线性对数阶常出现于嵌套循环中，两层循环的时间复杂度分别为 O(log n) 和 O(n)。",
+            "confidence": 0.95,
+            "direction_basis": "线性对数阶是时间复杂度的一种类型，时间复杂度包含线性对数阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "阶乘阶",
+            "type": "CONTAINS",
+            "evidence": "阶乘阶对应数学上的“全排列”问题。",
+            "confidence": 0.95,
+            "direction_basis": "阶乘阶是时间复杂度的一种类型，时间复杂度包含阶乘阶。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最佳时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“最佳时间复杂度”对应函数渐近下界，用 Ω 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "最佳时间复杂度是时间复杂度的一种，时间复杂度包含最佳时间复杂度。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "最差时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "最差时间复杂度是时间复杂度的一种，时间复杂度包含最差时间复杂度。"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "平均时间复杂度",
+            "type": "CONTAINS",
+            "evidence": "平均时间复杂度可以体现算法在随机输入数据下的运行效率，用 Θ 记号来表示。",
+            "confidence": 0.9,
+            "direction_basis": "平均时间复杂度是时间复杂度的一种，时间复杂度包含平均时间复杂度。"
+          },
+          {
+            "source": "递归",
+            "target": "分治",
+            "type": "APPLIES_TO",
+            "evidence": "递归体现了“将问题分解为更小子问题”的思维范式，这种分治策略至关重要。",
+            "confidence": 0.85,
+            "direction_basis": "递归用于实现分治策略，方法应用于目标。"
+          },
+          {
+            "source": "复杂度分析",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "复杂度分析为我们提供了一把评估算法效率的“标尺”。",
+            "confidence": 0.9,
+            "direction_basis": "复杂度分析用于评估算法效率，方法应用于目标。"
+          },
+          {
+            "source": "实际测试",
+            "target": "算法效率",
+            "type": "APPLIES_TO",
+            "evidence": "这种评估方式能够反映真实情况，但也存在较大的局限性。",
+            "confidence": 0.85,
+            "direction_basis": "实际测试用于评估算法效率，方法应用于目标。"
+          },
+          {
+            "source": "调用栈",
+            "target": "栈帧空间",
+            "type": "RELATED_TO",
+            "evidence": "函数的上下文数据都存储在称为“栈帧空间”的内存区域中。",
+            "confidence": 0.9,
+            "direction_basis": "调用栈与栈帧空间密切相关，工具与存储区域。"
+          },
+          {
+            "source": "递归",
+            "target": "调用栈",
+            "type": "RELATED_TO",
+            "evidence": "“调用栈”和“栈帧空间”这类递归术语已经暗示了递归与栈之间的密切关系。",
+            "confidence": 0.9,
+            "direction_basis": "递归与调用栈密切相关，主体与支撑机制。"
+          },
+          {
+            "source": "递归",
+            "target": "递归树",
+            "type": "RELATED_TO",
+            "evidence": "这样不断递归调用下去，最终将产生一棵层数为 n 的递归树（recursion tree）。",
+            "confidence": 0.9,
+            "direction_basis": "递归与递归树密切相关，主体与表示工具。"
+          },
+          {
+            "source": "迭代",
+            "target": "递归",
+            "type": "RELATED_TO",
+            "evidence": "迭代与递归在实现、性能和适用性上有所不同。",
+            "confidence": 0.9,
+            "direction_basis": "迭代与递归是并列对比关系，正文先出现迭代。"
+          },
+          {
+            "source": "尾递归",
+            "target": "迭代",
+            "type": "RELATED_TO",
+            "evidence": "尾递归在空间效率上与迭代相当。",
+            "confidence": 0.85,
+            "direction_basis": "尾递归与迭代在空间效率上相当，并列类似。"
+          },
+          {
+            "source": "大 O 记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "这个数学符号称为大 O 记号（big-O notation），表示函数 T(n) 的渐近上界（asymptotic upper bound）。",
+            "confidence": 0.9,
+            "direction_basis": "大 O 记号用于表示渐近上界，工具与概念。"
+          },
+          {
+            "source": "最差时间复杂度",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "“最差时间复杂度”对应函数渐近上界，使用大 O 记号表示。",
+            "confidence": 0.9,
+            "direction_basis": "最差时间复杂度对应渐近上界，并列对应关系。"
+          },
+          {
+            "source": "操作数量",
+            "target": "时间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "时间复杂度分析本质上是计算“操作数量 T(n)”的渐近上界。",
+            "confidence": 0.85,
+            "direction_basis": "操作数量与时间复杂度密切相关，操作数量是分析基础。"
+          },
+          {
+            "source": "实际测试",
+            "target": "复杂度分析",
+            "type": "RELATED_TO",
+            "evidence": "复杂度分析克服了实际测试方法的弊端。",
+            "confidence": 0.85,
+            "direction_basis": "实际测试与复杂度分析是两种评估方法，并列对比。"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "常数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）: O(1) < O(log n) < O(n) < O(n^2) < O(2^n)",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含常数阶作为其类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "对数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）: O(1) < O(log n) < O(n) < O(n^2) < O(2^n)",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含对数阶作为其类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "线性阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）: O(1) < O(log n) < O(n) < O(n^2) < O(2^n)",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含线性阶作为其类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "平方阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）: O(1) < O(log n) < O(n) < O(n^2) < O(2^n)",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含平方阶作为其类型"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "指数阶",
+            "type": "CONTAINS",
+            "evidence": "常见的空间复杂度类型（从低到高排列）: O(1) < O(log n) < O(n) < O(n^2) < O(2^n)",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度包含指数阶作为其类型"
+          },
+          {
+            "source": "暂存空间",
+            "target": "暂存数据",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分: 暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间是上位概念，暂存数据是其组成部分"
+          },
+          {
+            "source": "暂存空间",
+            "target": "栈帧空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分: 暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间是上位概念，栈帧空间是其组成部分"
+          },
+          {
+            "source": "暂存空间",
+            "target": "指令空间",
+            "type": "CONTAINS",
+            "evidence": "暂存空间可以进一步划分为三个部分: 暂存数据、栈帧空间、指令空间",
+            "confidence": 0.95,
+            "direction_basis": "暂存空间是上位概念，指令空间是其组成部分"
+          },
+          {
+            "source": "以空间换时间",
+            "target": "以时间换空间",
+            "type": "RELATED_TO",
+            "evidence": "我们将牺牲内存空间来提升算法运行速度的思路称为“以空间换时间”；反之，则称为“以时间换空间”",
+            "confidence": 0.9,
+            "direction_basis": "并列类似关系，按正文先出现方为source"
+          },
+          {
+            "source": "时间复杂度",
+            "target": "空间复杂度",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的作用类似于时间复杂度",
+            "confidence": 0.9,
+            "direction_basis": "并列类似关系，按正文先出现方为source"
+          },
+          {
+            "source": "大O记号",
+            "target": "渐近上界",
+            "type": "RELATED_TO",
+            "evidence": "最差时间复杂度使用大 O 符号表示，对应函数渐近上界",
+            "confidence": 0.9,
+            "direction_basis": "工具与表示对象关系，大O记号用于表示渐近上界"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "暂存空间",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的统计范围是“暂存空间”加上“输出空间”",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度统计暂存空间，工具与对象关系"
+          },
+          {
+            "source": "空间复杂度",
+            "target": "输出空间",
+            "type": "RELATED_TO",
+            "evidence": "空间复杂度的统计范围是“暂存空间”加上“输出空间”",
+            "confidence": 0.9,
+            "direction_basis": "空间复杂度统计输出空间，工具与对象关系"
+          }
+        ],
+        "error": null,
+        "raw_relation_count": 56,
+        "dropped_counts": {
+          "duplicate": 13
+        },
+        "dropped_relations": [
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最差时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "最佳时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "时间复杂度",
+            "type": "CONTAINS",
+            "target": "平均时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "时间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "算法效率",
+            "type": "CONTAINS",
+            "target": "空间效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "CONTAINS",
+            "target": "尾递归",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "复杂度分析",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实际测试",
+            "type": "APPLIES_TO",
+            "target": "算法效率",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "APPLIES_TO",
+            "target": "分治",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "最差时间复杂度",
+            "type": "RELATED_TO",
+            "target": "渐近上界",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "递归",
+            "type": "RELATED_TO",
+            "target": "递归树",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "操作数量",
+            "type": "RELATED_TO",
+            "target": "时间复杂度",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          },
+          {
+            "source": "实际测试",
+            "type": "RELATED_TO",
+            "target": "复杂度分析",
+            "reason_code": "duplicate",
+            "detail": "重复三元组（多因分块重叠）"
+          }
+        ]
+      }
+    ]
+  }
+]

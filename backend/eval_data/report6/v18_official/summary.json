@@ -1,0 +1,640 @@
+{
+  "generated_at": "2026-11-14T13:13:06",
+  "prompt_version": "v1.8",
+  "model": "deepseek-chat",
+  "temperature": 0.3,
+  "runs": 5,
+  "extract_cache": false,
+  "documents": [
+    {
+      "name": "d1_数据结构_第7章_树",
+      "course": "数据结构",
+      "characters": 12416,
+      "gold_entities": 49,
+      "gold_relations": 33,
+      "elapsed_s": 88.7,
+      "entity_f1_mean": 0.9035,
+      "entity_f1_std": 0.0195,
+      "entity_category_accuracy": 0.943,
+      "relation_primary_f1_mean": 0.8909,
+      "relation_primary_f1_std": 0.0064,
+      "relation_primary_precision": 0.8684,
+      "relation_primary_recall": 0.9152,
+      "relation_core_f1": 0.8909,
+      "relation_full_f1": 0.8909,
+      "relation_macro_f1": 0.7783,
+      "direction_error_rate": 0.0,
+      "pred_total": 37,
+      "hit_full": 31,
+      "core_total": 33,
+      "hit_core": 31,
+      "per_round_f1": [
+        0.8857,
+        0.8955,
+        0.8824,
+        0.8955,
+        0.8955
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 25,
+          "pred_total": 27,
+          "micro": {
+            "tp": 24,
+            "fp": 3,
+            "fn": 1,
+            "precision": 0.8889,
+            "recall": 0.96,
+            "f1": 0.9231
+          },
+          "mean_document_f1": 0.9231,
+          "active_document_f1": 0.9231
+        },
+        "RELATED_TO": {
+          "gold_total": 5,
+          "pred_total": 6,
+          "micro": {
+            "tp": 4,
+            "fp": 2,
+            "fn": 1,
+            "precision": 0.6667,
+            "recall": 0.8,
+            "f1": 0.7273
+          },
+          "mean_document_f1": 0.7273,
+          "active_document_f1": 0.7273
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 4,
+          "micro": {
+            "tp": 3,
+            "fp": 1,
+            "fn": 0,
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571
+          },
+          "mean_document_f1": 0.8571,
+          "active_document_f1": 0.8571
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 6,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 3,
+        "low_confidence": 0,
+        "missed_core": 2,
+        "pred_raw_total": 40,
+        "pred_total": 37,
+        "dropped_total": 3,
+        "core_total": 33,
+        "full_total": 33
+      }
+    },
+    {
+      "name": "d2_数据结构_第2章_复杂度分析",
+      "course": "数据结构",
+      "characters": 16410,
+      "gold_entities": 40,
+      "gold_relations": 47,
+      "elapsed_s": 68.0,
+      "entity_f1_mean": 0.9187,
+      "entity_f1_std": 0.0258,
+      "entity_category_accuracy": 0.8541,
+      "relation_primary_f1_mean": 0.909,
+      "relation_primary_f1_std": 0.0134,
+      "relation_primary_precision": 0.9374,
+      "relation_primary_recall": 0.8826,
+      "relation_core_f1": 0.9004,
+      "relation_full_f1": 0.9079,
+      "relation_macro_f1": 0.8783,
+      "direction_error_rate": 0.013,
+      "pred_total": 43,
+      "hit_full": 42,
+      "core_total": 46,
+      "hit_core": 41,
+      "per_round_f1": [
+        0.9321,
+        0.902,
+        0.8996,
+        0.9091,
+        0.902
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 26,
+          "pred_total": 26,
+          "micro": {
+            "tp": 26,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        },
+        "RELATED_TO": {
+          "gold_total": 18,
+          "pred_total": 14,
+          "micro": {
+            "tp": 13,
+            "fp": 1,
+            "fn": 5,
+            "precision": 0.9286,
+            "recall": 0.7222,
+            "f1": 0.8125
+          },
+          "mean_document_f1": 0.8125,
+          "active_document_f1": 0.8125
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 3,
+          "micro": {
+            "tp": 3,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 1,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 15,
+        "low_confidence": 0,
+        "missed_core": 5,
+        "pred_raw_total": 58,
+        "pred_total": 43,
+        "dropped_total": 15,
+        "core_total": 46,
+        "full_total": 47
+      }
+    },
+    {
+      "name": "d3_物理_第2章_运动学",
+      "course": "物理",
+      "characters": 36659,
+      "gold_entities": 38,
+      "gold_relations": 60,
+      "elapsed_s": 86.8,
+      "entity_f1_mean": 0.9351,
+      "entity_f1_std": 0.0253,
+      "entity_category_accuracy": 0.9829,
+      "relation_primary_f1_mean": 0.8477,
+      "relation_primary_f1_std": 0.0195,
+      "relation_primary_precision": 0.92,
+      "relation_primary_recall": 0.7866,
+      "relation_core_f1": 0.8477,
+      "relation_full_f1": 0.8477,
+      "relation_macro_f1": 0.7874,
+      "direction_error_rate": 0.0116,
+      "pred_total": 55,
+      "hit_full": 47,
+      "core_total": 60,
+      "hit_core": 47,
+      "per_round_f1": [
+        0.8174,
+        0.8468,
+        0.8468,
+        0.8571,
+        0.8704
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 20,
+          "pred_total": 20,
+          "micro": {
+            "tp": 19,
+            "fp": 1,
+            "fn": 1,
+            "precision": 0.95,
+            "recall": 0.95,
+            "f1": 0.95
+          },
+          "mean_document_f1": 0.95,
+          "active_document_f1": 0.95
+        },
+        "RELATED_TO": {
+          "gold_total": 35,
+          "pred_total": 33,
+          "micro": {
+            "tp": 26,
+            "fp": 7,
+            "fn": 9,
+            "precision": 0.7879,
+            "recall": 0.7429,
+            "f1": 0.7647
+          },
+          "mean_document_f1": 0.7647,
+          "active_document_f1": 0.7647
+        },
+        "APPLIES_TO": {
+          "gold_total": 5,
+          "pred_total": 2,
+          "micro": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 3,
+            "precision": 1.0,
+            "recall": 0.4,
+            "f1": 0.5714
+          },
+          "mean_document_f1": 0.5714,
+          "active_document_f1": 0.5714
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 8,
+        "direction_reversed": 0,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 97,
+        "low_confidence": 0,
+        "missed_core": 13,
+        "pred_raw_total": 152,
+        "pred_total": 55,
+        "dropped_total": 97,
+        "core_total": 60,
+        "full_total": 60
+      }
+    },
+    {
+      "name": "d4_化学_第2章_原子分子与离子",
+      "course": "化学",
+      "characters": 40093,
+      "gold_entities": 62,
+      "gold_relations": 74,
+      "elapsed_s": 1801.1,
+      "entity_f1_mean": 0.96,
+      "entity_f1_std": 0.0054,
+      "entity_category_accuracy": 0.93,
+      "relation_primary_f1_mean": 0.9141,
+      "relation_primary_f1_std": 0.0128,
+      "relation_primary_precision": 0.8966,
+      "relation_primary_recall": 0.9324,
+      "relation_core_f1": 0.9141,
+      "relation_full_f1": 0.9141,
+      "relation_macro_f1": 0.8284,
+      "direction_error_rate": 0.0129,
+      "pred_total": 75,
+      "hit_full": 69,
+      "core_total": 74,
+      "hit_core": 69,
+      "per_round_f1": [
+        0.9262,
+        0.8961,
+        0.9139,
+        0.9079,
+        0.9262
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 0,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 32,
+          "pred_total": 32,
+          "micro": {
+            "tp": 32,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "mean_document_f1": 1.0,
+          "active_document_f1": 1.0
+        },
+        "RELATED_TO": {
+          "gold_total": 40,
+          "pred_total": 39,
+          "micro": {
+            "tp": 35,
+            "fp": 4,
+            "fn": 5,
+            "precision": 0.8974,
+            "recall": 0.875,
+            "f1": 0.8861
+          },
+          "mean_document_f1": 0.8861,
+          "active_document_f1": 0.8861
+        },
+        "APPLIES_TO": {
+          "gold_total": 2,
+          "pred_total": 4,
+          "micro": {
+            "tp": 2,
+            "fp": 2,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667
+          },
+          "mean_document_f1": 0.6667,
+          "active_document_f1": 0.6667
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 5,
+        "direction_reversed": 1,
+        "type_confused": 0,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 80,
+        "low_confidence": 0,
+        "missed_core": 5,
+        "pred_raw_total": 155,
+        "pred_total": 75,
+        "dropped_total": 80,
+        "core_total": 74,
+        "full_total": 74
+      }
+    },
+    {
+      "name": "d5_化学_第4章_化学反应计量",
+      "course": "化学",
+      "characters": 30732,
+      "gold_entities": 45,
+      "gold_relations": 39,
+      "elapsed_s": 58.6,
+      "entity_f1_mean": 0.8459,
+      "entity_f1_std": 0.0087,
+      "entity_category_accuracy": 0.958,
+      "relation_primary_f1_mean": 0.3625,
+      "relation_primary_f1_std": 0.0421,
+      "relation_primary_precision": 0.3972,
+      "relation_primary_recall": 0.336,
+      "relation_core_f1": 0.2526,
+      "relation_full_f1": 0.408,
+      "relation_macro_f1": 0.3571,
+      "direction_error_rate": 0.0973,
+      "pred_total": 46,
+      "hit_full": 19,
+      "core_total": 25,
+      "hit_core": 10,
+      "per_round_f1": [
+        0.4064,
+        0.4091,
+        0.3241,
+        0.3453,
+        0.3276
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 6,
+          "pred_total": 2,
+          "micro": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 4,
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5
+          },
+          "mean_document_f1": 0.5,
+          "active_document_f1": 0.5
+        },
+        "CONTAINS": {
+          "gold_total": 12,
+          "pred_total": 17,
+          "micro": {
+            "tp": 7,
+            "fp": 10,
+            "fn": 5,
+            "precision": 0.4118,
+            "recall": 0.5833,
+            "f1": 0.4828
+          },
+          "mean_document_f1": 0.4828,
+          "active_document_f1": 0.4828
+        },
+        "RELATED_TO": {
+          "gold_total": 18,
+          "pred_total": 23,
+          "micro": {
+            "tp": 9,
+            "fp": 14,
+            "fn": 9,
+            "precision": 0.3913,
+            "recall": 0.5,
+            "f1": 0.439
+          },
+          "mean_document_f1": 0.439,
+          "active_document_f1": 0.439
+        },
+        "APPLIES_TO": {
+          "gold_total": 3,
+          "pred_total": 4,
+          "micro": {
+            "tp": 1,
+            "fp": 3,
+            "fn": 2,
+            "precision": 0.25,
+            "recall": 0.3333,
+            "f1": 0.2857
+          },
+          "mean_document_f1": 0.2857,
+          "active_document_f1": 0.2857
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 21,
+        "direction_reversed": 5,
+        "type_confused": 1,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 0,
+        "duplicate": 4,
+        "low_confidence": 0,
+        "missed_core": 15,
+        "pred_raw_total": 50,
+        "pred_total": 46,
+        "dropped_total": 4,
+        "core_total": 25,
+        "full_total": 39
+      }
+    },
+    {
+      "name": "d6_化学_第1章_化学基本概念",
+      "course": "化学",
+      "characters": 33128,
+      "gold_entities": 45,
+      "gold_relations": 40,
+      "elapsed_s": 53.8,
+      "entity_f1_mean": 0.7717,
+      "entity_f1_std": 0.0327,
+      "entity_category_accuracy": 0.951,
+      "relation_primary_f1_mean": 0.3769,
+      "relation_primary_f1_std": 0.081,
+      "relation_primary_precision": 0.3133,
+      "relation_primary_recall": 0.4769,
+      "relation_core_f1": 0.3502,
+      "relation_full_f1": 0.3291,
+      "relation_macro_f1": 0.2275,
+      "direction_error_rate": 0.0546,
+      "pred_total": 37,
+      "hit_full": 10,
+      "core_total": 26,
+      "hit_core": 9,
+      "per_round_f1": [
+        0.3035,
+        0.4674,
+        0.2941,
+        0.3668,
+        0.4525
+      ],
+      "relation_by_type": {
+        "PRECEDES": {
+          "gold_total": 1,
+          "pred_total": 0,
+          "micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 1,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "mean_document_f1": 0.0,
+          "active_document_f1": 0.0
+        },
+        "CONTAINS": {
+          "gold_total": 13,
+          "pred_total": 17,
+          "micro": {
+            "tp": 6,
+            "fp": 11,
+            "fn": 7,
+            "precision": 0.3529,
+            "recall": 0.4615,
+            "f1": 0.4
+          },
+          "mean_document_f1": 0.4,
+          "active_document_f1": 0.4
+        },
+        "RELATED_TO": {
+          "gold_total": 19,
+          "pred_total": 15,
+          "micro": {
+            "tp": 3,
+            "fp": 12,
+            "fn": 16,
+            "precision": 0.2,
+            "recall": 0.1579,
+            "f1": 0.1765
+          },
+          "mean_document_f1": 0.1765,
+          "active_document_f1": 0.1765
+        },
+        "APPLIES_TO": {
+          "gold_total": 7,
+          "pred_total": 5,
+          "micro": {
+            "tp": 1,
+            "fp": 4,
+            "fn": 6,
+            "precision": 0.2,
+            "recall": 0.1429,
+            "f1": 0.1667
+          },
+          "mean_document_f1": 0.1667,
+          "active_document_f1": 0.1667
+        }
+      },
+      "error_taxonomy": {
+        "fabricated": 20,
+        "direction_reversed": 1,
+        "type_confused": 6,
+        "synonym_split": 0,
+        "invalid_endpoint": 0,
+        "invalid_relation_type": 0,
+        "dangling_endpoint": 8,
+        "duplicate": 6,
+        "low_confidence": 0,
+        "missed_core": 17,
+        "pred_raw_total": 51,
+        "pred_total": 37,
+        "dropped_total": 14,
+        "core_total": 26,
+        "full_total": 40
+      }
+    }
+  ]
+}

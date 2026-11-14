@@ -1,0 +1,72 @@
+{
+  "seed": 20261114,
+  "run_index": 0,
+  "n_relations_requested": 100,
+  "n_entities_requested": 50,
+  "min_per_type": 10,
+  "relation_pool_size": 280,
+  "entity_pool_size": 328,
+  "relation_sampled": 100,
+  "entity_sampled": 50,
+  "relation_quota_by_type": {
+    "APPLIES_TO": 13,
+    "CONTAINS": 41,
+    "PRECEDES": 9,
+    "RELATED_TO": 37
+  },
+  "relation_pool_by_type": {
+    "CONTAINS": 133,
+    "RELATED_TO": 115,
+    "APPLIES_TO": 23,
+    "PRECEDES": 9
+  },
+  "entity_pool_by_category": {
+    "概念": 277,
+    "方法": 46,
+    "公式": 5
+  },
+  "sources": [
+    {
+      "pred": "eval_data/report6/pred/d1_数据结构_第7章_树.json",
+      "text_id": "Hello算法_第7章_树",
+      "run_index": 0,
+      "relations": 31,
+      "entities": 50
+    },
+    {
+      "pred": "eval_data/report6/pred/d2_数据结构_第2章_复杂度分析.json",
+      "text_id": "数据结构_第2章_复杂度分析",
+      "run_index": 0,
+      "relations": 45,
+      "entities": 42
+    },
+    {
+      "pred": "eval_data/report6/pred/d3_物理_第2章_运动学.json",
+      "text_id": "物理_第2章_运动学_Kinematics",
+      "run_index": 0,
+      "relations": 48,
+      "entities": 40
+    },
+    {
+      "pred": "eval_data/report6/pred/d4_化学_第2章_原子分子与离子.json",
+      "text_id": "化学_第2章_原子分子与离子",
+      "run_index": 0,
+      "relations": 68,
+      "entities": 74
+    },
+    {
+      "pred": "eval_data/report6/pred/d5_化学_第4章_化学反应计量.json",
+      "text_id": "化学_化学反应计量_第4章",
+      "run_index": 0,
+      "relations": 44,
+      "entities": 62
+    },
+    {
+      "pred": "eval_data/report6/pred/d6_化学_第1章_化学基本概念.json",
+      "text_id": "化学_化学基本概念_第1章",
+      "run_index": 0,
+      "relations": 44,
+      "entities": 60
+    }
+  ]
+}
